@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin
+   id="org.testng.eclipse"
+   name="%pluginName"
+   version="5.1.0.0"
+   provider-name="%providerName"
+   class="org.testng.eclipse.TestNGPlugin">
+   <runtime>
+      <library name="eclipse-testng.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/testng-jdk14.jar">
+         <export name="*"/>
+      </library>
+   </runtime>
+   <requires>
+      <import plugin="org.eclipse.core.expressions"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.compare"/>
+      <import plugin="org.eclipse.debug.core"/>
+      <import plugin="org.eclipse.debug.ui"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.jdt.debug.ui"/>
+      <import plugin="org.eclipse.jdt.junit"/>
+      <import plugin="org.eclipse.jdt.launching"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.search"/>
+   </requires>
+   
+ 
+   <extension-point id="internal_testRunTabs" name="%testRunTabs.name" schema="schema/internal-testRunTabs.exsd"/>
+
+   <extension point="org.eclipse.ui.popupMenus">
+    <viewerContribution
+        id="testng.editor.popup"
+        targetID="#CompilationUnitEditorContext" >
+      <action
+          id="testng.debug.popup.action"
+          label="Debug as test"
+          menubarPath="testng.editor.menu/content"
+          class="org.testng.eclipse.launch.DebugEditorLaunchDelegate">
+      </action>
+      <action
+          id="testng.run.popup.action"
+          label="Run as test"
+          menubarPath="testng.editor.menu/content"
+          class="org.testng.eclipse.launch.RunEditorLaunchDelegate">
+      </action>
+      <menu
+            id="testng.editor.menu"
+            label="TestNG"
+            path="additions">
+         <groupMarker name="content"/>
+         <separator name="additions"/>
+      </menu>
+    </viewerContribution>
+  </extension>
+
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+            type="org.testng.eclipse.launchconfig"
+            class="org.testng.eclipse.launch.TestNGTabGroup"
+            id="org.testng.eclipse.launchConfigurationTabGroup.testng"/>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="org.testng.eclipse.launch.TestNGLaunchConfigurationDelegate"
+            id="org.testng.eclipse.launchconfig"
+            modes="run, debug"
+            name="%Launch.label"
+            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+            sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
+         <fileExtension
+               extension="java"
+               default="false"/>
+         <fileExtension
+               extension="class"
+               default="false"/>
+         <fileExtension
+               extension="xml"
+               default="false"/>
+      </launchConfigurationType>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            configTypeID="org.testng.eclipse.launchconfig"
+            icon="icons/full/main16/testng.gif"
+            id="org.testng.eclipse.launchimage"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            category="org.eclipse.jdt.ui.java"
+            class="org.testng.eclipse.ui.TestRunnerViewPart"
+            icon="icons/full/main16/testng_blur.gif"
+            id="org.testng.eclipse.ResultView"
+            name="%TestNG4Eclipse.ResultView"/>
+   </extension>
+   <extension
+         point="org.testng.eclipse.internal_testRunTabs">
+      <testRunTab class="org.testng.eclipse.ui.TestHierarchyTab"/>
+	  <testRunTab class="org.testng.eclipse.ui.FailureTab"/>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut
+            class="org.testng.eclipse.launch.TestNGLaunchShortcut"
+            icon="icons/full/main16/testng.gif"
+            id="org.testng.eclipse.shortcut"
+            label="%TestNGShortcut.test.label"
+            modes="run,debug">
+         <contextualLaunch>
+            <enablement>
+               <with variable="selection">
+                  <count
+                        value="1">
+                  </count>
+			   		<iterate>
+				 		<or>
+				   			<test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/>
+				   			<test property="org.eclipse.debug.ui.matchesPattern" value="*.class"/>
+				   			<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
+				 		</or>
+				 		<test property="org.testng.eclipse.isTest"/>
+			   		</iterate>
+               </with>
+            </enablement>
+         </contextualLaunch>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaHierarchyPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.debug.ui.DebugPerspective">
+         </perspective>
+      </shortcut>
+      <shortcut
+            class="org.testng.eclipse.launch.TestNGSuiteLaunchShortcut"
+            icon="icons/full/main16/testng.gif"
+            id="org.testng.eclipse.shortcut.testngSuite"
+            label="%TestNGShortcut.suite.label"
+            modes="run,debug">
+         <contextualLaunch>
+            <enablement>
+               <with variable="selection">
+                  <count
+                        value="1">
+                  </count>
+			   		<iterate>
+			   			<test property="org.eclipse.debug.ui.matchesPattern" value="*.xml"/>
+			   			<instanceof value="org.eclipse.core.resources.IFile"/>
+				 		<test property="org.testng.eclipse.isSuite"/>
+			   		</iterate>
+               </with>
+            </enablement>
+         </contextualLaunch>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaHierarchyPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.debug.ui.DebugPerspective">
+         </perspective>
+      </shortcut>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+            properties="isSuite"
+            namespace="org.testng.eclipse"
+            type="org.eclipse.core.resources.IFile"
+            class="org.testng.eclipse.launch.tester.FileExtender"
+            id="org.testng.eclipse.IFileExtender">
+      </propertyTester>
+      <propertyTester
+            properties="isTest"
+            namespace="org.testng.eclipse"
+            type="org.eclipse.jdt.core.IJavaElement"
+            class="org.testng.eclipse.launch.tester.JavaTypeExtender"
+            id="org.testng.eclipse.ITypeExtender">
+      </propertyTester>
+   </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            class="org.testng.eclipse.properties.TestNGPropertyPage"
+            id="org.testng.eclipse.properties.propertyPage1"
+            name="TestNG"
+            objectClass="org.eclipse.core.resources.IProject"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            class="org.testng.eclipse.properties.TestNGPropertyPage"
+            id="org.testng.eclipse.properties.propertyPage2"
+            name="TestNG"
+            objectClass="org.eclipse.jdt.core.IJavaProject"/>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            name="%TestNGCommand.run.test.label"
+            description="%TestNGCommand.run.test.label"
+            categoryId="org.eclipse.debug.ui.category.run"
+            id="org.testng.eclipse.shortcut.run">
+      </command>
+      <command
+            name="%TestNGCommand.debug.test.label"
+            description="%TestNGCommand.debug.test.label"
+            categoryId="org.eclipse.debug.ui.category.run"
+            id="org.testng.eclipse.shortcut.debug">
+      </command>
+      <command
+            name="%TestNGCommand.run.suite.label"
+            description="%TestNGCommand.run.suite.label"
+            categoryId="org.eclipse.debug.ui.category.run"
+            id="org.testng.eclipse.shortcut.testngSuite.run">
+      </command>
+      <command
+            name="%TestNGCommand.debug.suite.label"
+            description="%TestNGCommand.debug.suite.label"
+            categoryId="org.eclipse.debug.ui.category.run"
+            id="org.testng.eclipse.shortcut.testngSuite.debug">
+      </command>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            sequence="M3+M2+D N"
+            commandId="org.testng.eclipse.shortcut.debug"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+	  <!-- COMMAND+ALT+Q is "Hide/Show Dock" on carbon, so don't overwrite it -->
+      <key
+            sequence="M3+M2+X N"
+            commandId="org.testng.eclipse.shortcut.run"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M3+M2+D G"
+            commandId="org.testng.eclipse.shortcut.testngSuite.debug"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+	  <!-- COMMAND+ALT+Q is "Hide/Show Dock" on carbon, so don't overwrite it -->
+      <key
+            sequence="M3+M2+X G"
+            commandId="org.testng.eclipse.shortcut.testngSuite.run"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+   </extension>
+   
+   <extension
+         point="org.eclipse.jdt.ui.quickAssistProcessors">
+	  <quickAssistProcessor
+		   id="org.testng.eclipse.ui.conversion.JUnitConverterQuickAssistProcessor"
+		   name="org.testng.eclipse.ui.conversion.JUnitConverterQuickAssistProcessor"
+		   class="org.testng.eclipse.ui.conversion.JUnitConverterQuickAssistProcessor">
+	  </quickAssistProcessor>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.ui.quickFixProcessors">
+      <quickFixProcessor
+            class="org.testng.eclipse.ui.TestNGQuickFixProcessor"
+            id="org.testng.eclipse.ui.TestNGQuickFixProcessor"
+            name="org.testng.eclipse.ui.TestNGQuickFixProcessor"/>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.core.classpathContainerInitializer">
+      <classpathContainerInitializer
+            class="org.testng.eclipse.buildpath.TestNGContainerInitializer"
+            id="org.testng.TESTNG_CONTAINER"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.testng.eclipse.ui.preferences.PreferencePage"
+            id="org.testng.eclipse.ui.preferences.PreferencePage"
+            name="TestNG"/>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer class="org.testng.eclipse.ui.preferences.PreferenceInitializer"/>
+   </extension>
+</plugin>

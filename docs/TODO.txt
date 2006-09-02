@@ -1,0 +1,30 @@
+Current version:
+- Multiple testng.xml files
+- Error message if class not found when running single-class test
+- Remove super(string) if converting from a JUnit class
+
+
+
+
+Next version:
+[2005.03.06]
+[TNGE-011]:[CRITICAL] better way to clean up the temp suite files
+[TNGE-002]: support running tests from selected directories (see TNGE-003)
+[TNGE-005]: Suite customizer
+[TNGE-007] The Green Bar Window should indicate what it just
+ran ("Suites: testng.xml" or "Groups:  current assert"): started, still to refine
+
+
+DONE:
+
+[TNGE-008] Need to add a few i18n strings (in the green bar window)
+[TNGE-009] I think we should remove SPF from the green bar window (confusing 
+and my guess is, not very used)
+[TNGE-010] Groups launcher
+[TNGE-006] Suite search is taking too long. Must be optimized!!!
+[TNGE-001] The Group dialog should reflect what was found in the text field 
+(if anything).  Right now, it always shows up with everything unchecked
+[TNGE-003] Remove duplicates in the group dialog
+[TNGE-004] [FIXED: 2005.03.23] I'm using checkboxes instead of radioboxes 
+right now.  Couldn't get the radio to work because the events don't tell you if
+you are being unchecked or checked.
