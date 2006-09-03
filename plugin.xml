@@ -63,6 +63,13 @@
     </viewerContribution>
   </extension>
 
+	<extension point="org.eclipse.jdt.core.classpathVariableInitializer">
+      <classpathVariableInitializer
+            variable="TESTNG_HOME"
+            class="org.testng.eclipse.buildpath.TestNGHomeInitializer">
+      </classpathVariableInitializer>
+	</extension>
+	
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTabGroups">
       <launchConfigurationTabGroup

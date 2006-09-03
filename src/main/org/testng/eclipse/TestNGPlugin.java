@@ -29,7 +29,10 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * The plug-in runtime class for the TestNG plug-in.
@@ -40,7 +43,8 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
    */
   private static TestNGPlugin m_pluginInstance = null;
 
-  public static final String  PLUGIN_ID = "org.testng.eclipse"; //$NON-NLS-1$
+  public static final String PLUGIN_ID = "org.testng.eclipse"; //$NON-NLS-1$
+  public static final String TESTNG_HOME= "TESTNG_HOME"; //$NON-NLS-1$
 
   private static URL m_fgIconBaseURL;
   
@@ -52,6 +56,8 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
    * Once a test runner is connected it is removed from the set.
    */
   private AbstractSet n_trackedLaunches = new HashSet(20);
+
+  private BundleContext m_context;
 
   public TestNGPlugin() {
     m_pluginInstance = this;
@@ -85,6 +91,7 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
   public void start(BundleContext context) throws Exception {
     super.start(context);
 
+    m_context= context;
     ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
     launchManager.addLaunchListener(this);
     m_isStopped = false;
@@ -105,6 +112,7 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
     }
     finally {
       super.stop(context);
+      m_context= null;
     }
   }
 
@@ -295,6 +303,20 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
     }
     
     return outdir;
+  }
+  
+  public Bundle getBundle(String bundleName) {
+    Bundle bundle= Platform.getBundle(bundleName);
+    if (bundle != null)
+        return bundle;
+    
+    // Accessing unresolved bundle
+    ServiceReference serviceRef= m_context.getServiceReference(PackageAdmin.class.getName());
+    PackageAdmin admin= (PackageAdmin) m_context.getService(serviceRef);
+    Bundle[] bundles= admin.getBundles(bundleName, null);
+    if (bundles != null && bundles.length > 0)
+        return bundles[0];
+    return null;
   }
   
   private boolean isEmtpy(String string) {
