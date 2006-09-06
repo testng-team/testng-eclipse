@@ -108,6 +108,7 @@ public class RemoteTestNG extends TestNG {
     
     testNG.setOutputDirectory((String) commandLineArgs.get(TestNGCommandLineArgs.OUTDIR_COMMAND_OPT));
     testNG.setSourcePath((String) commandLineArgs.get(TestNGCommandLineArgs.SRC_COMMAND_OPT));
+    testNG.setTarget((String) commandLineArgs.get(TestNGCommandLineArgs.TARGET_COMMAND_OPT));
     
     List classes = (List) commandLineArgs.get(TestNGCommandLineArgs.TESTCLASS_COMMAND_OPT);
     if(null != classes) {
@@ -119,7 +120,7 @@ public class RemoteTestNG extends TestNG {
       testNG.setTestSuites(suites);
     }
 
-    testNG.setTarget((String) commandLineArgs.get(TestNGCommandLineArgs.TARGET_COMMAND_OPT));
+    
     testNG.setTestJar((String) commandLineArgs.get(TestNGCommandLineArgs.TESTJAR_COMMAND_OPT));
     testNG.setConnectionParameters((String) commandLineArgs.get(TestNGCommandLineArgs.HOST_COMMAND_OPT),
                                    Integer.parseInt((String) commandLineArgs.get(TestNGCommandLineArgs.PORT_COMMAND_OPT)));
