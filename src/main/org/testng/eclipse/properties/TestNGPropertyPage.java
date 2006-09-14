@@ -43,6 +43,7 @@ public class TestNGPropertyPage extends PropertyPage {
   private static final String PATH_TITLE = "Path:";
   private Text m_outdirPath;
   private Text m_reportersText;
+  private Button m_disabledListenersCheckbox;
   private IProject m_workingProject;
 
   public void createControl(Composite parent) {
@@ -97,6 +98,14 @@ public class TestNGPropertyPage extends PropertyPage {
     gd= new GridData(GridData.FILL_HORIZONTAL);
     gd.horizontalSpan= 3;
     listenersDetailsLabel.setLayoutData(gd);
+
+    Label disableListener = new Label(composite, SWT.NONE);
+    disableListener.setText("Disable default listeners:");
+
+    m_disabledListenersCheckbox= new Button(composite, SWT.CHECK);
+    gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+    gd.horizontalSpan= 2;
+    m_disabledListenersCheckbox.setLayoutData(gd);
     
     loadDefaults();
 
@@ -109,6 +118,7 @@ public class TestNGPropertyPage extends PropertyPage {
     // Populate the owner text field with the default value
     m_outdirPath.setText(TestNGPlugin.getDefault().getOutputDir(m_workingProject.getName()));
     m_reportersText.setText(TestNGPlugin.getDefault().getReporters(m_workingProject.getName()));
+    m_disabledListenersCheckbox.setSelection(TestNGPlugin.getDefault().getDisabledListeners(m_workingProject.getName()));
   }
 
   protected void performDefaults() {
@@ -119,6 +129,7 @@ public class TestNGPropertyPage extends PropertyPage {
   public boolean performOk() {
     TestNGPlugin.getDefault().storeOutputDir(m_workingProject.getName(), m_outdirPath.getText());
     TestNGPlugin.getDefault().storeReporters(m_workingProject.getName(), m_reportersText.getText());
+    TestNGPlugin.getDefault().storeDisabledListeners(m_workingProject.getName(), m_disabledListenersCheckbox.getSelection());
 
     if(super.performOk()) {
       setMessage("Project preferences are saved", INFORMATION);

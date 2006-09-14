@@ -75,8 +75,10 @@ public class RemoteTestNG extends TestNG {
             public TestRunner newTestRunner(ISuite suite, XmlTest xmlTest) {
               TestRunner runner = new TestRunner(suite, xmlTest);
               runner.addTestListener(new RemoteMessageSenderTestListener(suite, xmlTest, msh));
-              runner.addTestListener(new TestHTMLReporter());
-              runner.addTestListener(new JUnitXMLReporter());
+              if(m_useDefaultListeners) {
+                runner.addTestListener(new TestHTMLReporter());
+                runner.addTestListener(new JUnitXMLReporter());
+              }
 
               return runner;
             }
@@ -120,7 +122,11 @@ public class RemoteTestNG extends TestNG {
       testNG.setTestSuites(suites);
     }
 
-    
+    String useDefaultListeners = (String) commandLineArgs.get(TestNGCommandLineArgs.USE_DEFAULT_LISTENERS);
+    if (null != useDefaultListeners) {
+      testNG.setUseDefaultListeners("true".equalsIgnoreCase(useDefaultListeners));
+    }
+
     testNG.setTestJar((String) commandLineArgs.get(TestNGCommandLineArgs.TESTJAR_COMMAND_OPT));
     testNG.setConnectionParameters((String) commandLineArgs.get(TestNGCommandLineArgs.HOST_COMMAND_OPT),
                                    Integer.parseInt((String) commandLineArgs.get(TestNGCommandLineArgs.PORT_COMMAND_OPT)));

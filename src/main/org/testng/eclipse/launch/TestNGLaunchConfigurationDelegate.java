@@ -166,6 +166,12 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       argv.add(reporters.replace(' ', ';'));
     }
     
+    boolean disabledReporters= TestNGPlugin.getDefault().getDisabledListeners(project.getName());
+    if(disabledReporters) {
+      argv.add(TestNGCommandLineArgs.USE_DEFAULT_LISTENERS);
+      argv.add("false");
+    }
+    
     List launchSuiteList = ConfigurationHelper.getLaunchSuites(jproject, configuration);
     List suiteList  = new ArrayList();
     List tempSuites = new ArrayList();
