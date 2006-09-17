@@ -17,9 +17,11 @@ import org.testng.eclipse.util.ResourceUtil;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -215,8 +217,6 @@ public class FailureTab extends TestRunTab implements IMenuListener {
 
     m_table.showItem(ti);
     m_table.setSelection(new TableItem[] {ti});
-    
-//    System.out.println("FailureTab.setSelectedTest");
   }
 
   /**
@@ -227,7 +227,7 @@ public class FailureTab extends TestRunTab implements IMenuListener {
 //      System.out.println("[XXX:updateTestResult]: IS NULL");
       return;
     }
-//    System.out.println("[XXX:updateTestResult]:" + treeEntry.toString());
+
     if(RunInfo.RESULT_TYPE == treeEntry.m_type
         && ITestResult.SUCCESS != treeEntry.m_status
         && ITestResult.SKIP != treeEntry.m_status) {
@@ -324,6 +324,17 @@ public class FailureTab extends TestRunTab implements IMenuListener {
 
       if(null != info.m_className) {
         manager.add(new OpenTestAction(fRunnerViewPart, info.m_className, info.m_methodName));
+        manager.add(new Separator());
+        manager.add(new QuickRunAction(fRunnerViewPart.getLaunchedProject(), 
+                                       fRunnerViewPart.getLastLaunch(),
+                                       info.m_className,
+                                       info.m_methodName,
+                                       ILaunchManager.RUN_MODE));
+        manager.add(new QuickRunAction(fRunnerViewPart.getLaunchedProject(),
+                                       fRunnerViewPart.getLastLaunch(),
+                                       info.m_className,
+                                       info.m_methodName,
+                                       ILaunchManager.DEBUG_MODE));
       }
     }
   }

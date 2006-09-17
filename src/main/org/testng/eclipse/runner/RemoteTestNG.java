@@ -5,6 +5,7 @@ package org.testng.eclipse.runner;
 import java.util.List;
 import java.util.Map;
 
+import org.testng.IReporter;
 import org.testng.ISuite;
 import org.testng.ISuiteListener;
 import org.testng.ITestRunnerFactory;
@@ -16,6 +17,7 @@ import org.testng.remote.strprotocol.MessageHelper;
 import org.testng.remote.strprotocol.RemoteMessageSenderTestListener;
 import org.testng.remote.strprotocol.StringMessageSenderHelper;
 import org.testng.remote.strprotocol.SuiteMessage;
+import org.testng.reporters.FailedReporter;
 import org.testng.reporters.JUnitXMLReporter;
 import org.testng.reporters.TestHTMLReporter;
 import org.testng.xml.XmlSuite;
@@ -124,7 +126,10 @@ public class RemoteTestNG extends TestNG {
 
     String useDefaultListeners = (String) commandLineArgs.get(TestNGCommandLineArgs.USE_DEFAULT_LISTENERS);
     if (null != useDefaultListeners) {
-      testNG.setUseDefaultListeners("true".equalsIgnoreCase(useDefaultListeners));
+      if(!"true".equalsIgnoreCase(useDefaultListeners)) {
+        testNG.setUseDefaultListeners(false);
+        testNG.addListener((IReporter) new FailedReporter());
+      }
     }
 
     testNG.setTestJar((String) commandLineArgs.get(TestNGCommandLineArgs.TESTJAR_COMMAND_OPT));

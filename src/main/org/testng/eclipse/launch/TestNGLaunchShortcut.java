@@ -39,6 +39,7 @@ import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.components.ITestContent;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.TypeParser;
+import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.param.ParameterSolver;
 
 
@@ -99,17 +100,15 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
         Map methods = new HashMap();
         methods.put(imethod.getElementName(), imethod);
         
-        solveDependencies(imethod, methods);
+        JDTUtil.solveDependencies(imethod, methods);
         
         methodNames= new ArrayList(methods.size());
-        Set typesSet = new HashSet();
         for(Iterator it= methods.values().iterator(); it.hasNext(); ) {
           IMethod m= (IMethod) it.next();
           methodNames.add(m.getElementName());
-          typesSet.add(m.getDeclaringType());
         }
         
-        types= (IType[]) typesSet.toArray(new IType[typesSet.size()]);
+        types= new IType[] {imethod.getDeclaringType()};
         runType= TestNGLaunchConfigurationConstants.METHOD;
         
         break;
@@ -120,12 +119,10 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
     }
     
     List typeNames = new ArrayList();
-    
     for(int i = 0; i < types.length; i++) {
       typeNames.add(types[i].getFullyQualifiedName());
     }
-    
-    
+        
     Map parameters= ParameterSolver.solveParameters(ije);
     
     ILaunchConfigurationWorkingCopy workingCopy = ConfigurationHelper.createBasicConfiguration(
@@ -160,59 +157,6 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
     }
   }
 
-  private void solveDependencies(IMethod method, Map allMethods) {
-    try {
-      DependencyVisitor dv= new DependencyVisitor();
-      ASTParser parser= ASTParser.newParser(AST.JLS3);
-      parser.setSource(method.getSource().toCharArray());
-      parser.setKind(ASTParser.K_CLASS_BODY_DECLARATIONS);
-      ASTNode node= parser.createAST(null);
-      node.accept(dv);
-      if(!dv.dependsOn.isEmpty()) {
-        for(int i= 0; i < dv.dependsOn.size(); i++) {
-          String methodName= (String) dv.dependsOn.get(i);
-          if(!allMethods.containsKey(methodName)) {
-            IMethod meth= solveMethod(method.getDeclaringType(), methodName);
-            allMethods.put(methodName, meth);
-            solveDependencies(meth, allMethods);
-          }
-        }
-      }
-    }
-    catch(JavaModelException jme) {
-      ; //ignore
-    }
-  }
-  
-  private IMethod solveMethod(IType type, String methodName) {
-    try {
-      IMethod[] typemethods= type.getMethods();
-      
-      for(int i=0; i < typemethods.length; i++) {
-        if(methodName.equals(typemethods[i].getElementName())) {
-          return typemethods[i];
-        }
-      }
-      
-      ITypeHierarchy typeHierarchy= type.newSupertypeHierarchy(null);
-      IType[] superTypes= typeHierarchy.getAllSuperclasses(type);
-      for(int i= 0; i < superTypes.length; i++) {
-        IMethod[] methods= superTypes[i].getMethods();
-        
-        for(int j=0; j < methods.length; j++) {
-          if(methodName.equals(methods[j].getElementName())) {
-            return methods[j];
-          }
-        }
-      }
-    }
-    catch(JavaModelException jme) {
-      ; //ignore
-    }
-    
-    return null;
-  }
-  
   protected void launchConfiguration(ILaunchConfiguration config, String mode) {
     if(null != config) {
       DebugUITools.launch(config, mode);
@@ -221,40 +165,5 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
   
   protected ILaunchManager getLaunchManager() {
     return DebugPlugin.getDefault().getLaunchManager();
-  }
-  
-  private static class DependencyVisitor extends ASTVisitor {
-    private static final String ANNOTATION_PACKAGE = "org.testng.annotations.";
-    private static final String TEST_ANNOTATION = "Test";
-    private static final String TEST_ANNOTATION_FQN = ANNOTATION_PACKAGE + TEST_ANNOTATION;
-    List dependsOn= new ArrayList();
-
-    public boolean visit(NormalAnnotation annotation) {
-      if(!TEST_ANNOTATION.equals(annotation.getTypeName().getFullyQualifiedName()) 
-          && !TEST_ANNOTATION_FQN.equals(annotation.getTypeName().getFullyQualifiedName())) {
-        return false;
-      }
-      
-      List values= annotation.values();
-      
-      if(null != values && !values.isEmpty()) {
-        for(int i= 0; i < values.size(); i++) {
-          MemberValuePair pair= (MemberValuePair) values.get(i);
-          if("dependsOnMethods".equals(pair.getName().toString())) {
-            Expression paramAttr= pair.getValue();
-            if(paramAttr instanceof ArrayInitializer) {
-              List literals= ((ArrayInitializer) paramAttr).expressions();
-              List paramNames= new ArrayList(literals.size());
-              for(int j= 0; j < literals.size(); j++) {
-                StringLiteral str= (StringLiteral) literals.get(j);
-                dependsOn.add(str.getLiteralValue());
-              }
-            }
-          }
-        }
-      }
-      
-      return false;
-    }
-  }
+  }  
 }

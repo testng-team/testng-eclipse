@@ -4,6 +4,7 @@ package org.testng.eclipse.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -15,15 +16,25 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.MemberValuePair;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
-
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 
@@ -293,4 +304,165 @@ public class JDTUtil {
 
     return "";
   }
+  
+  /**
+   * Retrieves in the <code>IJavaProject</code> the class or the method element.
+   * @param javaProject
+   * @param className
+   * @param methodName
+   * @return
+   * @throws JavaModelException
+   */
+  public static IJavaElement findElement(IJavaProject javaProject, String className, String methodName) 
+  throws JavaModelException {
+    IType type = javaProject.findType(className);
+    if(null == type) {
+      return null;
+    }
+
+    if(null == methodName) {
+      return type;
+    }
+
+    IMethod method = findMethodInTypeHierarchy(type, methodName);
+    if (null == method) {
+      method = fuzzyFindMethodInTypeHierarchy(type, methodName);
+    }
+
+    return method;
+  }
+  
+  private static IMethod findMethodInTypeHierarchy(IType type, String methodName) throws JavaModelException {
+    IMethod method = type.getMethod(methodName, new String[0]);
+    if((method != null) && method.exists()) {
+      return method;
+    }
+
+    ITypeHierarchy typeHierarchy = type.newSupertypeHierarchy(null);
+    IType[] types = typeHierarchy.getAllSuperclasses(type);
+    for(int i = 0; i < types.length; i++) {
+      method = types[i].getMethod(methodName, new String[0]);
+      if((method != null) && method.exists()) {
+        return method;
+      }
+    }
+
+    return null;
+  }
+
+  private static IMethod fuzzyFindMethodInTypeHierarchy(IType type, String methodName) throws JavaModelException {
+    IMethod[] methods = type.getMethods();
+    for(int i = 0; i < methods.length; i++) {
+      if(methodName.equals(methods[i].getElementName()) && methods[i].exists()) {
+        return methods[i];
+      }
+    }
+
+    ITypeHierarchy typeHierarchy = type.newSupertypeHierarchy(null);
+    IType[] types = typeHierarchy.getAllSuperclasses(type);
+    for(int i = 0; i < types.length; i++) {
+      methods = types[i].getMethods();
+      for(int j = 0; j < methods.length; j++) {
+        if(methodName.equals(methods[j].getElementName()) && methods[j].exists()) {
+          return methods[j];
+        }
+      }
+    }
+
+    return null;
+  }
+  
+  /**
+   * Tries to retrieve the dependsOn part of a method definition.
+   * @param method
+   * @param allMethods
+   */
+  public static void solveDependencies(IMethod method, Map allMethods) {
+    try {
+      DependencyVisitor dv= new DependencyVisitor();
+      ASTParser parser= ASTParser.newParser(AST.JLS3);
+      parser.setSource(method.getSource().toCharArray());
+      parser.setKind(ASTParser.K_CLASS_BODY_DECLARATIONS);
+      ASTNode node= parser.createAST(null);
+      node.accept(dv);
+      if(!dv.dependsOn.isEmpty()) {
+        for(int i= 0; i < dv.dependsOn.size(); i++) {
+          String methodName= (String) dv.dependsOn.get(i);
+          if(!allMethods.containsKey(methodName)) {
+            IMethod meth= solveMethod(method.getDeclaringType(), methodName);
+            allMethods.put(methodName, meth);
+            solveDependencies(meth, allMethods);
+          }
+        }
+      }
+    }
+    catch(JavaModelException jme) {
+      ; //ignore
+    }
+  }
+  
+  private static IMethod solveMethod(IType type, String methodName) {
+    try {
+      IMethod[] typemethods= type.getMethods();
+      
+      for(int i=0; i < typemethods.length; i++) {
+        if(methodName.equals(typemethods[i].getElementName())) {
+          return typemethods[i];
+        }
+      }
+      
+      ITypeHierarchy typeHierarchy= type.newSupertypeHierarchy(null);
+      IType[] superTypes= typeHierarchy.getAllSuperclasses(type);
+      for(int i= 0; i < superTypes.length; i++) {
+        IMethod[] methods= superTypes[i].getMethods();
+        
+        for(int j=0; j < methods.length; j++) {
+          if(methodName.equals(methods[j].getElementName())) {
+            return methods[j];
+          }
+        }
+      }
+    }
+    catch(JavaModelException jme) {
+      ; //ignore
+    }
+    
+    return null;
+  }
+  
+  private static class DependencyVisitor extends ASTVisitor {
+    private static final String ANNOTATION_PACKAGE = "org.testng.annotations.";
+    private static final String TEST_ANNOTATION = "Test";
+    private static final String TEST_ANNOTATION_FQN = ANNOTATION_PACKAGE + TEST_ANNOTATION;
+    List dependsOn= new ArrayList();
+
+    public boolean visit(NormalAnnotation annotation) {
+      if(!TEST_ANNOTATION.equals(annotation.getTypeName().getFullyQualifiedName()) 
+          && !TEST_ANNOTATION_FQN.equals(annotation.getTypeName().getFullyQualifiedName())) {
+        return false;
+      }
+      
+      List values= annotation.values();
+      
+      if(null != values && !values.isEmpty()) {
+        for(int i= 0; i < values.size(); i++) {
+          MemberValuePair pair= (MemberValuePair) values.get(i);
+          if("dependsOnMethods".equals(pair.getName().toString())) {
+            Expression paramAttr= pair.getValue();
+            if(paramAttr instanceof ArrayInitializer) {
+              List literals= ((ArrayInitializer) paramAttr).expressions();
+              List paramNames= new ArrayList(literals.size());
+              for(int j= 0; j < literals.size(); j++) {
+                StringLiteral str= (StringLiteral) literals.get(j);
+                dependsOn.add(str.getLiteralValue());
+              }
+            }
+          }
+        }
+      }
+      
+      return false;
+    }
+  }
+
 }
