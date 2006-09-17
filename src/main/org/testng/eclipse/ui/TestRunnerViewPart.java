@@ -333,11 +333,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   protected void selectFirstFailure() {
-//    OldTestRunInfo firstFailure = (OldTestRunInfo) fFailures.get(0);
-//    if((firstFailure != null) && (m_activeRunTab.getSelectedTestId() == null)) {
-//      m_activeRunTab.setSelectedTest(firstFailure.getTestId());
-//      handleTestSelected(firstFailure.getTestId());
-//    }
+    // TODO
   }
 
   private boolean hasErrors() {
@@ -356,7 +352,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
           }
 
           fProgressBar.stopped();
-//          updateProgressBar(m_progressBar.getMaximum(), false);
         }
       });
     stopUpdateJobs();
@@ -378,15 +373,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     fTestRunnerClient = new EclipseTestRunnerClient();
     fTestRunnerClient.startListening(this, this, port);
     
-//    setContentDescription(project.getElementName());
-//    setTitleToolTip("TestNG runs " + project.getElementName() + " " + subName);
     m_rerunAction.setEnabled(true);
     m_rerunFailedAction.setEnabled(false);
   }
 
   protected void aboutToLaunch(final String message) {
     String msg = ResourceUtil.getFormattedString("TestRunnerViewPart.message.launching", message); //$NON-NLS-1$
-//    setInfoMessage(msg);
     firePropertyChange(IWorkbenchPart.PROP_TITLE);
   }
 
@@ -405,11 +397,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private void resetProgressBar(final int total) {
     fProgressBar.reset(total);
     fProgressBar.setMaximum(total, total);
-
-//    m_progressBar.setForeground(fOKColor);
-//    m_progressBar.setMinimum(0);
-//    m_progressBar.setMaximum(total);
-//    m_progressBar.setSelection(0);
   }
 
   private void postSyncRunnable(Runnable r) {
@@ -440,7 +427,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
           return;
         }
         m_testIsRunning = false;
-//        updateProgressBar(m_progressBar.getSelection() + 1, false);
 
         if(hasErrors()) {
           fNextAction.setEnabled(true);
@@ -451,9 +437,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private void refreshCounters() {
-//    m_counterPanel.setSuiteCount(m_suiteCount);
-//    m_counterPanel.setTestCount(m_testCount);
-//    m_counterPanel.setMethodTotalCount(m_methodTotalCount);
     m_counterPanel.setMethodCount(m_methodCount);
     m_counterPanel.setPassedCount(m_passedCount);
     m_counterPanel.setFailedCount(m_failedCount);
@@ -549,7 +532,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
     tabFolder.addSelectionListener(new SelectionAdapter() {
         public void widgetSelected(SelectionEvent event) {
-//          ppp("widgetSelected");
           testTabChanged(event);
         }
       });
@@ -626,13 +608,11 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
             if (hHint != SWT.DEFAULT)
                 maxHeight= hHint;
             
-            return new Point(maxWidth, maxHeight);  
-            
+            return new Point(maxWidth, maxHeight);
         }
         
         protected void layout (Composite composite, boolean flushCache) {
             Rectangle rect= composite.getClientArea();
-        
             Control[] children = composite.getChildren();
             for (int i = 0; i < children.length; i++) {
                 children[i].setBounds(rect);
@@ -678,8 +658,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         m_counterPanel.reset();
         m_failureTraceComponent.clear();
         fProgressBar.reset(testCount);
-//        m_progressBar.setSelection(0);
-//        m_progressBar.setMaximum(0);
         clearStatus();
         
         for(Enumeration e = m_tabsList.elements(); e.hasMoreElements();) {

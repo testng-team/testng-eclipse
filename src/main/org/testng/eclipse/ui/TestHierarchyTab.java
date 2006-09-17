@@ -587,8 +587,11 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
       if(RunInfo.RESULT_TYPE == testInfo.m_type) {
         manager.add(new OpenTestAction(fTestRunnerPart, testInfo.m_className, testInfo.m_methodName));
       }
-      manager.add(new Separator());
-      manager.add(new ExpandAllAction());
+      else {
+        manager.add(new OpenTestAction(fTestRunnerPart, testInfo.m_testName));
+        manager.add(new Separator());
+        manager.add(new ExpandAllAction());
+      }
     }
   }
   
