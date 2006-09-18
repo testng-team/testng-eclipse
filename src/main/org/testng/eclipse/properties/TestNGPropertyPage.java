@@ -45,6 +45,7 @@ public class TestNGPropertyPage extends PropertyPage {
   private Text m_reportersText;
   private Button m_disabledListenersCheckbox;
   private IProject m_workingProject;
+  private Button m_projectJar;
 
   public void createControl(Composite parent) {
     setDescription("General TestNG settings:");
@@ -56,19 +57,22 @@ public class TestNGPropertyPage extends PropertyPage {
    */
   protected Control createContents(Composite parent) {
     Composite composite = new Composite(parent, SWT.NONE);
-    composite.setLayout(new GridLayout(3, false));
-
+    composite.setLayout(new GridLayout(1, false));
     composite.setLayoutData(new GridData(GridData.FILL | GridData.GRAB_HORIZONTAL));
 
+    Composite pathComposite= new Composite(composite, SWT.BORDER);
+    pathComposite.setLayout(new GridLayout(3, false));
+    pathComposite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 3, 1));
+    
     //Label for path field
-    Label pathLabel = new Label(composite, SWT.NONE);
+    Label pathLabel = new Label(pathComposite, SWT.NONE);
     pathLabel.setText(PATH_TITLE);
 
     // Owner text field
-    m_outdirPath = new Text(composite, SWT.SINGLE | SWT.BORDER);
+    m_outdirPath = new Text(pathComposite, SWT.SINGLE | SWT.BORDER);
     m_outdirPath.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-    Button browse = new Button(composite, SWT.PUSH);
+    Button browse = new Button(pathComposite, SWT.PUSH);
     browse.setText("Browse");
     SWTUtil.setButtonGridData(browse);
     browse.addSelectionListener(new SelectionAdapter() {
@@ -77,35 +81,45 @@ public class TestNGPropertyPage extends PropertyPage {
         }
       });
 
-    Label pathDetailsLabel = new Label(composite, SWT.WRAP);
+    Label pathDetailsLabel = new Label(pathComposite, SWT.WRAP);
     pathDetailsLabel.setText("Set the directory for the tests output. "
         + "This location is used by TestNG to generate "
-        + "the output artifacts (including the file testng-failures.xml).");
-    GridData gd= new GridData(GridData.FILL_HORIZONTAL);
-    gd.horizontalSpan= 3;
-    pathDetailsLabel.setLayoutData(gd);
+        + "the output artifacts (including testng-failed.xml).");
+    pathDetailsLabel.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 3, 1));
     
+    Composite listenersComposite= new Composite(composite, SWT.BORDER);
+    listenersComposite.setLayout(new GridLayout(3, false));
+    listenersComposite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 3, 1));
+
+    Label disableListener = new Label(listenersComposite, SWT.NONE);
+    disableListener.setText("Disable default listeners:");
+
+    m_disabledListenersCheckbox= new Button(listenersComposite, SWT.CHECK);
+    GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+    gd.horizontalSpan= 2;
+    m_disabledListenersCheckbox.setLayoutData(gd);
+
     //Label for path field
-    Label listenersLabel = new Label(composite, SWT.NONE);
+    Label listenersLabel = new Label(listenersComposite, SWT.NONE);
     listenersLabel.setText("Listeners/Reporters:");
 
     // Owner text field
-    m_reportersText = new Text(composite, SWT.SINGLE | SWT.BORDER);
+    m_reportersText = new Text(listenersComposite, SWT.SINGLE | SWT.BORDER);
     m_reportersText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-    Label listenersDetailsLabel = new Label(composite, SWT.WRAP);
+    Label listenersDetailsLabel = new Label(listenersComposite, SWT.WRAP);
     listenersDetailsLabel.setText("Set the additional listeners/reporters (separated by space or ;) to be used when running the TestNG tests.");
-    gd= new GridData(GridData.FILL_HORIZONTAL);
-    gd.horizontalSpan= 3;
-    listenersDetailsLabel.setLayoutData(gd);
+    listenersDetailsLabel.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 3, 1));
 
-    Label disableListener = new Label(composite, SWT.NONE);
-    disableListener.setText("Disable default listeners:");
-
-    m_disabledListenersCheckbox= new Button(composite, SWT.CHECK);
-    gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-    gd.horizontalSpan= 2;
-    m_disabledListenersCheckbox.setLayoutData(gd);
+    Composite jarsComposite= new Composite(composite, SWT.BORDER);
+    jarsComposite.setLayout(new GridLayout(3, false));
+    jarsComposite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 3, 1));
+    
+    Label jarOrderLabel= new Label(jarsComposite, SWT.NONE);
+    jarOrderLabel.setText("Use project TestNG jar:");
+    
+    m_projectJar= new Button(jarsComposite, SWT.CHECK);
+    m_projectJar.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING, SWT.NONE, false, false, 2, 1));
     
     loadDefaults();
 
@@ -119,6 +133,7 @@ public class TestNGPropertyPage extends PropertyPage {
     m_outdirPath.setText(TestNGPlugin.getDefault().getOutputDir(m_workingProject.getName()));
     m_reportersText.setText(TestNGPlugin.getDefault().getReporters(m_workingProject.getName()));
     m_disabledListenersCheckbox.setSelection(TestNGPlugin.getDefault().getDisabledListeners(m_workingProject.getName()));
+    m_projectJar.setSelection(TestNGPlugin.getDefault().getUseProjectJar(m_workingProject.getName()));
   }
 
   protected void performDefaults() {
@@ -130,6 +145,7 @@ public class TestNGPropertyPage extends PropertyPage {
     TestNGPlugin.getDefault().storeOutputDir(m_workingProject.getName(), m_outdirPath.getText());
     TestNGPlugin.getDefault().storeReporters(m_workingProject.getName(), m_reportersText.getText());
     TestNGPlugin.getDefault().storeDisabledListeners(m_workingProject.getName(), m_disabledListenersCheckbox.getSelection());
+    TestNGPlugin.getDefault().storeUseProjectJar(m_workingProject.getName(), m_projectJar.getSelection());
 
     if(super.performOk()) {
       setMessage("Project preferences are saved", INFORMATION);

@@ -220,11 +220,22 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     String[] classPath = null;
     String testngJarLocation= getTestNGLibraryVersion(javaVersion);
     String testngJarName= testngJarLocation.indexOf('/') != -1 ? testngJarLocation.substring(testngJarLocation.indexOf('/') + 1) : testngJarLocation;
+    boolean donotappendjar= false;
+    String projectName= getJavaProjectName(configuration);
+    if(null != projectName) {
+       donotappendjar= TestNGPlugin.getDefault().getUseProjectJar(projectName);
+    }
+    
     int addedSize= 2;
-    for(int i= 0; i< cp.length; i++) {
-      if(cp[i].endsWith(testngJarName)) {
-        addedSize= 1;
-        break;
+    if(donotappendjar) {
+      addedSize= 1;
+    }
+    else {
+      for(int i= 0; i< cp.length; i++) {
+        if(cp[i].endsWith(testngJarName)) {
+          addedSize= 1;
+          break;
+        }
       }
     }
 

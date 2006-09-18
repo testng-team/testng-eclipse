@@ -358,4 +358,20 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
   public void storeDisabledListeners(String projectName, boolean selection) {
     getPreferenceStore().setValue(projectName + ".disabledListeners", selection);
   }
+
+  /**
+   * @param name
+   * @return
+   */
+  public boolean getUseProjectJar(String projectName) {
+    return getPreferenceStore().getBoolean(projectName + ".useProjectJar");
+  }
+
+  /**
+   * @param name
+   * @param selection
+   */
+  public void storeUseProjectJar(String projectName, boolean selection) {
+    getPreferenceStore().setValue(projectName + ".useProjectJar", selection);
+  }
 }
