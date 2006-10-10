@@ -45,7 +45,6 @@ import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.components.CheckBoxTable;
 import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.launch.components.ITestContent;
-import org.testng.eclipse.runner.RemoteTestNG;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.ProjectChooserDialog;
 import org.testng.eclipse.ui.util.TestSelectionDialog;
@@ -55,6 +54,7 @@ import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SWTUtil;
 import org.testng.eclipse.util.TestSearchEngine;
+import org.testng.remote.RemoteTestNG;
 
 /**
  * TestNG specific launcher tab.

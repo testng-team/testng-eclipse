@@ -1,10 +1,5 @@
 package org.testng.eclipse.launch;
 
-import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.runner.RemoteTestNG;
-import org.testng.eclipse.ui.util.ConfigurationHelper;
-import org.testng.eclipse.ui.util.Utils;
-
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -20,6 +15,10 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.ui.util.ConfigurationHelper;
+import org.testng.eclipse.ui.util.Utils;
+import org.testng.remote.RemoteTestNG;
 
 /**
  * Suite contextual launcher.

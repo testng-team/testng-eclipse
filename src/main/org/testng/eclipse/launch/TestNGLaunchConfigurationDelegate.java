@@ -13,7 +13,6 @@ import java.util.Vector;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -36,6 +35,7 @@ import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.ResourceUtil;
+import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
 
 
@@ -132,7 +132,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     String javaVersion = ConfigurationHelper.getComplianceLevel(jproject, configuration);
     String[] classPath = createClassPath(configuration, javaVersion);
     String progArgs = getProgramArguments(configuration);
-    VMRunnerConfiguration vmConfig = new VMRunnerConfiguration("org.testng.eclipse.runner.RemoteTestNG", //$NON-NLS-1$
+    VMRunnerConfiguration vmConfig = new VMRunnerConfiguration(RemoteTestNG.class.getName(), //$NON-NLS-1$
                                                                classPath);
 
     // insert the program arguments
