@@ -3,7 +3,7 @@
 <plugin
    id="org.testng.eclipse"
    name="%pluginName"
-   version="5.2.0.1"
+   version="5.3.0.0"
    provider-name="%providerName"
    class="org.testng.eclipse.TestNGPlugin">
    <runtime>
