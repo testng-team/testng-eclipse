@@ -1,5 +1,6 @@
 package org.testng.eclipse.launch.components;
 
+import org.testng.TestNG;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.signature.ASTMethodDescriptor;
 import org.testng.eclipse.util.signature.IMethodDescriptor;
@@ -16,8 +17,8 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 public class BaseVisitor extends ASTVisitor implements ITestContent {
-  public static final String JDK14_ANNOTATION = "1.4";
-  public static final String JDK15_ANNOTATION = "1.5";
+  static final String JDK14_ANNOTATION = TestNG.JAVADOC_ANNOTATION_TYPE;
+  static final String JDK15_ANNOTATION = TestNG.JDK_ANNOTATION_TYPE;
   
   // List<MethodDeclaration>
   private Set m_testMethods = new HashSet();

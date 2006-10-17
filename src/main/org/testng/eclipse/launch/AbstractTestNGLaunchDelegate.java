@@ -9,6 +9,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -66,8 +68,6 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
   }
 
   public void selectionChanged(IAction action, ISelection selection) {
-    m_action = action;
-    update();
   }
 
   private void update() {
@@ -97,7 +97,7 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
           return;
         }
         
-        IType[] types= getTypes(file);
+        IType[] types= getTypes(m_compilationUnit); //getTypes(file);
         IType checkType= null;
         if(null != mainType) {
           checkType= mainType;
@@ -106,7 +106,11 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
           checkType= types[0];
         }
         if(null != checkType && hasSource(checkType)) {
+          long startT= System.currentTimeMillis();
           ITestContent testContent = TypeParser.parseType(checkType);
+          long stopT= System.currentTimeMillis();
+          String msg= "Parsing time for main type '" + checkType.getFullyQualifiedName() + "' done in " + (stopT - startT) + " ms";
+//          TestNGPlugin.log(new Status(IStatus.INFO, TestNGPlugin.PLUGIN_ID, 2323, msg, null));
       
           if(testContent.isTestNGClass()) {
             if(null != types) {
@@ -165,6 +169,17 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
     }
   }
 
+  protected IType[] getTypes(ICompilationUnit compilationUnit) {
+    try {
+      return compilationUnit.getTypes();
+    }
+    catch(JavaModelException jme) {
+      TestNGPlugin.log(jme);
+    }
+    
+    return null;
+  }
+  
   protected IType[] getTypes(IFile file) {
     try {
       ICompilationUnit compilationUnit= JDTUtil.getJavaElement(file);

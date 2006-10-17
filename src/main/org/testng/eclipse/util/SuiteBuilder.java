@@ -6,6 +6,7 @@ import org.testng.eclipse.launch.components.ITestContent;
 import org.testng.eclipse.ui.util.TypeParser;
 import org.testng.eclipse.util.signature.IMethodDescriptor;
 import org.testng.eclipse.util.signature.MethodDescriptor;
+import org.testng.internal.AnnotationTypeEnum;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -37,9 +38,11 @@ public class SuiteBuilder {
     
     if(IJavaElement.COMPILATION_UNIT == ije.getElementType()) {
       createClassTest(types, ije, xmlSuite);
-    } else if(IJavaElement.TYPE == ije.getElementType()) {
+    } 
+    else if(IJavaElement.TYPE == ije.getElementType()) {
       createClassTest(types, ije, xmlSuite);
-    } else if(IJavaElement.METHOD == ije.getElementType()) {
+    } 
+    else if(IJavaElement.METHOD == ije.getElementType()) {
       createMethodTest(types, ije, xmlSuite);
     }
 
@@ -55,20 +58,19 @@ public class SuiteBuilder {
   }
 
   private static String convert(String annotationType) {
-    if("1.5".equals(annotationType) || TestNG.JDK5_ANNOTATION_TYPE.equals(annotationType)) {
-      return TestNG.JDK5_ANNOTATION_TYPE;
+    AnnotationTypeEnum annoType= AnnotationTypeEnum.JDK;
+    try {
+      annoType= AnnotationTypeEnum.valueOf(annotationType);
     }
-    if("1.4".equals(annotationType) || TestNG.JAVADOC_ANNOTATION_TYPE.equals(annotationType)) {
-      return TestNG.JAVADOC_ANNOTATION_TYPE;
+    catch(RuntimeException re) {
+      TestNGPlugin.log(new Status(IStatus.INFO, 
+                                  TestNGPlugin.PLUGIN_ID, 
+                                  1, 
+                                  "Unknown annotation type '" + annotationType + "' Using default: " + TestNG.JDK_ANNOTATION_TYPE, 
+                                  null));
     }
-    TestNGPlugin.log(new Status(IStatus.INFO, 
-                                TestNGPlugin.PLUGIN_ID, 
-                                1, 
-                                "Unknown annotation type '" + annotationType + "' Using default: " + TestNG.JDK5_ANNOTATION_TYPE , 
-                                null)
-    );
     
-    return TestNG.JDK5_ANNOTATION_TYPE;
+    return annoType.toString();
   }
   
   private static void createClassTest(IType[] types, IJavaElement ije, XMLStringBuffer buf) {
