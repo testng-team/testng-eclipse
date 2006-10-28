@@ -29,6 +29,7 @@ import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.eclipse.jface.util.Assert;
+import org.testng.TestNG;
 import org.testng.TestNGCommandLineArgs;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
@@ -209,7 +210,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
    * @return
    */
   private boolean isJDK15(String javaVersion) {
-    return javaVersion.startsWith("1.5") || javaVersion.startsWith("1.6");
+    return TestNG.JDK_ANNOTATION_TYPE.equals(javaVersion) || javaVersion.startsWith("1.5") || javaVersion.startsWith("1.6");
   }
 
   private String[] createClassPath(ILaunchConfiguration configuration, String javaVersion)

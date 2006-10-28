@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.testng.TestNG;
-import org.testng.internal.AnnotationTypeEnum;
 import org.testng.reporters.XMLStringBuffer;
 import org.testng.xml.LaunchSuite;
 import org.testng.xml.Parser;
@@ -22,7 +21,6 @@ abstract public class CustomSuite extends LaunchSuite {
     protected String m_projectName;
     protected String m_suiteName;
     protected String m_annotationType;
-    protected AnnotationTypeEnum m_annotationTypeE;
     protected Map m_parameters;
     private XMLStringBuffer m_suiteBuffer;
 
@@ -41,7 +39,6 @@ abstract public class CustomSuite extends LaunchSuite {
       else {
         m_annotationType= TestNG.JDK_ANNOTATION_TYPE;
       }
-      m_annotationTypeE= AnnotationTypeEnum.valueOf(annotationType);
     }
 
     protected XMLStringBuffer createContentBuffer() {
