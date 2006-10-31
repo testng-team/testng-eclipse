@@ -305,8 +305,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   public void showTest(RunInfo test) {
-    m_activeRunTab.setSelectedTest(test.m_id);
-    new OpenTestAction(this, test.m_className, test.m_methodName, false).run();
+    m_activeRunTab.setSelectedTest(test.getId());
+    new OpenTestAction(this, test.getClassName(), test.getMethodName(), false).run();
   }
 
 
@@ -1330,7 +1330,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   public void onFinish(SuiteMessage suiteMessage) {
     m_suiteCount++;
-    final String entryId = new RunInfo(suiteMessage.getSuiteName()).m_id;
+    final String entryId = new RunInfo(suiteMessage.getSuiteName()).getId();
     
     postSyncRunnable(new Runnable() {
       public void run() {
@@ -1393,7 +1393,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         m_methodTotalCount= m_methodCount; // trust the methodCount
     }
     
-    final String entryId = new RunInfo(tm.getSuiteName(), tm.getTestName()).m_id;
+    final String entryId = new RunInfo(tm.getSuiteName(), tm.getTestName()).getId();
     
     postSyncRunnable(new Runnable() {
       public void run() {

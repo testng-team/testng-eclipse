@@ -90,8 +90,8 @@ public class CompareResultDialog extends Dialog {
     super(parentShell);
     fgThis = this;
     setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX);
-    fTestName = failure.m_methodName;
-    initializeActualExpected(failure.m_stackTrace);
+    fTestName = failure.getMethodName();
+    initializeActualExpected(failure.getStackTrace());
     computePrefixSuffix();
     fSettings = TestNGPlugin.getDefault().getDialogSettings();
   }

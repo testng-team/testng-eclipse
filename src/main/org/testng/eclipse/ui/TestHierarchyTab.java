@@ -180,7 +180,7 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
       return;
     }
 
-    if(RunInfo.RESULT_TYPE == testInfo.m_type) {
+    if(RunInfo.RESULT_TYPE == testInfo.getType()) {
 //      OpenTestAction action = new OpenTestAction(fTestRunnerPart, testInfo.m_className, testInfo.m_methodName);
       OpenTestAction action = new OpenTestAction(fTestRunnerPart, testInfo);
       
@@ -207,7 +207,7 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
       return null;
     }
 
-    return testInfo.m_id;
+    return testInfo.getId();
   }
   
   /**
@@ -276,7 +276,7 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
       state = ITestResult.SKIP;
     }
     
-    ti.setImage(getStatusImage(ri.m_type, state));
+    ti.setImage(getStatusImage(ri.getType(), state));
   }
 
   /**
@@ -285,7 +285,7 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
    * @see net.noco.testng.ui.TestRunTab#updateTestResult(net.noco.testng.ui.RunInfo)
    */
   public void updateTestResult(RunInfo resultInfo) {
-    TreeItem ti = (TreeItem) getRunningEntry(resultInfo.m_id);
+    TreeItem ti = (TreeItem) getRunningEntry(resultInfo.getId());
     
     if(null == ti) {
       // probably this is a @Configuration failures
@@ -295,38 +295,38 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
     
     ti.setData("runinfo", resultInfo);
     ti.setExpanded(true);
-    ti.setImage(getStatusImage(resultInfo.m_type, resultInfo.m_status));
+    ti.setImage(getStatusImage(resultInfo.getType(), resultInfo.getStatus()));
     
-    if(ITestResult.SUCCESS != resultInfo.m_status) {
+    if(ITestResult.SUCCESS != resultInfo.getStatus()) {
       m_failureIds.add((String) ti.getData("testid"));
     }
     
-    perpetuateResult(ti.getParentItem(), resultInfo.m_status);
+    perpetuateResult(ti.getParentItem(), resultInfo.getStatus());
   }
   
   private void createNewEntry(RunInfo runInfo) {
-    String enclosingTestId = runInfo.m_suiteName + "." + runInfo.m_testName; 
+    String enclosingTestId = runInfo.getTestFQN(); 
     TreeItem parentItem = (TreeItem) m_treeItemMap.get(enclosingTestId);
     
     if (null == parentItem) {
       // the failures in beforeSuite/beforeTest are reported before a test context exists
-      newTreeEntry(new RunInfo(runInfo.m_suiteName));
-      newTreeEntry(new RunInfo(runInfo.m_suiteName, runInfo.m_testName));
+      newTreeEntry(new RunInfo(runInfo.getSuiteName()));
+      newTreeEntry(new RunInfo(runInfo.getSuiteName(), runInfo.getTestName()));
       parentItem = (TreeItem) m_treeItemMap.get(enclosingTestId);
     }
     
     TreeItem treeItem = new TreeItem(parentItem, SWT.NONE);
-    treeItem.setImage(getStatusImage(runInfo.m_type, runInfo.m_status));
+    treeItem.setImage(getStatusImage(runInfo.getType(), runInfo.getStatus()));
     treeItem.setData("runinfo", runInfo);
-    treeItem.setData("testid", runInfo.m_id);
+    treeItem.setData("testid", runInfo.getId());
     treeItem.setText(runInfo.getMethodDisplay());
     treeItem.setExpanded(true);
     
-    if(ITestResult.SUCCESS != runInfo.m_status) {
-      m_failureIds.add(runInfo.m_id);
+    if(ITestResult.SUCCESS != runInfo.getStatus()) {
+      m_failureIds.add(runInfo.getId());
     }
     
-    perpetuateResult(parentItem, runInfo.m_status);
+    perpetuateResult(parentItem, runInfo.getStatus());
   }
   
   private void perpetuateResult(TreeItem ti, int state) {
@@ -335,8 +335,8 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
     }
     
     RunInfo ri = (RunInfo) ti.getData("runinfo");
-    if(RunInfo.SUITE_TYPE == ri.m_type
-        || RunInfo.TEST_TYPE == ri.m_type) {
+    if(RunInfo.SUITE_TYPE == ri.getType()
+        || RunInfo.TEST_TYPE == ri.getType()) {
       switch(state) {
         case ITestResult.SUCCESS:
           ri.m_passed++;
@@ -353,7 +353,7 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
       }
       
       ti.setExpanded(true);
-      String itemName = RunInfo.SUITE_TYPE == ri.m_type ? ri.m_suiteName : ri.m_testName;
+      String itemName = RunInfo.SUITE_TYPE == ri.getType() ? ri.getSuiteName() : ri.getTestName();
       
 
       ti.setText(MessageFormat.format(FORMATTED_MESSAGE,
@@ -405,16 +405,16 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
     boolean running= false;
     boolean allowDups= true;
       
-      switch(treeEntry.m_type) {
+      switch(treeEntry.getType()) {
         case RunInfo.SUITE_TYPE:
-          if(!m_treeItemMap.containsKey(treeEntry.m_id)) {
+          if(!m_treeItemMap.containsKey(treeEntry.getId())) {
             treeItem = new TreeItem(fTree, SWT.NONE);
             treeItem.setImage(m_suiteRunIcon);
             treeItem.setData("runinfo", treeEntry);
-            treeItem.setData("testid", treeEntry.m_id);
+            treeItem.setData("testid", treeEntry.getId());
             treeItem.setText(MessageFormat.format(FORMATTED_MESSAGE,
                 new Object[] {
-                    treeEntry.m_suiteName,
+                    treeEntry.getSuiteName(),
                     new Integer(treeEntry.m_passed),
                     new Integer(treeEntry.m_failed),
                     new Integer(treeEntry.m_skipped),
@@ -425,16 +425,16 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
 
           break;
         case RunInfo.TEST_TYPE:
-          if(!m_treeItemMap.containsKey(treeEntry.m_id)) {
-            TreeItem suiteItem = (TreeItem) m_treeItemMap.get(treeEntry.m_suiteName);
+          if(!m_treeItemMap.containsKey(treeEntry.getId())) {
+            TreeItem suiteItem = (TreeItem) m_treeItemMap.get(treeEntry.getSuiteName());
             treeItem = new TreeItem(suiteItem, SWT.NONE);
             treeItem.setImage(m_testRunIcon);
             treeItem.setData("runinfo", treeEntry);
-            treeItem.setData("testid", treeEntry.m_id);
-            treeItem.setData("testname", treeEntry.m_testName);
+            treeItem.setData("testid", treeEntry.getId());
+            treeItem.setData("testname", treeEntry.getTestName());
             treeItem.setText(MessageFormat.format(FORMATTED_MESSAGE,
                 new Object[] {
-                  treeEntry.m_testName,
+                  treeEntry.getTestName(),
                   new Integer(treeEntry.m_passed),
                   new Integer(treeEntry.m_failed),
                   new Integer(treeEntry.m_skipped),
@@ -444,7 +444,7 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
           }
           break;
         case RunInfo.RESULT_TYPE:
-          String enclosingTestId = treeEntry.m_suiteName + "." + treeEntry.m_testName; 
+          String enclosingTestId = treeEntry.getTestFQN(); 
           TreeItem testItem = (TreeItem) m_treeItemMap.get(enclosingTestId);
           
           if (null != testItem) {
@@ -454,18 +454,18 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
           else { 
 //            System.err.println("[INFO]" + treeEntry.m_id);
             // the failures in beforeSuite/beforeTest are reported before a test context exists
-            newTreeEntry(new RunInfo(treeEntry.m_suiteName));
-            newTreeEntry(new RunInfo(treeEntry.m_suiteName, treeEntry.m_testName));
+            newTreeEntry(new RunInfo(treeEntry.getSuiteName()));
+            newTreeEntry(new RunInfo(treeEntry.getSuiteName(), treeEntry.getTestName()));
             testItem = (TreeItem) m_treeItemMap.get(enclosingTestId);
           }
           
           treeItem = new TreeItem(testItem, SWT.NONE);
           treeItem.setImage(m_testRunIcon);
           treeItem.setData("runinfo", treeEntry);
-          treeItem.setData("testid", treeEntry.m_id);
+          treeItem.setData("testid", treeEntry.getId());
           String parentName= (String) testItem.getData("testname");
-          if(treeEntry.m_className.equals(parentName)) {
-            treeItem.setText(treeEntry.m_methodName + treeEntry.getParametersDisplay());
+          if(treeEntry.getClassName().equals(parentName)) {
+            treeItem.setText(treeEntry.getMethodName() + treeEntry.getParametersDisplay());
           }
           else {
             treeItem.setText(treeEntry.getMethodDisplay());
@@ -482,9 +482,9 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
   }
   
   private void registerTreeEntry(RunInfo runInfo, TreeItem item, boolean allowDups, boolean running) {
-    String itemKey= runInfo.m_id;
+    String itemKey= runInfo.getId();
 
-    if(!allowDups && m_treeItemMap.containsKey(runInfo.m_id)) {
+    if(!allowDups && m_treeItemMap.containsKey(runInfo.getId())) {
       m_duplicateItemsIndex++;
       itemKey+= m_duplicateItemsIndex;
 
@@ -493,10 +493,10 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
     }
     
     if(running) {
-      List dups= (List) m_runningItems.get(runInfo.m_id);
+      List dups= (List) m_runningItems.get(runInfo.getId());
       if(null == dups) {
         dups= new ArrayList();
-        m_runningItems.put(runInfo.m_id, dups);
+        m_runningItems.put(runInfo.getId(), dups);
       }
       dups.add(item);
     }
@@ -585,12 +585,12 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
       TreeItem treeItem = fTree.getSelection()[0];
       RunInfo  testInfo = (RunInfo) treeItem.getData("runinfo");
 
-      if(RunInfo.RESULT_TYPE == testInfo.m_type) {
+      if(RunInfo.RESULT_TYPE == testInfo.getType()) {
 //        manager.add(new OpenTestAction(fTestRunnerPart, testInfo.m_className, testInfo.m_methodName));
         manager.add(new OpenTestAction(fTestRunnerPart, testInfo));
       }
       else {
-        manager.add(new OpenTestAction(fTestRunnerPart, testInfo.m_testName));
+        manager.add(new OpenTestAction(fTestRunnerPart, testInfo.getTestName()));
         manager.add(new Separator());
         manager.add(new ExpandAllAction());
       }

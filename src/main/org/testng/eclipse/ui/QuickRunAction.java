@@ -46,8 +46,8 @@ public class QuickRunAction extends Action {
     m_javaProject= javaProject;
     m_previousRun= prevLaunch;
     m_runInfo= runInfo;
-    m_className.add(m_runInfo.m_className);
-    m_methodName.add(m_runInfo.m_methodName);
+    m_className.add(m_runInfo.getClassName());
+    m_methodName.add(m_runInfo.getMethodName());
     m_runMode= mode;
     
     initUI();

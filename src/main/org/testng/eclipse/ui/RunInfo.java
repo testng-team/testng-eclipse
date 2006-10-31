@@ -11,21 +11,21 @@ public class RunInfo {
   public static final int TEST_TYPE = 2;
   public static final int RESULT_TYPE = 3;
   
-  protected String m_id;
-  protected int m_type;
-  protected String m_suiteName;
-  protected String m_testName;
-  protected String m_className;
-  protected String m_methodName;
-  protected String[] m_parameters;
-  protected String[] m_parameterTypes;
-  protected String m_stackTrace;
+  private String m_id;
+  private int m_type;
+  private String m_suiteName;
+  private String m_testName;
+  private String m_className;
+  private String m_methodName;
+  private String[] m_parameters;
+  private String[] m_parameterTypes;
+  private String m_stackTrace;
   protected int m_methodCount;
   protected int m_passed;
   protected int m_failed;
   protected int m_skipped;
   protected int m_successPercentageFailed;
-  protected int m_status;
+  private int m_status;
   
   
   public RunInfo(String suiteName) {
@@ -151,6 +151,7 @@ public class RunInfo {
   }
 
   /**
+   * FIXME: rename to getMethodFQN()
    * @return
    */
   public String getMethodDisplay() {
@@ -188,5 +189,33 @@ public class RunInfo {
    */
   public String[] getParameterTypes() {
     return m_parameterTypes;
+  }
+  
+  public String getId() {
+    return m_id;
+  }
+  
+  public String getSuiteName() {
+    return m_suiteName;
+  }
+  
+  public String getTestName() {
+    return m_testName;
+  }
+  
+  public String getTestFQN() {
+    return m_suiteName + "." + m_testName;
+  }
+  
+  public int getType() {
+    return m_type;
+  }
+  
+  public int getStatus() {
+    return m_status;
+  }
+  
+  public String getStackTrace() {
+    return m_stackTrace;
   }
 }

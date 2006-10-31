@@ -167,7 +167,7 @@ public class FailureTab extends TestRunTab implements IMenuListener {
       return null;
     }
 
-    return ((RunInfo) m_table.getItem(index).getData()).m_id;
+    return ((RunInfo) m_table.getItem(index).getData()).getId();
   }
 
   /**
@@ -229,14 +229,14 @@ public class FailureTab extends TestRunTab implements IMenuListener {
       return;
     }
 
-    if(RunInfo.RESULT_TYPE == treeEntry.m_type
-        && ITestResult.SUCCESS != treeEntry.m_status
-        && ITestResult.SKIP != treeEntry.m_status) {
+    if(RunInfo.RESULT_TYPE == treeEntry.getType()
+        && ITestResult.SUCCESS != treeEntry.getStatus()
+        && ITestResult.SKIP != treeEntry.getStatus()) {
       TableItem ti = new TableItem(m_table, SWT.NONE);
       ti.setData(treeEntry);
       ti.setText(treeEntry.getMethodDisplay());
-      ti.setImage(getImage(treeEntry.m_status));
-      m_tableItems.put(treeEntry.m_id, ti);
+      ti.setImage(getImage(treeEntry.getStatus()));
+      m_tableItems.put(treeEntry.getId(), ti);
     }
   }
 
@@ -323,7 +323,7 @@ public class FailureTab extends TestRunTab implements IMenuListener {
       TableItem item = m_table.getItem(m_table.getSelectionIndex());
       RunInfo   info = (RunInfo) item.getData();
 
-      if(null != info.m_className) {
+      if(null != info.getClassName()) {
 //        manager.add(new OpenTestAction(fRunnerViewPart, info.m_className, info.m_methodName));
         manager.add(new OpenTestAction(fRunnerViewPart, info));
         manager.add(new Separator());

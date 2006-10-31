@@ -189,7 +189,7 @@ class FailureTrace implements IMenuListener {
     
     fFailure = failure;
     fCompareAction.setEnabled(true);
-    String trace = failure.m_stackTrace; //$NON-NLS-1$
+    String trace = failure.getStackTrace();
 
     if(fInputTrace == trace) {
       return;
