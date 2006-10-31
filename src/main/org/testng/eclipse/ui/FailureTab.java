@@ -147,7 +147,8 @@ public class FailureTab extends TestRunTab implements IMenuListener {
       TableItem item = m_table.getItem(m_table.getSelectionIndex());
       RunInfo   info = (RunInfo) item.getData();
 
-      new OpenTestAction(fRunnerViewPart, info.m_className, info.m_methodName).run();
+//      new OpenTestAction(fRunnerViewPart, info.m_className, info.m_methodName).run();
+      new OpenTestAction(fRunnerViewPart, info).run();
     }
   }
   
@@ -233,7 +234,7 @@ public class FailureTab extends TestRunTab implements IMenuListener {
         && ITestResult.SKIP != treeEntry.m_status) {
       TableItem ti = new TableItem(m_table, SWT.NONE);
       ti.setData(treeEntry);
-      ti.setText(treeEntry.m_className + "." + treeEntry.m_methodName);
+      ti.setText(treeEntry.getMethodDisplay());
       ti.setImage(getImage(treeEntry.m_status));
       m_tableItems.put(treeEntry.m_id, ti);
     }
@@ -323,17 +324,16 @@ public class FailureTab extends TestRunTab implements IMenuListener {
       RunInfo   info = (RunInfo) item.getData();
 
       if(null != info.m_className) {
-        manager.add(new OpenTestAction(fRunnerViewPart, info.m_className, info.m_methodName));
+//        manager.add(new OpenTestAction(fRunnerViewPart, info.m_className, info.m_methodName));
+        manager.add(new OpenTestAction(fRunnerViewPart, info));
         manager.add(new Separator());
         manager.add(new QuickRunAction(fRunnerViewPart.getLaunchedProject(), 
                                        fRunnerViewPart.getLastLaunch(),
-                                       info.m_className,
-                                       info.m_methodName,
+                                       info,
                                        ILaunchManager.RUN_MODE));
         manager.add(new QuickRunAction(fRunnerViewPart.getLaunchedProject(),
                                        fRunnerViewPart.getLastLaunch(),
-                                       info.m_className,
-                                       info.m_methodName,
+                                       info,
                                        ILaunchManager.DEBUG_MODE));
       }
     }

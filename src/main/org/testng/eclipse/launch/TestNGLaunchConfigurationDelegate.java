@@ -210,7 +210,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
    * @return
    */
   private boolean isJDK15(String javaVersion) {
-    return TestNG.JDK_ANNOTATION_TYPE.equals(javaVersion) || javaVersion.startsWith("1.5") || javaVersion.startsWith("1.6");
+    return TestNG.JDK_ANNOTATION_TYPE.equalsIgnoreCase(javaVersion) || javaVersion.startsWith("1.5") || javaVersion.startsWith("1.6");
   }
 
   private String[] createClassPath(ILaunchConfiguration configuration, String javaVersion)

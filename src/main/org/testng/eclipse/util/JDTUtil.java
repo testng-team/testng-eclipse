@@ -17,11 +17,13 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -37,6 +39,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
+import org.testng.eclipse.ui.RunInfo;
 
 /**
  * Class offering utility method to access different Eclipse resources.
@@ -305,6 +308,40 @@ public class JDTUtil {
     return "";
   }
   
+  public static IJavaElement findElement(IJavaProject javaProject, RunInfo runInfo) 
+  throws JavaModelException {
+    IType type = javaProject.findType(runInfo.getClassName());
+    if(null == type) {
+      return null;
+    }
+
+    if(null == runInfo.getMethodName()) {
+      return type;
+    }
+
+    String[] paramTypes= runInfo.getParameterTypes();
+    if(null == paramTypes) {
+      paramTypes= new String[0];
+    }
+    List params= new ArrayList(paramTypes.length);
+    for(int i= 0; i < paramTypes.length; i++) {
+      int idx= paramTypes[i].lastIndexOf('.');
+      String typeName= idx == -1 ? paramTypes[i] : paramTypes[i].substring(idx + 1);
+      params.add(Signature.createTypeSignature(typeName, false));
+    }
+    IMethod method= findMethodInTypeHierarchy(type, runInfo.getMethodName(), (String[]) params.toArray(new String[paramTypes.length]));
+    if(null == method) {
+      method = fuzzyFindMethodInTypeHierarchy(type, runInfo.getMethodName(), paramTypes);
+    }
+    
+    return method;
+  }
+  
+  public static IJavaElement findElement(IJavaProject javaProject, String className) 
+  throws JavaModelException {
+    return javaProject.findType(className);
+  }
+  
   /**
    * Retrieves in the <code>IJavaProject</code> the class or the method element.
    * @param javaProject
@@ -313,35 +350,38 @@ public class JDTUtil {
    * @return
    * @throws JavaModelException
    */
-  public static IJavaElement findElement(IJavaProject javaProject, String className, String methodName) 
-  throws JavaModelException {
-    IType type = javaProject.findType(className);
-    if(null == type) {
-      return null;
-    }
-
-    if(null == methodName) {
-      return type;
-    }
-
-    IMethod method = findMethodInTypeHierarchy(type, methodName);
-    if (null == method) {
-      method = fuzzyFindMethodInTypeHierarchy(type, methodName);
-    }
-
-    return method;
-  }
+//  public static IJavaElement findElement(IJavaProject javaProject, String className, String methodName) 
+//  throws JavaModelException {
+//    IType type = javaProject.findType(className);
+//    if(null == type) {
+//      return null;
+//    }
+//
+//    if(null == methodName) {
+//      return type;
+//    }
+//
+//    // FIXME: we need some work here
+//    String finalMethodName = methodName.indexOf('(') == -1 ? methodName : methodName.substring(0, methodName.indexOf('('));
+//    
+//    IMethod method = findMethodInTypeHierarchy(type, finalMethodName);
+//    if (null == method) {
+//      method = fuzzyFindMethodInTypeHierarchy(type, finalMethodName);
+//    }
+//
+//    return method;
+//  }
   
-  private static IMethod findMethodInTypeHierarchy(IType type, String methodName) throws JavaModelException {
-    IMethod method = type.getMethod(methodName, new String[0]);
-    if((method != null) && method.exists()) {
-      return method;
+  private static IMethod findMethodInTypeHierarchy(IType type, String methodName, String[] paramTypes) throws JavaModelException {
+    IMethod method = type.getMethod(methodName, paramTypes);
+    if(method != null && method.exists()) { 
+        return method;
     }
 
     ITypeHierarchy typeHierarchy = type.newSupertypeHierarchy(null);
     IType[] types = typeHierarchy.getAllSuperclasses(type);
     for(int i = 0; i < types.length; i++) {
-      method = types[i].getMethod(methodName, new String[0]);
+      method = types[i].getMethod(methodName, paramTypes);
       if((method != null) && method.exists()) {
         return method;
       }
@@ -350,10 +390,10 @@ public class JDTUtil {
     return null;
   }
 
-  private static IMethod fuzzyFindMethodInTypeHierarchy(IType type, String methodName) throws JavaModelException {
+  private static IMethod fuzzyFindMethodInTypeHierarchy(IType type, String methodName, String[] paramTypes) throws JavaModelException {
     IMethod[] methods = type.getMethods();
     for(int i = 0; i < methods.length; i++) {
-      if(methodName.equals(methods[i].getElementName()) && methods[i].exists()) {
+      if(methodName.equals(methods[i].getElementName()) && methods[i].exists() && methods[i].getNumberOfParameters() == paramTypes.length) {
         return methods[i];
       }
     }

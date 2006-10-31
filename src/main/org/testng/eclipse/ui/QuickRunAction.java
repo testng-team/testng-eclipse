@@ -39,13 +39,15 @@ public class QuickRunAction extends Action {
   private ILaunch m_previousRun;
   private List/*<String>*/ m_className= new ArrayList();
   private List/*<String>*/ m_methodName= new ArrayList();
+  private RunInfo m_runInfo;
   private String m_runMode;
   
-  public QuickRunAction(IJavaProject javaProject, ILaunch prevLaunch, String className, String methodName, String mode) {
+  public QuickRunAction(IJavaProject javaProject, ILaunch prevLaunch, RunInfo runInfo, String mode) {
     m_javaProject= javaProject;
     m_previousRun= prevLaunch;
-    m_className.add(className);
-    m_methodName.add(methodName);
+    m_runInfo= runInfo;
+    m_className.add(m_runInfo.m_className);
+    m_methodName.add(m_runInfo.m_methodName);
     m_runMode= mode;
     
     initUI();
@@ -76,7 +78,7 @@ public class QuickRunAction extends Action {
     IMethod imethod= null; 
     Map parameters= null; 
     try {
-      imethod= (IMethod) JDTUtil.findElement(m_javaProject, (String) m_className.get(0), (String) m_methodName.get(0)); 
+      imethod= (IMethod) JDTUtil.findElement(m_javaProject, m_runInfo); 
       parameters= ParameterSolver.solveParameters(imethod);
     }
     catch(JavaModelException jmex) {

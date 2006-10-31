@@ -181,7 +181,8 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
     }
 
     if(RunInfo.RESULT_TYPE == testInfo.m_type) {
-      OpenTestAction action = new OpenTestAction(fTestRunnerPart, testInfo.m_className, testInfo.m_methodName);
+//      OpenTestAction action = new OpenTestAction(fTestRunnerPart, testInfo.m_className, testInfo.m_methodName);
+      OpenTestAction action = new OpenTestAction(fTestRunnerPart, testInfo);
       
       if(action.isEnabled()) {
         action.run();
@@ -318,7 +319,7 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
     treeItem.setImage(getStatusImage(runInfo.m_type, runInfo.m_status));
     treeItem.setData("runinfo", runInfo);
     treeItem.setData("testid", runInfo.m_id);
-    treeItem.setText(runInfo.m_className + "." + runInfo.m_methodName);
+    treeItem.setText(runInfo.getMethodDisplay());
     treeItem.setExpanded(true);
     
     if(ITestResult.SUCCESS != runInfo.m_status) {
@@ -464,10 +465,10 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
           treeItem.setData("testid", treeEntry.m_id);
           String parentName= (String) testItem.getData("testname");
           if(treeEntry.m_className.equals(parentName)) {
-            treeItem.setText(treeEntry.m_methodName);
+            treeItem.setText(treeEntry.m_methodName + treeEntry.getParametersDisplay());
           }
           else {
-            treeItem.setText(treeEntry.m_className + "." + treeEntry.m_methodName);
+            treeItem.setText(treeEntry.getMethodDisplay());
           }
           
           break;
@@ -585,7 +586,8 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
       RunInfo  testInfo = (RunInfo) treeItem.getData("runinfo");
 
       if(RunInfo.RESULT_TYPE == testInfo.m_type) {
-        manager.add(new OpenTestAction(fTestRunnerPart, testInfo.m_className, testInfo.m_methodName));
+//        manager.add(new OpenTestAction(fTestRunnerPart, testInfo.m_className, testInfo.m_methodName));
+        manager.add(new OpenTestAction(fTestRunnerPart, testInfo));
       }
       else {
         manager.add(new OpenTestAction(fTestRunnerPart, testInfo.m_testName));

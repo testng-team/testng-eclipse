@@ -17,6 +17,8 @@ public class RunInfo {
   protected String m_testName;
   protected String m_className;
   protected String m_methodName;
+  protected String[] m_parameters;
+  protected String[] m_parameterTypes;
   protected String m_stackTrace;
   protected int m_methodCount;
   protected int m_passed;
@@ -43,19 +45,45 @@ public class RunInfo {
                  String testName, 
                  String className, 
                  String methodName,
+                 String[] params,
+                 String[] paramTypes,
                  String stackTrace,
                  int status) {
-    m_id = suiteName + "." + testName + "." + className + "." + methodName;
+    m_id = suiteName + "." + testName + "." + className + "." + methodName + toString(params, paramTypes);
     m_suiteName = suiteName;
     m_testName = testName;
     m_className = className;
     m_methodName = methodName;
+    m_parameters= params;
+    m_parameterTypes= paramTypes;
     m_stackTrace = stackTrace;
     m_type = RESULT_TYPE;
     m_status = status;
   }
   
   
+  /**
+   * @param params
+   * @param paramTypes
+   * @return
+   */
+  private String toString(String[] params, String[] paramTypes) {
+    if(null == params || params.length == 0) return "";
+    
+    StringBuffer buf= new StringBuffer("(");
+    for(int i= 0; i < params.length; i++) {
+      if(i > 0) buf.append(", ");
+      if("java.lang.String".equals(paramTypes[i]) && !("null".equals(params[i]) || "\"\"".equals(params[i]))) {
+        buf.append("\"").append(params[i]).append("\"");
+      }
+      else {
+        buf.append(params[i]);
+      }
+    }
+    
+    return buf.append(")").toString();
+  }
+
   /**
    * Override hashCode.
    *
@@ -80,6 +108,18 @@ public class RunInfo {
 
     return m_id.equals(((RunInfo) o).m_id);
   }
+  
+//  public String toDisplayString() {
+//    if(SUITE_TYPE == m_type) {
+//    }
+//    else if(TEST_TYPE == m_type) {
+//    }
+//    else if(RESULT_TYPE == m_type) {
+//    }
+//    else {
+//      return "";
+//    }
+//  }
   
  
   public String toString() {
@@ -108,5 +148,45 @@ public class RunInfo {
     buffer.append("]");
     
     return buffer.toString();
+  }
+
+  /**
+   * @return
+   */
+  public String getMethodDisplay() {
+    StringBuffer buf= new StringBuffer(m_className);
+    buf.append(".").append(m_methodName).append(getParametersDisplay());
+    
+    return buf.toString();
+  }
+
+  /**
+   * @return
+   */
+  public String getParametersDisplay() {
+    if(null == m_parameters || m_parameters.length == 0) return "";
+
+    return toString(m_parameters, m_parameterTypes);
+  }
+
+  /**
+   * @return
+   */
+  public String getClassName() {
+    return m_className;
+  }
+
+  /**
+   * @return
+   */
+  public String getMethodName() {
+    return m_methodName;
+  }
+
+  /**
+   * @return
+   */
+  public String[] getParameterTypes() {
+    return m_parameterTypes;
   }
 }

@@ -1409,46 +1409,37 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     });
   }
 
+  private RunInfo createRunInfo(TestResultMessage trm, String stackTrace, int type) {
+    return new RunInfo(trm.getSuiteName(),
+                       trm.getName(),
+                       trm.getTestClass(),
+                       trm.getMethod(),
+                       trm.getParameters(),
+                       trm.getParameterTypes(),
+                       stackTrace,
+                       type);
+                       
+  }
+  
   public void onTestSuccess(TestResultMessage trm) {
-    final RunInfo ri = new RunInfo(trm.getSuiteName(), 
-                                   trm.getName(), 
-                                   trm.getTestClass(), 
-                                   trm.getMethod(), 
-                                   null, 
-                                   ITestResult.SUCCESS
-    );
     m_passedCount++;
     m_methodCount++;
     
-    postTestResult(ri, 0 /*no error*/);
+    postTestResult(createRunInfo(trm, null, ITestResult.SUCCESS), 0 /*no error*/);
   }
 
   public void onTestFailure(TestResultMessage trm) {
     m_failedCount++;
     m_methodCount++;
 //    System.out.println("[INFO:onTestFailure]:" + trm.getMessageAsString());
-    postTestResult(new RunInfo(trm.getSuiteName(), 
-                               trm.getName(),
-                               trm.getTestClass(), 
-                               trm.getMethod(), 
-                               trm.getStackTrace(), 
-                               ITestResult.FAILURE), 
-                   1 /*error*/
-    );
+    postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.FAILURE), 1 /*error*/);
   }
 
   public void onTestSkipped(TestResultMessage trm) {
     m_skippedCount++;
     m_methodCount++;
 //    System.out.println("[INFO:onTestSkipped]:" + trm.getMessageAsString());
-    postTestResult(new RunInfo(trm.getSuiteName(), 
-                               trm.getName(), 
-                               trm.getTestClass(), 
-                               trm.getMethod(), 
-                               null, 
-                               ITestResult.SKIP
-                               ), 
-                   1 /*error*/
+    postTestResult(createRunInfo(trm, null, ITestResult.SKIP), 1 /*error*/
     );
   }
 
@@ -1456,13 +1447,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_successPercentageFailed++;
     m_methodCount++;
     
-    postTestResult(new RunInfo(trm.getSuiteName(), 
-                               trm.getName(), 
-                               trm.getTestClass(), 
-                               trm.getMethod(),
-                               trm.getStackTrace(),
-                               ITestResult.SUCCESS_PERCENTAGE_FAILURE
-                               ),
+    postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.SUCCESS_PERCENTAGE_FAILURE),
                    1 /*error*/
     );
   }
@@ -1473,12 +1458,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
    */
   public void onTestStart(TestResultMessage trm) {
 //    System.out.println("[INFO:onTestStart]:" + trm.getMessageAsString());
-    postTestStarted(new RunInfo(trm.getSuiteName(), 
-                                trm.getName(), 
-                                trm.getTestClass(), 
-                                trm.getMethod(),
-                                trm.getStackTrace(),
-                                ITestResult.SUCCESS)
-    );
+    postTestStarted(createRunInfo(trm, null, ITestResult.SUCCESS));
   }
 }
