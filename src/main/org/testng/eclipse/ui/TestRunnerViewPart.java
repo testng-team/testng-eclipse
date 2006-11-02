@@ -171,6 +171,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private Action m_openReportAction;
   private boolean m_hasFailures;
   
+  private long m_startTime;
+  private long m_stopTime;
+  
   /**
    * Whether the output scrolls and reveals tests as they are executed.
    */
@@ -435,7 +438,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_counterPanel.setPassedCount(m_passedCount);
     m_counterPanel.setFailedCount(m_failedCount);
     m_counterPanel.setSkippedCount(m_skippedCount);
-    fProgressBar.refresh(hasErrors());
+    String msg= "";
+    if(m_startTime != 0L && m_stopTime != 0L) {
+      msg= " (" + (m_stopTime - m_startTime) + " ms)";
+    }
+    
+    fProgressBar.refresh(hasErrors(), msg);
   }
 
   protected void postShowTestResultsView() {
@@ -642,6 +650,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_failedCount = 0;
     m_skippedCount = 0;
     m_successPercentageFailed = 0;
+    m_startTime= 0L;
+    m_stopTime= 0L;
     
     postSyncRunnable(new Runnable() {
       public void run() {
@@ -1002,7 +1012,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
    * Background job running in UI thread for updating components info. 
    */
   class UpdateUIJob extends UIJob {
-    private boolean fRunning = true;
+    private volatile boolean fRunning = true;
 
     public UpdateUIJob(String name) {
       super(name);
@@ -1308,7 +1318,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   public void onInitialization(GenericMessage genericMessage) {
     final int suiteCount = Integer.parseInt(genericMessage.getProperty("suiteCount")); //$NON-NLS-1$
     final int testCount = Integer.parseInt(genericMessage.getProperty("testCount")); //$NON-NLS-1$
-    
     reset(suiteCount, testCount);
     stopUpdateJobs();
     m_updateUIJob= new UpdateUIJob("Update TestNG"); //$NON-NLS-1$ 
@@ -1319,6 +1328,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_runLock.acquire();
     getProgressService().schedule(m_isRunningJob);
     m_updateUIJob.schedule(REFRESH_INTERVAL);
+    m_startTime= System.currentTimeMillis();
   }
 
   public void onStart(SuiteMessage suiteMessage) {
@@ -1350,12 +1360,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       m_hasFailures= true;
       postShowTestResultsView();
       stopTest();
+      m_stopTime= System.currentTimeMillis();
       postSyncRunnable(new Runnable() {
         public void run() {
           if(isDisposed()) {
             return;
           }
-      
           refreshCounters();
 //          m_progressBar.redraw();
         }

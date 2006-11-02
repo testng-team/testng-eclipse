@@ -50,6 +50,7 @@ public class JUnitProgressBar extends Canvas {
   private int m_totalMethodsCounter;
   private int m_methodsCounter;
   private String m_currentMessage = "Tests: 0/0  Methods: 0/0";
+  private String m_timeMessage= "";
 
   public JUnitProgressBar(Composite parent) {
     super(parent, SWT.NONE);
@@ -101,6 +102,7 @@ public class JUnitProgressBar extends Canvas {
     m_testCounter = 0;
     m_totalMethodsCounter = 0;
     m_methodsCounter = 0;
+    m_timeMessage= "";
     m_currentMessage = getCurrentMessage();
 
     redraw();
@@ -109,7 +111,7 @@ public class JUnitProgressBar extends Canvas {
 
   private String getCurrentMessage() {
     return "Tests: " + m_testCounter + "/" + m_totalTestsCounter + "  Methods: " + m_methodsCounter
-      + "/" + m_totalMethodsCounter;
+      + "/" + m_totalMethodsCounter + m_timeMessage;
   }
 
   private void paintStep(int startX, int endX) {
@@ -189,10 +191,11 @@ public class JUnitProgressBar extends Canvas {
 
     gc.setFont(JFaceResources.getDefaultFont());
     FontMetrics fontMetrics = gc.getFontMetrics();
-    int stringWidth = fontMetrics.getAverageCharWidth() * m_currentMessage.length();
+    final String msg= getCurrentMessage();
+    int stringWidth = fontMetrics.getAverageCharWidth() * msg.length();
     int stringHeight = fontMetrics.getHeight();
     gc.setForeground(m_messageColor);
-    gc.drawString(m_currentMessage,
+    gc.drawString(msg,
                   (rect.width - stringWidth) / 2,
                   (rect.height - stringHeight) / 2,
                   true);
@@ -233,8 +236,9 @@ public class JUnitProgressBar extends Canvas {
     redraw();
   }
 
-  public void refresh(boolean hasErrors) {
+  public void refresh(boolean hasErrors, String msg) {
     fError = hasErrors;
+    m_timeMessage= msg;
     redraw();
   }
 
