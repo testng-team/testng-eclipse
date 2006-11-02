@@ -173,7 +173,7 @@ public class ConfigurationHelper {
     
     try {
       ILaunchConfigurationType configurationType = launchManager.getLaunchConfigurationType(TestNGLaunchConfigurationConstants.ID_TESTNG_APPLICATION);
-      wConf = configurationType.newInstance(project,confName);
+      wConf = configurationType.newInstance(project, confName);
 //          launchManager.generateUniqueLaunchConfigurationNameFrom(confName));
       wConf.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
                          RemoteTestNG.class.getName());

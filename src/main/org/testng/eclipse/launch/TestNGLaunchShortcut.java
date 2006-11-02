@@ -59,6 +59,7 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
     IType[] types = new IType[0];
     List methodNames = null;
     List packageNames= new ArrayList();
+    String confName= null;
     
     int runType= -1;
 
@@ -66,7 +67,9 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
       case IJavaElement.PACKAGE_FRAGMENT:
       {
         runType= TestNGLaunchConfigurationConstants.PACKAGE;
-        packageNames.add(((IPackageFragment) ije).getElementName());
+        IPackageFragment ipf= (IPackageFragment) ije;
+        packageNames.add(ipf.getElementName());
+        confName= "package " + ipf.getElementName();
         
         break;
       }
@@ -77,7 +80,11 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
         
         
         try {
-          types = ((ICompilationUnit) ije).getTypes();
+          ICompilationUnit icu= (ICompilationUnit) ije;
+          types = icu.getTypes();
+          
+          IType mainType= icu.findPrimaryType();
+          confName= mainType != null ? mainType.getElementName() : icu.getElementName();
         }
         catch(JavaModelException jme) {
           ; // nothing
@@ -88,9 +95,11 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
       
       case IJavaElement.TYPE:
       {
-        types = new IType[] {(IType) ije};
+        IType type= (IType) ije;
+        types = new IType[] {type};
         runType= TestNGLaunchConfigurationConstants.CLASS;
-
+        confName= type.getElementName();
+        
         break;
       }
       
@@ -110,6 +119,7 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
         
         types= new IType[] {imethod.getDeclaringType()};
         runType= TestNGLaunchConfigurationConstants.METHOD;
+        confName= imethod.getDeclaringType().getElementName() + "." + imethod.getElementName();
         
         break;
       }
@@ -126,7 +136,7 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
     Map parameters= ParameterSolver.solveParameters(ije);
     
     ILaunchConfigurationWorkingCopy workingCopy = ConfigurationHelper.createBasicConfiguration(
-        getLaunchManager(), ijp.getProject(), "TestNG context suite");
+        getLaunchManager(), ijp.getProject(), confName);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
                              typeNames);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.METHOD_TEST_LIST,

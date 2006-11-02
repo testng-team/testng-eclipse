@@ -2,23 +2,21 @@ package org.testng.eclipse.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.Action;
 import org.testng.eclipse.TestNGPlugin;
@@ -70,10 +68,6 @@ public class QuickRunAction extends Action {
     }
   }
   
-  /**
-   * TODO:
-   * - solve dependencies
-   */
   public void run() {
     IMethod imethod= null; 
     Map parameters= null; 
@@ -82,15 +76,18 @@ public class QuickRunAction extends Action {
       parameters= ParameterSolver.solveParameters(imethod);
     }
     catch(JavaModelException jmex) {
-      // FIXME: log that there was a problem finding the IMethod
+      TestNGPlugin.log(new Status(IStatus.ERROR, TestNGPlugin.PLUGIN_ID, 3333, 
+          "Cannot find method " + m_runInfo.getMethodDisplay() + " in class " + m_runInfo.getClassName(), //$NON-NLS-1$ $NON-NLS-2$
+          jmex));
     }
 
-    if(null != imethod) {
-      solveDependencies(imethod);
-    }
+    if(null == imethod) return;
 
+    solveDependencies(imethod);
+
+    final String confName= imethod.getDeclaringType().getElementName() + "." + imethod.getElementName();
     ILaunchConfigurationWorkingCopy workingCopy= 
-      ConfigurationHelper.createBasicConfiguration(getLaunchManager(), m_javaProject.getProject(), "TestNG context suite"); //$NON-NLS-1$
+      ConfigurationHelper.createBasicConfiguration(getLaunchManager(), m_javaProject.getProject(), confName);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST, m_className);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.METHOD_TEST_LIST, m_methodName);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE, TestNGLaunchConfigurationConstants.METHOD);

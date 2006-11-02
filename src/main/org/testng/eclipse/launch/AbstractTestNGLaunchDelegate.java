@@ -52,6 +52,7 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
   private ICompilationUnit m_compilationUnit;
   private Map m_launchAttributes= new HashMap();
   private String m_actionText= "";
+  private String configName;
   
   protected abstract String getLaunchMode();
   
@@ -106,10 +107,10 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
           checkType= types[0];
         }
         if(null != checkType && hasSource(checkType)) {
-          long startT= System.currentTimeMillis();
+//          long startT= System.currentTimeMillis();
           ITestContent testContent = TypeParser.parseType(checkType);
-          long stopT= System.currentTimeMillis();
-          String msg= "Parsing time for main type '" + checkType.getFullyQualifiedName() + "' done in " + (stopT - startT) + " ms";
+//          long stopT= System.currentTimeMillis();
+//          String msg= "Parsing time for main type '" + checkType.getFullyQualifiedName() + "' done in " + (stopT - startT) + " ms";
 //          TestNGPlugin.log(new Status(IStatus.INFO, TestNGPlugin.PLUGIN_ID, 2323, msg, null));
       
           if(testContent.isTestNGClass()) {
@@ -125,6 +126,7 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
               m_launchAttributes.put(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
                                      testContent.getAnnotationType());
 
+              configName= checkType.getElementName();
               isTestNGenabled= true;
             }
           }
@@ -137,6 +139,7 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
           m_launchAttributes.put(TestNGLaunchConfigurationConstants.TYPE, SUITE_TYPE);
           m_launchAttributes.put(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
             Utils.stringToList(file.getProjectRelativePath().toOSString()));
+          configName= file.getName();
           isTestNGenabled= true;
         }
       }
@@ -149,7 +152,7 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
   public void run(IAction action) {
     try {
       ILaunchConfigurationWorkingCopy workingCopy = ConfigurationHelper.createBasicConfiguration(
-          getLaunchManager(), m_project, "TestNG context suite");
+          getLaunchManager(), m_project, configName);
       m_launchAttributes.putAll(workingCopy.getAttributes());
       
       if(null != m_compilationUnit) {
