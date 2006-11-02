@@ -52,21 +52,14 @@ public class TestNGSuiteLaunchShortcut implements ILaunchShortcut {
 //    ILaunchConfiguration conf = null; //findConfiguration(suiteFile, mode);
     
 //    if(null == conf) {
-      ILaunchConfigurationWorkingCopy wCopy = 
-          ConfigurationHelper.createBasicConfiguration(getLaunchManager(),
-                                                       suiteFile.getProject(),
-                                                       "TestNG context suite " + suiteFile.getName());
-      wCopy.setAttribute(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
-                        Utils.stringToList(suiteFile.getProjectRelativePath().toOSString()));
-      wCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
-                         TestNGLaunchConfigurationConstants.SUITE);
-//      try {
-//        conf = wCopy.doSave();
-//      }
-//      catch(CoreException ce) {
-//        TestNGPlugin.log(ce);
-//      }
-//    }
+    ILaunchConfigurationWorkingCopy wCopy = 
+        ConfigurationHelper.createBasicConfiguration(getLaunchManager(),
+                                                     suiteFile.getProject(),
+                                                     "TestNG context suite " + suiteFile.getName());
+    wCopy.setAttribute(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
+                      Utils.stringToList(suiteFile.getProjectRelativePath().toOSString()));
+    wCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
+                       TestNGLaunchConfigurationConstants.SUITE);
     
     if(null != wCopy) {
       try {
