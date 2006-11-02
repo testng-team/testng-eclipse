@@ -22,6 +22,8 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -121,9 +123,26 @@ public class TestNGPropertyPage extends PropertyPage {
     m_projectJar= new Button(jarsComposite, SWT.CHECK);
     m_projectJar.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING, SWT.NONE, false, false, 2, 1));
     
+    Label projectJarLabel= new Label(jarsComposite, SWT.WRAP | SWT.BOLD);
+    projectJarLabel.setText("The project TestNG jar must be newer than version 5.2 (prior versions are not compatible).");
+    Font normalFont= projectJarLabel.getFont();
+    FontData fd= normalFont.getFontData()[0];
+    fd.setStyle(fd.getStyle() | SWT.ITALIC | SWT.BOLD);
+    projectJarLabel.setFont(new Font(projectJarLabel.getDisplay(), fd));
+    projectJarLabel.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 3, 1));
+    
     loadDefaults();
 
     return composite;
+  }
+
+  
+  public void dispose() {
+    m_projectJar.dispose();
+    m_reportersText.dispose();
+    m_outdirPath.dispose();
+    m_disabledListenersCheckbox.dispose();
+    super.dispose();
   }
 
   private void loadDefaults() {
