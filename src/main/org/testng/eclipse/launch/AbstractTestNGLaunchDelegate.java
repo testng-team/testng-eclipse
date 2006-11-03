@@ -52,7 +52,8 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
   private ICompilationUnit m_compilationUnit;
   private Map m_launchAttributes= new HashMap();
   private String m_actionText= "";
-  private String configName;
+  private String m_configName;
+  private boolean m_isSuite= false;
   
   protected abstract String getLaunchMode();
   
@@ -126,7 +127,7 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
               m_launchAttributes.put(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
                                      testContent.getAnnotationType());
 
-              configName= checkType.getElementName();
+              m_configName= checkType.getElementName();
               isTestNGenabled= true;
             }
           }
@@ -139,7 +140,8 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
           m_launchAttributes.put(TestNGLaunchConfigurationConstants.TYPE, SUITE_TYPE);
           m_launchAttributes.put(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
             Utils.stringToList(file.getProjectRelativePath().toOSString()));
-          configName= file.getName();
+          m_configName= file.getProjectRelativePath().toString().replace('/', '.');
+          m_isSuite= true;
           isTestNGenabled= true;
         }
       }
@@ -150,25 +152,31 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
   }
   
   public void run(IAction action) {
-    try {
-      ILaunchConfigurationWorkingCopy workingCopy = ConfigurationHelper.createBasicConfiguration(
-          getLaunchManager(), m_project, configName);
-      m_launchAttributes.putAll(workingCopy.getAttributes());
-      
-      if(null != m_compilationUnit) {
-        Map params= ParameterSolver.solveParameters(m_compilationUnit);
-        if(null != params) {
-          m_launchAttributes.put(TestNGLaunchConfigurationConstants.PARAMS, params);
+    ILaunchConfiguration config= ConfigurationHelper.findConfiguration(getLaunchManager(), m_project, m_configName);
+    if(null == config) {
+      try {
+        ILaunchConfigurationWorkingCopy workingCopy = ConfigurationHelper.createBasicConfiguration(
+            getLaunchManager(), m_project, m_configName);
+        m_launchAttributes.putAll(workingCopy.getAttributes());
+        
+        if(null != m_compilationUnit) {
+          Map params= ParameterSolver.solveParameters(m_compilationUnit);
+          if(null != params) {
+            m_launchAttributes.put(TestNGLaunchConfigurationConstants.PARAMS, params);
+          }
         }
-      }
+        
+        workingCopy.setAttributes(m_launchAttributes);
       
-      workingCopy.setAttributes(m_launchAttributes);
-      if(null != workingCopy) {
-        launchConfiguration(workingCopy.doSave(), getLaunchMode());
+        config= workingCopy.doSave();
+      }
+      catch(CoreException ce) {
+        TestNGPlugin.log(ce);
       }
     }
-    catch(CoreException ce) {
-      TestNGPlugin.log(ce);
+    
+    if(null != config) {
+      launchConfiguration(config, getLaunchMode());
     }
   }
 

@@ -1,7 +1,5 @@
 package org.testng.eclipse.launch;
 
-import java.util.List;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
@@ -18,7 +16,6 @@ import org.eclipse.ui.IEditorPart;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.Utils;
-import org.testng.remote.RemoteTestNG;
 
 /**
  * Suite contextual launcher.
@@ -47,67 +44,30 @@ public class TestNGSuiteLaunchShortcut implements ILaunchShortcut {
   }
 
   protected void run(IFile suiteFile, String mode) {
-    ppp("launch " + suiteFile.getFullPath().toOSString() + " in " + mode + " mode");
-    final String launchConfName = suiteFile.getFullPath().toOSString().replace('\\', '.').replace('/', '.');
-//    ILaunchConfiguration conf = null; //findConfiguration(suiteFile, mode);
-    
-//    if(null == conf) {
-    ILaunchConfigurationWorkingCopy wCopy = 
+    final String fileConfName= suiteFile.getProjectRelativePath().toString().replace('/', '.');
+    ILaunchConfiguration config= ConfigurationHelper.findConfiguration(getLaunchManager(), suiteFile.getProject(), fileConfName);
+    if(null == config) {
+      ILaunchConfigurationWorkingCopy wCopy = 
         ConfigurationHelper.createBasicConfiguration(getLaunchManager(),
                                                      suiteFile.getProject(),
-                                                     "TestNG context suite " + suiteFile.getName());
-    wCopy.setAttribute(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
-                      Utils.stringToList(suiteFile.getProjectRelativePath().toOSString()));
-    wCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
-                       TestNGLaunchConfigurationConstants.SUITE);
+                                                     fileConfName);
+      wCopy.setAttribute(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
+                        Utils.stringToList(suiteFile.getProjectRelativePath().toOSString()));
+      wCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
+                         TestNGLaunchConfigurationConstants.SUITE);
     
-    if(null != wCopy) {
       try {
-        launchConfiguration(wCopy.doSave(), mode);
+        config= wCopy.doSave();
       }
-      catch(CoreException ce) {
-        TestNGPlugin.log(ce);
+      catch(CoreException cex) {
+        TestNGPlugin.log(cex);
       }
-    }
-  }
-
-/*
-  protected ILaunchConfiguration findConfiguration(IFile file, String mode) {
-    ILaunchConfigurationType confType = getJavaLaunchConfigType();
-    ILaunchConfiguration resultConf = null;
-    try {
-      ILaunchConfiguration[] availConfs = getLaunchManager().getLaunchConfigurations(confType);
-      
-      String projectName = file.getProject().getName();
-      String suitePath = file.getFullPath().toOSString().replace('\\', '.').replace('/', '.');
-      String main = RemoteTestNG.class.getName();
-      
-      for(int i = 0; i < availConfs.length; i++) {
-        String confProjectName = ConfigurationHelper.getProjectName(availConfs[i]);
-        String confMainName = ConfigurationHelper.getMain(availConfs[i]);
-        
-        if(projectName.equals(confProjectName) && main.equals(confMainName)) {
-          List suiteList = ConfigurationHelper.getSuites(availConfs[i]);
-          if(null != suiteList 
-              && suiteList.size() == 1 
-              && suitePath.equals(suiteList.get(0))) {
-            if(null == resultConf) {
-              resultConf = availConfs[i];
-            }
-            else {
-              ppp("another conf matching found");
-            }
-          }
-        }
-      }
-    }
-    catch(CoreException ce) {
-      TestNGPlugin.log(ce);
     }
     
-    return resultConf;
+    if(null != config) {
+      launchConfiguration(config, mode);
+    }
   }
-*/
   
   protected void launchConfiguration(ILaunchConfiguration config, String mode) {
     if (config != null) {

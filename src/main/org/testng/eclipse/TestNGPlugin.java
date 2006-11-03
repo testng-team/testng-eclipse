@@ -6,6 +6,7 @@ import org.testng.eclipse.ui.preferences.PreferenceConstants;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.SWTUtil;
+import org.testng.remote.RemoteTestNG;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -45,6 +46,8 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
 
   public static final String PLUGIN_ID = "org.testng.eclipse"; //$NON-NLS-1$
   public static final String TESTNG_HOME= "TESTNG_HOME"; //$NON-NLS-1$
+
+  public static final String MAIN_RUNNER = RemoteTestNG.class.getName();
 
   private static URL m_fgIconBaseURL;
   

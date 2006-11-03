@@ -135,35 +135,40 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
         
     Map parameters= ParameterSolver.solveParameters(ije);
     
-    ILaunchConfigurationWorkingCopy workingCopy = ConfigurationHelper.createBasicConfiguration(
-        getLaunchManager(), ijp.getProject(), confName);
-    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
-                             typeNames);
-    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.METHOD_TEST_LIST,
-                             methodNames);
-    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST,
-                             packageNames);
-    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
-                             runType);
-    if(null != parameters) {
-      workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
-                               parameters);
-    }
-
-    if (IJavaElement.PACKAGE_FRAGMENT != ije.getElementType()) {
-      ITestContent testContent = TypeParser.parseType(types[0]);
-      workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
-                               testContent.getAnnotationType());
-    }
-
+    ILaunchConfiguration config= ConfigurationHelper.findConfiguration(getLaunchManager(), ijp.getProject(), confName);
     
-    if(null != workingCopy) {
+    if(null == config) {    
+      ILaunchConfigurationWorkingCopy workingCopy = ConfigurationHelper.createBasicConfiguration(
+          getLaunchManager(), ijp.getProject(), confName);
+      workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
+                               typeNames);
+      workingCopy.setAttribute(TestNGLaunchConfigurationConstants.METHOD_TEST_LIST,
+                               methodNames);
+      workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST,
+                               packageNames);
+      workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
+                               runType);
+      if(null != parameters) {
+        workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
+                                 parameters);
+      }
+  
+      if (IJavaElement.PACKAGE_FRAGMENT != ije.getElementType()) {
+        ITestContent testContent = TypeParser.parseType(types[0]);
+        workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
+                                 testContent.getAnnotationType());
+      }
+  
       try {
-        launchConfiguration(workingCopy.doSave(), mode);
+        config= workingCopy.doSave();
       }
-      catch(CoreException ce) {
-        TestNGPlugin.log(ce);
+      catch(CoreException cex) {
+        TestNGPlugin.log(cex);
       }
+    }
+    
+    if(null != config) {
+      launchConfiguration(config, mode);
     }
   }
 
