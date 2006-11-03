@@ -10,7 +10,7 @@ import org.testng.eclipse.TestNGPlugin;
  * @author cbeust
  */
 public abstract class TestNGLaunchConfigurationConstants {
-  public static final String JDK15_COMPLIANCE = "jdk";
+  public static final String JDK15_COMPLIANCE = "JDK";
   public static final String JDK14_COMPLIANCE = "javadoc";
   
   public static final String ID_TESTNG_APPLICATION = "org.testng.eclipse.launchconfig"; //$NON-NLS-1$
