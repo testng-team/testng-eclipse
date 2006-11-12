@@ -490,8 +490,8 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
       
       m_complianceLevelCombo = new Combo(group, SWT.DROP_DOWN | SWT.READ_ONLY);
       m_complianceLevelCombo.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-      m_complianceLevelCombo.add(TestNGLaunchConfigurationConstants.JDK14_COMPLIANCE);
       m_complianceLevelCombo.add(TestNGLaunchConfigurationConstants.JDK15_COMPLIANCE);
+      m_complianceLevelCombo.add(TestNGLaunchConfigurationConstants.JDK14_COMPLIANCE);
       m_complianceLevelCombo.select(0);
       GridData gd2 = new GridData(GridData.HORIZONTAL_ALIGN_END  | GridData.GRAB_HORIZONTAL);
       gd2.widthHint = 50; // HINT: originally minimumWidth (widthHint is supported in older API version)
