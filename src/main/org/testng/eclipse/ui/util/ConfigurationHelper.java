@@ -3,6 +3,7 @@ package org.testng.eclipse.ui.util;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -186,6 +187,22 @@ public class ConfigurationHelper {
     return wConf;
   }
   
+  /**
+   * @param selectedProject
+   */
+  public static void createBasicConfiguration(IJavaProject javaProject, ILaunchConfigurationWorkingCopy config) {
+    final String projectName = (javaProject == null) ? "" : javaProject.getElementName();
+    
+    config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+                        projectName);
+    config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
+                        RemoteTestNG.class.getName());
+    config.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
+                        JDTUtil.getProjectVMVersion(javaProject));
+    config.setAttribute(TestNGLaunchConfigurationConstants.TYPE, TestNGLaunchConfigurationConstants.CLASS);
+    config.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL, "2"); 
+  }
+
   private static String computeRelativePath(final String rootPath, final String sourcePath) {
     File rootFile = new File(rootPath);
     String rootRelativeName = rootFile.getName();
@@ -310,4 +327,25 @@ public class ConfigurationHelper {
     return resultConf;
   }
 
+  /**
+   * @param classMethods
+   * @return
+   */
+  public static Map toClassMethodsMap(Map classMethods) {
+    Map result= new HashMap();
+    for(Iterator it= classMethods.entrySet().iterator(); it.hasNext(); ) {
+      Map.Entry entry= (Map.Entry) it.next();
+      String clsName= (String) entry.getKey();
+      List methods= (List) entry.getValue();
+      StringBuffer strMethods= new StringBuffer();
+      for(int i= 0; i < methods.size(); i++) {
+        if(i > 0) strMethods.append(";");
+        strMethods.append(methods.get(i));
+      }
+      
+      result.put(clsName, strMethods.toString());
+    }
+    
+    return result;
+  }
 }

@@ -2,7 +2,6 @@ package org.testng.eclipse.util.param;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.parsers.FactoryConfigurationError;
@@ -45,6 +44,10 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author <a href='mailto:the_mindstorm[at]evolva[dot]ro'>Alexandru Popescu</a>
  */
 public class ParameterSolver {
+  /**
+   * TODO: this method searches only for parameters of the current <code>javaElement</code>
+   * and not all the dependencies.
+   */
   public static Map solveParameters(IJavaElement javaElement) {
     Map paramNames= null;
     try {

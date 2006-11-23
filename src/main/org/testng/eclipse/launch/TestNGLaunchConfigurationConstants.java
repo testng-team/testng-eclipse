@@ -38,6 +38,9 @@ public abstract class TestNGLaunchConfigurationConstants {
   public static final String METHOD_TEST_LIST = 
     make("METHOD_TEST_LIST"); //$NON-NLS-1$
   
+  public static final String ALL_METHODS_LIST = 
+    make("ALL_CLASS_METHODS"); //$NON-NLS-1$
+  
   /**
    * List of packages
    */

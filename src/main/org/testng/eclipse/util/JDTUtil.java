@@ -12,12 +12,13 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -33,10 +34,13 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.ui.RunInfo;
@@ -425,15 +429,23 @@ public class JDTUtil {
       parser.setKind(ASTParser.K_CLASS_BODY_DECLARATIONS);
       ASTNode node= parser.createAST(null);
       node.accept(dv);
-      if(!dv.dependsOn.isEmpty()) {
-        for(int i= 0; i < dv.dependsOn.size(); i++) {
-          String methodName= (String) dv.dependsOn.get(i);
+      if(!dv.dependsOnMethods.isEmpty()) {
+        for(int i= 0; i < dv.dependsOnMethods.size(); i++) {
+          String methodName= (String) dv.dependsOnMethods.get(i);
           if(!allMethods.containsKey(methodName)) {
             IMethod meth= solveMethod(method.getDeclaringType(), methodName);
             allMethods.put(methodName, meth);
             solveDependencies(meth, allMethods);
           }
         }
+      }
+      if(!dv.dependsOnGroups.isEmpty()) {
+        ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), 
+            "WARNING", 
+            "Method defines group dependencies that will be ignored", 
+            new Status(IStatus.WARNING, TestNGPlugin.PLUGIN_ID, 3333, 
+                "Method " + method.getElementName() + " defines the following group dependencies " + dv.dependsOnGroups
+                + " which due to a plugin limitation will be ignored", null));
       }
     }
     catch(JavaModelException jme) {
@@ -474,7 +486,8 @@ public class JDTUtil {
     private static final String ANNOTATION_PACKAGE = "org.testng.annotations.";
     private static final String TEST_ANNOTATION = "Test";
     private static final String TEST_ANNOTATION_FQN = ANNOTATION_PACKAGE + TEST_ANNOTATION;
-    List dependsOn= new ArrayList();
+    List dependsOnMethods= new ArrayList();
+    List dependsOnGroups= new ArrayList();
 
     public boolean visit(NormalAnnotation annotation) {
       if(!TEST_ANNOTATION.equals(annotation.getTypeName().getFullyQualifiedName()) 
@@ -488,20 +501,29 @@ public class JDTUtil {
         for(int i= 0; i < values.size(); i++) {
           MemberValuePair pair= (MemberValuePair) values.get(i);
           if("dependsOnMethods".equals(pair.getName().toString())) {
-            Expression paramAttr= pair.getValue();
-            if(paramAttr instanceof ArrayInitializer) {
-              List literals= ((ArrayInitializer) paramAttr).expressions();
-              List paramNames= new ArrayList(literals.size());
-              for(int j= 0; j < literals.size(); j++) {
-                StringLiteral str= (StringLiteral) literals.get(j);
-                dependsOn.add(str.getLiteralValue());
-              }
-            }
+            dependsOnMethods.addAll(extractValues(pair.getValue()));
+          }
+          else if("dependsOnGroups".equals(pair.getName().toString())) {
+            dependsOnGroups.addAll(extractValues(pair.getValue()));
           }
         }
       }
       
       return false;
+    }
+    
+    private List extractValues(Expression paramAttr) {
+      List values= new ArrayList();
+      if(paramAttr instanceof ArrayInitializer) {
+        List literals= ((ArrayInitializer) paramAttr).expressions();
+        List paramNames= new ArrayList(literals.size());
+        for(int j= 0; j < literals.size(); j++) {
+          StringLiteral str= (StringLiteral) literals.get(j);
+          values.add(str.getLiteralValue());
+        }
+      }
+
+      return values;
     }
   }
 

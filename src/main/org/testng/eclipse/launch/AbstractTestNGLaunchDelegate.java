@@ -31,6 +31,7 @@ import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.TypeParser;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.JDTUtil;
+import org.testng.eclipse.util.LaunchUtil;
 import org.testng.eclipse.util.SuiteFileValidator;
 import org.testng.eclipse.util.param.ParameterSolver;
 
@@ -44,16 +45,17 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
   private static final Integer CLASS_TYPE= new Integer(TestNGLaunchConfigurationConstants.CLASS);
   private static final Integer SUITE_TYPE= new Integer(TestNGLaunchConfigurationConstants.SUITE);
   
-  
   private IAction m_action;
   private IEditorPart m_editorPart;
   
   private IProject m_project;
   private ICompilationUnit m_compilationUnit;
   private Map m_launchAttributes= new HashMap();
-  private String m_actionText= "";
   private String m_configName;
+  
+  private String m_actionText= "";
   private boolean m_isSuite= false;
+  private boolean m_enabled= false;
   
   protected abstract String getLaunchMode();
   
@@ -77,6 +79,7 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
       return;
     }
 
+    m_enabled= false;
     m_launchAttributes.clear();
 
     IEditorInput editorInput= m_editorPart.getEditorInput();
@@ -85,99 +88,70 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
       IFile file= ((IFileEditorInput) editorInput).getFile();
       m_project= file.getProject();
       m_actionText= getCommandPrefix();
-      boolean isTestNGenabled= false;
+      
       if("java".equals(file.getFileExtension())) {
         m_actionText+= " test";
-      
         m_compilationUnit= JDTUtil.getJavaElement(file);
-        IType mainType= null; 
-        try {
-          mainType= m_compilationUnit.findPrimaryType();
-        }
-        catch(AssertionFailedException failure) {
-          TestNGPlugin.log(failure); // TESTNG-70
+
+        IType[] types= getTypes(m_compilationUnit);
+        IType mainType= getMainType(m_compilationUnit, types);
+        
+        if(null == types || null == mainType || !hasSource(mainType)) {
           return;
         }
-        
-        IType[] types= getTypes(m_compilationUnit); //getTypes(file);
-        IType checkType= null;
-        if(null != mainType) {
-          checkType= mainType;
-        }
-        else if(null != types && types.length > 0) {
-          checkType= types[0];
-        }
-        if(null != checkType && hasSource(checkType)) {
-//          long startT= System.currentTimeMillis();
-          ITestContent testContent = TypeParser.parseType(checkType);
-//          long stopT= System.currentTimeMillis();
-//          String msg= "Parsing time for main type '" + checkType.getFullyQualifiedName() + "' done in " + (stopT - startT) + " ms";
-//          TestNGPlugin.log(new Status(IStatus.INFO, TestNGPlugin.PLUGIN_ID, 2323, msg, null));
-      
-          if(testContent.isTestNGClass()) {
-            if(null != types) {
-              List classNames= new ArrayList();
-              for(int i= 0; i < types.length; i++) {
-                classNames.add(types[i].getFullyQualifiedName());
-              }
-              
-              m_launchAttributes.put(TestNGLaunchConfigurationConstants.TYPE, CLASS_TYPE);
-              m_launchAttributes.put(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
-                                     classNames);
-              m_launchAttributes.put(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
-                                     testContent.getAnnotationType());
 
-              m_configName= checkType.getElementName();
-              isTestNGenabled= true;
-            }
-          }
-        }
+        ITestContent testContent = TypeParser.parseType(mainType);
+
+        if(testContent.isTestNGClass()) {
+          m_enabled= true;
+          m_configName= mainType.getElementName();
+          
+          m_launchAttributes= LaunchUtil.createClassLaunchConfiguration(mainType, types, testContent.getAnnotationType());
+          m_launchAttributes.put(TestNGLaunchConfigurationConstants.TYPE, CLASS_TYPE);
+        }        
       }
-      else if("xml".equals(file.getFileExtension())) {
-        m_actionText+= " suite";
-      
-        if(isSuiteDefinition(file)) {
-          m_launchAttributes.put(TestNGLaunchConfigurationConstants.TYPE, SUITE_TYPE);
-          m_launchAttributes.put(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
-            Utils.stringToList(file.getProjectRelativePath().toOSString()));
-          m_configName= file.getProjectRelativePath().toString().replace('/', '.');
-          m_isSuite= true;
-          isTestNGenabled= true;
-        }
-      }
+//      else if("xml".equals(file.getFileExtension())) {
+//        m_actionText+= " suite";
+//      
+//        if(isSuiteDefinition(file)) {
+//          m_launchAttributes.put(TestNGLaunchConfigurationConstants.TYPE, SUITE_TYPE);
+//          m_launchAttributes.put(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
+//            Utils.stringToList(file.getProjectRelativePath().toOSString()));
+//          m_configName= file.getProjectRelativePath().toString().replace('/', '.');
+//          m_isSuite= true;
+//          isTestNGenabled= true;
+//        }
+//      }
     
-      m_action.setEnabled(isTestNGenabled);
+      m_action.setEnabled(m_enabled);
       m_action.setText(m_actionText);
     }
   }
   
-  public void run(IAction action) {
-    ILaunchConfiguration config= ConfigurationHelper.findConfiguration(getLaunchManager(), m_project, m_configName);
-    if(null == config) {
-      try {
-        ILaunchConfigurationWorkingCopy workingCopy = ConfigurationHelper.createBasicConfiguration(
-            getLaunchManager(), m_project, m_configName);
-        m_launchAttributes.putAll(workingCopy.getAttributes());
-        
-        if(null != m_compilationUnit) {
-          Map params= ParameterSolver.solveParameters(m_compilationUnit);
-          if(null != params) {
-            m_launchAttributes.put(TestNGLaunchConfigurationConstants.PARAMS, params);
-          }
-        }
-        
-        workingCopy.setAttributes(m_launchAttributes);
-      
-        config= workingCopy.doSave();
-      }
-      catch(CoreException ce) {
-        TestNGPlugin.log(ce);
-      }
+  /**
+   * @param compilationUnit
+   * @param types
+   * @return
+   */
+  private IType getMainType(ICompilationUnit compilationUnit, IType[] types) {
+    IType mainType= null;
+    try {
+      mainType= compilationUnit.findPrimaryType();
+    }
+    catch(AssertionFailedException failure) {
+      ; //ignore
+    }
+    if(null == mainType && null != types && types.length > 0) {
+      mainType= types[0];
     }
     
-    if(null != config) {
-      launchConfiguration(config, getLaunchMode());
-    }
+    return mainType;
+  }
+
+  public void run(IAction action) {
+    if(!m_enabled) return;
+    
+    LaunchUtil.launchConfiguration(m_project, m_configName, m_launchAttributes, m_compilationUnit, getLaunchMode());
   }
 
   protected IType[] getTypes(ICompilationUnit compilationUnit) {
@@ -191,7 +165,7 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
     return null;
   }
   
-  protected IType[] getTypes(IFile file) {
+/*  protected IType[] getTypes(IFile file) {
     try {
       ICompilationUnit compilationUnit= JDTUtil.getJavaElement(file);
       return compilationUnit.getTypes();
@@ -201,7 +175,7 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
     }
     
     return null;
-  }
+  }*/
   
   private boolean hasSource(IType type) {
     try {
@@ -223,15 +197,5 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
     }
     
     return false;
-  }
-  
-  protected void launchConfiguration(ILaunchConfiguration config, String mode) {
-    if(null != config) {
-      DebugUITools.launch(config, mode);
-    }
-  }
-  
-  protected ILaunchManager getLaunchManager() {
-    return DebugPlugin.getDefault().getLaunchManager();
-  }
+  }  
 }

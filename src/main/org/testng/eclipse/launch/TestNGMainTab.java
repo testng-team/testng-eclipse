@@ -51,6 +51,7 @@ import org.testng.eclipse.ui.util.TestSelectionDialog;
 import org.testng.eclipse.ui.util.TypeParser;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.JDTUtil;
+import org.testng.eclipse.util.LaunchUtil;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SWTUtil;
 import org.testng.eclipse.util.TestSearchEngine;
@@ -128,16 +129,17 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     if(null == m_selectedProject) {
       m_selectedProject = JDTUtil.getJavaProjectContext();
     }
-    String projectName = (m_selectedProject == null) ? "" : m_selectedProject.getElementName();
-
-    config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
-                        projectName);
-    config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
-                        RemoteTestNG.class.getName());
-    config.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
-                        JDTUtil.getProjectVMVersion(m_selectedProject));
-    config.setAttribute(TestNGLaunchConfigurationConstants.TYPE, TestNGLaunchConfigurationConstants.CLASS);
-    config.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL, "2"); 
+    ConfigurationHelper.createBasicConfiguration(m_selectedProject, config);
+//    String projectName = (m_selectedProject == null) ? "" : m_selectedProject.getElementName();
+//
+//    config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+//                        projectName);
+//    config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
+//                        RemoteTestNG.class.getName());
+//    config.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
+//                        JDTUtil.getProjectVMVersion(m_selectedProject));
+//    config.setAttribute(TestNGLaunchConfigurationConstants.TYPE, TestNGLaunchConfigurationConstants.CLASS);
+//    config.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL, "2"); 
   }
 
 
@@ -209,23 +211,14 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
    * @see org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
    */
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-    configuration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
-                               m_projectText.getText().trim());
-    configuration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
-                               RemoteTestNG.class.getName());
-    configuration.setAttribute(TestNGLaunchConfigurationConstants.TYPE, m_typeOfTestRun);
-    configuration.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
-                               Utils.stringToNullList(m_classText.getText().trim()));
-    configuration.setAttribute(TestNGLaunchConfigurationConstants.GROUP_LIST,
-                               new ArrayList(m_groupMap.keySet()));
-    configuration.setAttribute(TestNGLaunchConfigurationConstants.GROUP_CLASS_LIST,
-                               Utils.uniqueMergeList(m_groupMap.values()));
-    configuration.setAttribute(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
-                               Utils.stringToNullList(m_suiteText.getText().trim()));
-    configuration.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
-                               m_complianceLevelCombo.getText());
-    configuration.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL,
-                               m_logLevelCombo.getText());
+    LaunchUtil.updateLaunchConfiguration(configuration,
+        new LaunchUtil.LaunchInfo(m_projectText.getText(),
+            m_typeOfTestRun,
+            m_classText.getText(),
+            m_groupMap,
+            m_suiteText.getText(),
+            m_complianceLevelCombo.getText(),
+            m_logLevelCombo.getText()));
   }
 
   /**

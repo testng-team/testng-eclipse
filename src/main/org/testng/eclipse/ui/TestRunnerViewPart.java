@@ -98,6 +98,7 @@ import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.JDTUtil;
+import org.testng.eclipse.util.LaunchUtil;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.remote.RemoteTestNG;
 import org.testng.remote.strprotocol.GenericMessage;
@@ -1235,7 +1236,13 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
     
     public void run() {
-      if(hasErrors() && null != m_LastLaunch) {
+      if(null != m_LastLaunch && hasErrors()) {
+        LaunchUtil.launchFailedSuite(m_workingProject, m_LastLaunch.getLaunchMode());
+      }
+    }
+    
+    /*public void run() {
+      if(null != m_LastLaunch && hasErrors()) {
         String suiteFileName= TestNGPlugin.getDefault().getOutputDir(m_workingProject.getProject().getName()) + "/" + FailedReporter.TESTNG_FAILED_XML; 
         IFile suiteFile= m_workingProject.getProject().getFile(suiteFileName);
         String mode= m_LastLaunch.getLaunchMode();
@@ -1257,20 +1264,20 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
             
         launchConfiguration(conf, mode);
       }
-    }
+    }*/
     
     /**
      * Returns the local java launch config type
      */
-    protected ILaunchConfigurationType getJavaLaunchConfigType() {
+    /*protected ILaunchConfigurationType getJavaLaunchConfigType() {
       return getLaunchManager().getLaunchConfigurationType(TestNGLaunchConfigurationConstants.ID_TESTNG_APPLICATION);    
-    }
+    }*/
     
-    protected ILaunchManager getLaunchManager() {
+    /*protected ILaunchManager getLaunchManager() {
       return DebugPlugin.getDefault().getLaunchManager();
-    }
+    }*/
     
-    protected ILaunchConfiguration findConfiguration(IFile file, String mode) {
+    /*protected ILaunchConfiguration findConfiguration(IFile file, String mode) {
       ILaunchConfigurationType confType = getJavaLaunchConfigType();
       ILaunchConfiguration resultConf = null;
       try {
@@ -1304,13 +1311,13 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       }
       
       return resultConf;
-    }
+    }*/
     
-    protected void launchConfiguration(ILaunchConfiguration config, String mode) {
+    /*protected void launchConfiguration(ILaunchConfiguration config, String mode) {
       if (config != null) {
         DebugUITools.launch(config, mode);
       }
-    }
+    }*/
 
   }
 

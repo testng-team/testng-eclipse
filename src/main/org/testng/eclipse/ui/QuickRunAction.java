@@ -1,30 +1,21 @@
 package org.testng.eclipse.ui;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.Action;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.util.JDTUtil;
+import org.testng.eclipse.util.LaunchUtil;
 import org.testng.eclipse.util.ResourceUtil;
-import org.testng.eclipse.util.param.ParameterSolver;
 
 
 /**
@@ -69,6 +60,27 @@ public class QuickRunAction extends Action {
   }
   
   public void run() {
+    IMethod imethod= null;  
+    try {
+      imethod= (IMethod) JDTUtil.findElement(m_javaProject, m_runInfo); 
+    }
+    catch(JavaModelException jmex) {
+      TestNGPlugin.log(new Status(IStatus.ERROR, TestNGPlugin.PLUGIN_ID, 3333, 
+          "Cannot find method " + m_runInfo.getMethodDisplay() + " in class " + m_runInfo.getClassName(), //$NON-NLS-1$ $NON-NLS-2$
+          jmex));
+    }
+
+    if(null == imethod) return;
+
+    LaunchUtil.launchConfiguration(m_javaProject, 
+                                   m_className,
+                                   m_methodName,
+                                   imethod, 
+                                   ConfigurationHelper.getComplianceLevel(m_javaProject, m_previousRun.getLaunchConfiguration()), 
+                                   m_runMode);
+  }
+  
+/*  public void run() {
     IMethod imethod= null; 
     Map parameters= null; 
     try {
@@ -107,9 +119,9 @@ public class QuickRunAction extends Action {
         TestNGPlugin.log(ce);
       }
     }
-  }
+  }*/
   
-  private void solveDependencies(IMethod imethod) {
+/*  private void solveDependencies(IMethod imethod) {
     Map methods = new HashMap();
     methods.put(imethod.getElementName(), imethod);
     
@@ -120,15 +132,15 @@ public class QuickRunAction extends Action {
       IMethod m= (IMethod) it.next();
       m_methodName.add(m.getElementName());
     }    
-  }
+  }*/
   
-  protected ILaunchManager getLaunchManager() {
+/*  protected ILaunchManager getLaunchManager() {
     return DebugPlugin.getDefault().getLaunchManager();
-  }
+  }*/
   
-  protected void launchConfiguration(ILaunchConfiguration config, String mode) {
+/*  protected void launchConfiguration(ILaunchConfiguration config, String mode) {
     if(null != config) {
       DebugUITools.launch(config, mode);
     }
-  }
+  }*/
 }
