@@ -51,7 +51,6 @@ import org.testng.eclipse.ui.util.TestSelectionDialog;
 import org.testng.eclipse.ui.util.TypeParser;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.JDTUtil;
-import org.testng.eclipse.util.LaunchUtil;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SWTUtil;
 import org.testng.eclipse.util.TestSearchEngine;
@@ -211,8 +210,8 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
    * @see org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
    */
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-    LaunchUtil.updateLaunchConfiguration(configuration,
-        new LaunchUtil.LaunchInfo(m_projectText.getText(),
+    ConfigurationHelper.updateLaunchConfiguration(configuration,
+        new ConfigurationHelper.LaunchInfo(m_projectText.getText(),
             m_typeOfTestRun,
             m_classText.getText(),
             m_groupMap,

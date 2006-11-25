@@ -106,8 +106,7 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
           m_enabled= true;
           m_configName= mainType.getElementName();
           
-          m_launchAttributes= LaunchUtil.createClassLaunchConfiguration(mainType, types, testContent.getAnnotationType());
-          m_launchAttributes.put(TestNGLaunchConfigurationConstants.TYPE, CLASS_TYPE);
+          m_launchAttributes= LaunchUtil.createClassLaunchConfigurationMap(mainType, types, testContent.getAnnotationType());
         }        
       }
 //      else if("xml".equals(file.getFileExtension())) {
@@ -151,7 +150,7 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
   public void run(IAction action) {
     if(!m_enabled) return;
     
-    LaunchUtil.launchConfiguration(m_project, m_configName, m_launchAttributes, m_compilationUnit, getLaunchMode());
+    LaunchUtil.launchMapConfiguration(m_project, m_configName, m_launchAttributes, m_compilationUnit, getLaunchMode());
   }
 
   protected IType[] getTypes(ICompilationUnit compilationUnit) {

@@ -35,7 +35,7 @@ public class TestNGSuiteLaunchShortcut implements ILaunchShortcut {
   }
 
   protected void run(IFile suiteFile, String mode) {
-    LaunchUtil.launchConfiguration(suiteFile, mode);
+    LaunchUtil.launchSuiteConfiguration(suiteFile, mode);
   }
   
   /*protected void run(IFile suiteFile, String mode) {

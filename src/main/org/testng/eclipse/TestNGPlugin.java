@@ -49,6 +49,8 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
 
   public static final String MAIN_RUNNER = RemoteTestNG.class.getName();
 
+  public static final int LAUNCH_ERROR = 1001;
+
   private static URL m_fgIconBaseURL;
   
   private static boolean m_isStopped = false;

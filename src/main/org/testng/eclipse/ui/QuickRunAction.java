@@ -26,8 +26,6 @@ import org.testng.eclipse.util.ResourceUtil;
 public class QuickRunAction extends Action {
   private IJavaProject m_javaProject;
   private ILaunch m_previousRun;
-  private List/*<String>*/ m_className= new ArrayList();
-  private List/*<String>*/ m_methodName= new ArrayList();
   private RunInfo m_runInfo;
   private String m_runMode;
   
@@ -35,8 +33,6 @@ public class QuickRunAction extends Action {
     m_javaProject= javaProject;
     m_previousRun= prevLaunch;
     m_runInfo= runInfo;
-    m_className.add(m_runInfo.getClassName());
-    m_methodName.add(m_runInfo.getMethodName());
     m_runMode= mode;
     
     initUI();
@@ -72,12 +68,10 @@ public class QuickRunAction extends Action {
 
     if(null == imethod) return;
 
-    LaunchUtil.launchConfiguration(m_javaProject, 
-                                   m_className,
-                                   m_methodName,
-                                   imethod, 
-                                   ConfigurationHelper.getComplianceLevel(m_javaProject, m_previousRun.getLaunchConfiguration()), 
-                                   m_runMode);
+    LaunchUtil.launchMethodConfiguration(m_javaProject, 
+        imethod, 
+        ConfigurationHelper.getComplianceLevel(m_javaProject, m_previousRun.getLaunchConfiguration()), 
+        m_runMode);
   }
   
 /*  public void run() {

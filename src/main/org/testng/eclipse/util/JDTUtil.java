@@ -2,9 +2,13 @@ package org.testng.eclipse.util;
 
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -416,41 +420,63 @@ public class JDTUtil {
     return null;
   }
   
+  public static List/*<MethodDefinition>*/ solveDependencies(IMethod method) {
+    Map/*<String, MethodDefinition>*/ parsedmethods= new HashMap();
+    MethodDefinition md= new MethodDefinition(method);
+    parsedmethods.put(method.getElementName(), method.getElementName());
+    
+    List/*<MethodDefinition>*/ results= new ArrayList();
+    results.add(md);
+    results.addAll(solveDependencies(md, parsedmethods));
+    
+    return results;
+  }
+  
   /**
    * Tries to retrieve the dependsOn part of a method definition.
    * @param method
    * @param allMethods
    */
-  public static void solveDependencies(IMethod method, Map allMethods) {
+  private static List/*<MethodDefinition>*/ solveDependencies(MethodDefinition methodDef, Map parsedMethods) {
+    DependencyVisitor dv= parse(methodDef.getMethod());
+    
+    List/*<MethodDefinition>*/ results= new ArrayList();
+    List dependesonmethods= dv.getDependsOnMethods();
+    
+    if(!dependesonmethods.isEmpty()) {
+      for(int i= 0; i < dependesonmethods.size(); i++) {
+        String methodName= (String) dependesonmethods.get(i);
+        if(!parsedMethods.containsKey(methodName)) {
+          IMethod meth= solveMethod(methodDef.getMethod().getDeclaringType(), methodName);
+          if(null != meth) {
+            MethodDefinition md= new MethodDefinition(meth);
+            
+            parsedMethods.put(meth.getElementName(), meth.getElementName());
+            results.add(md);
+            methodDef.addDependencyMethod(md);
+            results.addAll(solveDependencies(md, parsedMethods));
+          }
+        }
+      }
+    }
+    
+    methodDef.addDependecyGroups(dv.getDependsOnGroups());
+    
+    return results;
+  }
+  
+  private static DependencyVisitor parse(IMethod method) {
+    DependencyVisitor dv= new DependencyVisitor();
     try {
-      DependencyVisitor dv= new DependencyVisitor();
       ASTParser parser= ASTParser.newParser(AST.JLS3);
       parser.setSource(method.getSource().toCharArray());
       parser.setKind(ASTParser.K_CLASS_BODY_DECLARATIONS);
       ASTNode node= parser.createAST(null);
       node.accept(dv);
-      if(!dv.dependsOnMethods.isEmpty()) {
-        for(int i= 0; i < dv.dependsOnMethods.size(); i++) {
-          String methodName= (String) dv.dependsOnMethods.get(i);
-          if(!allMethods.containsKey(methodName)) {
-            IMethod meth= solveMethod(method.getDeclaringType(), methodName);
-            allMethods.put(methodName, meth);
-            solveDependencies(meth, allMethods);
-          }
-        }
-      }
-      if(!dv.dependsOnGroups.isEmpty()) {
-        ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), 
-            "WARNING", 
-            "Method defines group dependencies that will be ignored", 
-            new Status(IStatus.WARNING, TestNGPlugin.PLUGIN_ID, 3333, 
-                "Method " + method.getElementName() + " defines the following group dependencies " + dv.dependsOnGroups
-                + " which due to a plugin limitation will be ignored", null));
-      }
     }
-    catch(JavaModelException jme) {
-      ; //ignore
-    }
+    catch(JavaModelException jmex) { ; }
+
+    return dv;
   }
   
   private static IMethod solveMethod(IType type, String methodName) {
@@ -482,12 +508,56 @@ public class JDTUtil {
     return null;
   }
   
+  public static class MethodDefinition {
+    private final IMethod m_method;
+    private final Set/*<String>*/ m_dependsongroups= new HashSet();
+    private final Set/*<IMethod>*/ m_dependsonmethods= new HashSet();
+    
+    public MethodDefinition(IMethod method) {
+      m_method= method;
+    }
+    
+    public void addDependecyGroups(List dependsOnGroups) {
+      if(null != dependsOnGroups && !dependsOnGroups.isEmpty()) {
+        m_dependsongroups.addAll(dependsOnGroups);
+      }
+    }
+
+    public void addDependencyMethod(MethodDefinition md) {
+      m_dependsonmethods.add(md);
+    }
+
+    /**
+     * @return
+     */
+    public IMethod getMethod() {
+      return m_method;
+    }
+
+    public String getKey() {
+      return m_method.getKey(); 
+    }
+
+    /**
+     * @return
+     */
+    public Set/*<String>*/ getGroups() {
+      return m_dependsongroups;
+    }
+  }
+  
+  /**
+   * An <code>ASTVisitor</code> that extracts the <tt>dependsOnMethods</tt> and <tt>dependsOnGroups</tt>.
+   */
   private static class DependencyVisitor extends ASTVisitor {
     private static final String ANNOTATION_PACKAGE = "org.testng.annotations.";
     private static final String TEST_ANNOTATION = "Test";
     private static final String TEST_ANNOTATION_FQN = ANNOTATION_PACKAGE + TEST_ANNOTATION;
-    List dependsOnMethods= new ArrayList();
-    List dependsOnGroups= new ArrayList();
+    private static final String DEPENDS_ON_METHODS= "dependsOnMethods";
+    private static final String DEPENDS_ON_GROUPS= "dependsOnGroups";
+    
+    List m_dependsOnMethods= new ArrayList();
+    List m_dependsOnGroups= new ArrayList();
 
     public boolean visit(NormalAnnotation annotation) {
       if(!TEST_ANNOTATION.equals(annotation.getTypeName().getFullyQualifiedName()) 
@@ -500,18 +570,26 @@ public class JDTUtil {
       if(null != values && !values.isEmpty()) {
         for(int i= 0; i < values.size(); i++) {
           MemberValuePair pair= (MemberValuePair) values.get(i);
-          if("dependsOnMethods".equals(pair.getName().toString())) {
-            dependsOnMethods.addAll(extractValues(pair.getValue()));
+          if(DEPENDS_ON_METHODS.equals(pair.getName().toString())) {
+            m_dependsOnMethods.addAll(extractValues(pair.getValue()));
           }
-          else if("dependsOnGroups".equals(pair.getName().toString())) {
-            dependsOnGroups.addAll(extractValues(pair.getValue()));
+          else if(DEPENDS_ON_GROUPS.equals(pair.getName().toString())) {
+            m_dependsOnGroups.addAll(extractValues(pair.getValue()));
           }
         }
       }
       
       return false;
     }
+
+    public List getDependsOnGroups() {
+      return m_dependsOnGroups;
+    }
     
+    public List getDependsOnMethods() {
+      return m_dependsOnMethods;
+    }
+
     private List extractValues(Expression paramAttr) {
       List values= new ArrayList();
       if(paramAttr instanceof ArrayInitializer) {
@@ -526,5 +604,4 @@ public class JDTUtil {
       return values;
     }
   }
-
 }

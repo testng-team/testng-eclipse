@@ -2,6 +2,7 @@ package org.testng.eclipse.util.param;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.parsers.FactoryConfigurationError;
@@ -48,16 +49,23 @@ public class ParameterSolver {
    * TODO: this method searches only for parameters of the current <code>javaElement</code>
    * and not all the dependencies.
    */
-  public static Map solveParameters(IJavaElement javaElement) {
-    Map paramNames= null;
+  public static Map solveParameters(IJavaElement[] javaElements) {
+    if(null == javaElements || javaElements.length == 0) return null;
+    
+    Map paramNames= new HashMap();
     try {
-      paramNames= getParameterNames(javaElement);
+      for(int i= 0; i < javaElements.length; i++) {
+        Map params= getParameterNames(javaElements[i]);
+        if(null != params) {
+          paramNames.putAll(params);
+        }
+      }
       
-      if(null == paramNames) {
+      if(paramNames.isEmpty()) {
         return null;
       }
       
-      return solveParameterValues(javaElement.getAncestor(IJavaElement.JAVA_PROJECT).getCorrespondingResource(), paramNames);
+      return findParameterValues(javaElements[0].getAncestor(IJavaElement.JAVA_PROJECT).getCorrespondingResource(), paramNames);
     }
     catch(JavaModelException jmex) {
       TestNGPlugin.log(jmex);
@@ -128,7 +136,7 @@ public class ParameterSolver {
     return parser.createAST(null);
   }
   
-  protected static Map solveParameterValues(IResource projectRes, Map parameters) {
+  private static Map findParameterValues(IResource projectRes, Map parameters) {
     IResource[] suiteFiles= searchSuites(new IResource[] {projectRes});
     IFile selectedSuite= null;
     
@@ -139,10 +147,10 @@ public class ParameterSolver {
       selectedSuite= (IFile) suiteFiles[0];
     }
 
-    return doSolveParameterValues(selectedSuite, parameters);
+    return extractParameterValues(selectedSuite, parameters);
   }
   
-  protected static Map doSolveParameterValues(IFile file, Map parameters) {
+  private static Map extractParameterValues(IFile file, Map parameters) {
     try {
       InputStream is= file.getContents();
       ParameterValuesContentHandler pvch= new ParameterValuesContentHandler(parameters);

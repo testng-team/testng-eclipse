@@ -3,6 +3,7 @@ package org.testng.eclipse.ui.util;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -30,6 +31,32 @@ import org.testng.remote.RemoteTestNG;
  */
 public class ConfigurationHelper {
   
+  public static class LaunchInfo {
+    public String m_projectName;
+    public int m_launchType;
+    public String m_className;
+    public String m_suiteName;
+    public Map m_groupMap;
+    public String m_complianceLevel;
+    public String m_logLevel;
+    
+    public LaunchInfo(String projectName,
+                      int launchType,
+                      String className,
+                      Map groupMap,
+                      String suiteName,
+                      String complianceLevel,
+                      String logLevel) {
+      m_projectName= projectName;
+      m_launchType= launchType;
+      m_className= className.trim();
+      m_groupMap= groupMap;
+      m_suiteName= suiteName.trim();
+      m_complianceLevel= complianceLevel;
+      m_logLevel= logLevel;
+    }
+  }
+
   public static int getLogLevel(ILaunchConfiguration config) {
     String stringResult = getStringAttribute(config, TestNGLaunchConfigurationConstants.LOG_LEVEL);
     if(null == stringResult) {
@@ -227,7 +254,8 @@ public class ConfigurationHelper {
     if (type == TestNGLaunchConfigurationConstants.SUITE) {
       return createLaunchSuites(ijp.getProject(), getSuites(configuration));
     }
-    else if (type == TestNGLaunchConfigurationConstants.GROUP) {
+    
+    if (type == TestNGLaunchConfigurationConstants.GROUP) {
       groups = getGroups(configuration);
       testClasses = getGroupClasses(configuration);
     }
@@ -244,13 +272,57 @@ public class ConfigurationHelper {
 
     return createLaunchSuites(ijp.getProject().getName(),
                               packages,
-                              testClasses, 
-                              testMethods, 
+                              getClassMethods(configuration),
                               groups,
                               parameters,
                               getComplianceLevel(ijp, configuration),
-                              getLogLevel(configuration)
-           );      
+                              getLogLevel(configuration));
+    
+//    return createLaunchSuites(ijp.getProject().getName(),
+//                              packages,
+//                              testClasses, 
+//                              testMethods, 
+//                              groups,
+//                              parameters,
+//                              getComplianceLevel(ijp, configuration),
+//                              getLogLevel(configuration)
+//           );      
+  }
+
+  private static List createLaunchSuites(String projectName, 
+                                         List packages, 
+                                         Map classMethods, 
+                                         List groups, 
+                                         Map parameters, 
+                                         String annotationType, 
+                                         int logLevel) {
+    return Arrays.asList(
+        new Object[] {org.testng.xml.SuiteGenerator.createSuite(projectName,
+                                                                packages,
+                                                                classMethods, 
+                                                                groups, 
+                                                                parameters,
+                                                                annotationType,
+                                                                logLevel)});
+  }
+
+  /**
+   * @param configuration
+   * @return
+   */
+  private static Map getClassMethods(ILaunchConfiguration configuration) {
+    Map confResult= getMapAttribute(configuration, TestNGLaunchConfigurationConstants.ALL_METHODS_LIST);
+    if(null == confResult) return null;
+    
+    Map results= new HashMap();
+    for(Iterator it= confResult.entrySet().iterator(); it.hasNext(); ) {
+      Map.Entry entry= (Map.Entry) it.next();
+      String className= (String) entry.getKey();
+      String methodNames= (String) entry.getValue();
+      results.put(className, Arrays.asList(methodNames.split(";")));
+    }
+    
+    return results;
   }
 
   /**
@@ -347,5 +419,42 @@ public class ConfigurationHelper {
     }
     
     return result;
+  }
+
+  /**
+   * @param configuration
+   */
+  public static void updateLaunchConfiguration(ILaunchConfigurationWorkingCopy configuration, LaunchInfo launchInfo) {
+    final List EMPTY= new ArrayList();
+    Map classMethods= new HashMap();
+    Collection classes= launchInfo.m_groupMap.values();
+    if(null != classes) {
+      for(Iterator it= classes.iterator(); it.hasNext(); ) {
+        List classList= (List) it.next();
+        for(Iterator itc= classList.iterator(); itc.hasNext(); ) {
+          classMethods.put(itc.next(), EMPTY);
+        }
+      }
+    }
+    
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.TYPE, launchInfo.m_launchType);
+    configuration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+                               launchInfo.m_projectName);
+    configuration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
+                               RemoteTestNG.class.getName());
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
+                               Utils.stringToNullList(launchInfo.m_className));
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.GROUP_LIST,
+                               new ArrayList(launchInfo.m_groupMap.keySet()));
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.GROUP_CLASS_LIST,
+                               Utils.uniqueMergeList(launchInfo.m_groupMap.values()));
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
+                               Utils.stringToNullList(launchInfo.m_suiteName));
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
+                               toClassMethodsMap(classMethods));
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
+                               launchInfo.m_complianceLevel);
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL,
+                               launchInfo.m_logLevel);
   }
 }

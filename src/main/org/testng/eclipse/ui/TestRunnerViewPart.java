@@ -1237,7 +1237,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     
     public void run() {
       if(null != m_LastLaunch && hasErrors()) {
-        LaunchUtil.launchFailedSuite(m_workingProject, m_LastLaunch.getLaunchMode());
+        LaunchUtil.launchFailedSuiteConfiguration(m_workingProject, m_LastLaunch.getLaunchMode());
       }
     }
     
