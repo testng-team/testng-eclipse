@@ -18,9 +18,10 @@ import org.testng.eclipse.ui.util.Utils;
  * An AST visitor used to parse all the JavaDoc annotations in a file
  *
  * @author cbeust
+ * @author <a href='mailto:the_mindstorm[at]evolva[dot]ro'>Alexandru Popescu</a>
  */
 public class JavaDocVisitor extends BaseVisitor {
-  private static final Pattern GROUPS_PATTERN = Pattern.compile("\\s*groups\\s*=\\s*\"([^\"]*)\"");
+  private static final Pattern GROUPS_PATTERN = Pattern.compile(".*\\s*groups\\s*=\\s*\"([^\"]*)\"\\s*.*");
   
   public JavaDocVisitor() {
     super(true); // visit JavaDoc tags
@@ -74,7 +75,7 @@ public class JavaDocVisitor extends BaseVisitor {
               TextElement txte = (TextElement) fragments.get(i);
               Matcher matcher = GROUPS_PATTERN.matcher(txte.getText());
               if(matcher.matches()) {
-                addGroup(matcher.group(0));
+                addGroup(matcher.group(1));
               }
             }
           }

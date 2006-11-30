@@ -376,11 +376,11 @@ public class LaunchUtil {
     ILaunchConfiguration conf= save(launchConfiguration);
     
     if(null != conf) {
-      try {
-        Map attrs= conf.getAttributes();
-        System.out.println("Launch attrs:" + attrs);
-      }
-      catch(CoreException cex) { ; }
+//      try {
+//        Map attrs= conf.getAttributes();
+//        System.out.println("Launch attrs:" + attrs);
+//      }
+//      catch(CoreException cex) { ; }
       
       DebugUITools.launch(conf, runMode);
     }
