@@ -239,7 +239,7 @@ public class ParameterSolver {
       m_params= parameters;
     }
     
-    public InputSource resolveEntity(String systemId, String publicId) throws IOException, SAXException {
+    public InputSource resolveEntity(String systemId, String publicId) throws SAXException {
       InputSource result = null;
       if (Parser.DEPRECATED_TESTNG_DTD_URL.equals(publicId) || Parser.TESTNG_DTD_URL.equals(publicId)) {
         InputStream is = getClass().getClassLoader().getResourceAsStream(Parser.TESTNG_DTD);
@@ -247,7 +247,12 @@ public class ParameterSolver {
           is = Thread.currentThread().getContextClassLoader().getResourceAsStream(Parser.TESTNG_DTD);
           if (null == is) {
             System.out.println("WARNING: couldn't find in classpath " + publicId + "\n" + "Fetching it from the Web site.");
-            result = super.resolveEntity(systemId, publicId);
+            try {
+              result = super.resolveEntity(systemId, publicId);
+            }
+            catch(Exception ex) {
+              ex.printStackTrace();
+            }
           }
           else {
             result = new InputSource(is);
@@ -258,7 +263,12 @@ public class ParameterSolver {
         }
       }
       else {
-        result = super.resolveEntity(systemId, publicId);
+        try {
+          result = super.resolveEntity(systemId, publicId);
+        }
+        catch(Exception ex) {
+              ex.printStackTrace();
+            }
       }
 
       return result;
