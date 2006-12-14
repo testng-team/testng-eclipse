@@ -53,8 +53,8 @@ public abstract class OpenEditorAction extends Action {
       IJavaElement element = findElement(getLaunchedProject(), fClassName);
       if(element == null) {
         MessageDialog.openError(getShell(),
-                                ResourceUtil.getString("OpenEditorAction.error.cannotopen.title"),
-                                ResourceUtil.getString("OpenEditorAction.error.cannotopen.message")); //$NON-NLS-1$ //$NON-NLS-2$
+                                ResourceUtil.getString("OpenEditorAction.error.cannotopen.title"), //$NON-NLS-1$
+                                ResourceUtil.getFormattedString("OpenEditorAction.error.cannotopen.message", fClassName)); //$NON-NLS-1$
 
         return;
       }
@@ -62,14 +62,14 @@ public abstract class OpenEditorAction extends Action {
     }
     catch(CoreException e) {
       ErrorDialog.openError(getShell(),
-                            ResourceUtil.getString("OpenEditorAction.error.dialog.title"),
-                            ResourceUtil.getString("OpenEditorAction.error.dialog.message"),
-                            e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
+                            ResourceUtil.getString("OpenEditorAction.error.dialog.title"), //$NON-NLS-1$
+                            ResourceUtil.getFormattedString("OpenEditorAction.error.dialog.message", fClassName), //$NON-NLS-1$
+                            e.getStatus());
 
       return;
     }
     if(textEditor == null) {
-      fTestRunner.setInfoMessage(ResourceUtil.getString("OpenEditorAction.message.cannotopen")); //$NON-NLS-1$
+      fTestRunner.setInfoMessage(ResourceUtil.getFormattedString("OpenEditorAction.error.cannotopen.message", fClassName)); //$NON-NLS-1$
 
       return;
     }
