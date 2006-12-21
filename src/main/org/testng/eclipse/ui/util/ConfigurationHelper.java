@@ -436,6 +436,9 @@ public class ConfigurationHelper {
         }
       }
     }
+    if(null != launchInfo.m_className) {
+      classMethods.put(launchInfo.m_className, EMPTY);
+    }
     
     configuration.setAttribute(TestNGLaunchConfigurationConstants.TYPE, launchInfo.m_launchType);
     configuration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
