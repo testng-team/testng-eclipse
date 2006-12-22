@@ -1,19 +1,15 @@
 package org.testng.eclipse;
 
 
-import org.testng.eclipse.ui.TestRunnerViewPart;
-import org.testng.eclipse.ui.preferences.PreferenceConstants;
-import org.testng.eclipse.ui.util.ConfigurationHelper;
-import org.testng.eclipse.util.JDTUtil;
-import org.testng.eclipse.util.SWTUtil;
-import org.testng.remote.RemoteTestNG;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.AbstractSet;
 import java.util.HashSet;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
@@ -34,6 +30,12 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
+import org.testng.eclipse.ui.TestRunnerViewPart;
+import org.testng.eclipse.ui.preferences.PreferenceConstants;
+import org.testng.eclipse.ui.util.ConfigurationHelper;
+import org.testng.eclipse.util.JDTUtil;
+import org.testng.eclipse.util.SWTUtil;
+import org.testng.remote.RemoteTestNG;
 
 /**
  * The plug-in runtime class for the TestNG plug-in.
@@ -301,15 +303,6 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
     label.setFont(bold ? BOLD_FONT : REGULAR_FONT);
   }
   
-  public String getOutputDir(String projectName) {
-    String outdir= getPreferenceStore().getString(projectName + ".outdir");
-    if(isEmtpy(outdir)) {
-      outdir= getPreferenceStore().getString(PreferenceConstants.P_OUTPUT); 
-    }
-    
-    return outdir;
-  }
-  
   public Bundle getBundle(String bundleName) {
     Bundle bundle= Platform.getBundle(bundleName);
     if (bundle != null)
@@ -328,8 +321,9 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
     return null == string || "".equals(string.trim());
   }
   
-  public void storeOutputDir(String projectName, String outdir) {
+  public void storeOutputDir(String projectName, String outdir, boolean isAbsolute) {
     getPreferenceStore().setValue(projectName + ".outdir", outdir);
+    getPreferenceStore().setValue(projectName + ".absolutepath", isAbsolute);
   }
 
   /**
@@ -378,5 +372,40 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
    */
   public void storeUseProjectJar(String projectName, boolean selection) {
     getPreferenceStore().setValue(projectName + ".useProjectJar", selection);
+  }
+
+  /**
+   * @param name
+   * @return
+   */
+  public boolean isAbsolutePath(String projectName) {
+    return getPreferenceStore().getBoolean(projectName + ".absolutepath");
+  }
+
+  public IPath getOutputDirectoryPath(IJavaProject project) {
+    final String projectName= project.getElementName();
+    final String outdir= getOutputDir(projectName);
+    boolean isAbsolute= isAbsolutePath(projectName);
+    return new Path(isAbsolute ? outdir : project.getPath().toOSString() + "/" + outdir);
+  }
+  
+  public String getOutputDir(String projectName) {
+    String outdir= getPreferenceStore().getString(projectName + ".outdir");
+    if(isEmtpy(outdir)) {
+      outdir= getPreferenceStore().getString(PreferenceConstants.P_OUTPUT); 
+    }
+    
+    return outdir;
+  }
+  
+  /**
+   * @return an <code>IPath</code> with the absolute path to the output directory
+   */
+  public IPath getAbsoluteOutputdirPath(IJavaProject project) {
+    final String projectName= project.getElementName();
+    final String outdir= getOutputDir(projectName);
+    boolean isAbsolute= isAbsolutePath(projectName);
+    
+    return new Path(isAbsolute ? outdir : project.getProject().getLocation().toOSString() + "/" + outdir);
   }
 }

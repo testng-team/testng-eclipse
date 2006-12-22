@@ -13,6 +13,7 @@ import java.util.Vector;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -157,17 +158,17 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       }
     }
 
+    TestNGPlugin plugin= TestNGPlugin.getDefault();
     argv.add(TestNGCommandLineArgs.OUTDIR_COMMAND_OPT);
-    argv.add(Utils.absolutePath(project.getLocation().toOSString(),
-             TestNGPlugin.getDefault().getOutputDir(project.getName())));
+    argv.add(plugin.getAbsoluteOutputdirPath(jproject).toOSString());
     
-    String reporters= TestNGPlugin.getDefault().getReporters(project.getName());
+    String reporters= plugin.getReporters(project.getName());
     if(null != reporters && !"".equals(reporters)) {
       argv.add(TestNGCommandLineArgs.LISTENER_COMMAND_OPT);
       argv.add(reporters.replace(' ', ';'));
     }
     
-    boolean disabledReporters= TestNGPlugin.getDefault().getDisabledListeners(project.getName());
+    boolean disabledReporters= plugin.getDisabledListeners(project.getName());
     if(disabledReporters) {
       argv.add(TestNGCommandLineArgs.USE_DEFAULT_LISTENERS);
       argv.add("false");

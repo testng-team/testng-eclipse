@@ -37,47 +37,4 @@ public class TestNGSuiteLaunchShortcut implements ILaunchShortcut {
   protected void run(IFile suiteFile, String mode) {
     LaunchUtil.launchSuiteConfiguration(suiteFile, mode);
   }
-  
-  /*protected void run(IFile suiteFile, String mode) {
-    final String fileConfName= suiteFile.getProjectRelativePath().toString().replace('/', '.');
-    ILaunchConfiguration config= ConfigurationHelper.findConfiguration(getLaunchManager(), suiteFile.getProject(), fileConfName);
-    if(null == config) {
-      ILaunchConfigurationWorkingCopy wCopy = 
-        ConfigurationHelper.createBasicConfiguration(getLaunchManager(),
-                                                     suiteFile.getProject(),
-                                                     fileConfName);
-      wCopy.setAttribute(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
-                        Utils.stringToList(suiteFile.getProjectRelativePath().toOSString()));
-      wCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
-                         TestNGLaunchConfigurationConstants.SUITE);
-    
-      try {
-        config= wCopy.doSave();
-      }
-      catch(CoreException cex) {
-        TestNGPlugin.log(cex);
-      }
-    }
-    
-    if(null != config) {
-      launchConfiguration(config, mode);
-    }
-  }*/
-  
-  /*protected void launchConfiguration(ILaunchConfiguration config, String mode) {
-    if (config != null) {
-      DebugUITools.launch(config, mode);
-    }
-  }*/
-  
-  /**
-   * Returns the local java launch config type
-   */
-  /*protected ILaunchConfigurationType getJavaLaunchConfigType() {
-    return getLaunchManager().getLaunchConfigurationType(TestNGLaunchConfigurationConstants.ID_TESTNG_APPLICATION);    
-  }*/
-  
-  /*protected ILaunchManager getLaunchManager() {
-    return DebugPlugin.getDefault().getLaunchManager();
-  }*/
 }

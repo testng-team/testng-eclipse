@@ -2,6 +2,8 @@ package org.testng.eclipse.util;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -9,12 +11,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.internal.resources.Workspace;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -68,31 +74,52 @@ public class LaunchUtil {
   private static final List EMPTY_ARRAY_PARAM= new ArrayList();
 
   /**
-   * Suite file launcher.
+   * Suite file launcher. The file may reside outside the workbench.
    */
   public static void launchFailedSuiteConfiguration(IJavaProject javaProject, String runMode) {
-    String suiteFileName= TestNGPlugin.getDefault().getOutputDir(javaProject.getProject().getName()) + "/" + FailedReporter.TESTNG_FAILED_XML; 
-    IFile suiteFile= javaProject.getProject().getFile(suiteFileName);
+//    Workspace workspace = (Workspace) ResourcesPlugin.getWorkspace();
+    TestNGPlugin plugin= TestNGPlugin.getDefault();
+    final String suiteConfName= javaProject.getElementName() + "-" + FailedReporter.TESTNG_FAILED_XML;
+    final String suiteFilePath= plugin.getAbsoluteOutputdirPath(javaProject).toOSString() + "/" + FailedReporter.TESTNG_FAILED_XML;
     
-    launchSuiteConfiguration(suiteFile, runMode);
+    /*final String suiteFilePath= "D:\\tmp\\testng-output\\index.html";*/ /*plugin.getOutputDirectoryPath(javaProject.getProject()).toOSString() 
+    + "/"
+    + FailedReporter.TESTNG_FAILED_XML;*/
+//    IPath suiteFilePath= new Path(plugin.getOutputDirectoryPath(javaProject.getProject()).toOSString() 
+//        + "/"
+//        + FailedReporter.TESTNG_FAILED_XML);
+//    IFile suiteFile= (IFile) workspace.newResource(suiteFilePath, IResource.FILE);
+//    String suiteFileName= TestNGPlugin.getDefault().getOutputDir(javaProject.getProject().getName()) + "/" + FailedReporter.TESTNG_FAILED_XML; 
+//    IFile suiteFile= javaProject.getProject().getFile(suiteFileName);
+    
+    launchSuiteConfiguration(javaProject.getProject(),
+        suiteConfName,
+        suiteFilePath,
+        runMode);
   }
   
   /**
-   * Suite file launcher.
+   * Suite file launcher. The <code>IFile</code> must exist in the workbench.
    */
   public static void launchSuiteConfiguration(IFile suiteFile, String mode) {
     final IProject project= suiteFile.getProject();
     final String fileConfName= suiteFile.getProjectRelativePath().toString().replace('/', '.');
+    final String suitePath= suiteFile.getLocation().toOSString();
+
+    launchSuiteConfiguration(project, fileConfName, suitePath, mode);
+  }
+
+  private static void launchSuiteConfiguration(IProject project, String fileConfName, String suiteFilePath, String mode) {
     ILaunchConfigurationWorkingCopy configWC= createLaunchConfiguration(project, fileConfName);
 
     configWC.setAttribute(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
-                          Utils.stringToList(suiteFile.getProjectRelativePath().toOSString()));
+                          Collections.singletonList(suiteFilePath));
     configWC.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
                           TestNGLaunchConfigurationConstants.SUITE);
     
     runConfig(configWC, mode);
   }
-
+  
   public static void launchMapConfiguration(IProject project,
                                             String configName,
                                             Map launchAttributes,

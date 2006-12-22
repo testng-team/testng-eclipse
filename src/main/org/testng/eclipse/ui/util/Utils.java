@@ -145,6 +145,8 @@ public class Utils {
       return sourceFile.getAbsolutePath();
     }
     else {
+      String projectPrefixPath= null; 
+      int lastSegment= rootPath.lastIndexOf('/');
       return new File(rootPath, sourcePath).getAbsolutePath();
     }
   }

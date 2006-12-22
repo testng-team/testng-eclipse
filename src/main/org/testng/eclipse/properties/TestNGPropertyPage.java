@@ -29,6 +29,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
@@ -48,6 +49,7 @@ public class TestNGPropertyPage extends PropertyPage {
   private Button m_disabledListenersCheckbox;
   private IProject m_workingProject;
   private Button m_projectJar;
+  private Button m_fullPathOutput;
 
   public void createControl(Composite parent) {
     setDescription("General TestNG settings:");
@@ -63,8 +65,8 @@ public class TestNGPropertyPage extends PropertyPage {
     composite.setLayoutData(new GridData(GridData.FILL | GridData.GRAB_HORIZONTAL));
 
     Composite pathComposite= new Composite(composite, SWT.BORDER);
-    pathComposite.setLayout(new GridLayout(3, false));
-    pathComposite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 3, 1));
+    pathComposite.setLayout(new GridLayout(4, false));
+    pathComposite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 4, 1));
     
     //Label for path field
     Label pathLabel = new Label(pathComposite, SWT.NONE);
@@ -75,7 +77,7 @@ public class TestNGPropertyPage extends PropertyPage {
     m_outdirPath.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
     Button browse = new Button(pathComposite, SWT.PUSH);
-    browse.setText("Browse");
+    browse.setText("Project"); //$NON-NLS-1$
     SWTUtil.setButtonGridData(browse);
     browse.addSelectionListener(new SelectionAdapter() {
         public void widgetSelected(SelectionEvent e) {
@@ -83,11 +85,28 @@ public class TestNGPropertyPage extends PropertyPage {
         }
       });
 
+    Button browseFS= new Button(pathComposite, SWT.PUSH);
+    browseFS.setText("Browse"); //$NON-NLS-1$
+    SWTUtil.setButtonGridData(browseFS);
+    browseFS.addSelectionListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent evt) {
+        DirectoryDialog dlg= new DirectoryDialog(m_outdirPath.getShell());
+        dlg.setMessage("Select TestNG output directory");
+        String selectedDir= dlg.open();
+        m_outdirPath.setText(selectedDir != null ? selectedDir : "");
+        m_fullPathOutput.setSelection(true);
+      }
+    });
+    
+    m_fullPathOutput= new Button(pathComposite, SWT.CHECK);
+    m_fullPathOutput.setText("Absolute path output directory");
+    m_fullPathOutput.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 4, 1));
+    
     Label pathDetailsLabel = new Label(pathComposite, SWT.WRAP);
     pathDetailsLabel.setText("Set the directory for the tests output. "
         + "This location is used by TestNG to generate "
         + "the output artifacts (including testng-failed.xml).");
-    pathDetailsLabel.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 3, 1));
+    pathDetailsLabel.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 4, 1));
     
     Composite listenersComposite= new Composite(composite, SWT.BORDER);
     listenersComposite.setLayout(new GridLayout(3, false));
@@ -150,6 +169,7 @@ public class TestNGPropertyPage extends PropertyPage {
 
     // Populate the owner text field with the default value
     m_outdirPath.setText(TestNGPlugin.getDefault().getOutputDir(m_workingProject.getName()));
+    m_fullPathOutput.setSelection(TestNGPlugin.getDefault().isAbsolutePath(m_workingProject.getName()));
     m_reportersText.setText(TestNGPlugin.getDefault().getReporters(m_workingProject.getName()));
     m_disabledListenersCheckbox.setSelection(TestNGPlugin.getDefault().getDisabledListeners(m_workingProject.getName()));
     m_projectJar.setSelection(TestNGPlugin.getDefault().getUseProjectJar(m_workingProject.getName()));
@@ -161,7 +181,7 @@ public class TestNGPropertyPage extends PropertyPage {
   }
 
   public boolean performOk() {
-    TestNGPlugin.getDefault().storeOutputDir(m_workingProject.getName(), m_outdirPath.getText());
+    TestNGPlugin.getDefault().storeOutputDir(m_workingProject.getName(), m_outdirPath.getText(), m_fullPathOutput.getSelection());
     TestNGPlugin.getDefault().storeReporters(m_workingProject.getName(), m_reportersText.getText());
     TestNGPlugin.getDefault().storeDisabledListeners(m_workingProject.getName(), m_disabledListenersCheckbox.getSelection());
     TestNGPlugin.getDefault().storeUseProjectJar(m_workingProject.getName(), m_projectJar.getSelection());
@@ -225,6 +245,7 @@ public class TestNGPropertyPage extends PropertyPage {
     if (dialog.open() == Window.OK) {
       m_outdirPath.setText(((IContainer) dialog.getFirstResult()).getProjectRelativePath()
                            .toPortableString());
+      m_fullPathOutput.setSelection(false);
     }
 
   }

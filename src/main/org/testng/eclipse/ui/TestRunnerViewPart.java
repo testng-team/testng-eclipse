@@ -25,14 +25,18 @@ import java.util.Vector;
 
 import org.eclipse.core.internal.resources.Workspace;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -373,6 +377,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     
     m_rerunAction.setEnabled(true);
     m_rerunFailedAction.setEnabled(false);
+    m_openReportAction.setEnabled(true);
+//    getViewSite().getActionBars().updateActionBars();
   }
 
   protected void aboutToLaunch(final String message) {
@@ -776,7 +782,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     fPrevAction.setEnabled(false);
     m_rerunAction.setEnabled(false);
     m_rerunFailedAction.setEnabled(false);
-    m_openReportAction.setEnabled(true);
+    m_openReportAction.setEnabled(false);
     
     actionBars.setGlobalActionHandler(ActionFactory.NEXT.getId(), fNextAction);
     actionBars.setGlobalActionHandler(ActionFactory.PREVIOUS.getId(), fPrevAction);
@@ -1186,29 +1192,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/report.gif")); //$NON-NLS-1$
       setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/report.gif")); //$NON-NLS-1$
     }
-    
-    public void run() {
-      Workspace workspace = (Workspace) ResourcesPlugin.getWorkspace();
-      IJavaProject javaProject= m_workingProject != null ? m_workingProject : JDTUtil.getJavaProjectContext();
-      if(null == javaProject) {
-        return;
-      }
-      String output= TestNGPlugin.getDefault().getOutputDir(javaProject.getElementName());
-      Path path= new Path(javaProject.getPath().toOSString() + "/" + output + "/index.html");
-      IFile file= (IFile) workspace.newResource(path, IResource.FILE);
-        
-      // We still don't have a file for some reason, then just give up.
-      if(file == null) {
-        return;
-      }
 
-      try {
-        file.getParent().refreshLocal(IResource.DEPTH_INFINITE, null);
-      }
-      catch(CoreException ce) {
-        ;
-      }
-      
+    private void openEditor(IFile file) {
       final IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
       if(window == null) {
         return;
@@ -1219,9 +1204,50 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         return;
       }
       try {
-        IDE.openEditor(page, file, true);
-      } catch(final PartInitException e) {
+        IDE.openEditor(page, file);
+      } 
+      catch(final PartInitException e) {
         TestNGPlugin.log(e);
+      }
+    }
+    
+    public void run() {
+      Workspace workspace = (Workspace) ResourcesPlugin.getWorkspace();
+      IJavaProject javaProject= m_workingProject != null ? m_workingProject : JDTUtil.getJavaProjectContext();
+      if(null == javaProject) {
+        return;
+      }
+      TestNGPlugin plugin= TestNGPlugin.getDefault();
+      IPath filePath= new Path(plugin.getOutputDirectoryPath(javaProject).toOSString() + "/index.html");
+      boolean isAbsolute= plugin.isAbsolutePath(javaProject.getElementName());
+      
+      IProgressMonitor progressMonitor= new NullProgressMonitor();
+      if(isAbsolute) {
+        IFile file = javaProject.getProject().getFile("temp-testng-index.html");
+        try {
+          file.createLink(filePath, IResource.NONE, progressMonitor);
+          if(null == file) return;
+          try {
+            openEditor(file);
+          }
+          finally {
+            file.delete(true, progressMonitor);
+          }
+        }
+        catch(CoreException cex) {
+          ; // TODO: is there any other option?
+        }
+      }
+      else {
+        IFile file= (IFile) workspace.newResource(filePath, IResource.FILE);
+        if(null == file) return;
+        try {
+          file.refreshLocal(IResource.DEPTH_ZERO, progressMonitor);
+          openEditor(file);
+        }
+        catch(CoreException cex) {
+          ; // nothing I can do about it
+        }
       }
     }
   }
@@ -1239,86 +1265,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       if(null != m_LastLaunch && hasErrors()) {
         LaunchUtil.launchFailedSuiteConfiguration(m_workingProject, m_LastLaunch.getLaunchMode());
       }
-    }
-    
-    /*public void run() {
-      if(null != m_LastLaunch && hasErrors()) {
-        String suiteFileName= TestNGPlugin.getDefault().getOutputDir(m_workingProject.getProject().getName()) + "/" + FailedReporter.TESTNG_FAILED_XML; 
-        IFile suiteFile= m_workingProject.getProject().getFile(suiteFileName);
-        String mode= m_LastLaunch.getLaunchMode();
-        ppp("launch " + suiteFile.getFullPath().toOSString() + " in " + mode + " mode");
-        final String launchConfName = suiteFile.getFullPath().toOSString();
-        ILaunchConfiguration conf = findConfiguration(suiteFile, mode);
-            
-        if(null == conf) {
-          ILaunchConfigurationWorkingCopy wCopy = 
-                ConfigurationHelper.createBasicConfiguration(getLaunchManager(),
-                                                             suiteFile.getProject(),
-                                                             launchConfName);
-          wCopy.setAttribute(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
-                             Utils.stringToList(suiteFile.getProjectRelativePath().toOSString()));
-          wCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
-                               TestNGLaunchConfigurationConstants.SUITE);
-          conf = wCopy;
-        }
-            
-        launchConfiguration(conf, mode);
-      }
-    }*/
-    
-    /**
-     * Returns the local java launch config type
-     */
-    /*protected ILaunchConfigurationType getJavaLaunchConfigType() {
-      return getLaunchManager().getLaunchConfigurationType(TestNGLaunchConfigurationConstants.ID_TESTNG_APPLICATION);    
-    }*/
-    
-    /*protected ILaunchManager getLaunchManager() {
-      return DebugPlugin.getDefault().getLaunchManager();
-    }*/
-    
-    /*protected ILaunchConfiguration findConfiguration(IFile file, String mode) {
-      ILaunchConfigurationType confType = getJavaLaunchConfigType();
-      ILaunchConfiguration resultConf = null;
-      try {
-        ILaunchConfiguration[] availConfs = getLaunchManager().getLaunchConfigurations(confType);
-        
-        String projectName = file.getProject().getName();
-        String suitePath = file.getFullPath().toOSString();
-        String main = RemoteTestNG.class.getName();
-        
-        for(int i = 0; i < availConfs.length; i++) {
-          String confProjectName = ConfigurationHelper.getProjectName(availConfs[i]);
-          String confMainName = ConfigurationHelper.getMain(availConfs[i]);
-          
-          if(projectName.equals(confProjectName) && main.equals(confMainName)) {
-            List suiteList = ConfigurationHelper.getSuites(availConfs[i]);
-            if(null != suiteList 
-                && suiteList.size() == 1 
-                && suitePath.equals(suiteList.get(0))) {
-              if(null == resultConf) {
-                resultConf = availConfs[i];
-              }
-              else {
-                ppp("another conf matching found");
-              }
-            }
-          }
-        }
-      }
-      catch(CoreException ce) {
-        TestNGPlugin.log(ce);
-      }
-      
-      return resultConf;
-    }*/
-    
-    /*protected void launchConfiguration(ILaunchConfiguration config, String mode) {
-      if (config != null) {
-        DebugUITools.launch(config, mode);
-      }
-    }*/
-
+    }    
   }
 
   /// ~ ITestNGRemoteEventListener
