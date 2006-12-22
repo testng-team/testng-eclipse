@@ -77,20 +77,9 @@ public class LaunchUtil {
    * Suite file launcher. The file may reside outside the workbench.
    */
   public static void launchFailedSuiteConfiguration(IJavaProject javaProject, String runMode) {
-//    Workspace workspace = (Workspace) ResourcesPlugin.getWorkspace();
     TestNGPlugin plugin= TestNGPlugin.getDefault();
     final String suiteConfName= javaProject.getElementName() + "-" + FailedReporter.TESTNG_FAILED_XML;
     final String suiteFilePath= plugin.getAbsoluteOutputdirPath(javaProject).toOSString() + "/" + FailedReporter.TESTNG_FAILED_XML;
-    
-    /*final String suiteFilePath= "D:\\tmp\\testng-output\\index.html";*/ /*plugin.getOutputDirectoryPath(javaProject.getProject()).toOSString() 
-    + "/"
-    + FailedReporter.TESTNG_FAILED_XML;*/
-//    IPath suiteFilePath= new Path(plugin.getOutputDirectoryPath(javaProject.getProject()).toOSString() 
-//        + "/"
-//        + FailedReporter.TESTNG_FAILED_XML);
-//    IFile suiteFile= (IFile) workspace.newResource(suiteFilePath, IResource.FILE);
-//    String suiteFileName= TestNGPlugin.getDefault().getOutputDir(javaProject.getProject().getName()) + "/" + FailedReporter.TESTNG_FAILED_XML; 
-//    IFile suiteFile= javaProject.getProject().getFile(suiteFileName);
     
     launchSuiteConfiguration(javaProject.getProject(),
         suiteConfName,

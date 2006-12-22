@@ -1,16 +1,21 @@
 package org.testng.eclipse.ui.preferences;
 
 
-import org.eclipse.jface.preference.BooleanFieldEditor;
+import org.eclipse.debug.internal.ui.preferences.BooleanFieldEditor2;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.util.SWTUtil;
 
 /**
  * This class represents a preference page that
@@ -28,7 +33,8 @@ import org.testng.eclipse.TestNGPlugin;
  * @author <a href='mailto:the_mindstorm[at]evolva[dot]ro'>Alexandru Popescu</a>
  */
 public class PreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
-  private StringFieldEditor m_outputDirEditor;
+  private FSBrowseDirectoryFieldEditor m_outputdir;
+  private BooleanFieldEditor2 m_absolutePath;
   
   public PreferencePage() {
     super(GRID);
@@ -43,20 +49,25 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
    * restore itself.
    */
   public void createFieldEditors() {
-    m_outputDirEditor= new StringFieldEditor(PreferenceConstants.P_OUTPUT, "Output directory:", getFieldEditorParent()); //$NON-NLS-1$
-    addField(m_outputDirEditor);
+    Composite parentComposite= getFieldEditorParent();
+    m_outputdir= new FSBrowseDirectoryFieldEditor(PreferenceConstants.P_OUTPUT, "Output directory", parentComposite);
+    m_outputdir.fillIntoGrid(parentComposite, 3);
+    Button btn= m_outputdir.getChangeControl(parentComposite);
+    btn.addSelectionListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent evt) {
+        m_absolutePath.getChangeControl(getFieldEditorParent()).setSelection(true);
+      }
+    });
+    m_absolutePath= new BooleanFieldEditor2(PreferenceConstants.P_ABSOLUTEPATH, "Absolute output path", SWT.NONE, parentComposite); //$NON-NLS-1$
+    addField(m_outputdir);
+    addField(m_absolutePath);
   }
 
   
   public boolean performOk() {
     IPreferenceStore storage= TestNGPlugin.getDefault().getPreferenceStore();
-    String output= m_outputDirEditor.getStringValue();
-    if(null != output && !"".equals(output) && output.startsWith("/")) {
-      output= output.substring(1);
-      m_outputDirEditor.setStringValue(output);
-    }
-    
-    storage.setValue(PreferenceConstants.P_OUTPUT, output);
+    storage.setValue(PreferenceConstants.P_OUTPUT, m_outputdir.getStringValue());
+    storage.setValue(PreferenceConstants.P_ABSOLUTEPATH, m_absolutePath.getBooleanValue());
     setMessage("Preferences saved", INFORMATION);
     
     return super.performOk();
@@ -68,4 +79,13 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
   public void init(IWorkbench workbench) {
   }
 
+  private static class FSBrowseDirectoryFieldEditor extends DirectoryFieldEditor {
+    public FSBrowseDirectoryFieldEditor(String name, String labelText, Composite parent) {
+      super(name, labelText, parent);
+    }
+
+    public Button getChangeControl(Composite parent) {
+      return super.getChangeControl(parent);
+    }
+  }
 }

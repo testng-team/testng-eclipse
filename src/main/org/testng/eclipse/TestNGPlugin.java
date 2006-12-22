@@ -379,7 +379,12 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
    * @return
    */
   public boolean isAbsolutePath(String projectName) {
-    return getPreferenceStore().getBoolean(projectName + ".absolutepath");
+    if(getPreferenceStore().contains(projectName + ".absolutepath")) {
+      return getPreferenceStore().getBoolean(projectName + ".absolutepath");
+    }
+    else {
+      return getPreferenceStore().getBoolean(PreferenceConstants.P_ABSOLUTEPATH);
+    }
   }
 
   public IPath getOutputDirectoryPath(IJavaProject project) {

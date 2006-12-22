@@ -5,4 +5,5 @@ package org.testng.eclipse.ui.preferences;
  */
 public class PreferenceConstants {
   public static final String P_OUTPUT = "generalOutput";
+  public static final String P_ABSOLUTEPATH = "generalOutputRelative";
 }
