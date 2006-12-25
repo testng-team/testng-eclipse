@@ -213,7 +213,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     ConfigurationHelper.updateLaunchConfiguration(configuration,
         new ConfigurationHelper.LaunchInfo(m_projectText.getText(),
             m_typeOfTestRun,
-            m_classText.getText(),
+            Utils.stringToList(m_classText.getText().trim()),
             m_groupMap,
             m_suiteText.getText(),
             m_complianceLevelCombo.getText(),

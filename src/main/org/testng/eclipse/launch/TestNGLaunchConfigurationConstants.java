@@ -33,7 +33,7 @@ public abstract class TestNGLaunchConfigurationConstants {
     make("CLASS_TEST_LIST"); //$NON-NLS-1$
 
   /**
-   * List of methods
+   * List of methods. This is replaced by {@link #ALL_METHODS_LIST}.
    */
   public static final String METHOD_TEST_LIST = 
     make("METHOD_TEST_LIST"); //$NON-NLS-1$

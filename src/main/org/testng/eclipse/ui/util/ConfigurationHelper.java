@@ -34,7 +34,7 @@ public class ConfigurationHelper {
   public static class LaunchInfo {
     public String m_projectName;
     public int m_launchType;
-    public String m_className;
+    public Collection/*<String>*/ m_classNames;
     public String m_suiteName;
     public Map m_groupMap;
     public String m_complianceLevel;
@@ -42,14 +42,14 @@ public class ConfigurationHelper {
     
     public LaunchInfo(String projectName,
                       int launchType,
-                      String className,
+                      Collection classNames,
                       Map groupMap,
                       String suiteName,
                       String complianceLevel,
                       String logLevel) {
       m_projectName= projectName;
       m_launchType= launchType;
-      m_className= className.trim();
+      m_classNames= classNames;
       m_groupMap= groupMap;
       m_suiteName= suiteName.trim();
       m_complianceLevel= complianceLevel;
@@ -247,7 +247,7 @@ public class ConfigurationHelper {
     List packages= null;
     List testClasses = null;
     List groups = null;
-    List testMethods = null;
+    Map classMethods= null;
     Map parameters= null;
     
     parameters= getMapAttribute(configuration, TestNGLaunchConfigurationConstants.PARAMS);
@@ -258,37 +258,51 @@ public class ConfigurationHelper {
     if (type == TestNGLaunchConfigurationConstants.GROUP) {
       groups = getGroups(configuration);
       testClasses = getGroupClasses(configuration);
+      packages= getListAttribute(configuration, TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST);
     }
     else if (type == TestNGLaunchConfigurationConstants.CLASS) {
       testClasses = getClasses(configuration);
+      classMethods= getClassMethods(configuration);
     }
     else if (type == TestNGLaunchConfigurationConstants.METHOD) {
+      classMethods= getClassMethods(configuration); 
       testClasses = getClasses(configuration);
-      testMethods = getMethods(configuration);
     }
     else if (type == TestNGLaunchConfigurationConstants.PACKAGE) {
       packages= getListAttribute(configuration, TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST);
     }
 
-    return createLaunchSuites(ijp.getProject().getName(),
-                              packages,
-                              getClassMethods(configuration),
-                              groups,
-                              parameters,
-                              getComplianceLevel(ijp, configuration),
-                              getLogLevel(configuration));
-    
 //    return createLaunchSuites(ijp.getProject().getName(),
 //                              packages,
-//                              testClasses, 
-//                              testMethods, 
+//                              getClassMethods(configuration),
 //                              groups,
 //                              parameters,
 //                              getComplianceLevel(ijp, configuration),
-//                              getLogLevel(configuration)
-//           );      
+//                              getLogLevel(configuration));
+    
+    return createLaunchSuites(ijp.getProject().getName(),
+                              packages,
+                              testClasses, 
+                              classMethods, 
+                              groups,
+                              parameters,
+                              getComplianceLevel(ijp, configuration),
+                              getLogLevel(configuration)
+           );      
   }
 
+  /**
+   * Suite generator based on TestNG core. It is overseeded by internal suite
+   * generators that offer more control on the names.
+   * @param projectName the project name
+   * @param packages a list (possible empty) of package names
+   * @param classMethods a map (possible empty) of classes and their corresponding methods
+   * @param groups a list (possible empty) of group names
+   * @param parameters the parameters required to run the test
+   * @param annotationType
+   * @param logLevel
+   * @return
+   */
   private static List createLaunchSuites(String projectName, 
                                          List packages, 
                                          Map classMethods, 
@@ -346,11 +360,15 @@ public class ConfigurationHelper {
     return suiteList;
   }
     
-  // FIXME: does not support multiple classes
+  /**
+   * Custom Eclipse plugin suite generator. Instead of using TestNG core
+   * suite generator, we are using a set of custom generators that allow 
+   * more customization.
+   */
   private static List createLaunchSuites(String projectName,
                                          List packages,
                                          List classNames, 
-                                         List methodNames, 
+                                         Map classMethods, 
                                          List groupNames,
                                          Map parameters,
                                          String annotationType,
@@ -360,7 +378,7 @@ public class ConfigurationHelper {
         new Object[] {SuiteGenerator.createCustomizedSuite(projectName,
                                                            packages,
                                                            classNames, 
-                                                           methodNames, 
+                                                           classMethods, 
                                                            groupNames,
                                                            parameters,
                                                            annotationType,
@@ -436,8 +454,14 @@ public class ConfigurationHelper {
         }
       }
     }
-    if(null != launchInfo.m_className) {
-      classMethods.put(launchInfo.m_className, EMPTY);
+    Collection classNames= launchInfo.m_classNames;
+    List classNamesList= new ArrayList();
+    if(null != classNames && !classNames.isEmpty()) {
+      for(Iterator it= classNames.iterator(); it.hasNext(); ) {
+        Object cls= it.next();
+        classMethods.put(cls, EMPTY);
+        classNamesList.add(cls);
+      }
     }
     
     configuration.setAttribute(TestNGLaunchConfigurationConstants.TYPE, launchInfo.m_launchType);
@@ -446,7 +470,7 @@ public class ConfigurationHelper {
     configuration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
                                RemoteTestNG.class.getName());
     configuration.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
-                               Utils.stringToNullList(launchInfo.m_className));
+                               classNamesList);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.GROUP_LIST,
                                new ArrayList(launchInfo.m_groupMap.keySet()));
     configuration.setAttribute(TestNGLaunchConfigurationConstants.GROUP_CLASS_LIST,
