@@ -399,10 +399,16 @@ public class JDTUtil {
   }
 
   private static IMethod fuzzyFindMethodInTypeHierarchy(IType type, String methodName, String[] paramTypes) throws JavaModelException {
+    List fuzzyResults= new ArrayList();
     IMethod[] methods = type.getMethods();
     for(int i = 0; i < methods.length; i++) {
-      if(methodName.equals(methods[i].getElementName()) && methods[i].exists() && methods[i].getNumberOfParameters() == paramTypes.length) {
-        return methods[i];
+      if(methodName.equals(methods[i].getElementName()) && methods[i].exists()) {
+        if(methods[i].getNumberOfParameters() == paramTypes.length) {
+          return methods[i];
+        }
+        else {
+          fuzzyResults.add(methods[i]);
+        }
       }
     }
 
@@ -417,7 +423,7 @@ public class JDTUtil {
       }
     }
 
-    return null;
+    return (fuzzyResults.isEmpty() ? null : (IMethod) fuzzyResults.get(0) );
   }
   
   public static List/*<MethodDefinition>*/ solveDependencies(IMethod method) {
