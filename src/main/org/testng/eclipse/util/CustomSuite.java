@@ -176,7 +176,7 @@ abstract public class CustomSuite extends LaunchSuite {
    * collection of names (order of group names ia not important).
    */
   protected void generateDefaultGroupsElement(XMLStringBuffer suiteBuffer, Collection /*<String>*/ groupNames) {
-    if((null != groupNames) || groupNames.isEmpty()) {
+    if((null == groupNames) || groupNames.isEmpty()) {
       return;
     }
 
