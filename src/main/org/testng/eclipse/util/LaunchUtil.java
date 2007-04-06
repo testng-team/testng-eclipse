@@ -2,25 +2,19 @@ package org.testng.eclipse.util;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.internal.resources.Workspace;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -42,9 +36,9 @@ import org.eclipse.search.ui.text.FileTextSearchScope;
 import org.eclipse.ui.PlatformUI;
 import org.testng.TestNG;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
-import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.JDTUtil.MethodDefinition;
 import org.testng.eclipse.util.param.ParameterSolver;
 import org.testng.reporters.FailedReporter;
@@ -79,7 +73,7 @@ public class LaunchUtil {
   public static void launchFailedSuiteConfiguration(IJavaProject javaProject, String runMode) {
     TestNGPlugin plugin= TestNGPlugin.getDefault();
     final String suiteConfName= javaProject.getElementName() + "-" + FailedReporter.TESTNG_FAILED_XML;
-    final String suiteFilePath= plugin.getAbsoluteOutputdirPath(javaProject).toOSString() + "/" + FailedReporter.TESTNG_FAILED_XML;
+    final String suiteFilePath= TestNGPlugin.getPluginPreferenceStore().getOutputAbsolutePath(javaProject).toOSString() + "/" + FailedReporter.TESTNG_FAILED_XML;
     
     launchSuiteConfiguration(javaProject.getProject(),
         suiteConfName,
@@ -286,7 +280,7 @@ public class LaunchUtil {
       types = icu.getTypes();
     }
     catch(JavaModelException jme) {
-      TestNGPlugin.log(new Status(IStatus.ERROR, TestNGPlugin.PLUGIN_ID, TestNGPlugin.LAUNCH_ERROR, "No types in compilation unit " + icu.getElementName(), jme));
+      TestNGPlugin.log(new Status(IStatus.ERROR, TestNGPlugin.PLUGIN_ID, TestNGPluginConstants.LAUNCH_ERROR, "No types in compilation unit " + icu.getElementName(), jme));
     }
 
     if(null == types) return;
@@ -377,7 +371,7 @@ public class LaunchUtil {
         configWC= config.getWorkingCopy();
       }
       catch(CoreException cex) {
-        TestNGPlugin.log(new Status(IStatus.ERROR, TestNGPlugin.PLUGIN_ID, TestNGPlugin.LAUNCH_ERROR,
+        TestNGPlugin.log(new Status(IStatus.ERROR, TestNGPlugin.PLUGIN_ID, TestNGPluginConstants.LAUNCH_ERROR,
             "Cannot create working copy of existing launcher " + config.getName(), cex));
       }
     }

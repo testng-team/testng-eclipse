@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.osgi.framework.Bundle;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.TestNGPluginConstants;
 
 
 /**
@@ -40,7 +41,7 @@ public class TestNGHomeInitializer extends ClasspathVariableInitializer {
         }
         IPath location= Path.fromOSString(new File(local.getPath()).getAbsolutePath());
         if (null != location) {
-          JavaCore.setClasspathVariable(TestNGPlugin.TESTNG_HOME, location, null);
+          JavaCore.setClasspathVariable(TestNGPluginConstants.TESTNG_HOME, location, null);
         }
         else {
         }
@@ -51,6 +52,6 @@ public class TestNGHomeInitializer extends ClasspathVariableInitializer {
   }
 
   private void clearVariable() {
-    JavaCore.removeClasspathVariable(TestNGPlugin.TESTNG_HOME, null);
+    JavaCore.removeClasspathVariable(TestNGPluginConstants.TESTNG_HOME, null);
   }
 }

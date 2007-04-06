@@ -6,10 +6,7 @@ import java.net.URL;
 import java.util.AbstractSet;
 import java.util.HashSet;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
@@ -31,14 +28,15 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.testng.eclipse.ui.TestRunnerViewPart;
-import org.testng.eclipse.ui.preferences.PreferenceConstants;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.util.JDTUtil;
+import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.SWTUtil;
-import org.testng.remote.RemoteTestNG;
 
 /**
  * The plug-in runtime class for the TestNG plug-in.
+ * 
+ * @author <a href='mailto:the[dot]mindstorm[at]gmail[dot]com'>Alex Popescu</a>
  */
 public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
   /**
@@ -47,12 +45,6 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
   private static TestNGPlugin m_pluginInstance = null;
 
   public static final String PLUGIN_ID = "org.testng.eclipse"; //$NON-NLS-1$
-  public static final String TESTNG_HOME= "TESTNG_HOME"; //$NON-NLS-1$
-
-  public static final String MAIN_RUNNER = RemoteTestNG.class.getName();
-
-  public static final int LAUNCH_ERROR = 1001;
-
   private static URL m_fgIconBaseURL;
   
   private static boolean m_isStopped = false;
@@ -65,6 +57,7 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
   private AbstractSet n_trackedLaunches = new HashSet(20);
 
   private BundleContext m_context;
+  private PreferenceStoreUtil m_preferenceUtil;
 
   public TestNGPlugin() {
     m_pluginInstance = this;
@@ -84,6 +77,10 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
     return PLUGIN_ID;
   }
 
+  public static PreferenceStoreUtil getPluginPreferenceStore() {
+    return m_pluginInstance.m_preferenceUtil; 
+  }
+  
   public static void log(Throwable e) {
     log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, "Error", e)); //$NON-NLS-1$
   }
@@ -102,6 +99,7 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
     ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
     launchManager.addLaunchListener(this);
     m_isStopped = false;
+    m_preferenceUtil= new PreferenceStoreUtil(getPreferenceStore());
   }
 
   /**
@@ -131,11 +129,9 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
    * @see org.eclipse.debug.core.ILaunchListener#launchRemoved(org.eclipse.debug.core.ILaunch)
    */
   public void launchRemoved(final ILaunch launch) {
-    ppp("launchRemoved:" + n_trackedLaunches);
     n_trackedLaunches.remove(launch);
     SWTUtil.getDisplay().asyncExec(new Runnable() {
         public void run() {
-
           TestRunnerViewPart testRunnerViewPart = findTestRunnerViewPartInActivePage();
           if((testRunnerViewPart != null)
              && testRunnerViewPart.isCreated()
@@ -151,7 +147,6 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
    * @see org.eclipse.debug.core.ILaunchListener#launchAdded(org.eclipse.debug.core.ILaunch)
    */
   public void launchAdded(final ILaunch launch) {
-    ppp("launchAdded:" + n_trackedLaunches);
     n_trackedLaunches.add(launch);
   }
 
@@ -159,7 +154,6 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
    * @see org.eclipse.debug.core.ILaunchListener#launchChanged(org.eclipse.debug.core.ILaunch)
    */
   public void launchChanged(final ILaunch launch) {
-    ppp("launchChanged:" + n_trackedLaunches);
     if(!n_trackedLaunches.contains(launch)) {
       return;
     }
@@ -178,17 +172,13 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
       log(ex);
       return;
     }
-    
+
+//  log(new Status(IStatus.WARNING, getPluginId(), IStatus.WARNING, 
+//  "launch a project with NULL name. Ignoring", null));
     if(null == projectName) {
-//      log(new Status(IStatus.WARNING, getPluginId(), IStatus.WARNING, 
-//          "launch a project with NULL name. Ignoring", null));
       return;
     }
 
-//    ppp("PORT   :" + port);
-//    ppp("PROJECT:" + projectName);
-//    ppp("SUBNAME:" + subName);
-    
     final int   finalPort = port;
     final IJavaProject ijp = JDTUtil.getJavaProject(projectName);
     final String name = subName;
@@ -249,7 +239,6 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
   }
 
   private TestRunnerViewPart findTestRunnerViewPartInActivePage() {
-
     IWorkbenchPage page = SWTUtil.getActivePage(getWorkbench());
     if(null == page) {
       return null;
@@ -319,98 +308,5 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
   
   private boolean isEmtpy(String string) {
     return null == string || "".equals(string.trim());
-  }
-  
-  public void storeOutputDir(String projectName, String outdir, boolean isAbsolute) {
-    getPreferenceStore().setValue(projectName + ".outdir", outdir);
-    getPreferenceStore().setValue(projectName + ".absolutepath", isAbsolute);
-  }
-
-  /**
-   * @param name
-   * @return
-   */
-  public String getReporters(String projectName) {
-    return getPreferenceStore().getString(projectName + ".reporters");
-  }
-
-  /**
-   * @param name
-   * @param text
-   */
-  public void storeReporters(String projectName, String reporters) {
-    getPreferenceStore().setValue(projectName + ".reporters", reporters);
-  }
-
-  /**
-   * @param name
-   * @return
-   */
-  public boolean getDisabledListeners(String projectName) {
-    return getPreferenceStore().getBoolean(projectName + ".disabledListeners");
-  }
-
-  /**
-   * @param name
-   * @param selection
-   */
-  public void storeDisabledListeners(String projectName, boolean selection) {
-    getPreferenceStore().setValue(projectName + ".disabledListeners", selection);
-  }
-
-  /**
-   * @param name
-   * @return
-   */
-  public boolean getUseProjectJar(String projectName) {
-    return getPreferenceStore().getBoolean(projectName + ".useProjectJar");
-  }
-
-  /**
-   * @param name
-   * @param selection
-   */
-  public void storeUseProjectJar(String projectName, boolean selection) {
-    getPreferenceStore().setValue(projectName + ".useProjectJar", selection);
-  }
-
-  /**
-   * @param name
-   * @return
-   */
-  public boolean isAbsolutePath(String projectName) {
-    if(getPreferenceStore().contains(projectName + ".absolutepath")) {
-      return getPreferenceStore().getBoolean(projectName + ".absolutepath");
-    }
-    else {
-      return getPreferenceStore().getBoolean(PreferenceConstants.P_ABSOLUTEPATH);
-    }
-  }
-
-  public IPath getOutputDirectoryPath(IJavaProject project) {
-    final String projectName= project.getElementName();
-    final String outdir= getOutputDir(projectName);
-    boolean isAbsolute= isAbsolutePath(projectName);
-    return new Path(isAbsolute ? outdir : project.getPath().toOSString() + "/" + outdir);
-  }
-  
-  public String getOutputDir(String projectName) {
-    String outdir= getPreferenceStore().getString(projectName + ".outdir");
-    if(isEmtpy(outdir)) {
-      outdir= getPreferenceStore().getString(PreferenceConstants.P_OUTPUT); 
-    }
-    
-    return outdir;
-  }
-  
-  /**
-   * @return an <code>IPath</code> with the absolute path to the output directory
-   */
-  public IPath getAbsoluteOutputdirPath(IJavaProject project) {
-    final String projectName= project.getElementName();
-    final String outdir= getOutputDir(projectName);
-    boolean isAbsolute= isAbsolutePath(projectName);
-    
-    return new Path(isAbsolute ? outdir : project.getProject().getLocation().toOSString() + "/" + outdir);
-  }
+  }  
 }

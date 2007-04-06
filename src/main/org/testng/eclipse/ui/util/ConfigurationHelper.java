@@ -19,6 +19,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.SuiteGenerator;
@@ -398,7 +399,7 @@ public class ConfigurationHelper {
       ILaunchConfiguration[] availConfs = launchManager.getLaunchConfigurations(confType);
       
       final String projectName = project.getName();
-      final String mainRunner = TestNGPlugin.MAIN_RUNNER;
+      final String mainRunner = TestNGPluginConstants.MAIN_RUNNER;
       
       for(int i = 0; i < availConfs.length; i++) {
         String confProjectName = ConfigurationHelper.getProjectName(availConfs[i]);

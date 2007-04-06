@@ -36,6 +36,7 @@ import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.JDTUtil;
+import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
@@ -158,17 +159,17 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       }
     }
 
-    TestNGPlugin plugin= TestNGPlugin.getDefault();
+    PreferenceStoreUtil storage= TestNGPlugin.getPluginPreferenceStore();
     argv.add(TestNGCommandLineArgs.OUTDIR_COMMAND_OPT);
-    argv.add(plugin.getAbsoluteOutputdirPath(jproject).toOSString());
+    argv.add(storage.getOutputAbsolutePath(jproject).toOSString());
     
-    String reporters= plugin.getReporters(project.getName());
+    String reporters= storage.getReporters(project.getName(), false);
     if(null != reporters && !"".equals(reporters)) {
       argv.add(TestNGCommandLineArgs.LISTENER_COMMAND_OPT);
       argv.add(reporters.replace(' ', ';'));
     }
     
-    boolean disabledReporters= plugin.getDisabledListeners(project.getName());
+    boolean disabledReporters= storage.hasDisabledListeners(project.getName(), false);
     if(disabledReporters) {
       argv.add(TestNGCommandLineArgs.USE_DEFAULT_LISTENERS);
       argv.add("false");
@@ -225,7 +226,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     boolean donotappendjar= false;
     String projectName= getJavaProjectName(configuration);
     if(null != projectName) {
-       donotappendjar= TestNGPlugin.getDefault().getUseProjectJar(projectName);
+       donotappendjar= TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(projectName);
     }
     
     int addedSize= 2;

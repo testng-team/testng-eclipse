@@ -103,6 +103,7 @@ import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.LaunchUtil;
+import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.remote.RemoteTestNG;
 import org.testng.remote.strprotocol.GenericMessage;
@@ -1217,9 +1218,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       if(null == javaProject) {
         return;
       }
-      TestNGPlugin plugin= TestNGPlugin.getDefault();
-      IPath filePath= new Path(plugin.getOutputDirectoryPath(javaProject).toOSString() + "/index.html");
-      boolean isAbsolute= plugin.isAbsolutePath(javaProject.getElementName());
+      PreferenceStoreUtil storage= TestNGPlugin.getPluginPreferenceStore();
+      IPath filePath= new Path(storage.getOutputDirectoryPath(javaProject).toOSString() + "/index.html");
+      boolean isAbsolute= storage.isOutputAbsolutePath(javaProject.getElementName(), false);
       
       IProgressMonitor progressMonitor= new NullProgressMonitor();
       if(isAbsolute) {

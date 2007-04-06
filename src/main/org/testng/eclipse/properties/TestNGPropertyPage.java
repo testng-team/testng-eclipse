@@ -36,9 +36,9 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceSorter;
-
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.util.JDTUtil;
+import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.SWTUtil;
 
 public class TestNGPropertyPage extends PropertyPage {
@@ -168,11 +168,12 @@ public class TestNGPropertyPage extends PropertyPage {
     m_workingProject = (IProject) getElement().getAdapter(IProject.class);
 
     // Populate the owner text field with the default value
-    m_outdirPath.setText(TestNGPlugin.getDefault().getOutputDir(m_workingProject.getName()));
-    m_fullPathOutput.setSelection(TestNGPlugin.getDefault().isAbsolutePath(m_workingProject.getName()));
-    m_reportersText.setText(TestNGPlugin.getDefault().getReporters(m_workingProject.getName()));
-    m_disabledListenersCheckbox.setSelection(TestNGPlugin.getDefault().getDisabledListeners(m_workingProject.getName()));
-    m_projectJar.setSelection(TestNGPlugin.getDefault().getUseProjectJar(m_workingProject.getName()));
+    PreferenceStoreUtil storage= TestNGPlugin.getPluginPreferenceStore();
+    m_outdirPath.setText(storage.getOutputDir(m_workingProject.getName(), true));
+    m_fullPathOutput.setSelection(storage.isOutputAbsolutePath(m_workingProject.getName(), true));
+    m_reportersText.setText(storage.getReporters(m_workingProject.getName(), true));
+    m_disabledListenersCheckbox.setSelection(storage.hasDisabledListeners(m_workingProject.getName(), true));
+    m_projectJar.setSelection(storage.getUseProjectJar(m_workingProject.getName()));
   }
 
   protected void performDefaults() {
@@ -181,10 +182,11 @@ public class TestNGPropertyPage extends PropertyPage {
   }
 
   public boolean performOk() {
-    TestNGPlugin.getDefault().storeOutputDir(m_workingProject.getName(), m_outdirPath.getText(), m_fullPathOutput.getSelection());
-    TestNGPlugin.getDefault().storeReporters(m_workingProject.getName(), m_reportersText.getText());
-    TestNGPlugin.getDefault().storeDisabledListeners(m_workingProject.getName(), m_disabledListenersCheckbox.getSelection());
-    TestNGPlugin.getDefault().storeUseProjectJar(m_workingProject.getName(), m_projectJar.getSelection());
+    PreferenceStoreUtil storage= TestNGPlugin.getPluginPreferenceStore();
+    storage.storeOutputDir(m_workingProject.getName(), m_outdirPath.getText(), m_fullPathOutput.getSelection());
+    storage.storeReporters(m_workingProject.getName(), m_reportersText.getText());
+    storage.storeDisabledListeners(m_workingProject.getName(), m_disabledListenersCheckbox.getSelection());
+    storage.storeUseProjectJar(m_workingProject.getName(), m_projectJar.getSelection());
 
     if(super.performOk()) {
       setMessage("Project preferences are saved", INFORMATION);
