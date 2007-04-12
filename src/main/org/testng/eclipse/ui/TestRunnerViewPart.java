@@ -1404,7 +1404,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_skippedCount++;
     m_methodCount++;
 //    System.out.println("[INFO:onTestSkipped]:" + trm.getMessageAsString());
-    postTestResult(createRunInfo(trm, null, ITestResult.SKIP), 1 /*error*/
+    postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.SKIP), 1 /*error*/
     );
   }
 
