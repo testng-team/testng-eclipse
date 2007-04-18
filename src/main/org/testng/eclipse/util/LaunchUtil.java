@@ -454,7 +454,7 @@ public class LaunchUtil {
       }
     }
     IResource[] scopeResources= (IResource[]) resources.toArray(new IResource[resources.size()]);
-    ISearchQuery query= new FileSearchQuery("@Test(\\(.+)?", 
+    ISearchQuery query= new FileSearchQuery("@(Test|Before|After|Factory)(\\(.+)?", 
         true /*regexp*/ , 
         true /*casesensitive*/, 
         FileTextSearchScope.newSearchScope(scopeResources, new String[] {"*.java"}, false));

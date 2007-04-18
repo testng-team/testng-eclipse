@@ -88,6 +88,12 @@ public class AnnotationVisitor extends JavaDocVisitor {
         }
       }
     }
+    else if (isFactoryAnnotation(node.getTypeName().toString())) {
+      if (node.getParent() instanceof MethodDeclaration) {
+        m_annotationType = JDK15_ANNOTATION;
+        addFactoryMethod((MethodDeclaration) node.getParent(), JDK15_ANNOTATION);
+      }
+    }
 
     return false;
   }
