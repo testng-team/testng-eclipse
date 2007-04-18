@@ -36,6 +36,7 @@ public class ConfigurationHelper {
     public String m_projectName;
     public int m_launchType;
     public Collection/*<String>*/ m_classNames;
+    public Map/*<String, List<String>*/ classMethods;
     public String m_suiteName;
     public Map m_groupMap;
     public String m_complianceLevel;
@@ -44,6 +45,7 @@ public class ConfigurationHelper {
     public LaunchInfo(String projectName,
                       int launchType,
                       Collection classNames,
+                      Map classMethodsMap,
                       Map groupMap,
                       String suiteName,
                       String complianceLevel,
@@ -51,6 +53,7 @@ public class ConfigurationHelper {
       m_projectName= projectName;
       m_launchType= launchType;
       m_classNames= classNames;
+      classMethods= classMethodsMap;
       m_groupMap= groupMap;
       m_suiteName= suiteName.trim();
       m_complianceLevel= complianceLevel;
@@ -100,9 +103,9 @@ public class ConfigurationHelper {
     return getStringAttribute(configuration, IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME);
   }
   
-  private static List getMethods(ILaunchConfiguration configuration) {
-    return getListAttribute(configuration, TestNGLaunchConfigurationConstants.METHOD_TEST_LIST);
-  }
+//  private static List getMethods(ILaunchConfiguration configuration) {
+//    return getListAttribute(configuration, TestNGLaunchConfigurationConstants.METHOD_TEST_LIST);
+//  }
 
   public static String getComplianceLevel(ILaunchConfiguration configuration) {
     return getStringAttribute(configuration, TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR);
@@ -325,7 +328,7 @@ public class ConfigurationHelper {
    * @param configuration
    * @return
    */
-  private static Map getClassMethods(ILaunchConfiguration configuration) {
+  public static Map getClassMethods(ILaunchConfiguration configuration) {
     Map confResult= getMapAttribute(configuration, TestNGLaunchConfigurationConstants.ALL_METHODS_LIST);
     if(null == confResult) return null;
     
@@ -463,6 +466,9 @@ public class ConfigurationHelper {
         classMethods.put(cls, EMPTY);
         classNamesList.add(cls);
       }
+    }
+    if(null != launchInfo.classMethods) {
+      classMethods.putAll(launchInfo.classMethods);
     }
     
     configuration.setAttribute(TestNGLaunchConfigurationConstants.TYPE, launchInfo.m_launchType);

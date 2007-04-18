@@ -98,7 +98,8 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
   private ModifyListener m_groupTextAdapter;
   private ModifyListener m_suiteTextAdapter;
 
-
+  private Map/*<String, List<String>>*/ m_classMethods;
+  
   /**
    * @see org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse.swt.widgets.Composite)
    */
@@ -129,16 +130,6 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
       m_selectedProject = JDTUtil.getJavaProjectContext();
     }
     ConfigurationHelper.createBasicConfiguration(m_selectedProject, config);
-//    String projectName = (m_selectedProject == null) ? "" : m_selectedProject.getElementName();
-//
-//    config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
-//                        projectName);
-//    config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
-//                        RemoteTestNG.class.getName());
-//    config.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
-//                        JDTUtil.getProjectVMVersion(m_selectedProject));
-//    config.setAttribute(TestNGLaunchConfigurationConstants.TYPE, TestNGLaunchConfigurationConstants.CLASS);
-//    config.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL, "2"); 
   }
 
 
@@ -170,7 +161,11 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     
     updateComplianceLevel(configuration);
 
-    setType(ConfigurationHelper.getType(configuration));
+    int type= ConfigurationHelper.getType(configuration);
+    setType(type);
+    if(TestNGLaunchConfigurationConstants.METHOD == type) {
+      m_classMethods= ConfigurationHelper.getClassMethods(configuration);
+    }
     
     attachModificationListeners();
   }
@@ -214,6 +209,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
         new ConfigurationHelper.LaunchInfo(m_projectText.getText(),
             m_typeOfTestRun,
             Utils.stringToList(m_classText.getText().trim()),
+            m_classMethods,
             m_groupMap,
             m_suiteText.getText(),
             m_complianceLevelCombo.getText(),
@@ -650,6 +646,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     if (type != m_typeOfTestRun) {
 //      ppp("SET TYPE TO " + type + " (WAS " + m_typeOfTestRun + ")");
       m_typeOfTestRun = type;
+      m_classMethods= null; // we reset it here, because the user has changed settings on front page
       m_classRadio.setSelection(type == TestNGLaunchConfigurationConstants.CLASS);
       m_groupRadio.setSelection(type == TestNGLaunchConfigurationConstants.GROUP);
       m_suiteRadio.setSelection(type == TestNGLaunchConfigurationConstants.SUITE);
