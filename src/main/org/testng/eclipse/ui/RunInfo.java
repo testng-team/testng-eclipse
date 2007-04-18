@@ -74,7 +74,11 @@ public class RunInfo {
     for(int i= 0; i < params.length; i++) {
       if(i > 0) buf.append(", ");
       if("java.lang.String".equals(paramTypes[i]) && !("null".equals(params[i]) || "\"\"".equals(params[i]))) {
-        buf.append("\"").append(params[i]).append("\"");
+        String p= params[i];
+        if(p.indexOf('\n') != -1 || p.indexOf('\r') != -1) {
+          p= p.replace("\n", "\\n").replace("\r", "\\r");
+        }
+        buf.append("\"").append(p).append("\"");
       }
       else {
         buf.append(params[i]);
