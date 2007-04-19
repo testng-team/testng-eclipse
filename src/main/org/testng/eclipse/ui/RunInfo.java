@@ -26,6 +26,7 @@ public class RunInfo {
   protected int m_skipped;
   protected int m_successPercentageFailed;
   private int m_status;
+  private String m_testDescription;
   
   
   public RunInfo(String suiteName) {
@@ -45,6 +46,7 @@ public class RunInfo {
                  String testName, 
                  String className, 
                  String methodName,
+                 String testDesc,
                  String[] params,
                  String[] paramTypes,
                  String stackTrace,
@@ -54,6 +56,7 @@ public class RunInfo {
     m_testName = testName;
     m_className = className;
     m_methodName = methodName;
+    m_testDescription= testDesc != null ? (testDesc.equals(methodName) ? null : testDesc) : null;
     m_parameters= params;
     m_parameterTypes= paramTypes;
     m_stackTrace = stackTrace;
@@ -113,19 +116,6 @@ public class RunInfo {
     return m_id.equals(((RunInfo) o).m_id);
   }
   
-//  public String toDisplayString() {
-//    if(SUITE_TYPE == m_type) {
-//    }
-//    else if(TEST_TYPE == m_type) {
-//    }
-//    else if(RESULT_TYPE == m_type) {
-//    }
-//    else {
-//      return "";
-//    }
-//  }
-  
- 
   public String toString() {
     StringBuffer buffer = new StringBuffer();
     buffer.append("RunInfo[");
@@ -160,11 +150,19 @@ public class RunInfo {
    */
   public String getMethodDisplay() {
     StringBuffer buf= new StringBuffer(m_className);
-    buf.append(".").append(m_methodName).append(getParametersDisplay());
+    buf.append(getTestDescription())
+      .append(".").append(m_methodName).append(getParametersDisplay())
+    ;
     
     return buf.toString();
   }
 
+  public String getTestDescription() {
+    if(null == m_testDescription || "".equals(m_testDescription.trim())) return "";
+    
+    return m_testDescription.substring(m_testDescription.indexOf('('));
+  }
+  
   /**
    * @return
    */

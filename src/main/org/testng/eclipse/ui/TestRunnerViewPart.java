@@ -1379,6 +1379,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
                        trm.getName(),
                        trm.getTestClass(),
                        trm.getMethod(),
+                       trm.getTestDescription(),
                        trm.getParameters(),
                        trm.getParameterTypes(),
                        stackTrace,

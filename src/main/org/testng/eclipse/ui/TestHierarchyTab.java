@@ -485,11 +485,15 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
     String itemKey= runInfo.getId();
 
     if(!allowDups && m_treeItemMap.containsKey(runInfo.getId())) {
-      m_duplicateItemsIndex++;
-      itemKey+= m_duplicateItemsIndex;
-
-      item.setText(item.getText() + "[" + m_duplicateItemsIndex + "]");
-      item.setData("testid", itemKey);
+      TreeItem ti= (TreeItem) m_treeItemMap.get(runInfo.getId());
+      RunInfo ri= (RunInfo) ti.getData("runinfo");
+      if(runInfo.getTestDescription().equals(ri.getTestDescription())) {
+        m_duplicateItemsIndex++;
+        itemKey+= m_duplicateItemsIndex;
+  
+        item.setText(item.getText() + "[" + m_duplicateItemsIndex + "]");
+        item.setData("testid", itemKey);
+      }
     }
     
     if(running) {
