@@ -1,5 +1,8 @@
 package org.testng.eclipse.ui;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 /**
  * Class usage XXX
@@ -10,6 +13,8 @@ public class RunInfo {
   public static final int SUITE_TYPE = 1;
   public static final int TEST_TYPE = 2;
   public static final int RESULT_TYPE = 3;
+  private static final Pattern NEWLINES= Pattern.compile("\n", Pattern.LITERAL);
+  private static final Pattern CARRAGERETURN= Pattern.compile("\r", Pattern.LITERAL);
   
   private String m_id;
   private int m_type;
@@ -77,10 +82,7 @@ public class RunInfo {
     for(int i= 0; i < params.length; i++) {
       if(i > 0) buf.append(", ");
       if("java.lang.String".equals(paramTypes[i]) && !("null".equals(params[i]) || "\"\"".equals(params[i]))) {
-        String p= params[i];
-        if(p.indexOf('\n') != -1 || p.indexOf('\r') != -1) {
-          p= p.replace("\n", "\\n").replace("\r", "\\r");
-        }
+        String p= escapeNewLines2(params[i]);
         buf.append("\"").append(p).append("\"");
       }
       else {
@@ -91,6 +93,19 @@ public class RunInfo {
     return buf.append(")").toString();
   }
 
+/*  String escapeNewLines(String s) {
+    if(s.indexOf('\n') != -1 || s.indexOf('\r') != -1) {
+      return s.replace("\n", "\\n").replace("\r", "\\r");
+    }
+    
+    return s;
+  }
+*/  
+  String escapeNewLines2(String s) {
+    String result= NEWLINES.matcher(s).replaceAll("\\\\n");
+    return CARRAGERETURN.matcher(result).replaceAll("\\\\r");
+  }
+  
   /**
    * Override hashCode.
    *
@@ -219,5 +234,22 @@ public class RunInfo {
   
   public String getStackTrace() {
     return m_stackTrace;
+  }
+  
+  public static void main(String[] args) {
+    String test1= "something\nwrong";
+    String test2= "something\rwrong";
+    String test3= "something\ndefinitely\rwrong";
+    String test4= "something\\n not\\r wrong";
+    
+    RunInfo info= new RunInfo("doesntmatter");
+    System.out.println("1: " + info.escapeNewLines(test1));
+    System.out.println("2: " + info.escapeNewLines(test2));
+    System.out.println("3: " + info.escapeNewLines(test3));
+    System.out.println("4: " + info.escapeNewLines(test4));
+    System.out.println("1: " + info.escapeNewLines2(test1));
+    System.out.println("2: " + info.escapeNewLines2(test2));
+    System.out.println("3: " + info.escapeNewLines2(test3));
+    System.out.println("4: " + info.escapeNewLines2(test4));
   }
 }
