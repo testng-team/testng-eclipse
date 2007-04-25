@@ -1,20 +1,18 @@
 package org.testng.eclipse.ui;
 
-import java.util.regex.Matcher;
+
 import java.util.regex.Pattern;
-
-
 /**
- * Class usage XXX
+ * Carries along information about a test result.
  * 
- * @version $Revision$
+ * @author <a href='mailto:the[dot]mindstorm[at]gmail[dot]com'>Alex Popescu</a>
  */
 public class RunInfo {
   public static final int SUITE_TYPE = 1;
   public static final int TEST_TYPE = 2;
   public static final int RESULT_TYPE = 3;
-  private static final Pattern NEWLINES= Pattern.compile("\n", Pattern.LITERAL);
-  private static final Pattern CARRAGERETURN= Pattern.compile("\r", Pattern.LITERAL);
+  private static final Pattern NEWLINES= Pattern.compile("\n");
+  private static final Pattern CARRAGERETURN= Pattern.compile("\r");
   
   private String m_id;
   private int m_type;
@@ -93,17 +91,22 @@ public class RunInfo {
     return buf.append(")").toString();
   }
 
-/*  String escapeNewLines(String s) {
+  /*String escapeNewLines(String s) {
     if(s.indexOf('\n') != -1 || s.indexOf('\r') != -1) {
       return s.replace("\n", "\\n").replace("\r", "\\r");
     }
     
     return s;
-  }
-*/  
+  }*/
+  
   String escapeNewLines2(String s) {
     String result= NEWLINES.matcher(s).replaceAll("\\\\n");
     return CARRAGERETURN.matcher(result).replaceAll("\\\\r");
+  }
+  
+  String escapeNewLines3(String s) {
+    String result= Pattern.compile("\n").matcher(s).replaceAll("\\\\n");
+    return Pattern.compile("\r").matcher(result).replaceAll("\\\\r");
   }
   
   /**
@@ -235,4 +238,30 @@ public class RunInfo {
   public String getStackTrace() {
     return m_stackTrace;
   }
+  
+  /*public static void main(String[] args) {
+    String test1= "something\nwrong";
+    String test2= "something\rwrong";
+    String test3= "something\ndefinitely\rwrong";
+    String test4= "something\\n not\\r wrong";
+    String test5= "something not wrong\n";
+    String test6= "something not wrong\n\r";
+    String test7= "something not wrong\r\n";
+    
+    RunInfo info= new RunInfo("doesntmatter");
+    System.out.println("1: " + info.escapeNewLines(test1));
+    System.out.println("2: " + info.escapeNewLines(test2));
+    System.out.println("3: " + info.escapeNewLines(test3));
+    System.out.println("4: " + info.escapeNewLines(test4));
+    System.out.println("5: " + info.escapeNewLines(test5));
+    System.out.println("6: " + info.escapeNewLines(test6));
+    System.out.println("7: " + info.escapeNewLines(test7));
+    System.out.println("1: " + info.escapeNewLines2(test1));
+    System.out.println("2: " + info.escapeNewLines2(test2));
+    System.out.println("3: " + info.escapeNewLines2(test3));
+    System.out.println("4: " + info.escapeNewLines2(test4));
+    System.out.println("5: " + info.escapeNewLines2(test5));
+    System.out.println("6: " + info.escapeNewLines2(test6));
+    System.out.println("7: " + info.escapeNewLines2(test7));
+  }*/
 }
