@@ -235,21 +235,4 @@ public class RunInfo {
   public String getStackTrace() {
     return m_stackTrace;
   }
-  
-  public static void main(String[] args) {
-    String test1= "something\nwrong";
-    String test2= "something\rwrong";
-    String test3= "something\ndefinitely\rwrong";
-    String test4= "something\\n not\\r wrong";
-    
-    RunInfo info= new RunInfo("doesntmatter");
-    System.out.println("1: " + info.escapeNewLines(test1));
-    System.out.println("2: " + info.escapeNewLines(test2));
-    System.out.println("3: " + info.escapeNewLines(test3));
-    System.out.println("4: " + info.escapeNewLines(test4));
-    System.out.println("1: " + info.escapeNewLines2(test1));
-    System.out.println("2: " + info.escapeNewLines2(test2));
-    System.out.println("3: " + info.escapeNewLines2(test3));
-    System.out.println("4: " + info.escapeNewLines2(test4));
-  }
 }
