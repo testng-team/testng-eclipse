@@ -477,12 +477,11 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
       label.setText(ResourceUtil.getString("TestNGMainTab.testng.compliance")); // $NON-NLS-1$
       
       m_complianceLevelCombo = new Combo(group, SWT.DROP_DOWN | SWT.READ_ONLY);
-      m_complianceLevelCombo.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
       m_complianceLevelCombo.add(TestNGLaunchConfigurationConstants.JDK15_COMPLIANCE);
       m_complianceLevelCombo.add(TestNGLaunchConfigurationConstants.JDK14_COMPLIANCE);
       m_complianceLevelCombo.select(0);
       GridData gd2 = new GridData(GridData.HORIZONTAL_ALIGN_END  | GridData.GRAB_HORIZONTAL);
-      gd2.widthHint = 50; // HINT: originally minimumWidth (widthHint is supported in older API version)
+      gd2.widthHint = 70; // HINT: originally minimumWidth (widthHint is supported in older API version)
       m_complianceLevelCombo.setLayoutData(gd2);
       m_complianceLevelCombo.addModifyListener(new ModifyListener() {
         public void modifyText(ModifyEvent evt) {
@@ -503,7 +502,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
       m_logLevelCombo = new Combo(group, SWT.DROP_DOWN | SWT.READ_ONLY);
       gd = new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.GRAB_HORIZONTAL);
-      gd.widthHint = 50;
+      gd.widthHint = 70;
       m_logLevelCombo.setLayoutData(gd);
       for(int i = 0; i < 11; i++) {
         m_logLevelCombo.add("" + i);
