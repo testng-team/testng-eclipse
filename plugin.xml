@@ -3,7 +3,7 @@
 <plugin
    id="org.testng.eclipse"
    name="%pluginName"
-   version="5.6.0.20070407"
+   version="5.6.0.0"
    provider-name="%providerName"
    class="org.testng.eclipse.TestNGPlugin">
    <runtime>
@@ -26,12 +26,12 @@
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.debug.ui"/>
       <import plugin="org.eclipse.jdt.junit"/>
-      <import plugin="org.eclipse.jdt.launching"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
       <import plugin="org.eclipse.search"/>
+      <import plugin="org.eclipse.jdt.launching"/>
    </requires>
    
  
