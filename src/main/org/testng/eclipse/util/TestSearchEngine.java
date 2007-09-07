@@ -7,7 +7,9 @@ import org.testng.eclipse.launch.components.ITestContent;
 import org.testng.eclipse.ui.util.TypeParser;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.internal.resources.File;
@@ -116,18 +118,30 @@ public class TestSearchEngine {
     return (IType[]) result.toArray(new IType[result.size()]);
   }
 
+  private static Map/*<IJavaElement,Boolean>*/ s_isTestCache= new HashMap();
+  
   /**
    * Returns true in case the IJavaElement is one of COMPILATION_UNIT, TYPE or METHOD 
    * representing a valid TestNG test element.
    */
   public static boolean isTest(IJavaElement ije) {
+    Boolean cachedResult= (Boolean) s_isTestCache.get(ije);
+    if(null != cachedResult && cachedResult.booleanValue()) {
+      return true;
+    }
+    
+    boolean result= false;
     IType[] types = null;
     
     if(IJavaElement.METHOD == ije.getElementType()) {
       IMethod iMethod = (IMethod) ije;
       ITestContent content = TypeParser.parseType(iMethod.getDeclaringType());
       if(content.hasTestMethods()) {
-        return content.isTestMethod(iMethod);
+        result= content.isTestMethod(iMethod);
+        if(result) {
+          s_isTestCache.put(ije, Boolean.TRUE);
+        }
+        return result;
       }
       
       return false;
@@ -140,9 +154,11 @@ public class TestSearchEngine {
       catch(JavaModelException jme) {
         TestNGPlugin.log(jme);
       }
-    } else if(IJavaElement.TYPE == ije.getElementType()) {
+    } 
+    else if(IJavaElement.TYPE == ije.getElementType()) {
       types = new IType[] {(IType) ije};
-    } else {
+    } 
+    else {
       return false;
     }
     
@@ -151,6 +167,7 @@ public class TestSearchEngine {
         ITestContent testContent = TypeParser.parseType(types[i]);
         
         if(testContent.hasTestMethods()) {
+          s_isTestCache.put(ije, Boolean.TRUE);
           return true;
         }
       }
@@ -189,7 +206,7 @@ public class TestSearchEngine {
     }
 
     try {
-      return SuiteFileValidator.isSuiteDefinition(f.getContents());
+      return SuiteFileValidator.isSuiteDefinition(f);
     }
     catch(CoreException ce) {
       TestNGPlugin.log(ce);

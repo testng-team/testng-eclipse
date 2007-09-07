@@ -15,15 +15,15 @@ import org.eclipse.core.runtime.CoreException;
  * @author <a href='mailto:the_mindstorm@evolva.ro'>Alexandru Popescu</a>
  */
 public class FileExtender extends PropertyTester {
-  private static final String PROPERTY_IS_Test= "isSuite"; //$NON-NLS-1$
+//  private static final String PROPERTY_IS_Test= "isSuite"; //$NON-NLS-1$
 
   public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
     if(!(receiver instanceof IFile)) {
       return false;
     }
-    
+    System.out.println("RECEIVER:" + receiver + "; CLASS:" + receiver.getClass());
     try {
-      return SuiteFileValidator.isSuiteDefinition(((IFile) receiver).getContents());
+      return SuiteFileValidator.isSuiteDefinition((IFile) receiver);
     }
     catch(CoreException ce) {
       TestNGPlugin.log(ce);

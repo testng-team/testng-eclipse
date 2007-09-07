@@ -1,11 +1,15 @@
 package org.testng.eclipse.util;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.testng.eclipse.TestNGPlugin;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -25,6 +29,20 @@ public class SuiteFileValidator {
   private static final Pattern SUITE_REGEXP = Pattern.compile("<suite.*");
   private static final Pattern TAG_REGEXP = Pattern.compile("<[^>?!]+>");
   
+  private static Map/*<IFile,Boolean>*/ s_cache= new HashMap();
+  
+  public static boolean isSuiteDefinition(IFile file) throws CoreException {
+    Boolean result= (Boolean) s_cache.get(file);
+    if(null != result) {
+      return true;
+    }
+    boolean res= isSuiteDefinition(file.getContents());
+    if(res) {
+      s_cache.put(file, Boolean.TRUE);
+    }
+    return res;
+  }
+  
   /**
    * @return true if the InputStream represents a TestNG definition file.
    * For speed reasons, we stop the search as soon as we find an XML tag.
@@ -32,7 +50,7 @@ public class SuiteFileValidator {
    * DOCTYPES and other XML niceties with the TAG_REGEXP regular
    * expression defined above.
    */
-  public static boolean isSuiteDefinition(InputStream is) {
+  private static boolean isSuiteDefinition(InputStream is) {
     BufferedReader br = new BufferedReader(new InputStreamReader(is));
     
     try {

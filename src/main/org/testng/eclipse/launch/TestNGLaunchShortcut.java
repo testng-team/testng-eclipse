@@ -1,5 +1,6 @@
 package org.testng.eclipse.launch;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -21,7 +22,17 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
 
   public void launch(ISelection selection, String mode) {
     if(selection instanceof StructuredSelection) {
-      run((IJavaElement) ((StructuredSelection) selection).getFirstElement(), mode);
+      Object obj = ((StructuredSelection) selection).getFirstElement();
+      IJavaElement element= null;
+      if(obj instanceof IJavaElement) {
+        element= (IJavaElement) obj;
+      }
+      else if(obj instanceof IAdaptable) {
+        element= (IJavaElement) ((IAdaptable) obj).getAdapter(IJavaElement.class);
+      }
+      if(null != element) {
+        run(element, mode);
+      }
     }
   }
 

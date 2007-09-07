@@ -289,7 +289,8 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
     
     if(null == ti) {
       // probably this is a @Configuration failures
-      createNewEntry(resultInfo);
+      ti= createNewEntry(resultInfo);
+      updateView(ti);
       return;
     }
     
@@ -302,9 +303,16 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
     }
     
     perpetuateResult(ti.getParentItem(), resultInfo.getStatus());
+    updateView(ti);
   }
   
-  private void createNewEntry(RunInfo runInfo) {
+  private void updateView(TreeItem ti) {
+    // TESNTG-157: scroll latest marked test to visible in the view
+    ti.setExpanded(true);
+    fTree.setSelection(ti);    
+  }
+  
+  private TreeItem createNewEntry(RunInfo runInfo) {
     String enclosingTestId = runInfo.getTestFQN(); 
     TreeItem parentItem = (TreeItem) m_treeItemMap.get(enclosingTestId);
     
@@ -327,6 +335,8 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
     }
     
     perpetuateResult(parentItem, runInfo.getStatus());
+    
+    return treeItem;
   }
   
   private void perpetuateResult(TreeItem ti, int state) {

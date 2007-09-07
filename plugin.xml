@@ -192,12 +192,13 @@
    </extension>
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
+      <!--
       <propertyTester
-            properties="isSuite"
+            properties="isTest"
             namespace="org.testng.eclipse"
             type="org.eclipse.core.resources.IFile"
             class="org.testng.eclipse.launch.tester.FileExtender"
-            id="org.testng.eclipse.IFileExtender">
+            id="org.testng.eclipse.ITypeExtender">
       </propertyTester>
       <propertyTester
             properties="isTest"
@@ -206,6 +207,16 @@
             class="org.testng.eclipse.launch.tester.JavaTypeExtender"
             id="org.testng.eclipse.ITypeExtender">
       </propertyTester>
+      -->
+      
+      <propertyTester
+            properties="isTest,isSuite"
+            namespace="org.testng.eclipse"
+            type="org.eclipse.core.runtime.IAdaptable"
+            class="org.testng.eclipse.launch.tester.TestNGPropertyTester"
+            id="org.testng.eclipse.launch.tester.JUnitPropertyTester">
+      </propertyTester>
+      
    </extension>
    <extension
          point="org.eclipse.ui.propertyPages">

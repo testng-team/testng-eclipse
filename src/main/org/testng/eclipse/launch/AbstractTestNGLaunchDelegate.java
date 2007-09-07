@@ -1,21 +1,12 @@
 package org.testng.eclipse.launch;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -27,13 +18,10 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.components.ITestContent;
-import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.TypeParser;
-import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.LaunchUtil;
 import org.testng.eclipse.util.SuiteFileValidator;
-import org.testng.eclipse.util.param.ParameterSolver;
 
 /**
  * Base class for Run/Debug contextual actions. Handles TestNG tests, but no
@@ -189,7 +177,7 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
   
   protected boolean isSuiteDefinition(IFile file) {
     try {
-      return SuiteFileValidator.isSuiteDefinition(file.getContents());
+      return SuiteFileValidator.isSuiteDefinition(file);
     }
     catch(CoreException ce) {
       TestNGPlugin.log(ce);
