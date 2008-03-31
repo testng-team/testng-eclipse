@@ -2,9 +2,9 @@
 <?eclipse version="3.0"?>
 <plugin
    id="org.testng.eclipse"
-   name="%pluginName"
-   version="5.6.0.0"
-   provider-name="%providerName"
+   name="TestNG"
+   version="5.8.0.2"
+   provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
    <runtime>
       <library name="eclipse-testng.jar">
