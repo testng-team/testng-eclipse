@@ -475,7 +475,7 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
           treeItem.setData("testid", treeEntry.getId());
           String parentName= (String) testItem.getData("testname");
           if(treeEntry.getClassName().equals(parentName)) {
-            treeItem.setText(treeEntry.getMethodName() + treeEntry.getParametersDisplay());
+            treeItem.setText(treeEntry.getMethodName() + treeEntry.getTestDescription() + treeEntry.getParametersDisplay());
           }
           else {
             treeItem.setText(treeEntry.getMethodDisplay());

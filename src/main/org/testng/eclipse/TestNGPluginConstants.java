@@ -20,6 +20,7 @@ public abstract class TestNGPluginConstants {
   public static final String S_DEPRECATED_OUTPUT = "generalOutput";
   public static final String S_DEPRECATED_ABSOLUTEPATH = "generalOutputRelative";
 
+  public static final String S_FAILED_TESTS = "failedTests";
 
 
   private TestNGPluginConstants() {}

@@ -20,14 +20,15 @@ package org.testng.eclipse.ui;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import org.eclipse.core.internal.resources.Workspace;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -42,12 +43,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.action.Action;
@@ -98,21 +95,16 @@ import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
 import org.testng.ITestResult;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
-import org.testng.eclipse.ui.util.ConfigurationHelper;
-import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.LaunchUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.ResourceUtil;
-import org.testng.remote.RemoteTestNG;
 import org.testng.remote.strprotocol.GenericMessage;
 import org.testng.remote.strprotocol.IRemoteSuiteListener;
 import org.testng.remote.strprotocol.IRemoteTestListener;
 import org.testng.remote.strprotocol.SuiteMessage;
 import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
-import org.testng.reporters.FailedReporter;
 
 /**
  * A ViewPart that shows the results of a test run.
@@ -253,6 +245,10 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
    * The client side of the remote test runner
    */
   private EclipseTestRunnerClient fTestRunnerClient;
+  
+  // Stores any test descriptions of failed tests. For any test class 
+  // that implements ITest, this will be the returned value of getTestName().
+  private Set testDescriptions;
   
 
   public void init(IViewSite site, IMemento memento) throws PartInitException {
@@ -1264,7 +1260,10 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     
     public void run() {
       if(null != m_LastLaunch && hasErrors()) {
-        LaunchUtil.launchFailedSuiteConfiguration(m_workingProject, m_LastLaunch.getLaunchMode());
+        LaunchUtil.launchFailedSuiteConfiguration(m_workingProject, 
+        		m_LastLaunch.getLaunchMode(), 
+        		m_LastLaunch.getLaunchConfiguration(),
+        		getTestDescriptions());
       }
     }    
   }
@@ -1397,7 +1396,11 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   public void onTestFailure(TestResultMessage trm) {
     m_failedCount++;
     m_methodCount++;
-//    System.out.println("[INFO:onTestFailure]:" + trm.getMessageAsString());
+    String desc = trm.getTestDescription();
+    if (desc != null) {
+    	getTestDescriptions().add (desc);
+    }	
+    //    System.out.println("[INFO:onTestFailure]:" + trm.getMessageAsString());
     postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.FAILURE), 1 /*error*/);
   }
 
@@ -1426,4 +1429,11 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //    System.out.println("[INFO:onTestStart]:" + trm.getMessageAsString());
     postTestStarted(createRunInfo(trm, null, ITestResult.SUCCESS));
   }
+  
+  public Set getTestDescriptions() {
+	if (testDescriptions == null) {
+		testDescriptions = new HashSet();
+	}
+	return testDescriptions;
+}
 }

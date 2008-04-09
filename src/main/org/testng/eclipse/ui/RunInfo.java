@@ -30,6 +30,7 @@ public class RunInfo {
   protected int m_successPercentageFailed;
   private int m_status;
   private String m_testDescription;
+  private String m_jvm_args;
   
   
   public RunInfo(String suiteName) {
@@ -238,6 +239,14 @@ public class RunInfo {
   public String getStackTrace() {
     return m_stackTrace;
   }
+  
+  public String getJvmArgs() {
+	return m_jvm_args;
+}
+  
+  public void setJvmArgs(String m_jvm_args) {
+	this.m_jvm_args = m_jvm_args;
+}
   
   /*public static void main(String[] args) {
     String test1= "something\nwrong";

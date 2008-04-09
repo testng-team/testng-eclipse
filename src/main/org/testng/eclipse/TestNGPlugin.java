@@ -308,5 +308,17 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
   
   private boolean isEmtpy(String string) {
     return null == string || "".equals(string.trim());
-  }  
+  } 
+  
+  /**
+   * Returns a String that can be used as an identifying key for 
+   * a system property set when tests fail. The value of the property
+   * is the comma-separated results, if any, of calling getTestName() on the failed
+   * tests. This can be used by @Factory implementations to decide 
+   * which instances to construct.
+   * @return
+   */
+  public static String getFailedTestsKey() {
+	  return TestNGPluginConstants.S_FAILED_TESTS;
+  }
 }

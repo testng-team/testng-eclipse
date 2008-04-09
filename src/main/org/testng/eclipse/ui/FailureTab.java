@@ -327,6 +327,8 @@ public class FailureTab extends TestRunTab implements IMenuListener {
 //        manager.add(new OpenTestAction(fRunnerViewPart, info.m_className, info.m_methodName));
         manager.add(new OpenTestAction(fRunnerViewPart, info));
         manager.add(new Separator());
+        // TODO: the info object has the test_desc to pass along for re-running failed 
+        // factory tests
         manager.add(new QuickRunAction(fRunnerViewPart.getLaunchedProject(), 
                                        fRunnerViewPart.getLastLaunch(),
                                        info,
