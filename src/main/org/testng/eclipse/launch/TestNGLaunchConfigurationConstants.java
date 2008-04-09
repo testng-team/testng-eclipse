@@ -96,6 +96,8 @@ public abstract class TestNGLaunchConfigurationConstants {
   public static final String VM_ENABLEASSERTION_OPTION = "-ea";
   
   // What kind of run we are doing
+  // This would be a nice place for an enum when jdk1.5 or later can be 
+  // required.
   public static final int CLASS = 1;
   public static final int GROUP = 2;
   public static final int SUITE = 3;

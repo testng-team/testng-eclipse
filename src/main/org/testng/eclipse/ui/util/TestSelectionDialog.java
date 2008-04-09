@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.testng.eclipse.ui.util;
 
-
 import java.lang.reflect.InvocationTargetException;
 
 import java.text.MessageFormat;
@@ -32,6 +31,7 @@ import org.eclipse.ui.dialogs.TwoPaneElementSelector;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.TestSearchEngine;
@@ -40,233 +40,266 @@ import org.testng.eclipse.util.TestSearchEngine;
  * A dialog to select a test class or a test suite from a list of types.
  */
 public class TestSelectionDialog extends TwoPaneElementSelector {
-  private static final int TESTTYPE_TYPE = 1;
-  private static final int SUITE_TYPE = 2;
 
-  private IJavaProject m_project;
-  private Object[] m_input;
-  private Filters.ITypeFilter m_filter;
-  private int m_dialogType;
+	private IJavaProject m_project;
+	private Object[] m_input;
+	private Filters.ITypeFilter m_filter;
+	private int m_testngType;
 
-  private static class PackageRenderer extends JavaElementLabelProvider {
-    public PackageRenderer() {
-      super(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_POST_QUALIFIED
-            | JavaElementLabelProvider.SHOW_ROOT);
-    }
+	private static class PackageRenderer extends JavaElementLabelProvider {
+		public PackageRenderer() {
+			super(JavaElementLabelProvider.SHOW_PARAMETERS
+					| JavaElementLabelProvider.SHOW_POST_QUALIFIED
+					| JavaElementLabelProvider.SHOW_ROOT);
+		}
 
-    public Image getImage(Object element) {
-      Image result = null;
-      if (element instanceof IType) {
-        result = super.getImage(((IType) element).getPackageFragment());
-      }
-      else if (element instanceof File) {
-        result = super.getImage((File) element);
-      }
+		public Image getImage(Object element) {
+			Image result = null;
+			if (element instanceof IType) {
+				result = super.getImage(((IType) element).getPackageFragment());
+			} else if (element instanceof File) {
+				result = super.getImage((File) element);
+			}
 
-      return result;
-    }
+			return result;
+		}
 
-    public String getText(Object element) {
-      String result = element.toString();
-      if (element instanceof IType) {
-        result = super.getText(((IType) element).getPackageFragment());
-      }
-      else if (element instanceof File) {
-        result = ((File) element).getName();
-      }
+		public String getText(Object element) {
+			String result = element.toString();
+			if (element instanceof IType) {
+				result = super.getText(((IType) element).getPackageFragment());
+			} else if (element instanceof File) {
+				result = ((File) element).getName();
+			}
 
-      return result;
-    }
-  }
+			return result;
+		}
+	}
 
-  public static TestSelectionDialog createSuiteSelectionDialog(final Shell shell,
-                                                               final IJavaProject jproject,
-                                                               final Object[] resources) {
-    TestSelectionDialog result = new TestSelectionDialog(shell,
-                                                         SUITE_TYPE,
-                                                         jproject,
-                                                         new FileLabelProvider(FileLabelProvider.SHOW_LABEL),
-                                                         new FileLabelProvider(FileLabelProvider.SHOW_LABEL_PATH),
-                                                         resources,
-                                                         null);
-    result.setMessage(ResourceUtil.getString("TestNGMainTab.testdialog.selectSuite")); //$NON-NLS-1$
+	public static TestSelectionDialog createSuiteSelectionDialog(
+			final Shell shell, final IJavaProject jproject,
+			final Object[] resources) {
+		TestSelectionDialog result = new TestSelectionDialog(shell,
+				TestNGLaunchConfigurationConstants.SUITE, jproject,
+				new FileLabelProvider(FileLabelProvider.SHOW_LABEL),
+				new FileLabelProvider(FileLabelProvider.SHOW_LABEL_PATH),
+				resources, null);
+		result.setMessage(ResourceUtil
+				.getString("TestNGMainTab.testdialog.selectSuite")); //$NON-NLS-1$
 
-    return result;
-  }
+		return result;
+	}
 
-  public static TestSelectionDialog createTestTypeSelectionDialog(final Shell shell,
-                                                                  final IJavaProject jproject,
-                                                                  final Object[] types,
-                                                                  final Filters.ITypeFilter filter) {
-    TestSelectionDialog result = new TestSelectionDialog(shell,
-                                                         TESTTYPE_TYPE,
-                                                         jproject,
-                                                         new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS
-                                                                                      | JavaElementLabelProvider.SHOW_OVERLAY_ICONS),
-                                                         new PackageRenderer(),
-                                                         types,
-                                                         filter);
+	public static TestSelectionDialog createTestTypeSelectionDialog(
+			final Shell shell, final IJavaProject jproject,
+			final Object[] types, final Filters.ITypeFilter filter) {
+		return createJavaElementDialog (shell, jproject, types,
+				TestNGLaunchConfigurationConstants.CLASS, 
+				"TestNGMainTab.testdialog.selectTestClass", filter);
+	}
 
-    result.setMessage(ResourceUtil.getString("TestNGMainTab.testdialog.selectTestClass")); //$NON-NLS-1$
+	public static TestSelectionDialog createPackageSelectionDialog(
+			final Shell shell, final IJavaProject jproject, final Object[] types) {
+		return createJavaElementDialog (shell, jproject, types,
+				TestNGLaunchConfigurationConstants.PACKAGE, 
+				"TestNGMainTab.testdialog.selectPackage", null);
+	}
+	
+	public static TestSelectionDialog createMethodSelectionDialog(
+			final Shell shell, final IJavaProject jproject, final Object[] types) {
+		return createJavaElementDialog (shell, jproject, types,
+				TestNGLaunchConfigurationConstants.METHOD, 
+				"TestNGMainTab.testdialog.selectMethod", null);
+	}
+	
+	
+	private static TestSelectionDialog createJavaElementDialog(final Shell shell, 
+			final IJavaProject jproject, final Object[] types, 
+			final int testngType, final String title, final Filters.ITypeFilter filter
+			) {
+		TestSelectionDialog result = new TestSelectionDialog(shell,
+				testngType, jproject,
+				new JavaElementLabelProvider(
+						JavaElementLabelProvider.SHOW_BASICS
+								| JavaElementLabelProvider.SHOW_OVERLAY_ICONS),
+				new PackageRenderer(), types, filter);
+		result.setMessage(ResourceUtil
+				.getString(title));
+		return result;
+		
+		
+	}
 
-    return result;
-  }
+	private TestSelectionDialog(final Shell shell, final int type,
+			final IJavaProject jproject, final ILabelProvider mainProvider,
+			final ILabelProvider detailsProvider, final Object[] input,
+			final Filters.ITypeFilter filter) {
+		super(shell, mainProvider, detailsProvider);
 
-  private TestSelectionDialog(final Shell shell,
-                              final int type,
-                              final IJavaProject jproject,
-                              final ILabelProvider mainProvider,
-                              final ILabelProvider detailsProvider,
-                              final Object[] input,
-                              final Filters.ITypeFilter filter) {
-    super(shell, mainProvider, detailsProvider);
+		m_testngType = type;
+		m_project = jproject;
+		m_input = input;
+		m_filter = filter;
+	}
 
-    m_dialogType = type;
-    m_project = jproject;
-    m_input = input;
-    m_filter = filter;
-  }
+	/*
+	 * @see Window#open()
+	 */
+	public int open() {
+		if (null == m_input) {
+			switch (m_testngType) {
+			case TestNGLaunchConfigurationConstants.CLASS:
+				m_input = new IType[0];
 
-  /*
-   * @see Window#open()
-   */
-  public int open() {
-    if (null == m_input) {
-      if (TESTTYPE_TYPE == m_dialogType) {
-        m_input = new IType[0];
+				try {
+					m_input = TestSearchEngine.findTests(
+							new Object[] { m_project }, m_filter);
+				} catch (InterruptedException e) {
+					return CANCEL;
+				} catch (InvocationTargetException e) {
+					TestNGPlugin.log(e.getTargetException());
 
-        try {
-          m_input = TestSearchEngine.findTests(new Object[] { m_project }, m_filter);
-        }
-        catch (InterruptedException e) {
-          return CANCEL;
-        }
-        catch (InvocationTargetException e) {
-          TestNGPlugin.log(e.getTargetException());
+					return CANCEL;
+				}
+				break;
+			case TestNGLaunchConfigurationConstants.SUITE:
+				m_input = new IFile[0];
+				try {
+					m_input = TestSearchEngine
+							.findSuites(new Object[] { m_project });
+				} catch (InterruptedException e) {
+					return CANCEL;
+				} catch (InvocationTargetException e) {
+					TestNGPlugin.log(e.getTargetException());
 
-          return CANCEL;
-        }
-      }
-      else {
-        m_input = new IFile[0];
-        try {
-          m_input = TestSearchEngine.findSuites(new Object[] { m_project });
-        }
-        catch (InterruptedException e) {
-          return CANCEL;
-        }
-        catch (InvocationTargetException e) {
-          TestNGPlugin.log(e.getTargetException());
+					return CANCEL;
+				}
+				break;
+			case TestNGLaunchConfigurationConstants.PACKAGE:
+				m_input = new IType[0];
 
-          return CANCEL;
-        }
-      }
-    }
-    setElements(m_input);
+				try {
+					m_input = TestSearchEngine.findPackages(
+							new Object[] { m_project });
+				} catch (InterruptedException e) {
+					return CANCEL;
+				} catch (InvocationTargetException e) {
+					TestNGPlugin.log(e.getTargetException());
 
-    return super.open();
-  }
+					return CANCEL;
+				}
+				break;
+			default:
+				throw new IllegalArgumentException(
+						"testng type not yet implemented: " + m_testngType);
+			}
 
-  private static class FileLabelProvider extends LabelProvider {
-    public static final int SHOW_LABEL = 1;
-    public static final int SHOW_LABEL_PATH = 2;
-    public static final int SHOW_PATH_LABEL = 3;
-    public static final int SHOW_PATH = 4;
+		}
+		setElements(m_input);
 
-    private static final String fgSeparatorFormat = "{0} - {1}"; //$NON-NLS-1$
+		return super.open();
+	}
 
-    private WorkbenchLabelProvider fLabelProvider;
-    private ILabelDecorator fDecorator;
+	private static class FileLabelProvider extends LabelProvider {
+		public static final int SHOW_LABEL = 1;
+		public static final int SHOW_LABEL_PATH = 2;
+		public static final int SHOW_PATH_LABEL = 3;
+		public static final int SHOW_PATH = 4;
 
-    private int fOrder;
-    private String[] fArgs = new String[2];
+		private static final String fgSeparatorFormat = "{0} - {1}"; //$NON-NLS-1$
 
-    public FileLabelProvider(int orderFlag) {
-      fDecorator = PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
-      fLabelProvider = new WorkbenchLabelProvider();
-      fOrder = orderFlag;
-    }
+		private WorkbenchLabelProvider fLabelProvider;
+		private ILabelDecorator fDecorator;
 
-    public void setOrder(int orderFlag) {
-      fOrder = orderFlag;
-    }
+		private int fOrder;
+		private String[] fArgs = new String[2];
 
-    public String getText(Object element) {
-      if (!(element instanceof IResource)) {
-        return ""; //$NON-NLS-1$
-      }
+		public FileLabelProvider(int orderFlag) {
+			fDecorator = PlatformUI.getWorkbench().getDecoratorManager()
+					.getLabelDecorator();
+			fLabelProvider = new WorkbenchLabelProvider();
+			fOrder = orderFlag;
+		}
 
-      IResource resource = (IResource) element;
-      String text = null;
+		public void setOrder(int orderFlag) {
+			fOrder = orderFlag;
+		}
 
-      if ((resource == null) || !resource.exists()) {
-        text = ResourceUtil.getString("SearchResultView.removed_resource"); //$NON-NLS-1$
-      }
-      else {
-        IPath path = resource.getFullPath().removeLastSegments(1);
-        if (path.getDevice() == null) {
-          path = path.makeRelative();
-        }
-        if ((fOrder == SHOW_LABEL) || (fOrder == SHOW_LABEL_PATH)) {
-          text = fLabelProvider.getText(resource);
-          if ((path != null) && (fOrder == SHOW_LABEL_PATH)) {
-            fArgs[0] = text;
-            fArgs[1] = path.toString();
-            text = MessageFormat.format(fgSeparatorFormat, fArgs);
-          }
-        }
-        else {
-          if (path != null) {
-            text = path.toString();
-          }
-          else {
-            text = ""; //$NON-NLS-1$
-          }
-          if (fOrder == SHOW_PATH_LABEL) {
-            fArgs[0] = text;
-            fArgs[1] = fLabelProvider.getText(resource);
-            text = MessageFormat.format(fgSeparatorFormat, fArgs);
-          }
-        }
-      }
+		public String getText(Object element) {
+			if (!(element instanceof IResource)) {
+				return ""; //$NON-NLS-1$
+			}
 
-      // Do the decoration
-      if (fDecorator != null) {
-        String decoratedText = fDecorator.decorateText(text, resource);
-        if (decoratedText != null) {
-          return decoratedText;
-        }
-      }
+			IResource resource = (IResource) element;
+			String text = null;
 
-      return text;
-    }
+			if ((resource == null) || !resource.exists()) {
+				text = ResourceUtil
+						.getString("SearchResultView.removed_resource"); //$NON-NLS-1$
+			} else {
+				IPath path = resource.getFullPath().removeLastSegments(1);
+				if (path.getDevice() == null) {
+					path = path.makeRelative();
+				}
+				if ((fOrder == SHOW_LABEL) || (fOrder == SHOW_LABEL_PATH)) {
+					text = fLabelProvider.getText(resource);
+					if ((path != null) && (fOrder == SHOW_LABEL_PATH)) {
+						fArgs[0] = text;
+						fArgs[1] = path.toString();
+						text = MessageFormat.format(fgSeparatorFormat, fArgs);
+					}
+				} else {
+					if (path != null) {
+						text = path.toString();
+					} else {
+						text = ""; //$NON-NLS-1$
+					}
+					if (fOrder == SHOW_PATH_LABEL) {
+						fArgs[0] = text;
+						fArgs[1] = fLabelProvider.getText(resource);
+						text = MessageFormat.format(fgSeparatorFormat, fArgs);
+					}
+				}
+			}
 
-    public Image getImage(Object element) {
-      if (!(element instanceof IResource)) {
-        return null; //$NON-NLS-1$
-      }
+			// Do the decoration
+			if (fDecorator != null) {
+				String decoratedText = fDecorator.decorateText(text, resource);
+				if (decoratedText != null) {
+					return decoratedText;
+				}
+			}
 
-      IResource resource = (IResource) element;
-      Image image = fLabelProvider.getImage(resource);
-      if (fDecorator != null) {
-        Image decoratedImage = fDecorator.decorateImage(image, resource);
-        if (decoratedImage != null) {
-          return decoratedImage;
-        }
-      }
+			return text;
+		}
 
-      return image;
-    }
+		public Image getImage(Object element) {
+			if (!(element instanceof IResource)) {
+				return null; //$NON-NLS-1$
+			}
 
-    public void dispose() {
-      super.dispose();
-      fLabelProvider.dispose();
-    }
+			IResource resource = (IResource) element;
+			Image image = fLabelProvider.getImage(resource);
+			if (fDecorator != null) {
+				Image decoratedImage = fDecorator
+						.decorateImage(image, resource);
+				if (decoratedImage != null) {
+					return decoratedImage;
+				}
+			}
 
-    public boolean isLabelProperty(Object element, String property) {
-      return fLabelProvider.isLabelProperty(element, property);
-    }
+			return image;
+		}
 
-  }
+		public void dispose() {
+			super.dispose();
+			fLabelProvider.dispose();
+		}
+
+		public boolean isLabelProperty(Object element, String property) {
+			return fLabelProvider.isLabelProperty(element, property);
+		}
+
+	}
 
 }

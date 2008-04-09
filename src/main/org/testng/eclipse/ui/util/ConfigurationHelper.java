@@ -21,6 +21,7 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
+import org.testng.eclipse.ui.RunInfo;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.SuiteGenerator;
 import org.testng.remote.RemoteTestNG;
@@ -36,6 +37,7 @@ public class ConfigurationHelper {
     public String m_projectName;
     public int m_launchType;
     public Collection/*<String>*/ m_classNames;
+    public Collection/*<String>*/ m_packageNames;
     public Map/*<String, List<String>*/ classMethods;
     public String m_suiteName;
     public Map m_groupMap;
@@ -44,7 +46,8 @@ public class ConfigurationHelper {
     
     public LaunchInfo(String projectName,
                       int launchType,
-                      Collection classNames,
+                      Collection/*<String>*/ classNames,
+                      Collection/*<String>*/ packageNames,
                       Map classMethodsMap,
                       Map groupMap,
                       String suiteName,
@@ -58,6 +61,7 @@ public class ConfigurationHelper {
       m_suiteName= suiteName.trim();
       m_complianceLevel= complianceLevel;
       m_logLevel= logLevel;
+      m_packageNames = packageNames;
     }
   }
 
@@ -87,6 +91,10 @@ public class ConfigurationHelper {
     return getListAttribute(config, TestNGLaunchConfigurationConstants.CLASS_TEST_LIST);
   }
   
+  public static List getPackages(ILaunchConfiguration config) {
+	    return getListAttribute(config, TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST);
+	  }
+  
   public static List getSuites(ILaunchConfiguration config) {
     return getListAttribute(config, TestNGLaunchConfigurationConstants.SUITE_TEST_LIST);
   }
@@ -103,9 +111,9 @@ public class ConfigurationHelper {
     return getStringAttribute(configuration, IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME);
   }
   
-//  private static List getMethods(ILaunchConfiguration configuration) {
-//    return getListAttribute(configuration, TestNGLaunchConfigurationConstants.METHOD_TEST_LIST);
-//  }
+  public static List getMethods(ILaunchConfiguration configuration) {
+    return getListAttribute(configuration, TestNGLaunchConfigurationConstants.METHOD_TEST_LIST);
+  }
 
   public static String getComplianceLevel(ILaunchConfiguration configuration) {
     return getStringAttribute(configuration, TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR);
@@ -120,6 +128,26 @@ public class ConfigurationHelper {
     
     return result;
   }
+  
+  public static String getJvmArgs(ILaunchConfiguration configuration) {
+		if (configuration == null)
+			return null;
+		try {
+			return configuration.getAttribute(
+					IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "");
+		} catch (CoreException e) {
+			e.printStackTrace();
+			return ""; // TODO - better notification
+		}
+	}
+  
+  public static ILaunchConfigurationWorkingCopy setJvmArgs(
+			ILaunchConfigurationWorkingCopy configuration, String args) {
+		configuration.setAttribute(
+				IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, args);
+
+		return configuration;
+	}
   
   public static int getType(ILaunchConfiguration configuration) {
     int result = getIntAttribute(configuration, TestNGLaunchConfigurationConstants.TYPE);
@@ -295,34 +323,34 @@ public class ConfigurationHelper {
            );      
   }
 
-  /**
-   * Suite generator based on TestNG core. It is overseeded by internal suite
-   * generators that offer more control on the names.
-   * @param projectName the project name
-   * @param packages a list (possible empty) of package names
-   * @param classMethods a map (possible empty) of classes and their corresponding methods
-   * @param groups a list (possible empty) of group names
-   * @param parameters the parameters required to run the test
-   * @param annotationType
-   * @param logLevel
-   * @return
-   */
-  private static List createLaunchSuites(String projectName, 
-                                         List packages, 
-                                         Map classMethods, 
-                                         List groups, 
-                                         Map parameters, 
-                                         String annotationType, 
-                                         int logLevel) {
-    return Arrays.asList(
-        new Object[] {org.testng.xml.SuiteGenerator.createSuite(projectName,
-                                                                packages,
-                                                                classMethods, 
-                                                                groups, 
-                                                                parameters,
-                                                                annotationType,
-                                                                logLevel)});
-  }
+//  /**
+//   * Suite generator based on TestNG core. It is overseeded by internal suite
+//   * generators that offer more control on the names.
+//   * @param projectName the project name
+//   * @param packages a list (possible empty) of package names
+//   * @param classMethods a map (possible empty) of classes and their corresponding methods
+//   * @param groups a list (possible empty) of group names
+//   * @param parameters the parameters required to run the test
+//   * @param annotationType
+//   * @param logLevel
+//   * @return
+//   */
+//  private static List createLaunchSuites(String projectName, 
+//                                         List packages, 
+//                                         Map classMethods, 
+//                                         List groups, 
+//                                         Map parameters, 
+//                                         String annotationType, 
+//                                         int logLevel) {
+//    return Arrays.asList(
+//        new Object[] {org.testng.xml.SuiteGenerator.createSuite(projectName,
+//                                                                packages,
+//                                                                classMethods, 
+//                                                                groups, 
+//                                                                parameters,
+//                                                                annotationType,
+//                                                                logLevel)});
+//  }
 
   /**
    * @param configuration
@@ -388,38 +416,75 @@ public class ConfigurationHelper {
                                                            annotationType,
                                                            logLevel)});
   }
-
+  
   /**
+   * Looks for an available configuration that matches the project and confName parameters.
+   * If the defaultConfiguration is not null, it is used. The
+   * defaultConfiguration may be null, which may cause null to be returned if there is not 
+   * an exact match for the project and confName parameters. This method was added to allow
+   * the FailureTab to pass along the previous configuration for re-use, so that any jvm args
+   * defined there will be used.
    * @param launchManager
    * @param project
    * @param confName
+   * @param defaultConfiguration
    * @return
    */
-  public static ILaunchConfiguration findConfiguration(ILaunchManager launchManager, IProject project, String confName) {
-    ILaunchConfigurationType confType = launchManager.getLaunchConfigurationType(TestNGLaunchConfigurationConstants.ID_TESTNG_APPLICATION);;
-    ILaunchConfiguration resultConf = null;
-    try {
-      ILaunchConfiguration[] availConfs = launchManager.getLaunchConfigurations(confType);
-      
-      final String projectName = project.getName();
-      final String mainRunner = TestNGPluginConstants.MAIN_RUNNER;
-      
-      for(int i = 0; i < availConfs.length; i++) {
-        String confProjectName = ConfigurationHelper.getProjectName(availConfs[i]);
-        String confMainName = ConfigurationHelper.getMain(availConfs[i]);
-        
-        if(projectName.equals(confProjectName) && mainRunner.equals(confMainName) && confName.equals(availConfs[i].getName())) {
-          resultConf= availConfs[i];
-          break;
-        }
-      }
-    }
-    catch(CoreException ce) {
-      ; // IGNORE
-    }
-    
-    return resultConf;
-  }
+  public static ILaunchConfiguration findConfiguration(ILaunchManager launchManager, 
+		  IProject project, String confName, RunInfo runInfo) {
+ 
+	    ILaunchConfiguration resultConf = null;
+		try {
+				ILaunchConfigurationType confType = launchManager
+						.getLaunchConfigurationType(TestNGLaunchConfigurationConstants.ID_TESTNG_APPLICATION);
+				;
+
+				ILaunchConfiguration[] availConfs = launchManager
+						.getLaunchConfigurations(confType);
+
+				final String projectName = project.getName();
+				final String mainRunner = TestNGPluginConstants.MAIN_RUNNER;
+
+				for (int i = 0; i < availConfs.length; i++) {
+					String confProjectName = ConfigurationHelper
+					.getProjectName(availConfs[i]);
+					String confMainName = ConfigurationHelper
+					.getMain(availConfs[i]);
+
+					if (projectName.equals(confProjectName)
+							&& mainRunner.equals(confMainName) ) {
+						if (confName != null && 
+								confName.equals(availConfs[i].getName())) {
+							resultConf = availConfs[i];
+							break;
+						}
+						else if (runInfo != null) {
+							Map availableClassMethods = getClassMethods(availConfs[i]);
+							String method = runInfo.getMethodName();
+							if (method != null && availableClassMethods != null) {
+								String className = runInfo.getClassName();
+								Object o = availableClassMethods.get(className);
+								if (o != null && o instanceof List) {
+									List methods = (List) o;
+									if (methods.size() == 1) {
+										String available = (String) methods.get(0);
+										if (method.equalsIgnoreCase(available)) {
+											resultConf = availConfs[i];
+											break;
+										}
+									}
+								}
+							}
+						}// else if
+						// TODO: else complain about no reference parameters
+					}// if
+				}	// for			   
+		} catch (CoreException ce) {
+			; // IGNORE
+		}
+		
+		return resultConf;
+	}
 
   /**
    * @param classMethods
@@ -467,6 +532,10 @@ public class ConfigurationHelper {
         classNamesList.add(cls);
       }
     }
+    List packageList = new ArrayList();
+    if (launchInfo.m_packageNames != null) {
+    	packageList.addAll(launchInfo.m_packageNames);
+    }    
     if(null != launchInfo.classMethods) {
       classMethods.putAll(launchInfo.classMethods);
     }
@@ -478,6 +547,8 @@ public class ConfigurationHelper {
                                RemoteTestNG.class.getName());
     configuration.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
                                classNamesList);
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST,
+    		packageList);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.GROUP_LIST,
                                new ArrayList(launchInfo.m_groupMap.keySet()));
     configuration.setAttribute(TestNGLaunchConfigurationConstants.GROUP_CLASS_LIST,
@@ -490,5 +561,6 @@ public class ConfigurationHelper {
                                launchInfo.m_complianceLevel);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL,
                                launchInfo.m_logLevel);
+    
   }
 }
