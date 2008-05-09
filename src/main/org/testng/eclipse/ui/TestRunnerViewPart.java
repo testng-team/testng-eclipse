@@ -45,6 +45,7 @@ import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.action.Action;
@@ -1436,4 +1437,41 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 	}
 	return testDescriptions;
 }
+  
+    /**
+	 * If any test descriptions of failed tests have been saved, pass them along
+	 * as a jvm argument. They can they be used by
+	 * @Factory methods to select which parameters to use for creating the set
+	 * of test instances to re-run.
+	 */
+	public void run() {
+		if (null != m_LastLaunch && hasErrors()) {
+			ILaunchConfiguration config = m_LastLaunch.getLaunchConfiguration();
+			
+			try {
+				ILaunchConfigurationWorkingCopy wc = config.getWorkingCopy();
+				Set descriptions = getTestDescriptions();
+				if (!descriptions.isEmpty()) { // String.join is not
+					// available in jdk 1.4
+					StringBuffer buf = new StringBuffer();
+					Iterator it = descriptions.iterator();
+					boolean first = true;
+					while (it.hasNext()) {
+						if (first) {
+							first = false;
+						} else {
+							buf.append(",");
+						}
+						buf.append(it.next());
+					}
+					config = LaunchUtil.addJvmArg(TestNGPlugin
+							.getFailedTestsKey(), buf.toString(), wc);
+				}
+			} catch (CoreException ce) {
+				ce.printStackTrace();
+			}
+			LaunchUtil.launchFailedSuiteConfiguration(m_workingProject,
+					m_LastLaunch.getLaunchMode());
+		}
+	}
 }

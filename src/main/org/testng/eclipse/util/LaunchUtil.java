@@ -557,4 +557,47 @@ public class LaunchUtil {
 	  catch (CoreException ce) {}
 	  return config;
   }
+  
+  /**
+   * Create a working copy from the launcher arg, and set a jvm arg with the supplied 
+   * key and value. 
+   * @param key
+   * @param value
+   * @param config
+   * @return
+   */
+  public static ILaunchConfigurationWorkingCopy addJvmArg (String key, String value, 
+		  ILaunchConfigurationWorkingCopy config) {	  
+	  try {
+			String jvmargs = config.getAttribute(
+					IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "");			
+			String newarg = key + "=\"" + value + "\" ";
+			if (!key.startsWith("-D")) newarg = "-D" + newarg;
+			// if there is no value, then remove this jvm arg if there is one.
+			if (value == "") newarg = " "; 
+			else newarg = " " + newarg;
+			if (jvmargs.equals("")) {
+				// simplest case: set the attribute			
+				config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, newarg);
+			}
+			else if (jvmargs.indexOf(key) == -1) {
+				// nothing to replace; just add
+				config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, jvmargs + newarg);
+			}
+			else {
+				// find the new arg in the existing jvm args and replace it
+				int start = jvmargs.indexOf(key);
+				int next = jvmargs.indexOf("-D", start + 1);
+				StringBuffer buf = new StringBuffer();
+				buf.append(newarg)
+				.append (jvmargs.substring(0,start));
+				if (next > start) {
+					buf.append(jvmargs.substring(next));
+				}
+				config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, buf.toString());
+			}
+		}
+	  catch (CoreException ce) {}
+	  return config;
+  }
 }
