@@ -53,6 +53,7 @@ class FailureTrace implements IMenuListener {
   private String               fInputTrace;
   private RunInfo              fFailure;
   private CompareResultsAction fCompareAction;
+  private String 			   fMessage;
 
   public FailureTrace(Composite parent,
                       TestRunnerViewPart testRunner,
@@ -123,6 +124,7 @@ class FailureTrace implements IMenuListener {
       }
       
       manager.add(new TraceCopyAction(FailureTrace.this, fClipboard));
+      manager.add(new MessageCopyAction(FailureTrace.this, fClipboard));
     }
   }
 
@@ -224,7 +226,7 @@ class FailureTrace implements IMenuListener {
       if(line == null) {
         return;
       }
-
+      fMessage = line;
       TableItem tableItem = new TableItem(fTable, SWT.NONE);
       String    itemLabel = line.replace('\t', ' ');
       tableItem.setText(itemLabel);
@@ -267,5 +269,9 @@ class FailureTrace implements IMenuListener {
 
   public Shell getShell() {
     return fTable.getShell();
+  }
+  
+  public String getMessage() {
+	return fMessage;
   }
 }
