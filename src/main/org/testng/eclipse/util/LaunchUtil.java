@@ -286,10 +286,10 @@ public class LaunchUtil {
     for(int i = 0; i < types.length; i++) {
       typeNames.add(types[i].getFullyQualifiedName());
     }
-    
+    String name = typeNames.get(0).toString() + "." + methodNames.get(0).toString();
     final String complianceLevel= annotationType != null ? annotationType : getQuickComplianceLevel(types);
   
-    ILaunchConfigurationWorkingCopy workingCopy= createLaunchConfiguration(ijp.getProject(), null, runInfo);
+    ILaunchConfigurationWorkingCopy workingCopy= createLaunchConfiguration(ijp.getProject(), name, runInfo);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
                              typeNames);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.METHOD_TEST_LIST,
