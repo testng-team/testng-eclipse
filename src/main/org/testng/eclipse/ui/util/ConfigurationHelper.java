@@ -38,7 +38,7 @@ public class ConfigurationHelper {
     public int m_launchType;
     public Collection/*<String>*/ m_classNames;
     public Collection/*<String>*/ m_packageNames;
-    public Map/*<String, List<String>*/ classMethods;
+    public Map/*<String, List<String>*/ m_classMethods;
     public String m_suiteName;
     public Map m_groupMap;
     public String m_complianceLevel;
@@ -56,7 +56,7 @@ public class ConfigurationHelper {
       m_projectName= projectName;
       m_launchType= launchType;
       m_classNames= classNames;
-      classMethods= classMethodsMap;
+      m_classMethods= classMethodsMap;
       m_groupMap= groupMap;
       m_suiteName= suiteName.trim();
       m_complianceLevel= complianceLevel;
@@ -536,8 +536,8 @@ public class ConfigurationHelper {
     if (launchInfo.m_packageNames != null) {
     	packageList.addAll(launchInfo.m_packageNames);
     }    
-    if(null != launchInfo.classMethods) {
-      classMethods.putAll(launchInfo.classMethods);
+    if(null != launchInfo.m_classMethods) {
+      classMethods.putAll(launchInfo.m_classMethods);
     }
     
     configuration.setAttribute(TestNGLaunchConfigurationConstants.TYPE, launchInfo.m_launchType);
