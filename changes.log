@@ -1,0 +1,4 @@
+TESTNG-239  	 Copy Exception Message
+    Added MessageCopyAction, refactoring TraceCopyAction so both are minor variations on AbstractTraceAction, 
+    so that a right click on the failure trace offers the option of copying only the trace.
+    revision 93.
