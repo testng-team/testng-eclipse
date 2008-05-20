@@ -218,15 +218,17 @@ class FailureTrace implements IMenuListener {
     StringReader   stringReader = new StringReader(trace);
     BufferedReader bufferedReader = new BufferedReader(stringReader);
     String         line;
+    
 
-    try {
+    try {    	
 
       // first line contains the thrown exception
       line = bufferedReader.readLine();
       if(line == null) {
         return;
       }
-      fMessage = line;
+      boolean stackFound = false;
+
       TableItem tableItem = new TableItem(fTable, SWT.NONE);
       String    itemLabel = line.replace('\t', ' ');
       tableItem.setText(itemLabel);
@@ -245,9 +247,15 @@ class FailureTrace implements IMenuListener {
         // heuristic for detecting a stack frame - works for JDK
         if((itemLabel.indexOf(" at ") >= 0)) { //$NON-NLS-1$
           tableItem.setImage(m_stackIcon);
+          if (!stackFound) {
+        	  String messagebase = trace.replace('\n', ' ').replace('\t', ' ');
+        	  fMessage = messagebase.substring(0, messagebase.indexOf(" at "));
+        	  stackFound = true;
+          }
         }
         tableItem.setText(itemLabel);
       }
+      if (!stackFound) fMessage = trace;
     }
     catch(IOException e) {
       TableItem tableItem = new TableItem(fTable, SWT.NONE);

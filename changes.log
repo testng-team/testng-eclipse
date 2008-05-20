@@ -2,3 +2,12 @@ TESTNG-239  	 Copy Exception Message
     Added MessageCopyAction, refactoring TraceCopyAction so both are minor variations on AbstractTraceAction, 
     so that a right click on the failure trace offers the option of copying only the trace.
     revision 93.
+
+Rev 95: "method launcher name when created from outline view is no longer null"
+
+Rev 96 "rename variable to keep class conventions and reduce confusion between it 
+and a local method name, thus removing the method launcher's inclination 
+to lose its method name"  src/main/org/testng/eclipse/ui/util/ConfigurationHelper.java
+
+Rev 97 "Better detection of end of exception message" FailureTrace.java
+
