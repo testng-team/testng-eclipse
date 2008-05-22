@@ -248,7 +248,7 @@ class FailureTrace implements IMenuListener {
         if((itemLabel.indexOf(" at ") >= 0)) { //$NON-NLS-1$
           tableItem.setImage(m_stackIcon);
           if (!stackFound) {
-        	  String messagebase = trace.replace('\n', ' ').replace('\t', ' ');
+        	  String messagebase = trace.replace('\t', ' ');
         	  fMessage = messagebase.substring(0, messagebase.indexOf(" at "));
         	  stackFound = true;
           }

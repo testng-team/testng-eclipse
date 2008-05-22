@@ -15,6 +15,7 @@ public class RunInfo {
   private static final Pattern CARRAGERETURN= Pattern.compile("\r");
   
   private String m_id;
+  private String m_id_with_desc;
   private int m_type;
   private String m_suiteName;
   private String m_testName;
@@ -56,6 +57,8 @@ public class RunInfo {
                  String stackTrace,
                  int status) {
     m_id = suiteName + "." + testName + "." + className + "." + methodName + toString(params, paramTypes);
+    if (testDesc != null) m_id_with_desc = m_id + "." + testDesc;
+    else m_id_with_desc = m_id;
     m_suiteName = suiteName;
     m_testName = testName;
     m_className = className;
@@ -242,11 +245,11 @@ public class RunInfo {
   
   public String getJvmArgs() {
 	return m_jvm_args;
-}
-  
+  }
+
   public void setJvmArgs(String m_jvm_args) {
-	this.m_jvm_args = m_jvm_args;
-}
+    this.m_jvm_args = m_jvm_args;
+  }
   
   /*public static void main(String[] args) {
     String test1= "something\nwrong";

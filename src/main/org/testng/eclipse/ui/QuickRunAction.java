@@ -66,7 +66,7 @@ public class QuickRunAction extends Action {
 
     if(null == imethod) return;
     /*
-     * The runInfo is passed along in the in order to preserve any 
+     * The runInfo is passed along in order to preserve any 
      * jvm args used in the original launcher when
      * QuickRunAction is activated from the FailureTab to re-run failed 
      * methods. 

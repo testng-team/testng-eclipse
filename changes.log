@@ -11,3 +11,13 @@ to lose its method name"  src/main/org/testng/eclipse/ui/util/ConfigurationHelpe
 
 Rev 97 "Better detection of end of exception message" FailureTrace.java
 
+Rev.98
+Refactored TestHierarchyTab and FailureTab so that they use nearly the same code,
+putting in their own labels, except that for the FailureTab the test items are 
+not added to the displayed tree until they are known to fail.
+Fixes TESTNG-245     
+  Unify 'All Tests' and 'Failed Tests' with the only difference being filtering for failures.
+ 
+  
+  
+
