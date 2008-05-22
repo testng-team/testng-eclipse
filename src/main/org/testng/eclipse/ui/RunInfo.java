@@ -15,7 +15,7 @@ public class RunInfo {
   private static final Pattern CARRAGERETURN= Pattern.compile("\r");
   
   private String m_id;
-  private String m_id_with_desc;
+  private String m_idWithDesc;
   private int m_type;
   private String m_suiteName;
   private String m_testName;
@@ -31,7 +31,7 @@ public class RunInfo {
   protected int m_successPercentageFailed;
   private int m_status;
   private String m_testDescription;
-  private String m_jvm_args;
+  private String m_jvmArgs;
   
   
   public RunInfo(String suiteName) {
@@ -57,8 +57,8 @@ public class RunInfo {
                  String stackTrace,
                  int status) {
     m_id = suiteName + "." + testName + "." + className + "." + methodName + toString(params, paramTypes);
-    if (testDesc != null) m_id_with_desc = m_id + "." + testDesc;
-    else m_id_with_desc = m_id;
+    if (testDesc != null) m_idWithDesc = m_id + "." + testDesc;
+    else m_idWithDesc = m_id;
     m_suiteName = suiteName;
     m_testName = testName;
     m_className = className;
@@ -244,11 +244,11 @@ public class RunInfo {
   }
   
   public String getJvmArgs() {
-	return m_jvm_args;
+	return m_jvmArgs;
   }
 
-  public void setJvmArgs(String m_jvm_args) {
-    this.m_jvm_args = m_jvm_args;
+  public void setJvmArgs(String m_jvmArgs) {
+    this.m_jvmArgs = m_jvmArgs;
   }
   
   /*public static void main(String[] args) {
