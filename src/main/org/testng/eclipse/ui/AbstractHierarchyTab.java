@@ -1,0 +1,707 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *     Sebastian Davids - sdavids@gmx.de bugs 26754, 41228
+*******************************************************************************/
+package org.testng.eclipse.ui;
+
+
+import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.util.ResourceUtil;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
+import org.testng.ITestResult;
+
+/*
+ * A view that shows the contents of a test suite
+ * as a tree.
+ */
+public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuListener {
+  private final Image m_suiteIcon = TestNGPlugin.getImageDescriptor("obj16/suite.gif").createImage(); //$NON-NLS-1$
+  private final Image m_suiteOkeIcon = TestNGPlugin.getImageDescriptor("obj16/suiteok.gif").createImage(); //$NON-NLS-1$
+  private final Image m_suiteSkipIcon = TestNGPlugin.getImageDescriptor("obj16/suiteskip.gif").createImage(); //$NON-NLS-1$
+  private final Image m_suiteFailIcon = TestNGPlugin.getImageDescriptor("obj16/suitefail.gif").createImage(); //$NON-NLS-1$
+  private final Image m_suiteRunIcon = TestNGPlugin.getImageDescriptor("obj16/suiterun.gif").createImage(); //$NON-NLS-1$
+
+  private final Image m_testHierarchyIcon = TestNGPlugin.getImageDescriptor("obj16/testhier.gif").createImage(); //$NON-NLS-1$ 
+  private final Image m_testIcon = TestNGPlugin.getImageDescriptor("obj16/test.gif").createImage(); //$NON-NLS-1$
+  private final Image m_testOkeIcon = TestNGPlugin.getImageDescriptor("obj16/testok.gif").createImage(); //$NON-NLS-1$
+  private final Image m_testSkipIcon = TestNGPlugin.getImageDescriptor("obj16/testskip.gif").createImage(); //$NON-NLS-1$
+  private final Image m_testFailIcon = TestNGPlugin.getImageDescriptor("obj16/testfail.gif").createImage(); //$NON-NLS-1$
+  private final Image m_testRunIcon = TestNGPlugin.getImageDescriptor("obj16/testrun.gif").createImage(); //$NON-NLS-1$
+
+  private final static String FORMATTED_MESSAGE = "{0} ( {1}/{2}/{3}/{4} )";
+  
+  private Tree fTree;
+  
+  /**
+   * Maps test Ids to TreeItems.
+   */
+  private Map m_treeItemMap = new Hashtable();
+  private Map m_runningItems= new Hashtable();
+  
+  private int m_duplicateItemsIndex= 0;
+  
+  /**
+   * List of test failure Ids
+   */
+  private List m_failureIds = new ArrayList();
+
+  private boolean fMoveSelection = false;
+  
+  private TestRunnerViewPart fTestRunnerPart;
+  
+  //do not create TreeItems for tests for FailureTab until failure is known
+  // may be used in subclass constructor, eg for FailureTab
+  private boolean delayItemCreation=false; 
+  
+  public AbstractHierarchyTab(){}
+  
+  
+  public AbstractHierarchyTab(boolean delayItemCreation){
+    this.delayItemCreation = delayItemCreation;
+  }
+  
+
+  /**
+	 * @see net.noco.testng.ui.TestRunTab#createTabControl(org.eclipse.swt.custom.CTabFolder,
+	 *      net.noco.testng.ui.TestRunnerViewPart)
+	 */
+  public void createTabControl(CTabFolder tabFolder, TestRunnerViewPart runner) {
+    fTestRunnerPart = runner;
+
+    CTabItem hierarchyTab = new CTabItem(tabFolder, SWT.NONE);
+    hierarchyTab.setText(getName());
+    hierarchyTab.setImage(m_testHierarchyIcon);
+
+    Composite  testTreePanel = new Composite(tabFolder, SWT.NONE);
+    GridLayout gridLayout = new GridLayout();
+    gridLayout.marginHeight = 0;
+    gridLayout.marginWidth = 0;
+    testTreePanel.setLayout(gridLayout);
+
+    GridData gridData = new GridData(GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
+    testTreePanel.setLayoutData(gridData);
+
+    hierarchyTab.setControl(testTreePanel);
+    hierarchyTab.setToolTipText(ResourceUtil.getString(getTooltipKey())); //$NON-NLS-1$
+
+    fTree = new Tree(testTreePanel, SWT.V_SCROLL | SWT.SINGLE);
+    gridData = new GridData(GridData.FILL_BOTH
+                            | GridData.GRAB_HORIZONTAL
+                            | GridData.GRAB_VERTICAL);
+
+    fTree.setLayoutData(gridData);
+
+    initMenu();
+    addListeners();
+  }
+  
+
+  private void initMenu() {
+    MenuManager menuMgr = new MenuManager();
+    menuMgr.setRemoveAllWhenShown(true);
+    menuMgr.addMenuListener(this);
+
+    Menu menu = menuMgr.createContextMenu(fTree);
+    fTree.setMenu(menu);
+  }
+  
+  private void addListeners() {
+    fTree.addSelectionListener(new SelectionListener() {
+        public void widgetSelected(SelectionEvent e) {
+          activate();
+        }
+
+        public void widgetDefaultSelected(SelectionEvent e) {
+          activate();
+        }
+      });
+
+    fTree.addDisposeListener(new DisposeListener() {
+        public void widgetDisposed(DisposeEvent e) {
+          disposeIcons();
+        }
+      });
+
+    fTree.addMouseListener(new MouseAdapter() {
+        public void mouseDoubleClick(MouseEvent e) {
+          handleDoubleClick(e);
+        }
+      });
+  }
+
+  void disposeIcons() {
+    m_suiteIcon.dispose();
+    m_suiteOkeIcon.dispose();
+    m_suiteFailIcon.dispose();
+    m_suiteSkipIcon.dispose();
+    m_suiteRunIcon.dispose();
+
+    m_testHierarchyIcon.dispose();
+    m_testIcon.dispose();
+    m_testOkeIcon.dispose();
+    m_testFailIcon.dispose();
+    m_testSkipIcon.dispose();
+    m_testRunIcon.dispose();
+  }
+
+
+  void handleDoubleClick(MouseEvent e) {
+    RunInfo testInfo = getTestInfo();
+
+    if(null == testInfo) {
+      return;
+    }
+
+    if(RunInfo.RESULT_TYPE == testInfo.getType()) {
+//      OpenTestAction action = new OpenTestAction(fTestRunnerPart, testInfo.m_className, testInfo.m_methodName);
+      OpenTestAction action = new OpenTestAction(fTestRunnerPart, testInfo);
+      
+      if(action.isEnabled()) {
+        action.run();
+      }
+    }
+  }
+
+
+
+  /**
+   * @see net.noco.testng.ui.TestRunTab#getSelectedTestId()
+   */
+  public String getSelectedTestId() {
+    RunInfo testInfo = getTestInfo();
+    
+    if(testInfo == null) {
+      return null;
+    }
+
+    return testInfo.getId();
+  }
+  
+  /**
+   * @see net.noco.testng.ui.TestRunTab#activate()
+   */
+  public void activate() {
+    fMoveSelection = false;
+    testSelected();
+  }
+
+  /**
+   * @see net.noco.testng.ui.TestRunTab#setFocus()
+   */
+  public void setFocus() {
+    fTree.setFocus();
+  }
+
+  /**
+   * @see net.noco.testng.ui.TestRunTab#aboutToStart()
+   */
+  public void aboutToStart() {
+    fTree.removeAll();
+    m_treeItemMap = new Hashtable();
+    m_runningItems= new Hashtable();
+    m_duplicateItemsIndex= 0;
+    fMoveSelection = false;
+  }
+
+  /**
+   * @see net.noco.testng.ui.TestRunTab#setSelectedTest(java.lang.String)
+   */
+  public void setSelectedTest(String testId) {
+    if(null == testId) {
+      TestNGPlugin.log(new Status(IStatus.WARNING,
+          TestNGPlugin.PLUGIN_ID,
+          IStatus.WARNING,
+          "[" + getSelectedTestKey() + "] was called with '" + testId + "'",
+          null));
+      return;
+    }
+    
+    TreeItem treeItem = (TreeItem) getTreeEntry(testId); 
+    if(null != treeItem) {
+      fTree.setSelection(new TreeItem[] { treeItem });
+      treeItem.setExpanded(true);
+    }
+  }
+  
+  /**
+   * Called on suite and test events.
+   * @see org.testng.eclipse.ui.TestRunTab#updateEntry(java.lang.String)
+   */
+  public void updateEntry(String id) {
+    TreeItem ti = (TreeItem) m_treeItemMap.get(id);
+    
+    if(null == ti) {
+      return;
+    }
+    
+    RunInfo ri = (RunInfo) ti.getData("runinfo");
+    int state = ITestResult.SUCCESS;
+    if(ri.m_failed + ri.m_successPercentageFailed > 0) {
+      state = ITestResult.FAILURE;
+    }
+    else if(ri.m_skipped > 0) {
+      state = ITestResult.SKIP;
+    }
+    
+    ti.setImage(getStatusImage(ri.getType(), state));
+  }
+
+  /**
+   * Called on test results.
+   * 
+   * @see net.noco.testng.ui.TestRunTab#updateTestResult(net.noco.testng.ui.RunInfo)
+   */
+  public void updateTestResult(RunInfo resultInfo) {
+    TreeItem ti = (TreeItem) getRunningEntry(resultInfo.getId(), resultInfo.getTestDescription());
+    
+    if(null == ti) {
+      // probably this is a @Configuration failures
+      // or else the FailureTab is waiting to do the creating
+      ti= createFailedEntry(resultInfo);
+     // updateView(ti);
+     // return;
+    }
+    
+    ti.setData("runinfo", resultInfo);
+    ti.setExpanded(true);
+    ti.setImage(getStatusImage(resultInfo.getType(), resultInfo.getStatus()));
+    
+    if(ITestResult.SUCCESS != resultInfo.getStatus()) {
+      m_failureIds.add((String) ti.getData("testid"));
+    }
+    
+    perpetuateResult(ti.getParentItem(), resultInfo.getStatus());
+    updateView(ti);
+  }
+  
+  private void updateView(TreeItem ti) {
+    // TESNTG-157: scroll latest marked test to visible in the view
+    ti.setExpanded(true);
+    fTree.setSelection(ti);    
+  }
+  
+  private TreeItem createFailedEntry(RunInfo runInfo) {
+    String enclosingTestId = runInfo.getTestFQN(); 
+    TreeItem parentItem = (TreeItem) m_treeItemMap.get(enclosingTestId);
+    
+    if (null == parentItem) {
+      // the failures in beforeSuite/beforeTest are reported before a test context exists
+      newTreeEntry(new RunInfo(runInfo.getSuiteName()));
+      newTreeEntry(new RunInfo(runInfo.getSuiteName(), runInfo.getTestName()));
+      parentItem = (TreeItem) m_treeItemMap.get(enclosingTestId);
+    }
+    
+    TreeItem treeItem = testTreeItem(parentItem, runInfo);
+    
+    if(ITestResult.SUCCESS != runInfo.getStatus()) {
+      m_failureIds.add(runInfo.getId());
+    }
+    
+    perpetuateResult(parentItem, runInfo.getStatus());
+    
+    return treeItem;
+  }
+  
+  private TreeItem createNewTreeItem(TreeItem parentItem, RunInfo runInfo ) {
+	  if (parentItem == null) {
+		  throw new IllegalArgumentException ("parentItem must not be null");
+	  }
+	  TreeItem treeItem = new TreeItem(parentItem, SWT.NONE);
+	  treeItem.setImage(getStatusImage(runInfo.getType(), runInfo.getStatus()));
+	  treeItem.setData("runinfo", runInfo);
+	  treeItem.setData("testid", runInfo.getId());
+	  String testname = runInfo.getTestName();
+	  if (testname != null) {
+		  treeItem.setData("testname", testname);
+	  }
+	  String testdesc = runInfo.getTestDescription();
+    if (testdesc != null) {
+      treeItem.setData("testdesc", testdesc);
+    }
+	  treeItem.setExpanded(true);
+	  return treeItem;
+  }
+  
+  
+  
+  private void perpetuateResult(TreeItem ti, int state) {
+    if(null == ti) {
+      return;
+    }
+    
+    RunInfo ri = (RunInfo) ti.getData("runinfo");
+    if(RunInfo.SUITE_TYPE == ri.getType()
+        || RunInfo.TEST_TYPE == ri.getType()) {
+      switch(state) {
+        case ITestResult.SUCCESS:
+          ri.m_passed++;
+          break;
+        case ITestResult.FAILURE:
+          ri.m_failed++;
+          break;
+        case ITestResult.SKIP:
+          ri.m_skipped++;
+          break;
+        case ITestResult.SUCCESS_PERCENTAGE_FAILURE:
+          ri.m_successPercentageFailed++;
+          break;
+      }
+      
+      ti.setExpanded(true);
+      String itemName = RunInfo.SUITE_TYPE == ri.getType() ? ri.getSuiteName() : ri.getTestName();
+      
+
+      ti.setText(MessageFormat.format(FORMATTED_MESSAGE,
+          new Object[] {
+              itemName,
+              new Integer(ri.m_passed),
+              new Integer(ri.m_failed),
+              new Integer(ri.m_skipped),
+              new Integer(ri.m_successPercentageFailed)
+          })
+      );
+      
+      perpetuateResult(ti.getParentItem(), state);
+    }
+  }
+  
+  private Image getStatusImage(int type, int state) {
+    if(RunInfo.SUITE_TYPE == type) {
+      switch(state) {
+        case ITestResult.SUCCESS:
+          return m_suiteOkeIcon;
+        case ITestResult.FAILURE:
+        case ITestResult.SUCCESS_PERCENTAGE_FAILURE:
+          return m_suiteFailIcon;
+        case ITestResult.SKIP:
+          return m_suiteSkipIcon;
+      }
+    }
+    else {
+      switch(state) {
+        case ITestResult.SUCCESS:
+          return m_testOkeIcon;
+        case ITestResult.FAILURE:
+        case ITestResult.SUCCESS_PERCENTAGE_FAILURE:
+          return m_testFailIcon;
+        case ITestResult.SKIP:
+          return m_testSkipIcon;
+      }
+    }
+    
+    return null;
+  }
+    
+  /**
+   * @see net.noco.testng.ui.TestRunTab#newTreeEntry(net.noco.testng.ui.RunInfo)
+   */
+  public void newTreeEntry(RunInfo treeEntry) {
+    TreeItem treeItem = null;
+    boolean running= false;
+    boolean allowDups= true;
+      
+      switch(treeEntry.getType()) {
+        case RunInfo.SUITE_TYPE:
+          if(!m_treeItemMap.containsKey(treeEntry.getId())) {
+            treeItem = new TreeItem(fTree, SWT.NONE);
+            treeItem.setImage(m_suiteRunIcon);
+            treeItem.setData("runinfo", treeEntry);
+            treeItem.setData("testid", treeEntry.getId());
+            treeItem.setText(MessageFormat.format(FORMATTED_MESSAGE,
+                new Object[] {
+                    treeEntry.getSuiteName(),
+                    new Integer(treeEntry.m_passed),
+                    new Integer(treeEntry.m_failed),
+                    new Integer(treeEntry.m_skipped),
+                    new Integer(treeEntry.m_successPercentageFailed)
+                })
+            );
+          }
+
+          break;
+        case RunInfo.TEST_TYPE:
+          if(!m_treeItemMap.containsKey(treeEntry.getId())) {
+            TreeItem suiteItem = (TreeItem) m_treeItemMap.get(treeEntry.getSuiteName());            
+            treeItem = createNewTreeItem(suiteItem, treeEntry);
+            treeItem.setImage(m_testRunIcon);
+            treeItem.setText(MessageFormat.format(FORMATTED_MESSAGE,
+                new Object[] {
+                  treeEntry.getTestName(),
+                  new Integer(treeEntry.m_passed),
+                  new Integer(treeEntry.m_failed),
+                  new Integer(treeEntry.m_skipped),
+                  new Integer(treeEntry.m_successPercentageFailed)
+                })
+            );
+          }
+          break;
+        case RunInfo.RESULT_TYPE:
+          String enclosingTestId = treeEntry.getTestFQN(); 
+          TreeItem testItem = (TreeItem) m_treeItemMap.get(enclosingTestId);
+          
+          if (null != testItem) {
+            running= true;
+            allowDups= false;
+          }
+          else { 
+            // the failures in beforeSuite/beforeTest are reported before a test context exists
+            newTreeEntry(new RunInfo(treeEntry.getSuiteName()));
+            newTreeEntry(new RunInfo(treeEntry.getSuiteName(), treeEntry.getTestName()));
+            testItem = (TreeItem) m_treeItemMap.get(enclosingTestId);
+          }
+          // if it's for failure tab, at this point do not create a TreeItem
+          if (!delayItemCreation){
+            treeItem = testTreeItem(testItem, treeEntry);
+          }
+          break;
+      }
+      
+      if(null != treeItem) {
+        registerTreeEntry(treeEntry, treeItem, allowDups, running);
+      }
+  }
+  
+  private TreeItem testTreeItem(TreeItem parent, RunInfo treeEntry){
+    TreeItem treeItem = createNewTreeItem(parent, treeEntry);
+    treeItem.setImage(m_testRunIcon);        
+    String parentName= (String) parent.getData("testname");
+    if(treeEntry.getClassName().equals(parentName)) {
+      treeItem.setText(treeEntry.getMethodName() + treeEntry.getTestDescription() + treeEntry.getParametersDisplay());
+    }
+    else {
+      treeItem.setText(treeEntry.getMethodDisplay());
+    }
+    return treeItem;
+    
+  }
+  
+  private void registerTreeEntry(RunInfo runInfo, TreeItem item, boolean allowDups, boolean running) {
+	
+    String itemKey= runInfo.getId();
+
+    if(!allowDups && m_treeItemMap.containsKey(runInfo.getId())) {
+      TreeItem ti= (TreeItem) m_treeItemMap.get(runInfo.getId());
+      RunInfo ri= (RunInfo) ti.getData("runinfo");
+      if(runInfo.getTestDescription().equals(ri.getTestDescription())) {
+        m_duplicateItemsIndex++;
+        itemKey+= m_duplicateItemsIndex;
+  
+        item.setText(item.getText() + "[" + m_duplicateItemsIndex + "]");
+        item.setData("testid", itemKey);
+      }
+    }
+    
+    if(running) {
+      List dups= (List) m_runningItems.get(runInfo.getId());
+      if(null == dups) {
+        dups= new ArrayList();
+        m_runningItems.put(runInfo.getId(), dups);
+      }
+      dups.add(item);
+    }
+    
+    m_treeItemMap.put(itemKey, item);
+  }
+  
+  private TreeItem getRunningEntry(String originalId, String testdesc) {
+    if(m_runningItems.containsKey(originalId)) {
+      List dups= (List) m_runningItems.get(originalId);
+      if(dups.size() == 1) {
+        m_runningItems.remove(originalId);
+        return (TreeItem) dups.get(0);
+      }
+      else {
+        java.util.Iterator it = dups.iterator();
+        while (it.hasNext()) {
+          TreeItem next = (TreeItem)it.next();
+          RunInfo ri= (RunInfo) next.getData("runinfo");
+          if (testdesc != null & ri.getTestDescription().equals(testdesc)) {
+            return next;
+          }
+        }
+        // if we didn't find a match using test desc ..
+        return (TreeItem) dups.remove(0);
+      }
+    }
+
+    return null;
+  }
+  
+  private TreeItem getTreeEntry(String originalId) {
+    if(m_runningItems.containsKey(originalId)) {
+      List dups= (List) m_runningItems.get(originalId);
+      if(dups.size() == 1) {
+        m_runningItems.remove(originalId);
+        return (TreeItem) dups.get(0);
+      }
+      else {
+        return (TreeItem) dups.remove(0);
+      }
+    }
+    else {
+      return (TreeItem) m_treeItemMap.get(originalId);
+    }
+  }
+  
+  private TreeItem getInitialSearchSelection() {
+    TreeItem[] treeItems= fTree.getSelection(); 
+    TreeItem selection= null;
+    
+    if(treeItems.length == 0) {  
+      selection= fTree.getItems()[0];
+    }
+    else {
+      selection= treeItems[0];
+    }
+    
+    return selection;
+  }
+  
+  /**
+   * @see org.eclipse.jdt.internal.junit.ui.ITestRunView#selectNext()
+   */
+  public void selectNext() {
+    TreeItem currentSelection = getInitialSearchSelection();
+    String currentId = (String) currentSelection.getData("testid");
+    
+    int currentIndex = m_failureIds.indexOf(currentId);
+    if(++currentIndex <= m_failureIds.size()) {
+      setSelectedTest((String) m_failureIds.get(currentIndex));
+      testSelected();
+    }
+  }
+
+  /**
+   * @see org.eclipse.jdt.internal.junit.ui.ITestRunView#selectPrevious()
+   */
+  public void selectPrevious() {
+    TreeItem currentSelection = getInitialSearchSelection();
+    String currentId = (String) currentSelection.getData("testid");
+    
+    int currentIndex = m_failureIds.indexOf(currentId);
+    if(--currentIndex >= 0 && currentIndex < m_failureIds.size()) {
+      setSelectedTest((String) m_failureIds.get(currentIndex));
+      testSelected();
+    }
+  }
+  
+  /**
+   * @see org.eclipse.jface.action.IMenuListener#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
+   */
+  public void menuAboutToShow(IMenuManager manager) {
+	  if(fTree.getSelectionCount() > 0) {
+		  TreeItem treeItem = fTree.getSelection()[0];
+		  RunInfo  testInfo = (RunInfo) treeItem.getData("runinfo");
+
+		  manager.add(new OpenTestAction(fTestRunnerPart, testInfo));
+		  manager.add(new Separator());
+		  manager.add(new QuickRunAction(fTestRunnerPart.getLaunchedProject(), 
+				  fTestRunnerPart.getLastLaunch(),
+				  testInfo,
+				  ILaunchManager.RUN_MODE));
+		  manager.add(new QuickRunAction(fTestRunnerPart.getLaunchedProject(),
+				  fTestRunnerPart.getLastLaunch(),
+				  testInfo,
+				  ILaunchManager.DEBUG_MODE));
+		  manager.add(new Separator());
+		  manager.add(new ExpandAllAction());
+	  }
+  }
+  
+  
+  private RunInfo getTestInfo() {
+    TreeItem[] treeItems= fTree.getSelection();
+    
+    return treeItems.length == 0 ? null : (RunInfo) treeItems[0].getData("runinfo");
+  }
+  
+  private void testSelected() {
+    fTestRunnerPart.handleTestSelected(getTestInfo());
+  }
+
+  protected void expandAll() {
+    TreeItem[] treeItems = fTree.getSelection();
+    fTree.setRedraw(false);
+    for(int i = 0; i < treeItems.length; i++) {
+      expandAll(treeItems[i]);
+    }
+    fTree.setRedraw(true);
+  }
+
+  private void expandAll(TreeItem item) {
+    item.setExpanded(true);
+
+    TreeItem[] items = item.getItems();
+    for(int i = 0; i < items.length; i++) {
+      expandAll(items[i]);
+    }
+  }
+
+
+  private class ExpandAllAction extends Action {
+    public ExpandAllAction() {
+      setText(ResourceUtil.getString("ExpandAllAction.text")); //$NON-NLS-1$
+      setToolTipText(ResourceUtil.getString("ExpandAllAction.tooltip")); //$NON-NLS-1$
+    }
+
+    public void run() {
+      expandAll();
+    }
+  }
+  
+  protected String getResourceString(String key) {
+	  return ResourceUtil.getString(key);
+  }
+  
+  private static void ppp(final Object msg) {
+//    System.out.println("[TestHierachy]:- " + msg);
+  }
+  
+  protected abstract String getTooltipKey();
+  
+  protected abstract String getSelectedTestKey();
+  
+  /**
+   * @see net.noco.testng.ui.TestRunTab#getName()
+   */
+  public abstract String getName();
+}
