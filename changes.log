@@ -17,6 +17,9 @@ putting in their own labels, except that for the FailureTab the test items are
 not added to the displayed tree until they are known to fail.
 Fixes TESTNG-245     
   Unify 'All Tests' and 'Failed Tests' with the only difference being filtering for failures.
+  
+Rev.101
+  Fixes TESTNG-246  eclipse plugin needs automated build
  
   
   
