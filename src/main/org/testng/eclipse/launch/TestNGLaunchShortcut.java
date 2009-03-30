@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.testng.eclipse.util.LaunchUtil;
 
@@ -37,6 +38,11 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
   }
 
   public void launch(IEditorPart editor, String mode) {
+	  IEditorInput input = editor.getEditorInput();
+	  IJavaElement element = (IJavaElement) input.getAdapter(IJavaElement.class);
+	  if (element != null) {
+		  run(element, mode);
+	  }
   }
 
   protected void run(IJavaElement ije, String mode) {

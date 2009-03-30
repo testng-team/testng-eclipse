@@ -8,7 +8,7 @@
 	</target>
 
 	<target name="all.plugins" depends="init">
-		<ant antfile="build.xml" dir="${plugin.dir}" target="${target}">
+		<ant antfile="autobuild.plugin.xml" dir="${plugin.dir}" target="${target}" inheritAll="true">
 		</ant>
 	</target>
 	<target name="all.features" depends="init">

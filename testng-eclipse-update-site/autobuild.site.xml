@@ -67,6 +67,7 @@
 		<eclipse-ant working.dir="${feature.dir}" antfile="autobuild.feature.xml" >
 			<arg value="-Dfeature.version=${version}"/>
 			<arg value="-Dplugin.dir=${plugin.dir}"/>
+			<arg value="-Dplugin.version=${version}"/>
 			<arg value="-Declipse.dir=${eclipse.dir}"/>
 			<arg value="-Dbuild.dir=${build.dir}/features"/>
 			<arg value="-DbaseLocation=${eclipse.dir}"/>

@@ -43,6 +43,7 @@
 		<condition property="pluginTemp" value="${build.dir}/plugins">
 			<isset property="build.dir"/>
 		</condition>
+		<echo message="a.plugin.xml   build.dir=${build.dir}; plugin.version=${plugin.version}   --------------------"/>
 		<property name="pluginTemp" value="${basedir}"/>
 		<condition property="build.result.folder" value="${pluginTemp}/org.testng.eclipse_${plugin.version}">
 			<isset property="build.dir"/>

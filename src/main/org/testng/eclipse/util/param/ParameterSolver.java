@@ -140,6 +140,12 @@ public class ParameterSolver {
     IResource[] suiteFiles= searchSuites(new IResource[] {projectRes});
     IFile selectedSuite= null;
     
+    if (suiteFiles.length == 0) {
+    	// No parameters.  If they're all @Optional, this will work anyway.
+    	// Otherwise, this will ultimately cause the test to fail with a clear error.
+    	return new HashMap();
+    }   
+    
     if(suiteFiles.length > 1) {
       selectedSuite= showSelectionDialog(suiteFiles);
     }
@@ -199,7 +205,6 @@ public class ParameterSolver {
       return null;
     }
     final Shell parent = window.getShell();
-    final IContainer input = ResourcesPlugin.getWorkspace().getRoot();
 
     final SuiteListSelectionDialog dialog = new SuiteListSelectionDialog(parent, choices);
     dialog.setTitle("Select parameter definition file");

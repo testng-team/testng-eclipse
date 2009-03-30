@@ -3,8 +3,8 @@
 <plugin
    id="org.testng.eclipse"
    name="TestNG"
-   version="5.8.0.4"
-   provider-name="Alex Popescu"
+   version="5.9.0.2"
+   provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
    <runtime>
       <library name="eclipse-testng.jar">
@@ -41,18 +41,6 @@
     <viewerContribution
         id="testng.editor.popup"
         targetID="#CompilationUnitEditorContext" >
-      <action
-          id="testng.debug.popup.action"
-          label="Debug as test"
-          menubarPath="testng.editor.menu/content"
-          class="org.testng.eclipse.launch.DebugEditorLaunchDelegate">
-      </action>
-      <action
-          id="testng.run.popup.action"
-          label="Run as test"
-          menubarPath="testng.editor.menu/content"
-          class="org.testng.eclipse.launch.RunEditorLaunchDelegate">
-      </action>
       <menu
             id="testng.editor.menu"
             label="TestNG"
