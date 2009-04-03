@@ -333,7 +333,7 @@ class GroupListSuite extends CustomSuite {
   protected Collection/*<String>*/ m_packageNames;
   protected Collection/*<String>*/ m_classNames;
   protected Collection/*<String>*/ m_groupNames;
-  protected StringBuffer m_testName= new StringBuffer("G:");
+  protected StringBuffer m_testName= new StringBuffer("GRP-");
   
   public GroupListSuite(final String projectName,
                         final Collection packageNames,
