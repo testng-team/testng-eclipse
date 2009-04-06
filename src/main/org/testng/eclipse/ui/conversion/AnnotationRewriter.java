@@ -35,13 +35,28 @@ public class AnnotationRewriter
     //
     {
       ListRewrite lr = result.getListRewrite(astRoot, CompilationUnit.IMPORTS_PROPERTY);
-      String[] annotations = {
-          "Test", "Configuration", "Factory",
-      };
-      for (int i = 0; i < annotations.length; i++) {
+      if (visitor.getSetUp() != null) {
         ImportDeclaration id = ast.newImportDeclaration();
-        id.setName(ast.newName("org.testng.annotations." + annotations[i]));
+        id.setName(ast.newName("org.testng.annotations.BeforeMethod"));
         lr.insertFirst(id, null);
+      }
+
+      if (visitor.getTearDown() != null) {
+        ImportDeclaration id = ast.newImportDeclaration();
+        id.setName(ast.newName("org.testng.annotations.AfterMethod"));
+        lr.insertFirst(id, null);
+      }
+
+      if (visitor.getTestMethods().size() > 0) {
+        ImportDeclaration id = ast.newImportDeclaration();
+        id.setName(ast.newName("org.testng.annotations.Test"));
+        lr.insertFirst(id, null);          
+      }
+
+      if (visitor.getSuite() != null) {
+        ImportDeclaration id = ast.newImportDeclaration();
+        id.setName(ast.newName("org.testng.annotations.Factory"));
+        lr.insertFirst(id, null);          
       }
     }
     
@@ -52,20 +67,24 @@ public class AnnotationRewriter
     for (int i = 0; i < testMethods.size(); i++) {
       NormalAnnotation a = ast.newNormalAnnotation();
       a.setTypeName(ast.newName("Test"));
-      addAnnotation(result, (MethodDeclaration) testMethods.get(i), a);        
+      addAnnotation(ast, visitor, result, (MethodDeclaration) testMethods.get(i), a);        
     }
     
     //
-    // Addd @Configuration annotations
+    // Addd @BeforeMethod/@AfterMethod annotations
     //
     MethodDeclaration setUp = visitor.getSetUp();
     if (null != setUp) {
-      addConfiguration(ast, result, setUp, "beforeTestMethod");
+      NormalAnnotation a = ast.newNormalAnnotation();
+      a.setTypeName(ast.newName("BeforeMethod"));
+      addAnnotation(ast, visitor, result, setUp, a);
     }
     
     MethodDeclaration tearDown = visitor.getTearDown();
     if (null != tearDown) {
-      addConfiguration(ast, result, tearDown, "afterTestMethod");
+      NormalAnnotation a = ast.newNormalAnnotation();
+      a.setTypeName(ast.newName("AfterMethod"));
+      addAnnotation(ast, visitor, result, tearDown, a);
     }
 
     //
@@ -75,27 +94,13 @@ public class AnnotationRewriter
     if (null != suite) {
       NormalAnnotation a = ast.newNormalAnnotation();
       a.setTypeName(ast.newName("Factory"));
-      addAnnotation(result, suite, a);        
+      addAnnotation(ast, visitor, result, suite, a);        
     }
     
     return result;
   }
 
-  private void addConfiguration(AST ast, final ASTRewrite rewriter, 
-      MethodDeclaration md, String annotation) 
-  {
-    NormalAnnotation a = ast.newNormalAnnotation();
-    a.setTypeName(ast.newName("Configuration"));
-    List l = a.values();
-    MemberValuePair mvp = ast.newMemberValuePair();
-    mvp.setName(ast.newSimpleName(annotation));
-    BooleanLiteral sl = ast.newBooleanLiteral(true);
-    mvp.setValue(sl);
-    l.add(mvp);
-    addAnnotation(rewriter, md, a);
-  }
-  
-  private void addAnnotation(ASTRewrite rewriter, MethodDeclaration md, 
+  private void addAnnotation(AST ast, JUnitVisitor visitor, ASTRewrite rewriter, MethodDeclaration md, 
       NormalAnnotation a) 
   {
     List oldModifiers = md.modifiers();
