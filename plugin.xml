@@ -36,6 +36,8 @@
    
  
    <extension-point id="internal_testRunTabs" name="%testRunTabs.name" schema="schema/internal-testRunTabs.exsd"/>
+   <extension-point id="reporterListenerContributorSchema" name="%reporterListenerContributor.name" schema="schema/reporterListenerContributorSchema.exsd"/>
+   <extension-point id="testListenerContributorSchema" name="%testListenerContributor.name" schema="schema/testListenerContributorSchema.exsd"/>
 
    <extension point="org.eclipse.ui.popupMenus">
     <viewerContribution

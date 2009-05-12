@@ -13,6 +13,7 @@ import java.util.Vector;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -28,13 +29,14 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
-import org.eclipse.jface.util.Assert;
+import org.eclipse.core.runtime.Assert;
 import org.testng.TestNG;
 import org.testng.TestNGCommandLineArgs;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.JDTUtil;
+import org.testng.eclipse.util.ListenerContributorUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.remote.RemoteTestNG;
@@ -168,6 +170,30 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       argv.add(reporters.replace(' ', ';'));
     }
     
+    List contributors = ListenerContributorUtil.findReporterContributors();
+    contributors.addAll( ListenerContributorUtil.findTestContributors() );
+    StringBuffer reportersContributors = new StringBuffer();
+    boolean isFirst = true;
+    for (Iterator iterator = contributors.iterator(); iterator.hasNext();) {
+    	Object contributor = iterator.next();
+    	if( isFirst ) {
+    		reportersContributors.append(contributor.getClass().getName());
+    	} else {
+    		reportersContributors.append(";" + contributor.getClass().getName());
+    	}
+    	isFirst = false;
+    }
+    if(!reportersContributors.toString().trim().equals("")) {
+    	if( !argv.contains(TestNGCommandLineArgs.LISTENER_COMMAND_OPT) ) {
+    		argv.add(TestNGCommandLineArgs.LISTENER_COMMAND_OPT);
+            argv.add(reportersContributors.toString().trim());
+    	} else {
+    		String listeners = (String)argv.get(argv.size()-1);
+    		listeners += (";" + reportersContributors.toString().trim());
+    		argv.set(argv.size()-1, listeners);
+    	}
+    }
+    
     boolean disabledReporters= storage.hasDisabledListeners(project.getName(), false);
     if(disabledReporters) {
       argv.add(TestNGCommandLineArgs.USE_DEFAULT_LISTENERS);
@@ -248,18 +274,18 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
         List entries = new ArrayList();
 
         try {
-          entries.add(Platform.asLocalURL(new URL(url, "build/classes")).getFile()); //$NON-NLS-1$
+          entries.add(FileLocator.toFileURL(new URL(url, "build/classes")).getFile()); //$NON-NLS-1$
         }
         catch(IOException e3) {
           try {
-            entries.add(Platform.asLocalURL(new URL(url, "eclipse-testng.jar")).getFile()); //$NON-NLS-1$
+            entries.add(FileLocator.toFileURL(new URL(url, "eclipse-testng.jar")).getFile()); //$NON-NLS-1$
           }
           catch(IOException e4) {
             ;
           }
         }
         if(addedSize == 2) {
-          entries.add(Platform.asLocalURL(new URL(url, testngJarLocation)).getFile()); //$NON-NLS-1$
+          entries.add(FileLocator.toFileURL(new URL(url, testngJarLocation)).getFile()); //$NON-NLS-1$
         }
 
         Assert.isTrue(entries.size() == addedSize, "Required JARs available"); //$NON-NLS-1$
@@ -273,10 +299,10 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       else {
         classPath = new String[cp.length + addedSize];
         System.arraycopy(cp, 0, classPath, addedSize, cp.length);
-        classPath[0] = Platform.asLocalURL(new URL(url, "eclipse-testng.jar")).getFile(); //$NON-NLS-1$
+        classPath[0] = FileLocator.toFileURL(new URL(url, "eclipse-testng.jar")).getFile(); //$NON-NLS-1$
         
         if(addedSize == 2) {
-          classPath[1] = Platform.asLocalURL(new URL(url, testngJarLocation)).getFile();
+          classPath[1] = FileLocator.toFileURL(new URL(url, testngJarLocation)).getFile();
         }
       }
     }
