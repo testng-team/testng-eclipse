@@ -86,6 +86,10 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     runner.run(runConfig, launch, monitor);
   }
 
+  private static void ppp(String s) {
+      System.out.println("[TestNGLaunchConfigurationDelegate] " + s);
+  }
+
   protected VMRunnerConfiguration launchTypes(final ILaunchConfiguration configuration,
                                               ILaunch launch,
                                               final IJavaProject jproject,

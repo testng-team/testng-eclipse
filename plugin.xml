@@ -3,7 +3,7 @@
 <plugin
    id="org.testng.eclipse"
    name="TestNG"
-   version="5.10.1.0"
+   version="5.11.0.11"
    provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
    <runtime>
@@ -53,13 +53,13 @@
     </viewerContribution>
   </extension>
 
-	<extension point="org.eclipse.jdt.core.classpathVariableInitializer">
+        <extension point="org.eclipse.jdt.core.classpathVariableInitializer">
       <classpathVariableInitializer
             variable="TESTNG_HOME"
             class="org.testng.eclipse.buildpath.TestNGHomeInitializer">
       </classpathVariableInitializer>
-	</extension>
-	
+        </extension>
+       
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTabGroups">
       <launchConfigurationTabGroup
@@ -106,7 +106,7 @@
    <extension
          point="org.testng.eclipse.internal_testRunTabs">
       <testRunTab class="org.testng.eclipse.ui.TestHierarchyTab"/>
-	  <testRunTab class="org.testng.eclipse.ui.FailureTab"/>
+          <testRunTab class="org.testng.eclipse.ui.FailureTab"/>
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchShortcuts">
@@ -122,14 +122,14 @@
                   <count
                         value="1">
                   </count>
-			   		<iterate>
-				 		<or>
-				   			<test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/>
-				   			<test property="org.eclipse.debug.ui.matchesPattern" value="*.class"/>
-				   			<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
-				 		</or>
-				 		<test property="org.testng.eclipse.isTest"/>
-			   		</iterate>
+                                        <iterate>
+                                                <or>
+                                                        <test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/>
+                                                        <test property="org.eclipse.debug.ui.matchesPattern" value="*.class"/>
+                                                        <instanceof value="org.eclipse.jdt.core.IJavaElement"/>
+                                                </or>
+                                                <test property="org.testng.eclipse.isTest"/>
+                                        </iterate>
                </with>
             </enablement>
          </contextualLaunch>
@@ -158,11 +158,11 @@
                   <count
                         value="1">
                   </count>
-			   		<iterate>
-			   			<test property="org.eclipse.debug.ui.matchesPattern" value="*.xml"/>
-			   			<instanceof value="org.eclipse.core.resources.IFile"/>
-				 		<test property="org.testng.eclipse.isSuite"/>
-			   		</iterate>
+                                        <iterate>
+                                                <test property="org.eclipse.debug.ui.matchesPattern" value="*.xml"/>
+                                                <instanceof value="org.eclipse.core.resources.IFile"/>
+                                                <test property="org.testng.eclipse.isSuite"/>
+                                        </iterate>
                </with>
             </enablement>
          </contextualLaunch>
@@ -198,7 +198,7 @@
             id="org.testng.eclipse.ITypeExtender">
       </propertyTester>
       -->
-      
+     
       <propertyTester
             properties="isTest,isSuite"
             namespace="org.testng.eclipse"
@@ -206,7 +206,7 @@
             class="org.testng.eclipse.launch.tester.TestNGPropertyTester"
             id="org.testng.eclipse.launch.tester.JUnitPropertyTester">
       </propertyTester>
-      
+     
    </extension>
    <extension
          point="org.eclipse.ui.propertyPages">
@@ -253,13 +253,14 @@
       </command>
    </extension>
 
+
    <extension
          point="org.eclipse.ui.bindings">
       <key
             sequence="M3+M2+D N"
             commandId="org.testng.eclipse.shortcut.debug"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-	  <!-- COMMAND+ALT+Q is "Hide/Show Dock" on carbon, so don't overwrite it -->
+          <!-- COMMAND+ALT+Q is "Hide/Show Dock" on carbon, so don't overwrite it -->
       <key
             sequence="M3+M2+X N"
             commandId="org.testng.eclipse.shortcut.run"
@@ -268,7 +269,7 @@
             sequence="M3+M2+D G"
             commandId="org.testng.eclipse.shortcut.testngSuite.debug"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-	  <!-- COMMAND+ALT+Q is "Hide/Show Dock" on carbon, so don't overwrite it -->
+          <!-- COMMAND+ALT+Q is "Hide/Show Dock" on carbon, so don't overwrite it -->
       <key
             sequence="M3+M2+X G"
             commandId="org.testng.eclipse.shortcut.testngSuite.run"
@@ -277,11 +278,11 @@
    
    <extension
          point="org.eclipse.jdt.ui.quickAssistProcessors">
-	  <quickAssistProcessor
-		   id="org.testng.eclipse.ui.conversion.JUnitConverterQuickAssistProcessor"
-		   name="org.testng.eclipse.ui.conversion.JUnitConverterQuickAssistProcessor"
-		   class="org.testng.eclipse.ui.conversion.JUnitConverterQuickAssistProcessor">
-	  </quickAssistProcessor>
+          <quickAssistProcessor
+                   id="org.testng.eclipse.ui.conversion.JUnitConverterQuickAssistProcessor"
+                   name="org.testng.eclipse.ui.conversion.JUnitConverterQuickAssistProcessor"
+                   class="org.testng.eclipse.ui.conversion.JUnitConverterQuickAssistProcessor">
+          </quickAssistProcessor>
    </extension>
    <extension
          point="org.eclipse.jdt.ui.quickFixProcessors">

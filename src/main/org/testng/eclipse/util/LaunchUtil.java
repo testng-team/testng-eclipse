@@ -1,14 +1,5 @@
 package org.testng.eclipse.util;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -44,6 +35,15 @@ import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.util.JDTUtil.MethodDefinition;
 import org.testng.eclipse.util.param.ParameterSolver;
 import org.testng.reporters.FailedReporter;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * An utility class that centralize the work about configuration launchers.
@@ -126,7 +126,7 @@ public class LaunchUtil {
     if (jargs != null) ConfigurationHelper.setJvmArgs(configWC, jargs);
     if (failureDescriptions != null && failureDescriptions.size() > 0) {
     	Iterator it = failureDescriptions.iterator();
-    	StringBuilder buf = new StringBuilder();
+    	StringBuffer buf = new StringBuffer();
 		boolean first = true;
 		while (it.hasNext()) {
 			if (first) first = false;

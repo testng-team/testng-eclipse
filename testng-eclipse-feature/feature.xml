@@ -2,11 +2,11 @@
 <feature
       id="org.testng.feature"
       label="TestNG"
-      version="5.9.0.2"
+      version="5.11.0.11"
       provider-name="Cedric Beust">
 
    <description url="http://testng.org">
-      This is the Eclise plug-in for TestNG (http://testng.org).
+      This is the Eclipse plug-in for TestNG (http://testng.org).
    </description>
 
    <copyright url="http://www.example.com/copyright">

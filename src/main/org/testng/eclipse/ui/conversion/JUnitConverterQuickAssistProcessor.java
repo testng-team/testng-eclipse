@@ -61,8 +61,8 @@ public class JUnitConverterQuickAssistProcessor implements
 
       for (int i = 0; i < providers.length; i++) {
         ASTRewrite rewriter = providers[i].createRewriter(astRoot, ast, visitor);
-        vResult.add(new JUnitRewriteCorrectionProposal(
-            providers[i].getName(), cu, rewriter, 1));
+//        vResult.add(new JUnitRewriteCorrectionProposal(
+//            providers[i].getName(), cu, rewriter, 1));
       }
     }
     

@@ -21,7 +21,7 @@ public class FileExtender extends PropertyTester {
     if(!(receiver instanceof IFile)) {
       return false;
     }
-    System.out.println("RECEIVER:" + receiver + "; CLASS:" + receiver.getClass());
+    System.out.println("Validating suite file:" + receiver);
     try {
       return SuiteFileValidator.isSuiteDefinition((IFile) receiver);
     }
