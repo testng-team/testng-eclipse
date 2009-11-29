@@ -78,7 +78,7 @@ public class RunInfo {
    * @return
    */
   private String toString(String[] params, String[] paramTypes) {
-    if(null == params || params.length == 0) return "";
+    if(null == params || params.length == 0) return "()";
     
     StringBuffer buf= new StringBuffer("(");
     for(int i= 0; i < params.length; i++) {
@@ -180,16 +180,16 @@ public class RunInfo {
   }
 
   public String getTestDescription() {
-    if(null == m_testDescription || "".equals(m_testDescription.trim())) return "";
-    
-    return m_testDescription.substring(m_testDescription.indexOf('('));
+    if (null == m_testDescription || "".equals(m_testDescription.trim())) return "";
+    else return m_testDescription;
+//    return m_testDescription.substring(m_testDescription.indexOf('('));
   }
   
   /**
    * @return
    */
   public String getParametersDisplay() {
-    if(null == m_parameters || m_parameters.length == 0) return "";
+    if(null == m_parameters || m_parameters.length == 0) return "()";
 
     return toString(m_parameters, m_parameterTypes);
   }

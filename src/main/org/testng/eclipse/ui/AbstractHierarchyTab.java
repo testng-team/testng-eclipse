@@ -287,8 +287,6 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
 
   /**
    * Called on test results.
-   * 
-   * @see net.noco.testng.ui.TestRunTab#updateTestResult(net.noco.testng.ui.RunInfo)
    */
   public void updateTestResult(RunInfo resultInfo) {
     TreeItem ti = (TreeItem) getRunningEntry(resultInfo.getId(), resultInfo.getTestDescription());
@@ -354,9 +352,9 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
 		  treeItem.setData("testname", testname);
 	  }
 	  String testdesc = runInfo.getTestDescription();
-    if (testdesc != null) {
-      treeItem.setData("testdesc", testdesc);
-    }
+      if (testdesc != null) {
+        treeItem.setData("testdesc", testdesc);
+      }
 	  treeItem.setExpanded(true);
 	  return treeItem;
   }
@@ -503,13 +501,16 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
   private TreeItem testTreeItem(TreeItem parent, RunInfo treeEntry){
     TreeItem treeItem = createNewTreeItem(parent, treeEntry);
     treeItem.setImage(m_testRunIcon);        
-    String parentName= (String) parent.getData("testname");
-    if(treeEntry.getClassName().equals(parentName)) {
-      treeItem.setText(treeEntry.getMethodName() + treeEntry.getTestDescription() + treeEntry.getParametersDisplay());
-    }
-    else {
-      treeItem.setText(treeEntry.getMethodDisplay());
-    }
+//    String parentName= (String) parent.getData("testname");
+//    if(treeEntry.getClassName().equals(parentName)) {
+      treeItem.setText(treeEntry.getClassName() + "." + treeEntry.getMethodName()
+          + treeEntry.getParametersDisplay()
+          + " " + treeEntry.getTestDescription())
+          ;
+//    }
+//    else {
+//      treeItem.setText(treeEntry.getTestDescription());
+//    }
     return treeItem;
     
   }
