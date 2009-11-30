@@ -35,8 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 /*
- * A view that shows the contents of a test suite
- * as a tree.
+ * A view that shows the contents of a test suite as a tree.
  */
 public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuListener {
   private final Image m_suiteIcon = TestNGPlugin.getImageDescriptor("obj16/suite.gif").createImage(); //$NON-NLS-1$
@@ -83,12 +82,8 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
   public AbstractHierarchyTab(boolean delayItemCreation){
     this.delayItemCreation = delayItemCreation;
   }
-  
 
-  /**
-	 * @see net.noco.testng.ui.TestRunTab#createTabControl(org.eclipse.swt.custom.CTabFolder,
-	 *      net.noco.testng.ui.TestRunnerViewPart)
-	 */
+  @Override
   public void createTabControl(CTabFolder tabFolder, TestRunnerViewPart runner) {
     fTestRunnerPart = runner;
 
@@ -118,7 +113,6 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
     initMenu();
     addListeners();
   }
-  
 
   private void initMenu() {
     MenuManager menuMgr = new MenuManager();
@@ -186,11 +180,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
     }
   }
 
-
-
-  /**
-   * @see net.noco.testng.ui.TestRunTab#getSelectedTestId()
-   */
+  @Override
   public String getSelectedTestId() {
     RunInfo testInfo = getTestInfo();
     
@@ -200,25 +190,19 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
 
     return testInfo.getId();
   }
-  
-  /**
-   * @see net.noco.testng.ui.TestRunTab#activate()
-   */
+
+  @Override
   public void activate() {
     fMoveSelection = false;
     testSelected();
   }
 
-  /**
-   * @see net.noco.testng.ui.TestRunTab#setFocus()
-   */
+  @Override
   public void setFocus() {
     fTree.setFocus();
   }
 
-  /**
-   * @see net.noco.testng.ui.TestRunTab#aboutToStart()
-   */
+  @Override
   public void aboutToStart() {
     fTree.removeAll();
     m_treeItemMap = new Hashtable();
@@ -227,9 +211,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
     fMoveSelection = false;
   }
 
-  /**
-   * @see net.noco.testng.ui.TestRunTab#setSelectedTest(java.lang.String)
-   */
+  @Override
   public void setSelectedTest(String testId) {
     if(null == testId) {
       TestNGPlugin.log(new Status(IStatus.WARNING,
@@ -249,8 +231,8 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
   
   /**
    * Called on suite and test events.
-   * @see org.testng.eclipse.ui.TestRunTab#updateEntry(java.lang.String)
    */
+  @Override
   public void updateEntry(String id) {
     TreeItem ti = (TreeItem) m_treeItemMap.get(id);
     
@@ -273,7 +255,9 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
   /**
    * Called on test results.
    */
+  @Override
   public void updateTestResult(RunInfo resultInfo) {
+
     TreeItem ti = (TreeItem) getRunningEntry(resultInfo.getId(), resultInfo.getTestDescription());
 //    System.out.println("treeItem:" + ti + " resultInfo:" + resultInfo);
     
@@ -285,7 +269,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
      // updateView(ti);
      // return;
     }
-    
+
     ti.setData("runinfo", resultInfo);
     ti.setExpanded(true);
     ti.setImage(getStatusImage(resultInfo.getType(), resultInfo.getStatus()));
@@ -294,12 +278,12 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
       m_failureIds.add((String) ti.getData("testid"));
     }
     
-    perpetuateResult(ti.getParentItem(), resultInfo.getStatus());
+    propagateResult(ti.getParentItem(), resultInfo.getStatus());
     updateView(ti);
   }
   
   private void updateView(TreeItem ti) {
-    // TESNTG-157: scroll latest marked test to visible in the view
+    // TESTNG-157: scroll latest marked test to visible in the view
     ti.setExpanded(true);
     fTree.setSelection(ti);    
   }
@@ -321,7 +305,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
       m_failureIds.add(runInfo.getId());
     }
     
-    perpetuateResult(parentItem, runInfo.getStatus());
+    propagateResult(parentItem, runInfo.getStatus());
     
     return treeItem;
   }
@@ -346,9 +330,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
 	  return treeItem;
   }
   
-  
-  
-  private void perpetuateResult(TreeItem ti, int state) {
+  private void propagateResult(TreeItem ti, int state) {
     if(null == ti) {
       return;
     }
@@ -385,7 +367,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
           })
       );
       
-      perpetuateResult(ti.getParentItem(), state);
+      propagateResult(ti.getParentItem(), state);
     }
   }
   
@@ -415,10 +397,8 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
     
     return null;
   }
-    
-  /**
-   * @see net.noco.testng.ui.TestRunTab#newTreeEntry(net.noco.testng.ui.RunInfo)
-   */
+
+  @Override
   public void newTreeEntry(RunInfo treeEntry) {
     TreeItem treeItem = null;
     boolean running= false;
@@ -428,37 +408,20 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
         case RunInfo.SUITE_TYPE:
           if(!m_treeItemMap.containsKey(treeEntry.getId())) {
             treeItem = new TreeItem(fTree, SWT.NONE);
-            treeItem.setImage(m_suiteRunIcon);
             treeItem.setData("runinfo", treeEntry);
             treeItem.setData("testid", treeEntry.getId());
-            treeItem.setText(MessageFormat.format(FORMATTED_MESSAGE,
-                new Object[] {
-                    treeEntry.getSuiteName(),
-                    new Integer(treeEntry.m_passed),
-                    new Integer(treeEntry.m_failed),
-                    new Integer(treeEntry.m_skipped),
-                    new Integer(treeEntry.m_successPercentageFailed)
-                })
-            );
+            configureTreeItem(treeEntry, treeItem, m_suiteRunIcon, treeEntry.getSuiteName());
           }
-
           break;
+
         case RunInfo.TEST_TYPE:
           if(!m_treeItemMap.containsKey(treeEntry.getId())) {
             TreeItem suiteItem = (TreeItem) m_treeItemMap.get(treeEntry.getSuiteName());            
             treeItem = createNewTreeItem(suiteItem, treeEntry);
-            treeItem.setImage(m_testRunIcon);
-            treeItem.setText(MessageFormat.format(FORMATTED_MESSAGE,
-                new Object[] {
-                  treeEntry.getTestName(),
-                  new Integer(treeEntry.m_passed),
-                  new Integer(treeEntry.m_failed),
-                  new Integer(treeEntry.m_skipped),
-                  new Integer(treeEntry.m_successPercentageFailed)
-                })
-            );
+            configureTreeItem(treeEntry, treeItem, m_testRunIcon, treeEntry.getTestName());
           }
           break;
+
         case RunInfo.RESULT_TYPE:
           String enclosingTestId = treeEntry.getTestFQN(); 
           TreeItem testItem = (TreeItem) m_treeItemMap.get(enclosingTestId);
@@ -476,6 +439,8 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
           // if it's for failure tab, at this point do not create a TreeItem
           if (!delayItemCreation){
             treeItem = testTreeItem(testItem, treeEntry);
+          } else {
+            ppp("Delaying creation of " + testItem + " entry:" + treeEntry);
           }
           break;
       }
@@ -484,22 +449,36 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
         registerTreeEntry(treeEntry, treeItem, allowDups, running);
       }
   }
+
+
+  private void configureTreeItem(RunInfo treeEntry, TreeItem treeItem, Image icon, String name) {
+    treeItem.setImage(icon);
+    treeItem.setText(MessageFormat.format(FORMATTED_MESSAGE,
+        new Object[] {
+            name,
+            new Integer(treeEntry.m_passed),
+            new Integer(treeEntry.m_failed),
+            new Integer(treeEntry.m_skipped),
+            new Integer(treeEntry.m_successPercentageFailed)
+        })
+    );
+  }
   
   private TreeItem testTreeItem(TreeItem parent, RunInfo treeEntry){
+    ppp("Creating on " + this + " parent:" + parent + " entry:" + treeEntry);
     TreeItem treeItem = createNewTreeItem(parent, treeEntry);
     treeItem.setImage(m_testRunIcon);        
 //    String parentName= (String) parent.getData("testname");
 //    if(treeEntry.getClassName().equals(parentName)) {
-      treeItem.setText(treeEntry.getClassName() + "." + treeEntry.getMethodName()
-          + treeEntry.getParametersDisplay()
-          + " " + treeEntry.getTestDescription())
-          ;
+    treeItem.setText(treeEntry.getClassName() + "." + treeEntry.getMethodName()
+        + treeEntry.getParametersDisplay()
+        + " " + treeEntry.getTestDescription())
+        ;
 //    }
 //    else {
 //      treeItem.setText(treeEntry.getTestDescription());
 //    }
     return treeItem;
-    
   }
   
   private void registerTreeEntry(RunInfo runInfo, TreeItem item, boolean allowDups, boolean running) {
@@ -583,10 +562,8 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
     
     return selection;
   }
-  
-  /**
-   * @see org.eclipse.jdt.internal.junit.ui.ITestRunView#selectNext()
-   */
+
+  @Override
   public void selectNext() {
     TreeItem currentSelection = getInitialSearchSelection();
     String currentId = (String) currentSelection.getData("testid");
@@ -598,9 +575,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
     }
   }
 
-  /**
-   * @see org.eclipse.jdt.internal.junit.ui.ITestRunView#selectPrevious()
-   */
+  @Override
   public void selectPrevious() {
     TreeItem currentSelection = getInitialSearchSelection();
     String currentId = (String) currentSelection.getData("testid");
@@ -679,17 +654,19 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
   protected String getResourceString(String key) {
 	  return ResourceUtil.getString(key);
   }
-  
+
+  private static final boolean DEBUG = false;
+
   private static void ppp(final Object msg) {
-//    System.out.println("[TestHierachy]:- " + msg);
+    if (DEBUG) {
+      System.out.println("[AbstractHierarchyTab] " + msg);
+    }
   }
   
   protected abstract String getTooltipKey();
   
   protected abstract String getSelectedTestKey();
-  
-  /**
-   * @see net.noco.testng.ui.TestRunTab#getName()
-   */
+
+  @Override
   public abstract String getName();
 }

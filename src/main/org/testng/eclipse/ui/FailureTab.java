@@ -22,7 +22,7 @@ import org.testng.ITestResult;
 public class FailureTab extends AbstractHierarchyTab  {
   
   public FailureTab() {
-    super(true);
+    super(true /* delay creation */);
   }
    
   @Override
