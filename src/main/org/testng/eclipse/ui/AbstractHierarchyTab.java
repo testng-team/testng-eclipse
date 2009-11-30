@@ -248,8 +248,15 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
     else if(ri.m_skipped > 0) {
       state = ITestResult.SKIP;
     }
-    
+
+    onPostUpdate(ti, state);
     ti.setImage(getStatusImage(ri.getType(), state));
+  }
+
+  /**
+   * Called after an item has been updated, meant to be overridden by subclasses
+   */
+  protected void onPostUpdate(TreeItem ti, int state) {
   }
 
   /**
