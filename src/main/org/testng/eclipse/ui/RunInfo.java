@@ -137,29 +137,30 @@ public class RunInfo {
 
     return m_id.equals(((RunInfo) o).m_id);
   }
-  
+
+  @Override
   public String toString() {
     StringBuffer buffer = new StringBuffer();
     buffer.append("RunInfo[");
-    buffer.append("m_id: ");
+    buffer.append("id: ");
     buffer.append(m_id);
-    buffer.append(";m_suiteName: ");
+    buffer.append(" suiteName: ");
     buffer.append(m_suiteName);
-    buffer.append(";m_testName: ");
+    buffer.append(" testName: ");
     buffer.append(m_testName);
-    buffer.append(";m_className: ");
+    buffer.append(" className: ");
     buffer.append(m_className);
-    buffer.append(";m_methodName: ");
+    buffer.append(" methodName: ");
     buffer.append(m_methodName);
-    buffer.append(";m_methodCount: ");
+    buffer.append(" methodCount: ");
     buffer.append(m_methodCount);
-    buffer.append(";m_passed: ");
+    buffer.append(" passed: ");
     buffer.append(m_passed);
-    buffer.append(";m_failed: ");
+    buffer.append(" failed: ");
     buffer.append(m_failed);
-    buffer.append(";m_skipped: ");
+    buffer.append(" skipped: ");
     buffer.append(m_skipped);
-    buffer.append(";m_successPercentageFailed: ");
+    buffer.append(" successPercentageFailed: ");
     buffer.append(m_successPercentageFailed);
     buffer.append("]");
     

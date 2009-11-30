@@ -25,36 +25,32 @@ public class FailureTab extends AbstractHierarchyTab  {
     super(true);
   }
    
+  @Override
   protected String getTooltipKey() {
-	  return "FailureRunView.tab.tooltip";
+    return "FailureRunView.tab.tooltip";
   }
  
-  /**
-   * @see net.noco.testng.ui.TestRunTab#getName()
-   */
+  @Override
   public String getName() {
     return getResourceString("FailureRunView.tab.title"); //$NON-NLS-1$
   }
 
-  protected String getSelectedTestKey(){
-	  return "[FailureTab.setSelectedTest]";
+  @Override
+  protected String getSelectedTestKey() {
+    return "[FailureTab.setSelectedTest]";
   }
-  
-  /**
-   * @see net.noco.testng.ui.TestRunTab#updateTestResult(net.noco.testng.ui.RunInfo)
-   */
+
+  @Override
   public void updateTestResult(RunInfo treeEntry) {
-    if(null == treeEntry) {
+    if (null == treeEntry) {
       return;
     }
 
-    if(RunInfo.RESULT_TYPE == treeEntry.getType()) {
-    	if ( ITestResult.SUCCESS != treeEntry.getStatus()
-    			&& ITestResult.SKIP != treeEntry.getStatus()) {
-    		super.updateTestResult(treeEntry);
-    	}
+    if (RunInfo.RESULT_TYPE == treeEntry.getType()) {
+      if (ITestResult.SUCCESS != treeEntry.getStatus() && ITestResult.SKIP != treeEntry.getStatus()) {
+        super.updateTestResult(treeEntry);
+      }
     }
   }
- 
-  
+
 }

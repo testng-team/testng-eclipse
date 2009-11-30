@@ -1,26 +1,4 @@
-/*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Common Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/cpl-v10.html
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *     Sebastian Davids - sdavids@gmx.de bugs 26754, 41228
-*******************************************************************************/
 package org.testng.eclipse.ui;
-
-
-import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.util.ResourceUtil;
-
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -31,7 +9,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTException;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.DisposeEvent;
@@ -48,6 +25,14 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.testng.ITestResult;
+import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.util.ResourceUtil;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
 /*
  * A view that shows the contents of a test suite
@@ -290,10 +275,12 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
    */
   public void updateTestResult(RunInfo resultInfo) {
     TreeItem ti = (TreeItem) getRunningEntry(resultInfo.getId(), resultInfo.getTestDescription());
+//    System.out.println("treeItem:" + ti + " resultInfo:" + resultInfo);
     
     if(null == ti) {
       // probably this is a @Configuration failures
       // or else the FailureTab is waiting to do the creating
+      assert resultInfo.getStatus() == 2;
       ti= createFailedEntry(resultInfo);
      // updateView(ti);
      // return;
