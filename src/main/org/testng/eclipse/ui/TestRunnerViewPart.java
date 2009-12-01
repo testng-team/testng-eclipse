@@ -17,15 +17,6 @@
 package org.testng.eclipse.ui;
 
 
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
-
 import org.eclipse.core.internal.resources.Workspace;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -106,6 +97,15 @@ import org.testng.remote.strprotocol.IRemoteTestListener;
 import org.testng.remote.strprotocol.SuiteMessage;
 import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
+
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.Vector;
 
 /**
  * A ViewPart that shows the results of a test run.
@@ -340,23 +340,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     return (m_failedCount + m_skippedCount + m_successPercentageFailed > 0);
   }
 
-  private String elapsedTimeAsString(long runTime) {
-    return NumberFormat.getInstance().format((double) runTime / 1000);
-  }
-
-  private void handleStopped() {
-    postSyncRunnable(new Runnable() {
-        public void run() {
-          if(isDisposed()) {
-            return;
-          }
-
-          fProgressBar.stopped();
-        }
-      });
-    stopUpdateJobs();
-  }
-
   public void startTestRunListening(IJavaProject project, 
                                     String subName, 
                                     int port, 
@@ -384,6 +367,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     firePropertyChange(IWorkbenchPart.PROP_TITLE);
   }
 
+  @Override
   public synchronized void dispose() {
     m_isDisposed = true;
     stopTest();
@@ -396,46 +380,10 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     fFailureColor.dispose();
   }
 
-  private void resetProgressBar(final int total) {
-    fProgressBar.reset(total);
-    fProgressBar.setMaximum(total, total);
-  }
-
   private void postSyncRunnable(Runnable r) {
     if(!isDisposed()) {
       getDisplay().syncExec(r);
     }
-  }
-
-  private void aboutToStart() {
-    postSyncRunnable(new Runnable() {
-        public void run() {
-          if(!isDisposed()) {
-            for(Enumeration e = m_tabsList.elements(); e.hasMoreElements();) {
-              TestRunTab v = (TestRunTab) e.nextElement();
-              v.aboutToStart();
-            }
-            fNextAction.setEnabled(false);
-            fPrevAction.setEnabled(false);
-          }
-        }
-      });
-  }
-
-  private void postEndTest(final String testId, final String testName) {
-    postSyncRunnable(new Runnable() {
-      public void run() {
-        if(isDisposed()) {
-          return;
-        }
-        m_testIsRunning = false;
-
-        if(hasErrors()) {
-          fNextAction.setEnabled(true);
-          fPrevAction.setEnabled(true);
-        }
-      }
-    });
   }
 
   private void refreshCounters() {
@@ -538,6 +486,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_activeRunTab = (TestRunTab) m_tabsList.firstElement();
 
     tabFolder.addSelectionListener(new SelectionAdapter() {
+        @Override
         public void widgetSelected(SelectionEvent event) {
           testTabChanged(event);
         }
@@ -618,7 +567,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
             return new Point(maxWidth, maxHeight);
         }
         
-        protected void layout (Composite composite, boolean flushCache) {
+        @Override
+        protected void layout(Composite composite, boolean flushCache) {
             Rectangle rect= composite.getClientArea();
             Control[] children = composite.getChildren();
             for (int i = 0; i < children.length; i++) {
@@ -677,12 +627,14 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     });
   }
 
+  @Override
   public void setFocus() {
     if(m_activeRunTab != null) {
       m_activeRunTab.setFocus();
     }
   }
 
+  @Override
   public void createPartControl(Composite parent) {
     m_parentComposite = parent;
     addResizeListener(parent);
@@ -740,6 +692,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
+  @Override
   public void saveState(IMemento memento) {
     if(m_sashForm == null) {
       // part has not been created
@@ -1208,7 +1161,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         TestNGPlugin.log(e);
       }
     }
-    
+
+    @Override
     public void run() {
       Workspace workspace = (Workspace) ResourcesPlugin.getWorkspace();
       IJavaProject javaProject= m_workingProject != null ? m_workingProject : JDTUtil.getJavaProjectContext();

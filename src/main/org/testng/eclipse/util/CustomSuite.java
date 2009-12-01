@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.testng.TestNG;
+import org.testng.eclipse.TestNGPlugin;
 import org.testng.reporters.XMLStringBuffer;
 import org.testng.xml.LaunchSuite;
 import org.testng.xml.Parser;
@@ -66,6 +67,8 @@ abstract public class CustomSuite extends LaunchSuite {
 
     Properties attrs= new Properties();
     attrs.setProperty("name", getSuiteName());
+    attrs.setProperty("parallel", TestNGPlugin.getPluginPreferenceStore()
+        .getParallel(m_projectName, false /* not project only */));
     suiteBuffer.push("suite", attrs);
 
     if(m_parameters != null) {

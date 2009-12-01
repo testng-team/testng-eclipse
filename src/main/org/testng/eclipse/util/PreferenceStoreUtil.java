@@ -80,14 +80,21 @@ public class PreferenceStoreUtil {
     return m_storage.getBoolean(TestNGPluginConstants.S_ABSOLUTEPATH);
   }
 
-
-  public String getReporters(String projectName, boolean projectOnly) {
-    if(projectOnly || m_storage.contains(projectName + TestNGPluginConstants.S_REPORTERS)) {
-      return m_storage.getString(projectName + TestNGPluginConstants.S_REPORTERS);
+  private String getString(String projectName, boolean projectOnly, String prefName) {
+    if(projectOnly || m_storage.contains(projectName + prefName)) {
+      return m_storage.getString(projectName + prefName);
     }
     else {
-      return m_storage.getString(TestNGPluginConstants.S_REPORTERS);
+      return m_storage.getString(prefName);
     }
+  }
+
+  public String getReporters(String projectName, boolean projectOnly) {
+    return getString(projectName, projectOnly, TestNGPluginConstants.S_REPORTERS);
+  }
+
+  public String getParallel(String projectName, boolean projectOnly) {
+    return getString(projectName, projectOnly, TestNGPluginConstants.S_PARALLEL);
   }
 
   public boolean hasDisabledListeners(String projectName, boolean projectOnly) {
