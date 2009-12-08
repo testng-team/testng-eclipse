@@ -1,23 +1,24 @@
 package org.testng.eclipse.util;
 
 
+import org.testng.TestNG;
+import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.collections.Lists;
+import org.testng.eclipse.collections.Maps;
+import org.testng.reporters.XMLStringBuffer;
+import org.testng.xml.LaunchSuite;
+import org.testng.xml.Parser;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import org.testng.TestNG;
-import org.testng.eclipse.TestNGPlugin;
-import org.testng.reporters.XMLStringBuffer;
-import org.testng.xml.LaunchSuite;
-import org.testng.xml.Parser;
 
 /**
  * A custom suite generator.
@@ -28,14 +29,14 @@ abstract public class CustomSuite extends LaunchSuite {
   protected String m_projectName;
   protected String m_suiteName;
   protected String m_annotationType;
-  protected Map m_parameters;
+  protected Map<String, String> m_parameters;
   protected int m_logLevel;
 
   private XMLStringBuffer m_suiteBuffer;
 
   public CustomSuite(final String projectName,
                      final String suiteName,
-                     final Map parameters,
+                     final Map<String, String> parameters,
                      final String annotationType,
                      final int logLevel) {
     super(true);
@@ -71,12 +72,11 @@ abstract public class CustomSuite extends LaunchSuite {
         .getParallel(m_projectName, false /* not project only */));
     suiteBuffer.push("suite", attrs);
 
-    if(m_parameters != null) {
-      for(Iterator it= m_parameters.entrySet().iterator(); it.hasNext();) {
-        Map.Entry entry= (Map.Entry) it.next();
+    if (m_parameters != null) {
+      for (Map.Entry<String, String> entry : m_parameters.entrySet()) {
         Properties paramAttrs= new Properties();
-        paramAttrs.setProperty("name", (String) entry.getKey());
-        paramAttrs.setProperty("value", (String) entry.getValue());
+        paramAttrs.setProperty("name", entry.getKey());
+        paramAttrs.setProperty("value", entry.getValue());
         suiteBuffer.addEmptyElement("parameter", paramAttrs);
       }
     }
@@ -100,6 +100,7 @@ abstract public class CustomSuite extends LaunchSuite {
    * Generate the current suite to a file.
    * @see org.testng.xml.LaunchSuite#save(java.io.File)
    */
+  @Override
   public File save(File directory) {
     final File suiteFile= new File(directory, "temp-testng-customsuite.xml");
 
@@ -198,15 +199,14 @@ abstract public class CustomSuite extends LaunchSuite {
   }
 
   protected void generateDefaultPackagesElement(XMLStringBuffer suiteBuffer,
-                                                Collection /*<String>*/ packageNames) {
+                                                List<String> packageNames) {
     if((null == packageNames) || packageNames.isEmpty()) {
       return;
     }
 
     suiteBuffer.push("packages");
 
-    for(Iterator it= packageNames.iterator(); it.hasNext();) {
-      String packageName= (String) it.next();
+    for (String packageName : packageNames) {
       Properties packageAttrs= new Properties();
       packageAttrs.setProperty("name", packageName);
       suiteBuffer.addEmptyElement("package", packageAttrs);
@@ -216,15 +216,14 @@ abstract public class CustomSuite extends LaunchSuite {
   }
 
   protected void generateDefaultClassesElement(XMLStringBuffer suiteBuffer,
-                                               Collection /*<String>*/ classNames) {
+                                               List<String> classNames) {
     if((null == classNames) || classNames.isEmpty()) {
       return;
     }
 
     suiteBuffer.push("classes");
 
-    for(Iterator it= classNames.iterator(); it.hasNext();) {
-      String className= (String) it.next();
+    for (String className : classNames) {
       Properties classAttrs= new Properties();
       classAttrs.setProperty("name", className);
       suiteBuffer.addEmptyElement("class", classAttrs);
@@ -239,37 +238,35 @@ abstract public class CustomSuite extends LaunchSuite {
  * then <code></code> should be used.
  */
 class ClassMethodsSuite extends CustomSuite {
-  protected Collection/*<String>*/ m_classNames;
-  protected Map/*<String, Collection<String>*/ m_classMethods;
+  protected List<String> m_classNames;
+  protected Map<String, List<String>> m_classMethods;
   protected boolean m_useMethods;
   
   public ClassMethodsSuite(final String projectName,
-                           final Collection classNames,
-                           final Map classMethods,
-                           final Map parameters,
+                           final List<String> classNames,
+                           final Map<String, List<String>> classMethods,
+                           final Map<String, String> parameters,
                            final String annotationType,
                            final int logLevel) {
     super(projectName, projectName, parameters, annotationType, logLevel);
-    m_classNames= classNames;
-    m_classMethods= sanitize(classMethods);
+    m_classNames = classNames;
+    m_classMethods = sanitize(classMethods);
     if(m_useMethods) {
-      m_classNames= m_classMethods.keySet();
+      m_classNames = new ArrayList<String>(m_classMethods.keySet());
     }
   }
 
-  private Map sanitize(Map classMethods) {
-    Map result= new HashMap();
-    for(Iterator it= classMethods.entrySet().iterator(); it.hasNext(); ) {
-      Map.Entry entry= (Map.Entry) it.next();
-      String clsName= (String) entry.getKey();
-      List methods= (List) entry.getValue();
+  private Map<String, List<String>> sanitize(Map<String, List<String>> classMethods) {
+    Map<String, List<String>> result = Maps.newHashMap();
+    for (Map.Entry<String, List<String>> entry : classMethods.entrySet()) {
+      String clsName= entry.getKey();
+      List<String> methods= entry.getValue();
       if(null == methods || methods.isEmpty()) {
         result.put(clsName, null);
       }
       else {
-        List methodNames= new ArrayList();
-        for(Iterator itNames= methods.iterator(); itNames.hasNext(); ) {
-          String meth= (String) itNames.next();
+        List<String> methodNames= Lists.newArrayList();
+        for (String meth : methods) {
           if(null != meth && !"".equals(meth)) {
             methodNames.add(meth);
           }
@@ -286,11 +283,13 @@ class ClassMethodsSuite extends CustomSuite {
     
     return result;
   }
-  
+
+  @Override
   protected String getTestName() {
     return m_classNames.size() == 1 ? (String) m_classNames.iterator().next() : "classes";
   }
 
+  @Override
   protected void classesElement(XMLStringBuffer suiteBuffer) {
     if(m_useMethods) {
       generateClassesWithMethodsElement(suiteBuffer);
@@ -303,23 +302,21 @@ class ClassMethodsSuite extends CustomSuite {
   protected void generateClassesWithMethodsElement(XMLStringBuffer suiteBuffer) {
     suiteBuffer.push("classes");
 
-    for(Iterator it= m_classMethods.entrySet().iterator(); it.hasNext();) {
-      Map.Entry entry= (Map.Entry) it.next();
-      String className= (String) entry.getKey();
+    for (Map.Entry<String, List<String>> entry : m_classMethods.entrySet()) {
+      String className = entry.getKey();
       Properties classAttrs= new Properties();
       classAttrs.setProperty("name", className);
       
-      List methodNames= (List) entry.getValue();
+      List<String> methodNames = entry.getValue();
       if(null == methodNames) {
         suiteBuffer.addEmptyElement("class", classAttrs);
       }
       else {
         suiteBuffer.push("class", classAttrs);
         suiteBuffer.push("methods");
-        
-        for (Iterator itNames= methodNames.iterator(); itNames.hasNext(); ) {
+        for (String name : methodNames) {
           Properties methodAttrs = new Properties();
-          methodAttrs.setProperty("name", (String) itNames.next());
+          methodAttrs.setProperty("name", name);
           suiteBuffer.addEmptyElement("include", methodAttrs);
         }
         
@@ -333,16 +330,16 @@ class ClassMethodsSuite extends CustomSuite {
 }
 
 class GroupListSuite extends CustomSuite {
-  protected Collection/*<String>*/ m_packageNames;
-  protected Collection/*<String>*/ m_classNames;
-  protected Collection/*<String>*/ m_groupNames;
+  protected List<String> m_packageNames;
+  protected List<String> m_classNames;
+  protected List<String> m_groupNames;
   protected StringBuffer m_testName= new StringBuffer("GRP-");
   
   public GroupListSuite(final String projectName,
-                        final Collection packageNames,
-                        final Collection classNames,
-                        final Collection groupNames,
-                        final Map parameters,
+                        final List<String> packageNames,
+                        final List<String> classNames,
+                        final List<String> groupNames,
+                        final Map<String, String> parameters,
                         final String annotationType,
                         final int logLevel) {
     super(projectName, projectName + " by groups", parameters, annotationType, logLevel);
@@ -350,8 +347,8 @@ class GroupListSuite extends CustomSuite {
     m_packageNames= packageNames;
     m_classNames= classNames;
     m_groupNames= groupNames;
-    
-    for(Iterator it= groupNames.iterator(); it.hasNext(); ) {
+
+    for(Iterator<String> it = groupNames.iterator(); it.hasNext(); ) {
       m_testName.append(it.next());
       if(it.hasNext()) {
         m_testName.append(",");
@@ -359,44 +356,48 @@ class GroupListSuite extends CustomSuite {
     }
   }
 
+  @Override
   protected String getTestName() {
     return m_testName.toString();
   }
 
+  @Override
   protected void classesElement(XMLStringBuffer suiteBuffer) {
     generateDefaultClassesElement(suiteBuffer, m_classNames);
   }
 
+  @Override
   protected void groupsElement(XMLStringBuffer suiteBuffer) {
     generateDefaultGroupsElement(suiteBuffer, m_groupNames);
   }
 
+  @Override
   protected void packagesElement(XMLStringBuffer suiteBuffer) {
     generateDefaultPackagesElement(suiteBuffer, m_packageNames);
   }
-  
-  
 }
 
 /**
  * A package based generator.
  */
 class PackageSuite extends CustomSuite {
-  protected Collection/*<String>*/ m_packageNames;
+  protected List<String> m_packageNames;
   
   public PackageSuite(final String projectName,
-                      final Collection packageNames,
-                      final Map parameters,
+                      final List<String> packageNames,
+                      final Map<String, String> parameters,
                       final String annotationType,
                       final int logLevel) {
     super(projectName, projectName + " by packages", parameters, annotationType, logLevel);
     m_packageNames= packageNames;
   }
 
+  @Override
   protected String getTestName() {
     return m_packageNames.size() == 1 ? (String) m_packageNames.iterator().next() : m_projectName + " by packages";
   }
 
+  @Override
   protected void packagesElement(XMLStringBuffer suiteBuffer) {
     generateDefaultPackagesElement(suiteBuffer, m_packageNames);
   }
