@@ -1,11 +1,12 @@
 package org.testng.eclipse.util;
 
 
+import org.testng.xml.LaunchSuite;
+
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-
-import org.testng.xml.LaunchSuite;
 
 /**
  * Factory to create custom suites.
@@ -31,11 +32,11 @@ public class SuiteGenerator {
    * @return
    */
   public static LaunchSuite createCustomizedSuite(final String projectName,
-                                                  final Collection packageNames,
-                                                  final Collection classNames,
-                                                  final Map methodNames,
-                                                  final Collection groupNames,
-                                                  final Map parameters,
+                                                  final List<String> packageNames,
+                                                  final List<String> classNames,
+                                                  final Map<String, List<String>> methodNames,
+                                                  final List<String> groupNames,
+                                                  final Map<String, String> parameters,
                                                   final String annotationType,
                                                   final int logLevel) {
     if((null != groupNames) && !groupNames.isEmpty()) {

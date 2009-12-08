@@ -175,8 +175,8 @@ public class ConfigurationHelper {
   }
 
   ///////////////////// 
-  private static Map getMapAttribute(ILaunchConfiguration config, String attr) {
-    Map result = null;
+  private static Map<String, String> getMapAttribute(ILaunchConfiguration config, String attr) {
+    Map<String, String> result = null;
     
     try {
       result = config.getAttribute(attr, result);
@@ -355,19 +355,15 @@ public class ConfigurationHelper {
 //                                                                logLevel)});
 //  }
 
-  /**
-   * @param configuration
-   * @return
-   */
   public static Map<String, List<String>> getClassMethods(ILaunchConfiguration configuration) {
-    Map confResult= getMapAttribute(configuration, TestNGLaunchConfigurationConstants.ALL_METHODS_LIST);
+    Map<String, String> confResult =
+        getMapAttribute(configuration, TestNGLaunchConfigurationConstants.ALL_METHODS_LIST);
     if(null == confResult) return null;
     
     Map<String, List<String>> results= new HashMap<String, List<String>>();
-    for(Iterator it= confResult.entrySet().iterator(); it.hasNext(); ) {
-      Map.Entry entry= (Map.Entry) it.next();
-      String className= (String) entry.getKey();
-      String methodNames= (String) entry.getValue();
+    for (Map.Entry<String, String> entry : confResult.entrySet()) {
+      String className= entry.getKey();
+      String methodNames= entry.getValue();
       results.put(className, Arrays.asList(methodNames.split(";")));
     }
     
@@ -400,11 +396,11 @@ public class ConfigurationHelper {
    * more customization.
    */
   private static List<Object> createLaunchSuites(String projectName,
-                                         List packages,
-                                         List classNames, 
+                                         List<String> packages,
+                                         List<String> classNames, 
                                          Map<String, List<String>> classMethods, 
-                                         List groupNames,
-                                         Map parameters,
+                                         List<String> groupNames,
+                                         Map<String, String> parameters,
                                          String annotationType,
                                          final int logLevel) 
   {
