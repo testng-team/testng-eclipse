@@ -1,13 +1,5 @@
 package org.testng.eclipse.ui.util;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionListener;
@@ -15,8 +7,17 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
+import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.internal.annotations.JDK14TagFactory;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 public class Utils {
   public static final String TEST_ANNOTATION = "@" + JDK14TagFactory.TEST;
@@ -92,14 +93,9 @@ public class Utils {
     return org.testng.internal.Utils.split(string, sep);
   }
   
-  /**
-   *
-   * @param s
-   * @return
-   */
-  public static List stringToList(String s) {
+  public static List<String> stringToList(String s) {
     String[] a = s.split("[ ]+");
-    List     result = new ArrayList();
+    List<String> result = Lists.newArrayList();
     for(int i = 0; i < a.length; i++) {
       if(a[i].trim().length() > 0) {
         result.add(a[i]);
@@ -113,8 +109,8 @@ public class Utils {
    * Splits a space separated string into token and returns <tt>null</tt> if the string
    * is empty.
    */
-  public static List stringToNullList(final String s) {
-    List result = stringToList(s);
+  public static List<String> stringToNullList(final String s) {
+    List<String> result = stringToList(s);
     
     return result.isEmpty() ? null : result;
   }

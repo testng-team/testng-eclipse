@@ -83,13 +83,13 @@ abstract public class MultiSelector extends TestngTestSelector {
     Set<String> groups = getValues();
 
     if (groups.size() > 0) {
-      String[] uniqueGroups = (String[]) groups.toArray(new String[groups.size()]);
+      String[] uniqueGroups = groups.toArray(new String[groups.size()]);
       Arrays.sort(uniqueGroups);
       final CheckBoxTable cbt = new CheckBoxTable(getCallback().getShell(), uniqueGroups);
       String content = getText();
       if(!Utils.isEmpty(content)) {
-        List s = Utils.stringToList(content);
-        String[] existingGroups = (String[]) s.toArray(new String[s.size()]);
+        List<String> s = Utils.stringToList(content);
+        String[] existingGroups = s.toArray(new String[s.size()]);
         cbt.checkElements(existingGroups);
       }
       if(SelectionStatusDialog.CANCEL != cbt.open()) {
