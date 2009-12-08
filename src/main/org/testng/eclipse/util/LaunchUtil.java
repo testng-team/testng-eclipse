@@ -29,6 +29,8 @@ import org.eclipse.ui.PlatformUI;
 import org.testng.TestNG;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
+import org.testng.eclipse.collections.Lists;
+import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.RunInfo;
@@ -169,8 +171,8 @@ public class LaunchUtil {
   public static Map createClassLaunchConfigurationMap(IType mainType, IType[] types, String annotationType) {
     Map attrs= new HashMap();
 
-    List classNames= new ArrayList();
-    Map classMethods= new HashMap();
+    List<String> classNames= Lists.newArrayList();
+    Map<String, List<String>> classMethods= Maps.newHashMap();
 
     for(int i= 0; i < types.length; i++) {
       classNames.add(types[i].getFullyQualifiedName());

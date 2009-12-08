@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
@@ -83,8 +84,8 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
   private Combo m_complianceLevelCombo;
   private Combo m_logLevelCombo;
 
-  private List/*<TestngTestSelector>*/testngTestSelectors = new ArrayList/*<TestngTestSelector>*/();
-  private Map/*<String, List<String>>*/m_classMethods;
+  private List <TestngTestSelector> m_testngTestSelectors = Lists.newArrayList();
+  private Map<String, List<String>> m_classMethods;
 
   /**
    * @see org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse.swt.widgets.Composite)
@@ -120,7 +121,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
         setText(Utils.listToString(testClassNames));
       }
     };
-    testngTestSelectors.add(classSelector);
+    m_testngTestSelectors.add(classSelector);
 
     // methodSelector
     handler = new TestngTestSelector.ButtonHandler() {
@@ -136,11 +137,11 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
         setText(Utils.listToString(names));
       }
     };
-    testngTestSelectors.add(methodSelector);
+    m_testngTestSelectors.add(methodSelector);
 
     // groupSelector
     groupSelector = new GroupSelector(this, comp);
-    testngTestSelectors.add(groupSelector);
+    m_testngTestSelectors.add(groupSelector);
 
     //packageSelector
     handler = new TestngTestSelector.ButtonHandler() {
@@ -155,7 +156,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
         setText(Utils.listToString(names));
       }
     };
-    testngTestSelectors.add(packageSelector);
+    m_testngTestSelectors.add(packageSelector);
 
     // suiteSelector
     handler = new TestngTestSelector.ButtonHandler() {
@@ -207,7 +208,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     }
 
     suiteSelector = new SuiteSelector(this, handler, comp);
-    testngTestSelectors.add(suiteSelector);
+    m_testngTestSelectors.add(suiteSelector);
 
   }
 
@@ -228,7 +229,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     updateProjectFromConfig(configuration);
 
     dettachModificationListeners();
-    for(Iterator it = testngTestSelectors.iterator(); it.hasNext();) {
+    for(Iterator it = m_testngTestSelectors.iterator(); it.hasNext();) {
       TestngTestSelector sel = (TestngTestSelector) it.next();
       sel.initializeFrom(configuration);
     }
@@ -248,14 +249,14 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
   }
 
   private void dettachModificationListeners() {
-    for(Iterator it = testngTestSelectors.iterator(); it.hasNext();) {
+    for(Iterator it = m_testngTestSelectors.iterator(); it.hasNext();) {
       TestngTestSelector sel = (TestngTestSelector) it.next();
       sel.detachModificationListener();
     }
   }
 
   private void attachModificationListeners() {
-    for(Iterator it = testngTestSelectors.iterator(); it.hasNext();) {
+    for(Iterator it = m_testngTestSelectors.iterator(); it.hasNext();) {
       TestngTestSelector sel = (TestngTestSelector) it.next();
       sel.attachModificationListener();
     }
@@ -599,7 +600,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
   // package access for callbacks
   void setEnabledRadios(boolean state) {
-    for(Iterator it = testngTestSelectors.iterator(); it.hasNext();) {
+    for(Iterator it = m_testngTestSelectors.iterator(); it.hasNext();) {
       TestngTestSelector sel = (TestngTestSelector) it.next();
       sel.enableRadio(state);
     }
@@ -611,7 +612,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
       //      ppp("SET TYPE TO " + type + " (WAS " + m_typeOfTestRun + ")");
       m_typeOfTestRun = type;
       //////m_classMethods = null; // we reset it here, because the user has changed settings on front page
-      for(Iterator it = testngTestSelectors.iterator(); it.hasNext();) {
+      for(Iterator it = m_testngTestSelectors.iterator(); it.hasNext();) {
         TestngTestSelector sel = (TestngTestSelector) it.next();
         boolean select = (type == sel.getTestngType());
         sel.setRadioSelected(select);

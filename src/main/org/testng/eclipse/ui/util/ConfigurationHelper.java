@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
+import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.RunInfo;
@@ -22,6 +23,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -37,20 +39,20 @@ public class ConfigurationHelper {
   public static class LaunchInfo {
     public String m_projectName;
     public LaunchType m_launchType;
-    public Collection/*<String>*/ m_classNames;
-    public Collection/*<String>*/ m_packageNames;
-    public Map/*<String, List<String>*/ m_classMethods;
+    public Collection<String> m_classNames;
+    public Collection<String> m_packageNames;
+    public Map<String, List<String>> m_classMethods;
     public String m_suiteName;
-    public Map m_groupMap;
+    public Map<String, List<String>> m_groupMap;
     public String m_complianceLevel;
     public String m_logLevel;
     
     public LaunchInfo(String projectName,
                       LaunchType launchType,
-                      Collection/*<String>*/ classNames,
-                      Collection/*<String>*/ packageNames,
-                      Map classMethodsMap,
-                      Map groupMap,
+                      Collection<String> classNames,
+                      Collection<String> packageNames,
+                      Map<String, List<String>> classMethodsMap,
+                      Map<String, List<String>> groupMap,
                       String suiteName,
                       String complianceLevel,
                       String logLevel) {
@@ -80,27 +82,27 @@ public class ConfigurationHelper {
     return getStringAttribute(config, TestNGLaunchConfigurationConstants.DIRECTORY_TEST_LIST);
   }
 
-  public static List getGroups(ILaunchConfiguration config) {
+  public static List<String> getGroups(ILaunchConfiguration config) {
     return getListAttribute(config, TestNGLaunchConfigurationConstants.GROUP_LIST);
   }
 
-  public static List getGroupClasses(ILaunchConfiguration config) {
+  public static List<String> getGroupClasses(ILaunchConfiguration config) {
     return getListAttribute(config, TestNGLaunchConfigurationConstants.GROUP_CLASS_LIST);
   }
   
-  public static List getClasses(ILaunchConfiguration config) {
+  public static List<String> getClasses(ILaunchConfiguration config) {
     return getListAttribute(config, TestNGLaunchConfigurationConstants.CLASS_TEST_LIST);
   }
   
-  public static List getPackages(ILaunchConfiguration config) {
+  public static List<String> getPackages(ILaunchConfiguration config) {
 	    return getListAttribute(config, TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST);
 	  }
   
-  public static List getSuites(ILaunchConfiguration config) {
+  public static List<String> getSuites(ILaunchConfiguration config) {
     return getListAttribute(config, TestNGLaunchConfigurationConstants.SUITE_TEST_LIST);
   }
 
-  public static List getSources(ILaunchConfiguration config) {
+  public static List<String> getSources(ILaunchConfiguration config) {
     return getListAttribute(config, TestNGLaunchConfigurationConstants.SOURCE_TEST_LIST);
   }
 
@@ -112,7 +114,7 @@ public class ConfigurationHelper {
     return getStringAttribute(configuration, IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME);
   }
   
-  public static List getMethods(ILaunchConfiguration configuration) {
+  public static List<String> getMethods(ILaunchConfiguration configuration) {
     return getListAttribute(configuration, TestNGLaunchConfigurationConstants.METHOD_TEST_LIST);
   }
 
@@ -186,8 +188,8 @@ public class ConfigurationHelper {
     return result;
   }
   
-  private static List getListAttribute(ILaunchConfiguration config, String attr) {
-    List result = null;
+  private static List<String> getListAttribute(ILaunchConfiguration config, String attr) {
+    List<String> result = null;
     
     try {
       result = config.getAttribute(attr, result);
@@ -274,13 +276,13 @@ public class ConfigurationHelper {
   /**
    * @return List<LaunchSuite>
    */
-  public static List getLaunchSuites(IJavaProject ijp, ILaunchConfiguration configuration) {
+  public static List<Object> getLaunchSuites(IJavaProject ijp, ILaunchConfiguration configuration) {
     LaunchType type = ConfigurationHelper.getType(configuration);
     
-    List packages= null;
-    List testClasses = null;
-    List groups = null;
-    Map classMethods= null;
+    List<String> packages= null;
+    List<String> testClasses = null;
+    List<String> groups = null;
+    Map<String, List<String>> classMethods= null;
     Map parameters= null;
     
     parameters= getMapAttribute(configuration, TestNGLaunchConfigurationConstants.PARAMS);
@@ -357,11 +359,11 @@ public class ConfigurationHelper {
    * @param configuration
    * @return
    */
-  public static Map getClassMethods(ILaunchConfiguration configuration) {
+  public static Map<String, List<String>> getClassMethods(ILaunchConfiguration configuration) {
     Map confResult= getMapAttribute(configuration, TestNGLaunchConfigurationConstants.ALL_METHODS_LIST);
     if(null == confResult) return null;
     
-    Map results= new HashMap();
+    Map<String, List<String>> results= new HashMap<String, List<String>>();
     for(Iterator it= confResult.entrySet().iterator(); it.hasNext(); ) {
       Map.Entry entry= (Map.Entry) it.next();
       String className= (String) entry.getKey();
@@ -375,11 +377,10 @@ public class ConfigurationHelper {
   /**
    * @return List<LaunchSuite>
    */
-  private static List createLaunchSuites(final IProject project, List suites) {
-    List suiteList = new ArrayList();
+  private static List<Object> createLaunchSuites(final IProject project, List<String> suites) {
+    List<Object> suiteList = new ArrayList<Object>();
 
-    for(Iterator it = suites.iterator(); it.hasNext(); ) {
-      String suitePath= (String) it.next();
+    for (String suitePath : suites) {
       File suiteFile= new File(suitePath);
       if(suiteFile.exists() && suiteFile.isFile()) {
       }
@@ -398,10 +399,10 @@ public class ConfigurationHelper {
    * suite generator, we are using a set of custom generators that allow 
    * more customization.
    */
-  private static List createLaunchSuites(String projectName,
+  private static List<Object> createLaunchSuites(String projectName,
                                          List packages,
                                          List classNames, 
-                                         Map classMethods, 
+                                         Map<String, List<String>> classMethods, 
                                          List groupNames,
                                          Map parameters,
                                          String annotationType,
@@ -460,7 +461,7 @@ public class ConfigurationHelper {
 							break;
 						}
 						else if (runInfo != null) {
-							Map availableClassMethods = getClassMethods(availConfs[i]);
+							Map<String, List<String>> availableClassMethods = getClassMethods(availConfs[i]);
 							String method = runInfo.getMethodName();
 							if (method != null && availableClassMethods != null) {
 								String className = runInfo.getClassName();
@@ -487,16 +488,11 @@ public class ConfigurationHelper {
 		return resultConf;
 	}
 
-  /**
-   * @param classMethods
-   * @return
-   */
-  public static Map toClassMethodsMap(Map classMethods) {
-    Map result= new HashMap();
-    for(Iterator it= classMethods.entrySet().iterator(); it.hasNext(); ) {
-      Map.Entry entry= (Map.Entry) it.next();
-      String clsName= (String) entry.getKey();
-      List methods= (List) entry.getValue();
+  public static Map<String, String> toClassMethodsMap(Map<String, List<String>> classMethods) {
+    Map<String, String> result= new HashMap<String, String>();
+    for (Map.Entry<String, List<String>> entry : classMethods.entrySet()) {
+      String clsName = entry.getKey();
+      List<String> methods= entry.getValue();
       StringBuffer strMethods= new StringBuffer();
       for(int i= 0; i < methods.size(); i++) {
         if(i > 0) strMethods.append(";");
@@ -513,27 +509,24 @@ public class ConfigurationHelper {
    * @param configuration
    */
   public static void updateLaunchConfiguration(ILaunchConfigurationWorkingCopy configuration, LaunchInfo launchInfo) {
-    final List EMPTY= new ArrayList();
-    Map classMethods= new HashMap();
-    Collection classes= launchInfo.m_groupMap.values();
+    Map<String, List<String>> classMethods = Maps.newHashMap();
+    Collection<List<String>> classes= launchInfo.m_groupMap.values();
     if(null != classes) {
-      for(Iterator it= classes.iterator(); it.hasNext(); ) {
-        List classList= (List) it.next();
-        for(Iterator itc= classList.iterator(); itc.hasNext(); ) {
-          classMethods.put(itc.next(), EMPTY);
+      for (List<String> classList : classes) {
+        for (String c : classList) {
+          classMethods.put(c, Collections.<String>emptyList());
         }
       }
     }
-    Collection classNames= launchInfo.m_classNames;
-    List classNamesList= new ArrayList();
+    Collection<String> classNames= launchInfo.m_classNames;
+    List<Object> classNamesList= new ArrayList<Object>();
     if(null != classNames && !classNames.isEmpty()) {
-      for(Iterator it= classNames.iterator(); it.hasNext(); ) {
-        Object cls= it.next();
-        classMethods.put(cls, EMPTY);
+      for (String cls : classNames) {
+        classMethods.put(cls, Collections.<String>emptyList());
         classNamesList.add(cls);
       }
     }
-    List packageList = new ArrayList();
+    List<Object> packageList = new ArrayList<Object>();
     if (launchInfo.m_packageNames != null) {
     	packageList.addAll(launchInfo.m_packageNames);
     }    
@@ -552,7 +545,7 @@ public class ConfigurationHelper {
     configuration.setAttribute(TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST,
     		packageList);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.GROUP_LIST,
-                               new ArrayList(launchInfo.m_groupMap.keySet()));
+                               new ArrayList<Object>(launchInfo.m_groupMap.keySet()));
     configuration.setAttribute(TestNGLaunchConfigurationConstants.GROUP_CLASS_LIST,
                                Utils.uniqueMergeList(launchInfo.m_groupMap.values()));
     configuration.setAttribute(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,

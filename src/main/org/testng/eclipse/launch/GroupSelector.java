@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.launch.components.CheckBoxTable;
 import org.testng.eclipse.launch.components.Filters;
@@ -22,14 +23,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 public class GroupSelector extends TestngTestSelector {
 
-  private Map m_groupMap = new HashMap();
+  private Map<String, List<String>> m_groupMap = Maps.newHashMap();
 
   GroupSelector(TestNGMainTab callback, Composite comp) {
     super();
@@ -38,11 +37,12 @@ public class GroupSelector extends TestngTestSelector {
     //setTextEditable(false); // allow hand entry of group names
   }
 
+  @Override
   public void initializeFrom(ILaunchConfiguration configuration) {
-    List groupNames = ConfigurationHelper.getGroups(configuration);
+    List<String> groupNames = ConfigurationHelper.getGroups(configuration);
     setText(Utils.listToString(groupNames));
     m_groupMap.clear();
-    List groupClassNames = ConfigurationHelper.getGroupClasses(configuration);
+    List<String> groupClassNames = ConfigurationHelper.getGroupClasses(configuration);
     groupNames = ConfigurationHelper.getGroups(configuration);
     if(null != groupNames) {
       for(int i = 0; i < groupNames.size(); i++) {
@@ -51,7 +51,7 @@ public class GroupSelector extends TestngTestSelector {
     }
   }
 
-  public Map getGroupMap() {
+  public Map<String, List<String>> getGroupMap() {
     return m_groupMap;
   }
 
@@ -67,7 +67,7 @@ public class GroupSelector extends TestngTestSelector {
   * Invoked when the Search button for groups is pressed.
   */
   public void handleGroupSearchButtonSelected() {
-    Map groups = new HashMap();
+    Map<String, List<String>> groups = Maps.newHashMap();
 
     try {
       IJavaProject[] dependencies = new IJavaProject[0];
@@ -95,13 +95,12 @@ public class GroupSelector extends TestngTestSelector {
         if(t instanceof IType) {
           IType type = (IType) t;
           ITestContent content = TypeParser.parseType(type);
-          Collection groupNames = content.getGroups();
+          Collection<String> groupNames = content.getGroups();
           if(!groupNames.isEmpty()) {
-            for(Iterator it = groupNames.iterator(); it.hasNext();) {
-              String groupName = (String) it.next();
-              List rtypes = (List) groups.get(groupName);
+            for (String groupName : groupNames) {
+              List<String> rtypes = groups.get(groupName);
               if(null == rtypes) {
-                rtypes = new ArrayList();
+                rtypes = new ArrayList<String>();
                 groups.put(groupName, rtypes);
               }
 
@@ -130,7 +129,7 @@ public class GroupSelector extends TestngTestSelector {
     if(SelectionStatusDialog.CANCEL != cbt.open()) {
       String[] selectedGroups = cbt.getSelectedElements();
 
-      m_groupMap = new HashMap();
+      m_groupMap = Maps.newHashMap();
       for(int i = 0; i < selectedGroups.length; i++) {
         m_groupMap.put(selectedGroups[i], groups.get(selectedGroups[i]));
       }

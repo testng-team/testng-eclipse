@@ -1,9 +1,10 @@
 package org.testng.eclipse.launch.components;
 
+import org.eclipse.jdt.core.IMethod;
+import org.testng.eclipse.util.signature.IMethodDescriptor;
+
 import java.util.Collection;
 import java.util.Set;
-
-import org.eclipse.jdt.core.IMethod;
 
 public interface ITestContent {
   public boolean isTestNGClass();
@@ -11,11 +12,11 @@ public interface ITestContent {
   /**
    * Returns a Set<IMethodDescriptor>.
    */
-  Set getTestMethods();
+  Set<IMethodDescriptor> getTestMethods();
   
   boolean hasTestMethods();
 
-  Collection getGroups();
+  Collection<String> getGroups();
   
   boolean isTestMethod(IMethod imethod);
 
