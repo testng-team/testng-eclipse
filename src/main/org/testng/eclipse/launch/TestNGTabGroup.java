@@ -12,9 +12,6 @@ import org.eclipse.jdt.debug.ui.launchConfigurations.JavaClasspathTab;
 import org.eclipse.jdt.debug.ui.launchConfigurations.JavaJRETab;
  
 public class TestNGTabGroup extends AbstractLaunchConfigurationTabGroup {
-	/**
-	 * @see ILaunchConfigurationTabGroup#createTabs(ILaunchConfigurationDialog, String)
-	 */
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {		
 		ILaunchConfigurationTab[] tabs= new ILaunchConfigurationTab[] {
         new TestNGMainTab(),

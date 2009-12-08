@@ -1,12 +1,5 @@
 package org.testng.eclipse.launch.components;
 
-import org.testng.eclipse.util.ResourceUtil;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -24,21 +17,23 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
+import org.testng.eclipse.collections.Lists;
+import org.testng.eclipse.util.ResourceUtil;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
- * 
  * A Table with checkboxes to present group names.
- * 
- * @author <a href='mailto:the_mindstorm@evolva.ro'>Alexandru Popescu</a>
  */
 public class CheckBoxTable extends SelectionStatusDialog {
   protected CheckboxTableViewer m_viewer;
 
   private String[] m_elements;
-  private List m_selection = new ArrayList();
+  private List<Object> m_selection = Lists.newArrayList();
   
-  public CheckBoxTable(Shell shell, Collection elements) {
-    this(shell, (String[]) elements.toArray(new String[elements.size()]));
+  public CheckBoxTable(Shell shell, Collection<String> elements) {
+    this(shell, elements.toArray(new String[elements.size()]));
   }
   
   public CheckBoxTable(Shell shell, String[] elements) {
@@ -55,6 +50,7 @@ public class CheckBoxTable extends SelectionStatusDialog {
   /**
    * Handles cancel button pressed event.
    */
+  @Override
   protected void cancelPressed() {
     setSelectionResult(null);
     super.cancelPressed();
@@ -73,13 +69,14 @@ public class CheckBoxTable extends SelectionStatusDialog {
     m_viewer.setLabelProvider(new GroupNameLabelProvider());
 
     m_viewer.setInput(m_elements);
-    for (Iterator it = m_selection.iterator(); it.hasNext(); ) {
-      m_viewer.setChecked(it.next().toString(), true);
+    for (Object element : m_selection) {
+      m_viewer.setChecked(element.toString(), true);
     }
 
     return m_viewer;
   }
-  
+
+  @Override
   protected Control createDialogArea(Composite parent) {
     Composite composite = (Composite) super.createDialogArea(parent);
 
@@ -124,9 +121,10 @@ public class CheckBoxTable extends SelectionStatusDialog {
   }
   
   public String[] getSelectedElements() {
-    return (String[]) m_selection.toArray(new String[m_selection.size()]);
+    return m_selection.toArray(new String[m_selection.size()]);
   }
 
+  @Override
   protected void computeResult() {
     setSelectionResult(m_selection.toArray());
   }
@@ -153,7 +151,7 @@ public class CheckBoxTable extends SelectionStatusDialog {
     /**
      * Returns the image
      * 
-     * @param arg0 the file
+     * @param element the file
      * @return Image
      */
     public Image getImage(Object element) {
@@ -163,7 +161,7 @@ public class CheckBoxTable extends SelectionStatusDialog {
     /**
      * Returns the name of the file
      * 
-     * @param arg0 the name of the file
+     * @param element the name of the file
      * @return String
      */
     public String getText(Object element) {
@@ -173,7 +171,7 @@ public class CheckBoxTable extends SelectionStatusDialog {
     /**
      * Adds a listener
      * 
-     * @param arg0 the listener
+     * @param listener the listener
      */
     public void addListener(ILabelProviderListener listener) {
     // Throw it away

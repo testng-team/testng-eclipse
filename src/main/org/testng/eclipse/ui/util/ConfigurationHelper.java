@@ -37,15 +37,15 @@ import java.util.Map;
 public class ConfigurationHelper {
   
   public static class LaunchInfo {
-    public String m_projectName;
-    public LaunchType m_launchType;
-    public Collection<String> m_classNames;
-    public Collection<String> m_packageNames;
-    public Map<String, List<String>> m_classMethods;
-    public String m_suiteName;
-    public Map<String, List<String>> m_groupMap;
-    public String m_complianceLevel;
-    public String m_logLevel;
+    private String m_projectName;
+    private  LaunchType m_launchType;
+    private Collection<String> m_classNames;
+    private Collection<String> m_packageNames;
+    private Map<String, List<String>> m_classMethods;
+    private String m_suiteName;
+    private Map<String, List<String>> m_groupMap = Maps.newHashMap();
+    private String m_complianceLevel;
+    private String m_logLevel;
     
     public LaunchInfo(String projectName,
                       LaunchType launchType,

@@ -19,16 +19,11 @@ public abstract class TestngTestSelector {
 
 	public abstract void initializeFrom(ILaunchConfiguration configuration);
 
-	private Button radioButton;
-	private Text text;
-	private Button searchButton;
-	private ModifyListener textAdapter;
-	private Composite comp;
-	private TestNGMainTab callback;
-	private ButtonHandler buttonHandler;
-	private String labelKey;
-
-	private LaunchType testngType;
+	private Button m_radioButton;
+	private Text m_text;
+	private ModifyListener m_textAdapter;
+	private TestNGMainTab m_callback;
+	private LaunchType m_launchType;
 
 	TestngTestSelector() {
 	}
@@ -36,49 +31,47 @@ public abstract class TestngTestSelector {
 	TestngTestSelector(TestNGMainTab callback, ButtonHandler buttonHandler,
 			LaunchType testngType, Composite comp, String labelKey) {
 
-		init(callback, buttonHandler, testngType, comp, labelKey);
+		init(callback, buttonHandler, comp, testngType, labelKey);
 	}
-	
-	
 
 	public void attachModificationListener() {
-		text.addModifyListener(textAdapter);
+		m_text.addModifyListener(m_textAdapter);
 	}
 
 	public void detachModificationListener() {
-		text.removeModifyListener(textAdapter);
+		m_text.removeModifyListener(m_textAdapter);
 	}
 
 	public void enableRadio(boolean state) {
-		radioButton.setEnabled(state);
+		m_radioButton.setEnabled(state);
 	}
 
 	public void setTextEditable(boolean editable) {
-		text.setEditable(editable);
+		m_text.setEditable(editable);
 	}
 
 	public void setRadioSelected(boolean selected) {
-		radioButton.setSelection(selected);
+		m_radioButton.setSelection(selected);
 	}
 
 	public void setText(String string) {
-		text.setText(string);
+		m_text.setText(string);
 	}
 
 	public String getText() {
-		return text.getText();
+		return m_text.getText();
 	}
 
 	public LaunchType getTestngType() {
-		return testngType;
+		return m_launchType;
 	}
 
 	public Button getRadioButton() {
-		return radioButton;
+		return m_radioButton;
 	}
 
 	public TestNGMainTab getCallback() {
-		return callback;
+		return m_callback;
 	}
 
 	/**
@@ -91,24 +84,20 @@ public abstract class TestngTestSelector {
 	 * @param comp
 	 */
 	final void init(TestNGMainTab callback, ButtonHandler buttonHandler,
-			LaunchType testngType, Composite comp, String labelKey) {
+			Composite comp, LaunchType testngType, String labelKey) {
 
-		this.callback = callback;
-		this.buttonHandler = buttonHandler;
-		this.testngType = testngType;
-		this.comp = comp;
-		this.labelKey = labelKey;
+		m_callback = callback;
+		m_launchType = testngType;
 
-		textAdapter = new TextAdapter(testngType);
+		m_textAdapter = new TextAdapter(testngType);
 		SelectionAdapter radioAdapter = new RadioAdapter(testngType);
 		SelectionAdapter buttonAdapter = new ButtonAdapter(testngType,
 				buttonHandler);
 		Utils.Widgets wt = Utils.createWidgetTriple(comp, labelKey,
-				radioAdapter, buttonAdapter, textAdapter);
+				radioAdapter, buttonAdapter, m_textAdapter);
 
-		radioButton = wt.radio;
-		text = wt.text;
-		searchButton = wt.button;
+		m_radioButton = wt.radio;
+		m_text = wt.text;
 	}
 
 	/////
@@ -124,7 +113,7 @@ public abstract class TestngTestSelector {
 
 		public void widgetSelected(SelectionEvent evt) {
 			if (((Button) evt.widget).getSelection()) {
-				callback.setType(m_type);
+				m_callback.setType(m_type);
 			}
 		}
 	}
@@ -145,7 +134,7 @@ public abstract class TestngTestSelector {
 		}
 
 		public void modifyText(ModifyEvent evt) {
-			callback.setType(m_type);
+			m_callback.setType(m_type);
 		}
 	}
 
@@ -166,12 +155,12 @@ public abstract class TestngTestSelector {
 		}
 
 		public void widgetSelected(SelectionEvent evt) {
-			callback.setType(m_type);
+			m_callback.setType(m_type);
 			try {
-				callback.setEnabledRadios(false);
+				m_callback.setEnabledRadios(false);
 				m_handler.handleButton();
 			} finally {
-				callback.setEnabledRadios(true);
+				m_callback.setEnabledRadios(true);
 			}
 		};
 
