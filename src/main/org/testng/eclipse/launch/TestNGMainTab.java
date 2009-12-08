@@ -84,7 +84,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
   private Combo m_complianceLevelCombo;
   private Combo m_logLevelCombo;
 
-  private List <TestngTestSelector> m_testngTestSelectors = Lists.newArrayList();
+  private List <TestngTestSelector> m_launchSelectors = Lists.newArrayList();
   private Map<String, List<String>> m_classMethods;
 
   /**
@@ -121,7 +121,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
         setText(Utils.listToString(testClassNames));
       }
     };
-    m_testngTestSelectors.add(m_classSelector);
+    m_launchSelectors.add(m_classSelector);
 
     // methodSelector
     handler = new TestngTestSelector.ButtonHandler() {
@@ -137,11 +137,11 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
         setText(Utils.listToString(names));
       }
     };
-    m_testngTestSelectors.add(m_methodSelector);
+    m_launchSelectors.add(m_methodSelector);
 
     // groupSelector
     m_groupSelector = new GroupSelector(this, comp);
-    m_testngTestSelectors.add(m_groupSelector);
+    m_launchSelectors.add(m_groupSelector);
 
     //packageSelector
     handler = new TestngTestSelector.ButtonHandler() {
@@ -156,7 +156,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
         setText(Utils.listToString(names));
       }
     };
-    m_testngTestSelectors.add(m_packageSelector);
+    m_launchSelectors.add(m_packageSelector);
 
     // suiteSelector
     handler = new TestngTestSelector.ButtonHandler() {
@@ -165,50 +165,8 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
       };
     };
 
-    class SuiteSelector extends TestngTestSelector {
-
-      private Button m_suiteBrowseButton;
-
-      SuiteSelector(TestNGMainTab callback, ButtonHandler handler, Composite comp) {
-        super(callback, handler, LaunchType.SUITE, comp,
-            "TestNGMainTab.label.suiteTest");
-
-        Composite fill = new Composite(comp, SWT.NONE);
-        GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-        gd.horizontalSpan = 2;
-        gd.verticalIndent = 0;
-        gd.heightHint = 1;
-        fill.setLayoutData(gd);
-
-        //
-        // Search button
-        //
-        m_suiteBrowseButton = new Button(comp, SWT.PUSH);
-        m_suiteBrowseButton.setText(ResourceUtil.getString("TestNGMainTab.label.browsefs")); //$NON-NLS-1$
-
-        TestngTestSelector.ButtonHandler buttonHandler = new TestngTestSelector.ButtonHandler() {
-          public void handleButton() {
-            FileDialog fileDialog = new FileDialog(m_suiteBrowseButton.getShell(), SWT.OPEN);
-            setText(fileDialog.open());
-          }
-        };
-        ButtonAdapter adapter = new ButtonAdapter(getTestngType(), buttonHandler);
-
-        m_suiteBrowseButton.addSelectionListener(adapter);
-        gd = new GridData();
-        gd.verticalIndent = 0;
-        m_suiteBrowseButton.setLayoutData(gd);
-
-      }
-
-      public void initializeFrom(ILaunchConfiguration configuration) {
-        List suites = ConfigurationHelper.getSuites(configuration);
-        setText(Utils.listToString(suites));
-      }
-    }
-
     m_suiteSelector = new SuiteSelector(this, handler, comp);
-    m_testngTestSelectors.add(m_suiteSelector);
+    m_launchSelectors.add(m_suiteSelector);
 
   }
 
@@ -229,7 +187,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     updateProjectFromConfig(configuration);
 
     dettachModificationListeners();
-    for(Iterator it = m_testngTestSelectors.iterator(); it.hasNext();) {
+    for(Iterator it = m_launchSelectors.iterator(); it.hasNext();) {
       TestngTestSelector sel = (TestngTestSelector) it.next();
       sel.initializeFrom(configuration);
     }
@@ -249,14 +207,14 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
   }
 
   private void dettachModificationListeners() {
-    for(Iterator it = m_testngTestSelectors.iterator(); it.hasNext();) {
+    for(Iterator it = m_launchSelectors.iterator(); it.hasNext();) {
       TestngTestSelector sel = (TestngTestSelector) it.next();
       sel.detachModificationListener();
     }
   }
 
   private void attachModificationListeners() {
-    for(Iterator it = m_testngTestSelectors.iterator(); it.hasNext();) {
+    for(Iterator it = m_launchSelectors.iterator(); it.hasNext();) {
       TestngTestSelector sel = (TestngTestSelector) it.next();
       sel.attachModificationListener();
     }
@@ -600,7 +558,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
   // package access for callbacks
   void setEnabledRadios(boolean state) {
-    for(Iterator it = m_testngTestSelectors.iterator(); it.hasNext();) {
+    for(Iterator it = m_launchSelectors.iterator(); it.hasNext();) {
       TestngTestSelector sel = (TestngTestSelector) it.next();
       sel.enableRadio(state);
     }
@@ -612,7 +570,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
       //      ppp("SET TYPE TO " + type + " (WAS " + m_typeOfTestRun + ")");
       m_typeOfTestRun = type;
       //////m_classMethods = null; // we reset it here, because the user has changed settings on front page
-      for(Iterator it = m_testngTestSelectors.iterator(); it.hasNext();) {
+      for(Iterator it = m_launchSelectors.iterator(); it.hasNext();) {
         TestngTestSelector sel = (TestngTestSelector) it.next();
         boolean select = (type == sel.getTestngType());
         sel.setRadioSelected(select);
