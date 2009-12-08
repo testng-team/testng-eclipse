@@ -6,6 +6,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.testng.TestNG;
 import org.testng.eclipse.TestNGPluginConstants;
+import org.testng.eclipse.ui.util.Utils;
 
 
 /**
@@ -94,7 +95,8 @@ public class PreferenceStoreUtil {
   }
 
   public String getParallel(String projectName, boolean projectOnly) {
-    return getString(projectName, projectOnly, TestNGPluginConstants.S_PARALLEL);
+    String result = getString(projectName, projectOnly, TestNGPluginConstants.S_PARALLEL);
+    return Utils.isEmpty(result) ? "false" : result;
   }
 
   public boolean hasDisabledListeners(String projectName, boolean projectOnly) {
