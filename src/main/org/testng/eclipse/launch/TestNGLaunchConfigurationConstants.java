@@ -98,11 +98,28 @@ public abstract class TestNGLaunchConfigurationConstants {
   // What kind of run we are doing
   // This would be a nice place for an enum when jdk1.5 or later can be 
   // required.
-  public static final int CLASS = 1;
-  public static final int GROUP = 2;
-  public static final int SUITE = 3;
-  public static final int METHOD = 4;
-  public static final int PACKAGE = 5;
+  static public enum LaunchType {
+    UNDEFINED(-1),
+    CLASS(1),
+    GROUP(2),
+    SUITE(3),
+    METHOD(4),
+    PACKAGE(5);
+
+    private int m_type;
+
+    LaunchType(int type) {
+      m_type = type;
+    }
+
+    public static LaunchType fromInt(int result) {
+      for (LaunchType lt : values()) {
+        if (lt.m_type == result) return lt;
+      }
+      return null;
+    }
+  }
+
   public static final String PARAMS = make("PARAMETERS");
   
   

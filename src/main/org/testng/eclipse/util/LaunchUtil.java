@@ -30,6 +30,7 @@ import org.testng.TestNG;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
+import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.RunInfo;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.util.JDTUtil.MethodDefinition;
@@ -118,8 +119,7 @@ public class LaunchUtil {
 
     configWC.setAttribute(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
                           Collections.singletonList(suiteFilePath));
-    configWC.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
-                          TestNGLaunchConfigurationConstants.SUITE);
+    configWC.setAttribute(TestNGLaunchConfigurationConstants.TYPE, LaunchType.SUITE.ordinal());
     // carry over jvm args from prevConfig
     // set failed test jvm args
     String jargs = ConfigurationHelper.getJvmArgs(prevConfig);
@@ -177,10 +177,11 @@ public class LaunchUtil {
       classMethods.put(types[i].getFullyQualifiedName(), EMPTY_ARRAY_PARAM);
     }
 
-    attrs.put(TestNGLaunchConfigurationConstants.TYPE, new Integer(TestNGLaunchConfigurationConstants.CLASS));
+    attrs.put(TestNGLaunchConfigurationConstants.TYPE, LaunchType.CLASS.ordinal());
     attrs.put(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST, classNames);
     attrs.put(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR, annotationType);
-    attrs.put(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST, ConfigurationHelper.toClassMethodsMap(classMethods));
+    attrs.put(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST, 
+        ConfigurationHelper.toClassMethodsMap(classMethods));
 
     return attrs;
   }
@@ -207,7 +208,7 @@ public class LaunchUtil {
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST,
                              packageNames);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
-                             TestNGLaunchConfigurationConstants.PACKAGE);
+        LaunchType.PACKAGE.ordinal());
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
                              ConfigurationHelper.toClassMethodsMap(new HashMap()));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
@@ -297,7 +298,7 @@ public class LaunchUtil {
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST,
                              EMPTY_ARRAY_PARAM);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
-                             TestNGLaunchConfigurationConstants.METHOD);
+        LaunchType.METHOD.ordinal());
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
                              ConfigurationHelper.toClassMethodsMap(classMethods));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
@@ -359,7 +360,7 @@ public class LaunchUtil {
     ILaunchConfigurationWorkingCopy workingCopy = createLaunchConfiguration(ijp.getProject(), confName, null); 
     
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
-                             TestNGLaunchConfigurationConstants.CLASS);
+        LaunchType.CLASS.ordinal());
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
                              ConfigurationHelper.toClassMethodsMap(classMethods));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,

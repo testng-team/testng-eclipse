@@ -1,17 +1,8 @@
 package org.testng.eclipse.launch;
 
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
-
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,10 +20,10 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
-import org.eclipse.core.runtime.Assert;
 import org.testng.TestNG;
 import org.testng.TestNGCommandLineArgs;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.JDTUtil;
@@ -41,6 +32,16 @@ import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 
 public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigurationDelegate {
@@ -319,16 +320,16 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
   }
 
   private String getRunNameAttr(ILaunchConfiguration configuration) throws CoreException {
-    int runType = ConfigurationHelper.getType(configuration);
+    LaunchType runType = ConfigurationHelper.getType(configuration);
     
     switch(runType) {
-      case TestNGLaunchConfigurationConstants.CLASS:
+      case CLASS:
         return "test class";
-      case TestNGLaunchConfigurationConstants.GROUP:
+      case GROUP:
         return "groups";
-      case TestNGLaunchConfigurationConstants.SUITE:
+      case SUITE:
         return "suite";
-      case TestNGLaunchConfigurationConstants.PACKAGE:
+      case PACKAGE:
           return "package";  
       default:
         return "from context";

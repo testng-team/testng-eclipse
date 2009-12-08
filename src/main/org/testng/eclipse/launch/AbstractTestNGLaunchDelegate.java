@@ -30,9 +30,6 @@ import org.testng.eclipse.util.SuiteFileValidator;
  * @author <a href='mailto:the_mindstorm[at]evolva[dot]ro'>Alexandru Popescu</a>
  */
 public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDelegate {
-  private static final Integer CLASS_TYPE= new Integer(TestNGLaunchConfigurationConstants.CLASS);
-  private static final Integer SUITE_TYPE= new Integer(TestNGLaunchConfigurationConstants.SUITE);
-  
   private IAction m_action;
   private IEditorPart m_editorPart;
   

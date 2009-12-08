@@ -1,13 +1,6 @@
 package org.testng.eclipse.launch;
 
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -37,6 +30,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.ProjectChooserDialog;
@@ -46,6 +40,13 @@ import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SWTUtil;
 import org.testng.eclipse.util.TestSearchEngine;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * TestNG specific launcher tab.
@@ -76,7 +77,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
   // Package
   private TestngTestSelector packageSelector;
 
-  private int m_typeOfTestRun = -1;
+  private LaunchType m_typeOfTestRun = LaunchType.UNDEFINED;
 
   // Runtime group
   private Combo m_complianceLevelCombo;
@@ -109,10 +110,10 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     // classSelector
     TestngTestSelector.ButtonHandler handler = new TestngTestSelector.ButtonHandler() {
       public void handleButton() {
-        handleSearchButtonSelected(TestNGLaunchConfigurationConstants.CLASS);
+        handleSearchButtonSelected(LaunchType.CLASS);
       };
     };
-    classSelector = new TestngTestSelector(this, handler, TestNGLaunchConfigurationConstants.CLASS,
+    classSelector = new TestngTestSelector(this, handler, LaunchType.CLASS,
         comp, "TestNGMainTab.label.test") {
       public void initializeFrom(ILaunchConfiguration configuration) {
         List testClassNames = ConfigurationHelper.getClasses(configuration);
@@ -124,12 +125,12 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     // methodSelector
     handler = new TestngTestSelector.ButtonHandler() {
       public void handleButton() {
-        handleSearchButtonSelected(TestNGLaunchConfigurationConstants.METHOD);
+        handleSearchButtonSelected(LaunchType.METHOD);
       };
     };
 
     methodSelector = new TestngTestSelector(this, handler,
-        TestNGLaunchConfigurationConstants.METHOD, comp, "TestNGMainTab.label.method") {
+        LaunchType.METHOD, comp, "TestNGMainTab.label.method") {
       public void initializeFrom(ILaunchConfiguration configuration) {
         List names = ConfigurationHelper.getMethods(configuration);
         setText(Utils.listToString(names));
@@ -144,11 +145,11 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     //packageSelector
     handler = new TestngTestSelector.ButtonHandler() {
       public void handleButton() {
-        handleSearchButtonSelected(TestNGLaunchConfigurationConstants.PACKAGE);
+        handleSearchButtonSelected(LaunchType.PACKAGE);
       };
     };
     packageSelector = new TestngTestSelector(this, handler,
-        TestNGLaunchConfigurationConstants.PACKAGE, comp, "TestNGMainTab.label.package") {
+        LaunchType.PACKAGE, comp, "TestNGMainTab.label.package") {
       public void initializeFrom(ILaunchConfiguration configuration) {
         List names = ConfigurationHelper.getPackages(configuration);
         setText(Utils.listToString(names));
@@ -159,7 +160,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     // suiteSelector
     handler = new TestngTestSelector.ButtonHandler() {
       public void handleButton() {
-        handleSearchButtonSelected(TestNGLaunchConfigurationConstants.SUITE);
+        handleSearchButtonSelected(LaunchType.SUITE);
       };
     };
 
@@ -168,7 +169,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
       private Button m_suiteBrowseButton;
 
       SuiteSelector(TestNGMainTab callback, ButtonHandler handler, Composite comp) {
-        super(callback, handler, TestNGLaunchConfigurationConstants.SUITE, comp,
+        super(callback, handler, LaunchType.SUITE, comp,
             "TestNGMainTab.label.suiteTest");
 
         Composite fill = new Composite(comp, SWT.NONE);
@@ -237,9 +238,9 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
     updateComplianceLevel(configuration);
 
-    int type = ConfigurationHelper.getType(configuration);
+    LaunchType type = ConfigurationHelper.getType(configuration);
     setType(type);
-    if(TestNGLaunchConfigurationConstants.METHOD == type) {
+    if(LaunchType.METHOD == type) {
       m_classMethods = ConfigurationHelper.getClassMethods(configuration);
     }
 
@@ -362,29 +363,29 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
       return;
     }
 
-    if(getType() > -1) {
+    if (getType() != LaunchType.UNDEFINED) {
       switch(getType()) {
-        case TestNGLaunchConfigurationConstants.CLASS:
+        case CLASS:
           if(classSelector.getText().trim().length() < 1) {
             setErrorMessage(ResourceUtil.getString("TestNGMainTab.error.testclassnotdefined")); //$NON-NLS-1$
           }
           break;
-        case TestNGLaunchConfigurationConstants.SUITE:
+        case SUITE:
           if(suiteSelector.getText().trim().length() < 1) {
             setErrorMessage(ResourceUtil.getString("TestNGMainTab.error.suitenotdefined")); //$NON-NLS-1$
           }
           break;
-        case TestNGLaunchConfigurationConstants.METHOD:
+        case METHOD:
           if(methodSelector.getText().trim().length() < 1) {
             setErrorMessage(ResourceUtil.getString("TestNGMainTab.error.methodnotdefined")); //$NON-NLS-1$
           }
           break;
-        case TestNGLaunchConfigurationConstants.GROUP:
+        case GROUP:
           if(groupSelector.getText().trim().length() < 1) {
             setErrorMessage(ResourceUtil.getString("TestNGMainTab.error.groupnotdefined")); //$NON-NLS-1$
           }
           break;
-        case TestNGLaunchConfigurationConstants.PACKAGE:
+        case PACKAGE:
           if(packageSelector.getText().trim().length() < 1) {
             setErrorMessage(ResourceUtil.getString("TestNGMainTab.error.packagenotdefined")); //$NON-NLS-1$
           }
@@ -401,32 +402,32 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
    * Package access for callbacks.
    * @param testngType - one of TestNGLaunchConfigurationConstants
    */
-  void handleSearchButtonSelected(int testngType) {
+  void handleSearchButtonSelected(LaunchType testngType) {
     Object[] types = new Object[0];
     SelectionDialog dialog = null;
 
     try {
       switch(testngType) {
-        case TestNGLaunchConfigurationConstants.CLASS:
+        case CLASS:
           types = TestSearchEngine.findTests(getLaunchConfigurationDialog(),
               new Object[] {m_selectedProject}, Filters.SINGLE_TEST);
           dialog = TestSelectionDialog.createTestTypeSelectionDialog(getShell(), m_selectedProject,
               types, Filters.SINGLE_TEST);
           break;
-        case TestNGLaunchConfigurationConstants.METHOD:
+        case METHOD:
 
           types = TestSearchEngine.findMethods(getLaunchConfigurationDialog(),
               new Object[] {m_selectedProject}, classSelector.getText());
           dialog = TestSelectionDialog.createMethodSelectionDialog(getShell(), m_selectedProject,
               types);
           break;
-        case TestNGLaunchConfigurationConstants.SUITE:
+        case SUITE:
           types = TestSearchEngine.findSuites(getLaunchConfigurationDialog(),
               new Object[] {m_selectedProject});
           dialog = TestSelectionDialog.createSuiteSelectionDialog(getShell(), m_selectedProject,
               types);
           break;
-        case TestNGLaunchConfigurationConstants.PACKAGE:
+        case PACKAGE:
           types = TestSearchEngine.findPackages(getLaunchConfigurationDialog(),
               new Object[] {m_selectedProject});
           dialog = TestSelectionDialog.createPackageSelectionDialog(getShell(), m_selectedProject,
@@ -456,11 +457,11 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
     if(type != null) {
       switch(testngType) {
-        case TestNGLaunchConfigurationConstants.CLASS:
+        case CLASS:
           classSelector.setText((((IType) type).getFullyQualifiedName()).trim());
           m_selectedProject = ((IType) type).getJavaProject();
           break;
-        case TestNGLaunchConfigurationConstants.METHOD:
+        case METHOD:
           String fullName = ((String) type);
           int index = fullName.lastIndexOf('.');
           String className = fullName.substring(0, index);
@@ -472,11 +473,11 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
           methods.add(methodName);
           m_classMethods.put(className, methods);
           break;
-        case TestNGLaunchConfigurationConstants.SUITE:
+        case SUITE:
           IFile file = (IFile) type;
           suiteSelector.setText(file.getProjectRelativePath().toOSString().trim());
           break;
-        case TestNGLaunchConfigurationConstants.PACKAGE:
+        case PACKAGE:
           packageSelector.setText((String) type);
           break;
         default:
@@ -605,7 +606,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
   }
 
   // package not private, for callback access
-  void setType(int type) {
+  void setType(LaunchType type) {
     if(type != m_typeOfTestRun) {
       //      ppp("SET TYPE TO " + type + " (WAS " + m_typeOfTestRun + ")");
       m_typeOfTestRun = type;
@@ -620,7 +621,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     updateDialog();
   }
 
-  private int getType() {
+  private LaunchType getType() {
     return m_typeOfTestRun;
   }
 

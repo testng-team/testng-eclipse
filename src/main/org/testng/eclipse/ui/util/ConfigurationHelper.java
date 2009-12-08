@@ -1,14 +1,5 @@
 package org.testng.eclipse.ui.util;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunch;
@@ -21,10 +12,20 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
+import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.RunInfo;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.SuiteGenerator;
 import org.testng.remote.RemoteTestNG;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Helper methods to store and retrieve values from a launch configuration.
@@ -35,7 +36,7 @@ public class ConfigurationHelper {
   
   public static class LaunchInfo {
     public String m_projectName;
-    public int m_launchType;
+    public LaunchType m_launchType;
     public Collection/*<String>*/ m_classNames;
     public Collection/*<String>*/ m_packageNames;
     public Map/*<String, List<String>*/ m_classMethods;
@@ -45,7 +46,7 @@ public class ConfigurationHelper {
     public String m_logLevel;
     
     public LaunchInfo(String projectName,
-                      int launchType,
+                      LaunchType launchType,
                       Collection/*<String>*/ classNames,
                       Collection/*<String>*/ packageNames,
                       Map classMethodsMap,
@@ -149,9 +150,9 @@ public class ConfigurationHelper {
 		return configuration;
 	}
   
-  public static int getType(ILaunchConfiguration configuration) {
+  public static LaunchType getType(ILaunchConfiguration configuration) {
     int result = getIntAttribute(configuration, TestNGLaunchConfigurationConstants.TYPE);
-    return result;
+    return LaunchType.fromInt(result);
   }
   
   public static String getProjectName(ILaunch launch) {
@@ -258,7 +259,7 @@ public class ConfigurationHelper {
                         RemoteTestNG.class.getName());
     config.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
                         JDTUtil.getProjectVMVersion(javaProject));
-    config.setAttribute(TestNGLaunchConfigurationConstants.TYPE, TestNGLaunchConfigurationConstants.CLASS);
+    config.setAttribute(TestNGLaunchConfigurationConstants.TYPE, LaunchType.CLASS.ordinal());
     config.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL, "2"); 
   }
 
@@ -274,7 +275,7 @@ public class ConfigurationHelper {
    * @return List<LaunchSuite>
    */
   public static List getLaunchSuites(IJavaProject ijp, ILaunchConfiguration configuration) {
-    int type = ConfigurationHelper.getType(configuration);
+    LaunchType type = ConfigurationHelper.getType(configuration);
     
     List packages= null;
     List testClasses = null;
@@ -283,24 +284,24 @@ public class ConfigurationHelper {
     Map parameters= null;
     
     parameters= getMapAttribute(configuration, TestNGLaunchConfigurationConstants.PARAMS);
-    if (type == TestNGLaunchConfigurationConstants.SUITE) {
+    if (type == LaunchType.SUITE) {
       return createLaunchSuites(ijp.getProject(), getSuites(configuration));
     }
     
-    if (type == TestNGLaunchConfigurationConstants.GROUP) {
+    if (type == LaunchType.GROUP) {
       groups = getGroups(configuration);
       testClasses = getGroupClasses(configuration);
       packages= getListAttribute(configuration, TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST);
     }
-    else if (type == TestNGLaunchConfigurationConstants.CLASS) {
+    else if (type == LaunchType.CLASS) {
       testClasses = getClasses(configuration);
       classMethods= getClassMethods(configuration);
     }
-    else if (type == TestNGLaunchConfigurationConstants.METHOD) {
+    else if (type == LaunchType.METHOD) {
       classMethods= getClassMethods(configuration); 
       testClasses = getClasses(configuration);
     }
-    else if (type == TestNGLaunchConfigurationConstants.PACKAGE) {
+    else if (type == LaunchType.PACKAGE) {
       packages= getListAttribute(configuration, TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST);
     }
 
@@ -540,7 +541,8 @@ public class ConfigurationHelper {
       classMethods.putAll(launchInfo.m_classMethods);
     }
     
-    configuration.setAttribute(TestNGLaunchConfigurationConstants.TYPE, launchInfo.m_launchType);
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
+        launchInfo.m_launchType.ordinal());
     configuration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
                                launchInfo.m_projectName);
     configuration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,

@@ -8,6 +8,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
+import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.util.Utils;
 
 public abstract class TestngTestSelector {
@@ -27,14 +28,13 @@ public abstract class TestngTestSelector {
 	private ButtonHandler buttonHandler;
 	private String labelKey;
 
-	// TestNGLaunchConfigurationConstants.XXX
-	private int testngType;
+	private LaunchType testngType;
 
 	TestngTestSelector() {
 	}
 
 	TestngTestSelector(TestNGMainTab callback, ButtonHandler buttonHandler,
-			int testngType, Composite comp, String labelKey) {
+			LaunchType testngType, Composite comp, String labelKey) {
 
 		init(callback, buttonHandler, testngType, comp, labelKey);
 	}
@@ -69,7 +69,7 @@ public abstract class TestngTestSelector {
 		return text.getText();
 	}
 
-	public int getTestngType() {
+	public LaunchType getTestngType() {
 		return testngType;
 	}
 
@@ -91,7 +91,7 @@ public abstract class TestngTestSelector {
 	 * @param comp
 	 */
 	final void init(TestNGMainTab callback, ButtonHandler buttonHandler,
-			int testngType, Composite comp, String labelKey) {
+			LaunchType testngType, Composite comp, String labelKey) {
 
 		this.callback = callback;
 		this.buttonHandler = buttonHandler;
@@ -116,9 +116,9 @@ public abstract class TestngTestSelector {
 	//
 
 	class RadioAdapter extends SelectionAdapter {
-		private int m_type;
+		private LaunchType m_type;
 
-		public RadioAdapter(int type) {
+		public RadioAdapter(LaunchType type) {
 			m_type = type;
 		}
 
@@ -138,9 +138,9 @@ public abstract class TestngTestSelector {
 	//
 
 	class TextAdapter implements ModifyListener {
-		int m_type;
+		LaunchType m_type;
 
-		public TextAdapter(int type) {
+		public TextAdapter(LaunchType type) {
 			m_type = type;
 		}
 
@@ -157,10 +157,10 @@ public abstract class TestngTestSelector {
 	//
 
 	class ButtonAdapter extends SelectionAdapter {
-		private int m_type;
+		private LaunchType m_type;
 		private ButtonHandler m_handler;
 
-		public ButtonAdapter(int type, ButtonHandler handler) {
+		public ButtonAdapter(LaunchType type, ButtonHandler handler) {
 			m_type = type;
 			m_handler = handler;
 		}

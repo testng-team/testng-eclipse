@@ -10,10 +10,6 @@
  *******************************************************************************/
 package org.testng.eclipse.ui.util;
 
-import java.lang.reflect.InvocationTargetException;
-
-import java.text.MessageFormat;
-
 import org.eclipse.core.internal.resources.File;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -29,12 +25,15 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.TwoPaneElementSelector;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
-
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
+import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.TestSearchEngine;
+
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 
 /**
  * A dialog to select a test class or a test suite from a list of types.
@@ -44,7 +43,7 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 	private IJavaProject m_project;
 	private Object[] m_input;
 	private Filters.ITypeFilter m_filter;
-	private int m_testngType;
+	private LaunchType m_testngType;
 
 	private static class PackageRenderer extends JavaElementLabelProvider {
 		public PackageRenderer() {
@@ -80,7 +79,7 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 			final Shell shell, final IJavaProject jproject,
 			final Object[] resources) {
 		TestSelectionDialog result = new TestSelectionDialog(shell,
-				TestNGLaunchConfigurationConstants.SUITE, jproject,
+		    LaunchType.SUITE, jproject,
 				new FileLabelProvider(FileLabelProvider.SHOW_LABEL),
 				new FileLabelProvider(FileLabelProvider.SHOW_LABEL_PATH),
 				resources, null);
@@ -94,28 +93,28 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 			final Shell shell, final IJavaProject jproject,
 			final Object[] types, final Filters.ITypeFilter filter) {
 		return createJavaElementDialog (shell, jproject, types,
-				TestNGLaunchConfigurationConstants.CLASS, 
+		    LaunchType.CLASS, 
 				"TestNGMainTab.testdialog.selectTestClass", filter);
 	}
 
 	public static TestSelectionDialog createPackageSelectionDialog(
 			final Shell shell, final IJavaProject jproject, final Object[] types) {
 		return createJavaElementDialog (shell, jproject, types,
-				TestNGLaunchConfigurationConstants.PACKAGE, 
+		    LaunchType.PACKAGE, 
 				"TestNGMainTab.testdialog.selectPackage", null);
 	}
 	
 	public static TestSelectionDialog createMethodSelectionDialog(
 			final Shell shell, final IJavaProject jproject, final Object[] types) {
 		return createJavaElementDialog (shell, jproject, types,
-				TestNGLaunchConfigurationConstants.METHOD, 
+		    LaunchType.METHOD, 
 				"TestNGMainTab.testdialog.selectMethod", null);
 	}
 	
 	
 	private static TestSelectionDialog createJavaElementDialog(final Shell shell, 
 			final IJavaProject jproject, final Object[] types, 
-			final int testngType, final String title, final Filters.ITypeFilter filter
+			final LaunchType testngType, final String title, final Filters.ITypeFilter filter
 			) {
 		TestSelectionDialog result = new TestSelectionDialog(shell,
 				testngType, jproject,
@@ -130,7 +129,7 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 		
 	}
 
-	private TestSelectionDialog(final Shell shell, final int type,
+	private TestSelectionDialog(final Shell shell, final LaunchType type,
 			final IJavaProject jproject, final ILabelProvider mainProvider,
 			final ILabelProvider detailsProvider, final Object[] input,
 			final Filters.ITypeFilter filter) {
@@ -148,7 +147,7 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 	public int open() {
 		if (null == m_input) {
 			switch (m_testngType) {
-			case TestNGLaunchConfigurationConstants.CLASS:
+			case CLASS:
 				m_input = new IType[0];
 
 				try {
@@ -162,7 +161,7 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 					return CANCEL;
 				}
 				break;
-			case TestNGLaunchConfigurationConstants.SUITE:
+			case SUITE:
 				m_input = new IFile[0];
 				try {
 					m_input = TestSearchEngine
@@ -175,7 +174,7 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 					return CANCEL;
 				}
 				break;
-			case TestNGLaunchConfigurationConstants.PACKAGE:
+			case PACKAGE:
 				m_input = new IType[0];
 
 				try {
