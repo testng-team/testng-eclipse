@@ -1,6 +1,7 @@
 package org.testng.eclipse.launch;
 
 
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -12,7 +13,9 @@ import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.launch.components.ITestContent;
+import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.TypeParser;
+import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.TestSearchEngine;
 
@@ -22,11 +25,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class GroupSelector extends MultiSelector {
 
-  private Map<String, List<String>> m_groupMap;
+  private Map<String, List<String>> m_groupMap = Maps.newHashMap();
 
   GroupSelector(TestNGMainTab callback, Composite comp) {
     super(callback, comp, LaunchType.GROUP, "TestNGMainTab.label.group");
@@ -34,7 +36,7 @@ public class GroupSelector extends MultiSelector {
   }
 
   @Override
-  protected Set<String> getValues() {
+  protected Collection<String> getValues(ILaunchConfiguration configuration) {
     Map<String, List<String>> result = Maps.newHashMap();
 
     try {
@@ -94,6 +96,21 @@ public class GroupSelector extends MultiSelector {
 
     m_groupMap = result;
     return result.keySet();
+  }
+
+
+  @Override
+  public void initializeFrom(ILaunchConfiguration configuration) {
+    List<String> groupNames = ConfigurationHelper.getGroups(configuration);
+    setText(Utils.listToString(groupNames));
+    m_groupMap.clear();
+    List<String> groupClassNames = ConfigurationHelper.getGroupClasses(configuration);
+    groupNames = ConfigurationHelper.getGroups(configuration);
+    if(null != groupNames) {
+      for(int i = 0; i < groupNames.size(); i++) {
+        m_groupMap.put(groupNames.get(i), groupClassNames);
+      }
+    }
   }
 
   @Override

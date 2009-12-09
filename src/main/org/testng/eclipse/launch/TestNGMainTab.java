@@ -158,14 +158,20 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     };
     m_launchSelectors.add(m_packageSelector);
 
-    // suiteSelector
-    handler = new TestngTestSelector.ButtonHandler() {
-      public void handleButton() {
-        handleSearchButtonSelected(LaunchType.SUITE);
+    // Work in progress
+    if (true) {
+      // suiteSelector
+      handler = new TestngTestSelector.ButtonHandler() {
+        public void handleButton() {
+          handleSearchButtonSelected(LaunchType.SUITE);
+        };
       };
-    };
 
-    m_suiteSelector = new SuiteSelector(this, handler, comp);
+      m_suiteSelector = new SuiteSelector(this, handler, comp);
+    } else {
+      m_suiteSelector = new SuiteSelector2(this, comp);
+    }
+//    m_suiteSelector = new SuiteSelector(this, handler, comp);
     m_launchSelectors.add(m_suiteSelector);
 
   }
@@ -358,6 +364,8 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
   }
 
   /**
+   * Displays the selection dialog for the specified launch type.
+   * 
    * Package access for callbacks.
    * @param testngType - one of TestNGLaunchConfigurationConstants
    */

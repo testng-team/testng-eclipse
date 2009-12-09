@@ -506,11 +506,13 @@ public class ConfigurationHelper {
    */
   public static void updateLaunchConfiguration(ILaunchConfigurationWorkingCopy configuration, LaunchInfo launchInfo) {
     Map<String, List<String>> classMethods = Maps.newHashMap();
-    Collection<List<String>> classes= launchInfo.m_groupMap.values();
-    if(null != classes) {
-      for (List<String> classList : classes) {
-        for (String c : classList) {
-          classMethods.put(c, Collections.<String>emptyList());
+    if (launchInfo.m_groupMap != null) {
+      Collection<List<String>> classes= launchInfo.m_groupMap.values();
+      if(null != classes) {
+        for (List<String> classList : classes) {
+          for (String c : classList) {
+            classMethods.put(c, Collections.<String>emptyList());
+          }
         }
       }
     }

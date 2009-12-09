@@ -9,6 +9,7 @@ import org.eclipse.ui.dialogs.SelectionStatusDialog;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
+import org.testng.eclipse.launch.TestngTestSelector.ButtonHandler;
 import org.testng.eclipse.launch.components.CheckBoxTable;
 import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.launch.components.ITestContent;
@@ -37,6 +38,7 @@ abstract public class MultiSelector extends TestngTestSelector {
 //  private Map<String, List<String>> m_groupMap = Maps.newHashMap();
 
   private Map<String, List<String>> m_valueMap = Maps.newHashMap();
+  private ILaunchConfiguration m_configuration;
 
   protected MultiSelector(TestNGMainTab callback, Composite comp, LaunchType type,
       String labelKey) {
@@ -45,25 +47,11 @@ abstract public class MultiSelector extends TestngTestSelector {
     //setTextEditable(false); // allow hand entry of group names
   }
 
-  @Override
-  public void initializeFrom(ILaunchConfiguration configuration) {
-//    List<String> groupNames = ConfigurationHelper.getGroups(configuration);
-//    setText(Utils.listToString(groupNames));
-//    m_groupMap.clear();
-//    List<String> groupClassNames = ConfigurationHelper.getGroupClasses(configuration);
-//    groupNames = ConfigurationHelper.getGroups(configuration);
-//    if(null != groupNames) {
-//      for(int i = 0; i < groupNames.size(); i++) {
-//        m_groupMap.put(groupNames.get(i), groupClassNames);
-//      }
-//    }
-  }
-
   public Map<String, List<String>> getValueMap() {
     return m_valueMap;
   }
 
-  private ButtonHandler createButtonHandler() {
+  protected ButtonHandler createButtonHandler() {
     return new TestngTestSelector.ButtonHandler() {
       public void handleButton() {
         handleGroupSearchButtonSelected();
@@ -71,7 +59,9 @@ abstract public class MultiSelector extends TestngTestSelector {
     };
   }
 
-  protected abstract Set<String> getValues();
+  public abstract void initializeFrom(ILaunchConfiguration configuration);
+
+  protected abstract Collection<String> getValues(ILaunchConfiguration configuration);
 
   protected abstract Map<String, List<String>> onSelect(String[] selectedValues);
 
@@ -80,7 +70,7 @@ abstract public class MultiSelector extends TestngTestSelector {
   */
   public void handleGroupSearchButtonSelected() {
 
-    Set<String> groups = getValues();
+    Collection<String> groups = getValues(m_configuration);
 
     if (groups.size() > 0) {
       String[] uniqueGroups = groups.toArray(new String[groups.size()]);

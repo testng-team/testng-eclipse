@@ -119,12 +119,12 @@ public class Utils {
     System.out.println("[Utils] " + s);
   }
 
-  public static String listToString(List l) {
+  public static String listToString(Collection<String> l) {
     StringBuffer result = new StringBuffer();
 
     if(null != l) {
-      for(Iterator it = l.iterator(); it.hasNext();) {
-        result.append(it.next().toString()).append(" ");
+      for (String s : l) {
+        result.append(s).append(" ");
       }
     }
 
