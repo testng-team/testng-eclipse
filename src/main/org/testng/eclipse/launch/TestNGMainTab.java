@@ -23,7 +23,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -31,6 +30,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Lists;
+import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
@@ -43,9 +43,6 @@ import org.testng.eclipse.util.SWTUtil;
 import org.testng.eclipse.util.TestSearchEngine;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -112,12 +109,13 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     TestngTestSelector.ButtonHandler handler = new TestngTestSelector.ButtonHandler() {
       public void handleButton() {
         handleSearchButtonSelected(LaunchType.CLASS);
-      };
+      }
     };
     m_classSelector = new TestngTestSelector(this, handler, LaunchType.CLASS,
         comp, "TestNGMainTab.label.test") {
+      @Override
       public void initializeFrom(ILaunchConfiguration configuration) {
-        List testClassNames = ConfigurationHelper.getClasses(configuration);
+        List<String> testClassNames = ConfigurationHelper.getClasses(configuration);
         setText(Utils.listToString(testClassNames));
       }
     };
@@ -127,13 +125,14 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     handler = new TestngTestSelector.ButtonHandler() {
       public void handleButton() {
         handleSearchButtonSelected(LaunchType.METHOD);
-      };
+      }
     };
 
     m_methodSelector = new TestngTestSelector(this, handler,
         LaunchType.METHOD, comp, "TestNGMainTab.label.method") {
+      @Override
       public void initializeFrom(ILaunchConfiguration configuration) {
-        List names = ConfigurationHelper.getMethods(configuration);
+        List<String> names = ConfigurationHelper.getMethods(configuration);
         setText(Utils.listToString(names));
       }
     };
@@ -147,12 +146,13 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     handler = new TestngTestSelector.ButtonHandler() {
       public void handleButton() {
         handleSearchButtonSelected(LaunchType.PACKAGE);
-      };
+      }
     };
     m_packageSelector = new TestngTestSelector(this, handler,
         LaunchType.PACKAGE, comp, "TestNGMainTab.label.package") {
+      @Override
       public void initializeFrom(ILaunchConfiguration configuration) {
-        List names = ConfigurationHelper.getPackages(configuration);
+        List<String> names = ConfigurationHelper.getPackages(configuration);
         setText(Utils.listToString(names));
       }
     };
@@ -164,7 +164,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
       handler = new TestngTestSelector.ButtonHandler() {
         public void handleButton() {
           handleSearchButtonSelected(LaunchType.SUITE);
-        };
+        }
       };
 
       m_suiteSelector = new SuiteSelector(this, handler, comp);
@@ -193,8 +193,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     updateProjectFromConfig(configuration);
 
     dettachModificationListeners();
-    for(Iterator it = m_launchSelectors.iterator(); it.hasNext();) {
-      TestngTestSelector sel = (TestngTestSelector) it.next();
+    for (TestngTestSelector sel : m_launchSelectors) {
       sel.initializeFrom(configuration);
     }
 
@@ -213,15 +212,13 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
   }
 
   private void dettachModificationListeners() {
-    for(Iterator it = m_launchSelectors.iterator(); it.hasNext();) {
-      TestngTestSelector sel = (TestngTestSelector) it.next();
+    for (TestngTestSelector sel : m_launchSelectors) {
       sel.detachModificationListener();
     }
   }
 
   private void attachModificationListeners() {
-    for(Iterator it = m_launchSelectors.iterator(); it.hasNext();) {
-      TestngTestSelector sel = (TestngTestSelector) it.next();
+    for (TestngTestSelector sel : m_launchSelectors) {
       sel.attachModificationListener();
     }
   }
@@ -264,6 +261,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
   /**
    * @see org.eclipse.debug.ui.ILaunchConfigurationTab#isValid(org.eclipse.debug.core.ILaunchConfiguration)
    */
+  @Override
   public boolean isValid(ILaunchConfiguration launchConfig) {
     boolean result = getErrorMessage() == null;
 
@@ -280,17 +278,16 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
   /**
    * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getImage()
    */
+  @Override
   public Image getImage() {
     return getTestNGImage();
   }
 
   /**
-   * Method to retreive TestNG icon Image object.
+   * Retrieve the TestNG icon Image object.
    * <p>
    * Code adopted from <code>org.eclipse.jdt.internal.debug.ui.JavaDebugImages</code>
    * and <code>org.eclipse.jdt.internal.debug.ui.JDIDebugUIPlugin</code> classes.
-   * 
-   * @return
    */
   public static Image getTestNGImage() {
     final String key = "icon";
@@ -435,8 +432,8 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
           String methodName = fullName.substring(index + 1);
           m_classSelector.setText(className);
           m_methodSelector.setText(methodName);
-          m_classMethods = new HashMap();
-          List methods = new ArrayList();
+          m_classMethods = Maps.newHashMap();
+          List<String> methods = Lists.newArrayList();
           methods.add(methodName);
           m_classMethods.put(className, methods);
           break;
@@ -542,6 +539,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     Button projectSearchButton = new Button(projectGroup, SWT.PUSH);
     projectSearchButton.setText(ResourceUtil.getString("TestNGMainTab.label.browse")); //$NON-NLS-1$
     projectSearchButton.addSelectionListener(new SelectionAdapter() {
+      @Override
       public void widgetSelected(SelectionEvent evt) {
         handleProjectButtonSelected();
       }
@@ -566,8 +564,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
   // package access for callbacks
   void setEnabledRadios(boolean state) {
-    for(Iterator it = m_launchSelectors.iterator(); it.hasNext();) {
-      TestngTestSelector sel = (TestngTestSelector) it.next();
+    for (TestngTestSelector sel : m_launchSelectors) {
       sel.enableRadio(state);
     }
   }
@@ -578,8 +575,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
       //      ppp("SET TYPE TO " + type + " (WAS " + m_typeOfTestRun + ")");
       m_typeOfTestRun = type;
       //////m_classMethods = null; // we reset it here, because the user has changed settings on front page
-      for(Iterator it = m_launchSelectors.iterator(); it.hasNext();) {
-        TestngTestSelector sel = (TestngTestSelector) it.next();
+      for (TestngTestSelector sel : m_launchSelectors) {
         boolean select = (type == sel.getTestngType());
         sel.setRadioSelected(select);
         TestNGPlugin.bold(sel.getRadioButton(), select);
@@ -605,10 +601,12 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     return m_selectedProject;
   }
 
+  @Override
   protected Shell getShell() {
     return super.getShell();
   }
 
+  @Override
   protected ILaunchConfigurationDialog getLaunchConfigurationDialog() {
     return super.getLaunchConfigurationDialog();
   }
