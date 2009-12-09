@@ -37,20 +37,23 @@ import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.ProjectChooserDialog;
 import org.testng.eclipse.ui.util.TestSelectionDialog;
 import org.testng.eclipse.ui.util.Utils;
+import org.testng.eclipse.util.CustomSuite;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SWTUtil;
+import org.testng.eclipse.util.SuiteGenerator;
 import org.testng.eclipse.util.TestSearchEngine;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 /**
  * TestNG specific launcher tab.
  *
- * @author <a href='mailto:the_mindstorm@evolva.ro'>Alexandru Popescu</a>
- * @author cedric
+ * @author cbeust
  */
 public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILaunchConfigurationTab
 {
@@ -253,9 +256,22 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
               Utils.stringToList(m_packageSelector.getText().trim()), 
               m_classMethods, 
               m_groupSelector.getValueMap(), 
-              m_suiteSelector.getText(), 
+              createSuiteFile(m_suiteSelector.getText()), 
               m_complianceLevelCombo.getText(), 
               m_logLevelCombo.getText()));
+  }
+
+  private String createSuiteFile(String suites) {
+    List<String> suiteFiles = Arrays.asList(suites.split(" "));
+    if (suiteFiles.size() == 1) {
+      return suiteFiles.get(0);
+    } else {
+      CustomSuite ss = SuiteGenerator.createSuiteSuite(suiteFiles, "project");
+      File projectPathFile = new File(m_selectedProject.getProject().getLocation().toOSString());
+      ss.save(projectPathFile);
+      String result = new File(projectPathFile, ss.getFileName()).getAbsolutePath();
+      return result;
+    }
   }
 
   /**

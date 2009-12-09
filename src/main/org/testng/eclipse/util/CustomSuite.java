@@ -15,15 +15,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 /**
- * A custom suite generator.
+ * Base class used by classes that generate XML suite files.
  *
- * @author <a href='mailto:the[dot]mindstorm[at]gmail[dot]com'>Alex Popescu</a>
+ * @author cbeust
  */
 abstract public class CustomSuite extends LaunchSuite {
   protected String m_projectName;
@@ -33,6 +34,13 @@ abstract public class CustomSuite extends LaunchSuite {
   protected int m_logLevel;
 
   private XMLStringBuffer m_suiteBuffer;
+  private List<String> m_suiteFiles;
+
+  public CustomSuite(List<String> suiteFiles, String projectName, int logLevel) {
+    super(false);
+    init(suiteFiles, projectName, "Suites", Collections.<String, String>emptyMap(),
+        TestNG.JDK_ANNOTATION_TYPE, logLevel);
+  }
 
   public CustomSuite(final String projectName,
                      final String suiteName,
@@ -40,7 +48,17 @@ abstract public class CustomSuite extends LaunchSuite {
                      final String annotationType,
                      final int logLevel) {
     super(true);
+    init(Collections.<String>emptyList(), projectName, suiteName, parameters, annotationType,
+        logLevel);
+  }
 
+  private void init(List<String> suiteFiles, String projectName,
+      final String suiteName,
+      final Map<String, String> parameters,
+      final String annotationType,
+      final int logLevel) {
+
+    m_suiteFiles = suiteFiles;
     m_projectName= projectName;
     m_suiteName= suiteName;
     m_parameters= parameters;
@@ -54,8 +72,8 @@ abstract public class CustomSuite extends LaunchSuite {
     }
     
     m_logLevel= logLevel;
+    
   }
-
   abstract protected String getTestName();
 
   protected String getSuiteName() {
@@ -81,6 +99,15 @@ abstract public class CustomSuite extends LaunchSuite {
       }
     }
 
+    if (m_suiteFiles.size() > 0) {
+      suiteBuffer.push("suite-files");
+      for (String suite : m_suiteFiles) {
+        Properties s = new Properties();
+        s.put("path", suite);
+        suiteBuffer.addEmptyElement("suite-file", s);
+      }
+      suiteBuffer.pop("suite-files");
+    }
     initContentBuffer(suiteBuffer);
 
     suiteBuffer.pop("suite");
@@ -96,13 +123,17 @@ abstract public class CustomSuite extends LaunchSuite {
     return m_suiteBuffer;
   }
 
+  public String getFileName() {
+    return "temp-testng-customsuite.xml";
+  }
+
   /** 
    * Generate the current suite to a file.
    * @see org.testng.xml.LaunchSuite#save(java.io.File)
    */
   @Override
   public File save(File directory) {
-    final File suiteFile= new File(directory, "temp-testng-customsuite.xml");
+    final File suiteFile= new File(directory, getFileName());
 
     saveSuiteContent(suiteFile, getSuiteBuffer());
 
@@ -403,3 +434,18 @@ class PackageSuite extends CustomSuite {
   }
 }
 
+/**
+ * A suite file that contains several suite files.
+ * 
+ * @author cbeust
+ */
+class SuiteSuite extends CustomSuite {
+  public SuiteSuite(List<String> suiteFiles, String project) {
+    super(suiteFiles, project, 1);
+  }
+
+  @Override
+  protected String getTestName() {
+    return "Suite-of-suites";
+  }
+}

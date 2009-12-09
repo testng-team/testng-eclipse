@@ -111,6 +111,7 @@ public abstract class TestngTestSelector {
 			m_type = type;
 		}
 
+		@Override
 		public void widgetSelected(SelectionEvent evt) {
 			if (((Button) evt.widget).getSelection()) {
 				m_callback.setType(m_type);
@@ -141,6 +142,7 @@ public abstract class TestngTestSelector {
 	//
 	// TextAdapter
 	/////
+
 	/////
 	// ButtonAdapter
 	//
@@ -154,6 +156,7 @@ public abstract class TestngTestSelector {
 			m_handler = handler;
 		}
 
+		@Override
 		public void widgetSelected(SelectionEvent evt) {
 			m_callback.setType(m_type);
 			try {
@@ -162,7 +165,7 @@ public abstract class TestngTestSelector {
 			} finally {
 				m_callback.setEnabledRadios(true);
 			}
-		};
+		}
 
 		//
 		// ButtonAdapter

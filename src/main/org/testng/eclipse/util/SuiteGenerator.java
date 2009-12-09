@@ -4,7 +4,6 @@ package org.testng.eclipse.util;
 import org.testng.xml.LaunchSuite;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -63,5 +62,9 @@ public class SuiteGenerator {
                                    annotationType,
                                    logLevel);
     }
+  }
+
+  public static CustomSuite createSuiteSuite(List<String> suites, String project) {
+    return new SuiteSuite(suites, project);
   }
 }

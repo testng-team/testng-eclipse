@@ -24,8 +24,8 @@ import java.util.Map;
 public class SuiteSelector2 extends MultiSelector {
 
   SuiteSelector2(TestNGMainTab callback, Composite comp) {
-    super(callback, comp, LaunchType.GROUP, "TestNGMainTab.label.suiteTest");
-//    setTextEditable(false); // allow hand entry of group names
+    super(callback, comp, LaunchType.SUITE, "TestNGMainTab.label.suiteTest");
+    setTextEditable(false); // no manual edit
   }
 
   @Override
