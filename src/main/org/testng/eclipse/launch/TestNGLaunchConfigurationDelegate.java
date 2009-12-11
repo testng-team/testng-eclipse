@@ -203,8 +203,9 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     }
 
     if (null != suiteList) {
-      String suites = toPath(suiteList, " "); //$NON-NLS-1$
-      argv.add(suites); //$NON-NLS-1$
+      for (String suite : suiteList) {
+        argv.add(suite);
+      }
 
       launch.setAttribute(TestNGLaunchConfigurationConstants.TEMP_SUITE_LIST, Utils
           .listToString(tempSuites));

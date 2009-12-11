@@ -255,23 +255,10 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
               Utils.stringToList(m_classSelector.getText().trim()), 
               Utils.stringToList(m_packageSelector.getText().trim()), 
               m_classMethods, 
-              m_groupSelector.getValueMap(), 
-              createSuiteFile(m_suiteSelector.getText()), 
+              m_groupSelector.getValueMap(),
+              m_suiteSelector.getText(),
               m_complianceLevelCombo.getText(), 
               m_logLevelCombo.getText()));
-  }
-
-  private String createSuiteFile(String suites) {
-    List<String> suiteFiles = Arrays.asList(suites.split(" "));
-    if (suiteFiles.size() == 1) {
-      return suiteFiles.get(0);
-    } else {
-      CustomSuite ss = SuiteGenerator.createSuiteSuite(suiteFiles, "project");
-      File projectPathFile = new File(m_selectedProject.getProject().getLocation().toOSString());
-      ss.save(projectPathFile);
-      String result = new File(projectPathFile, ss.getFileName()).getAbsolutePath();
-      return result;
-    }
   }
 
   /**

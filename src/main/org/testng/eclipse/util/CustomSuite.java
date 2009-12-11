@@ -434,19 +434,3 @@ class PackageSuite extends CustomSuite {
     generateDefaultPackagesElement(suiteBuffer, m_packageNames);
   }
 }
-
-/**
- * A suite file that contains several suite files.
- * 
- * @author cbeust
- */
-class SuiteSuite extends CustomSuite {
-  public SuiteSuite(List<String> suiteFiles, String project) {
-    super(suiteFiles, project, 1);
-  }
-
-  @Override
-  protected String getTestName() {
-    return "Suite-of-suites";
-  }
-}

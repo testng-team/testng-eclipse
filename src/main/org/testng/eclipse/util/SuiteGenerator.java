@@ -34,8 +34,4 @@ public class SuiteGenerator {
           annotationType, logLevel);
     }
   }
-
-  public static CustomSuite createSuiteSuite(List<String> suites, String project) {
-    return new SuiteSuite(suites, project);
-  }
 }
