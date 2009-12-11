@@ -3,7 +3,7 @@
 <plugin
    id="org.testng.eclipse"
    name="TestNG"
-   version="5.11.0.22"
+   version="5.11.0.23"
    provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
    <runtime>

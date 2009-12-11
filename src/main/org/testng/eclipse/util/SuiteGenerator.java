@@ -11,56 +11,27 @@ import java.util.Map;
  * Factory to create custom suites.
  * 
  * @author Hani Suleiman
- * @author <a href='mailto:the[dot]mindstorm[at]gmail[dot]com'>Alex Popescu</a>
  */
 public class SuiteGenerator {
   public static LaunchSuite createProxiedXmlSuite(final File xmlSuitePath) {
     return new LaunchSuite.ExistingSuite(xmlSuitePath);
   }
 
-  /**
-   * 
-   * @param projectName
-   * @param packageNames
-   * @param classNames
-   * @param methodNames Map<String, Collection<String>>: classname -> collection of method names
-   * @param groupNames
-   * @param parameters
-   * @param annotationType
-   * @param logLevel
-   * @return
-   */
-  public static LaunchSuite createCustomizedSuite(final String projectName,
-                                                  final List<String> packageNames,
-                                                  final List<String> classNames,
-                                                  final Map<String, List<String>> methodNames,
-                                                  final List<String> groupNames,
-                                                  final Map<String, String> parameters,
-                                                  final String annotationType,
-                                                  final int logLevel) {
+  public static LaunchSuite createCustomizedSuite(String projectName,
+      List<String> packageNames, List<String> classNames, Map<String, List<String>> methodNames,
+      List<String> groupNames, Map<String, String> parameters, String annotationType,
+      int logLevel) {
+
     if((null != groupNames) && !groupNames.isEmpty()) {
-      return new GroupListSuite(projectName,
-                                packageNames, 
-                                classNames,
-                                groupNames,
-                                parameters,
-                                annotationType,
-                                logLevel);
+      return new GroupListSuite(projectName, packageNames, classNames, groupNames, parameters,
+          annotationType, logLevel);
     }
     else if(null != packageNames && !packageNames.isEmpty()) {
-      return new PackageSuite(projectName,
-                              packageNames, 
-                              parameters,
-                              annotationType,
-                              logLevel);
+      return new PackageSuite(projectName, packageNames, parameters, annotationType, logLevel);
     }
     else {
-      return new ClassMethodsSuite(projectName,
-                                   classNames,
-                                   methodNames,
-                                   parameters,
-                                   annotationType,
-                                   logLevel);
+      return new ClassMethodsSuite(projectName, classNames, methodNames, parameters,
+          annotationType, logLevel);
     }
   }
 

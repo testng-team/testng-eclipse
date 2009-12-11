@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
+import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
@@ -18,6 +19,7 @@ import org.testng.eclipse.ui.RunInfo;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.SuiteGenerator;
 import org.testng.remote.RemoteTestNG;
+import org.testng.xml.LaunchSuite;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -25,7 +27,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -276,14 +277,15 @@ public class ConfigurationHelper {
   /**
    * @return List<LaunchSuite>
    */
-  public static List<Object> getLaunchSuites(IJavaProject ijp, ILaunchConfiguration configuration) {
+  public static List<LaunchSuite> getLaunchSuites(IJavaProject ijp,
+      ILaunchConfiguration configuration) {
     LaunchType type = ConfigurationHelper.getType(configuration);
     
     List<String> packages= null;
     List<String> testClasses = null;
     List<String> groups = null;
     Map<String, List<String>> classMethods= null;
-    Map parameters= null;
+    Map<String, String> parameters= null;
     
     parameters= getMapAttribute(configuration, TestNGLaunchConfigurationConstants.PARAMS);
     if (type == LaunchType.SUITE) {
@@ -373,8 +375,8 @@ public class ConfigurationHelper {
   /**
    * @return List<LaunchSuite>
    */
-  private static List<Object> createLaunchSuites(final IProject project, List<String> suites) {
-    List<Object> suiteList = new ArrayList<Object>();
+  private static List<LaunchSuite> createLaunchSuites(final IProject project, List<String> suites) {
+    List<LaunchSuite> result = Lists.newArrayList();
 
     for (String suitePath : suites) {
       File suiteFile= new File(suitePath);
@@ -384,10 +386,10 @@ public class ConfigurationHelper {
         suiteFile= project.getFile(suitePath).getLocation().toFile();
       }
       
-      suiteList.add(SuiteGenerator.createProxiedXmlSuite(suiteFile));
+      result.add(SuiteGenerator.createProxiedXmlSuite(suiteFile));
     }
     
-    return suiteList;
+    return result;
   }
     
   /**
@@ -395,24 +397,15 @@ public class ConfigurationHelper {
    * suite generator, we are using a set of custom generators that allow 
    * more customization.
    */
-  private static List<Object> createLaunchSuites(String projectName,
-                                         List<String> packages,
-                                         List<String> classNames, 
-                                         Map<String, List<String>> classMethods, 
-                                         List<String> groupNames,
-                                         Map<String, String> parameters,
-                                         String annotationType,
-                                         final int logLevel) 
+  private static List<LaunchSuite> createLaunchSuites(String projectName, List<String> packages,
+      List<String> classNames, Map<String, List<String>> classMethods, List<String> groupNames,
+      Map<String, String> parameters, String annotationType, final int logLevel) 
   {
     return Arrays.asList(
-        new Object[] {SuiteGenerator.createCustomizedSuite(projectName,
-                                                           packages,
-                                                           classNames, 
-                                                           classMethods, 
-                                                           groupNames,
-                                                           parameters,
-                                                           annotationType,
-                                                           logLevel)});
+        new LaunchSuite[] {
+            SuiteGenerator.createCustomizedSuite(projectName, packages, classNames, 
+                classMethods, groupNames, parameters, annotationType, logLevel)
+        });
   }
   
   /**

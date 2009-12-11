@@ -1,23 +1,12 @@
 package org.testng.eclipse.util;
 
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
@@ -38,16 +27,23 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.StringLiteral;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.ui.RunInfo;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Class offering utility method to access different Eclipse resources.
@@ -268,16 +264,13 @@ public class JDTUtil {
   /**
    * Returns a list of files (List<File>) containing the source directories
    * defined in the specified project.
-   *
-   * @param jproject
-   * @return
    */
-  public static List getSourceDirFileList(IJavaProject jproject) {
+  public static List<File> getSourceDirFileList(IJavaProject jproject) {
     if ((null == jproject) || !jproject.exists()) {
-      return Collections.EMPTY_LIST;
+      return Collections.<File>emptyList();
     }
 
-    List sourcePaths = new ArrayList();
+    List<File> sourcePaths = Lists.newArrayList();
 
     try {
       IPackageFragmentRoot[] sourceRoots = jproject.getAllPackageFragmentRoots();
