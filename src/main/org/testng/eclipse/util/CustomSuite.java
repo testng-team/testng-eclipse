@@ -124,7 +124,7 @@ abstract public class CustomSuite extends LaunchSuite {
   }
 
   public String getFileName() {
-    return "temp-testng-customsuite.xml";
+    return "testng-customsuite.xml";
   }
 
   /** 
@@ -133,6 +133,7 @@ abstract public class CustomSuite extends LaunchSuite {
    */
   @Override
   public File save(File directory) {
+    directory.mkdirs();
     final File suiteFile= new File(directory, getFileName());
 
     saveSuiteContent(suiteFile, getSuiteBuffer());
