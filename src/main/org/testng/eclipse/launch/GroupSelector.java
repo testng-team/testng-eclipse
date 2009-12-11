@@ -31,7 +31,8 @@ public class GroupSelector extends MultiSelector {
   private Map<String, List<String>> m_groupMap = Maps.newHashMap();
 
   GroupSelector(TestNGMainTab callback, Composite comp) {
-    super(callback, comp, LaunchType.GROUP, "TestNGMainTab.label.group");
+    super(callback, comp, LaunchType.GROUP, "TestNGMainTab.label.group",
+        "CheckBoxTable.groups.title");
 //    setTextEditable(false); // allow hand entry of group names
   }
 
@@ -42,11 +43,6 @@ public class GroupSelector extends MultiSelector {
     try {
       IJavaProject[] dependencies = new IJavaProject[0];
       IJavaProject selectedProject = getCallback().getSelectedProject();
-      if (selectedProject == null) {
-        MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-            "No project", "Please select a project");
-        return Collections.emptySet();
-      }
 
       try {
         String[] dependencyPrjNames = selectedProject.getRequiredProjectNames();

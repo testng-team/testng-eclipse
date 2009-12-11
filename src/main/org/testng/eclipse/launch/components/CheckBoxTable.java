@@ -32,11 +32,11 @@ public class CheckBoxTable extends SelectionStatusDialog {
   private String[] m_elements;
   private List<Object> m_selection = Lists.newArrayList();
   
-  public CheckBoxTable(Shell shell, Collection<String> elements) {
-    this(shell, elements.toArray(new String[elements.size()]));
+  public CheckBoxTable(Shell shell, Collection<String> elements, String titleId) {
+    this(shell, elements.toArray(new String[elements.size()]), titleId);
   }
   
-  public CheckBoxTable(Shell shell, String[] elements) {
+  public CheckBoxTable(Shell shell, String[] elements, String titleId) {
     super(shell);
     
     m_elements = elements;
@@ -44,7 +44,7 @@ public class CheckBoxTable extends SelectionStatusDialog {
     setSelectionResult(null);
     setShellStyle(getShellStyle() | SWT.MAX | SWT.RESIZE);
     setBlockOnOpen(true);
-    setTitle(ResourceUtil.getString("CheckBokTable.title"));
+    setTitle(ResourceUtil.getString(titleId));
   }
   
   /**

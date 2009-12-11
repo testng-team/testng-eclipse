@@ -24,7 +24,8 @@ import java.util.Map;
 public class SuiteSelector2 extends MultiSelector {
 
   SuiteSelector2(TestNGMainTab callback, Composite comp) {
-    super(callback, comp, LaunchType.SUITE, "TestNGMainTab.label.suiteTest");
+    super(callback, comp, LaunchType.SUITE, "TestNGMainTab.label.suiteTest",
+        "CheckBoxTable.suites.title");
     setTextEditable(false); // no manual edit
   }
 

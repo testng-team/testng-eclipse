@@ -9,6 +9,7 @@ import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -27,6 +28,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Lists;
@@ -373,6 +375,13 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     Object[] types = new Object[0];
     SelectionDialog dialog = null;
 
+    IJavaProject selectedProject = getSelectedProject();
+    if (selectedProject == null) {
+      MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+          "No project", "Please select a project");
+      return;
+    }
+
     try {
       switch(testngType) {
         case CLASS:
@@ -382,16 +391,9 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
               types, Filters.SINGLE_TEST);
           break;
         case METHOD:
-
           types = TestSearchEngine.findMethods(getLaunchConfigurationDialog(),
               new Object[] {m_selectedProject}, m_classSelector.getText());
           dialog = TestSelectionDialog.createMethodSelectionDialog(getShell(), m_selectedProject,
-              types);
-          break;
-        case SUITE:
-          types = TestSearchEngine.findSuites(getLaunchConfigurationDialog(),
-              new Object[] {m_selectedProject});
-          dialog = TestSelectionDialog.createSuiteSelectionDialog(getShell(), m_selectedProject,
               types);
           break;
         case PACKAGE:
