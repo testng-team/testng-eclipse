@@ -69,9 +69,13 @@ public class CheckBoxTable extends SelectionStatusDialog {
     m_viewer.setLabelProvider(new GroupNameLabelProvider());
 
     m_viewer.setInput(m_elements);
+    List<Object> toRemove = Lists.newArrayList();
     for (Object element : m_selection) {
-      m_viewer.setChecked(element.toString(), true);
+      if (!m_viewer.setChecked(element.toString(), true)) {
+        toRemove.add(element);
+      }
     }
+    m_selection.removeAll(toRemove);
 
     return m_viewer;
   }

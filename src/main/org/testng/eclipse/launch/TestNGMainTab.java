@@ -162,7 +162,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     m_launchSelectors.add(m_packageSelector);
 
     // Work in progress
-    if (true) {
+    if (false) {
       // suiteSelector
       handler = new TestngTestSelector.ButtonHandler() {
         public void handleButton() {
