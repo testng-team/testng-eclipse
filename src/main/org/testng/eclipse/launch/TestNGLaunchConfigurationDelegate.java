@@ -149,11 +149,11 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     argv.add(TestNGCommandLineArgs.OUTDIR_COMMAND_OPT);
     argv.add(storage.getOutputAbsolutePath(jproject).toOSString());
 
-    String reporters = storage.getReporters(project.getName(), false);
-    if (null != reporters && !"".equals(reporters)) {
-      argv.add(TestNGCommandLineArgs.LISTENER_COMMAND_OPT);
-      argv.add(reporters.replace(' ', ';'));
-    }
+//    String reporters = storage.getReporters(project.getName(), false);
+//    if (null != reporters && !"".equals(reporters)) {
+//      argv.add(TestNGCommandLineArgs.LISTENER_COMMAND_OPT);
+//      argv.add(reporters.replace(' ', ';'));
+//    }
 
     List<ITestNGListener> contributors = ListenerContributorUtil.findReporterContributors();
     contributors.addAll(ListenerContributorUtil.findTestContributors());

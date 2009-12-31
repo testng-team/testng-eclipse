@@ -27,9 +27,9 @@ public class PreferenceStoreUtil {
     m_storage.setValue(projectName + TestNGPluginConstants.S_ABSOLUTEPATH, isAbsolute);
   }
 
-  public void storeReporters(String projectName, String reporters) {
-    m_storage.setValue(projectName + TestNGPluginConstants.S_REPORTERS, reporters);
-  }
+//  public void storeReporters(String projectName, String reporters) {
+//    m_storage.setValue(projectName + TestNGPluginConstants.S_REPORTERS, reporters);
+//  }
 
   public void storeDisabledListeners(String projectName, boolean selection) {
     m_storage.setValue(projectName + ".disabledListeners", selection);
@@ -90,14 +90,14 @@ public class PreferenceStoreUtil {
     }
   }
 
-  public String getReporters(String projectName, boolean projectOnly) {
-    return getString(projectName, projectOnly, TestNGPluginConstants.S_REPORTERS);
-  }
+//  public String getReporters(String projectName, boolean projectOnly) {
+//    return getString(projectName, projectOnly, TestNGPluginConstants.S_REPORTERS);
+//  }
 
-  public String getParallel(String projectName, boolean projectOnly) {
-    String result = getString(projectName, projectOnly, TestNGPluginConstants.S_PARALLEL);
-    return Utils.isEmpty(result) ? "false" : result;
-  }
+//  public String getParallel(String projectName, boolean projectOnly) {
+//    String result = getString(projectName, projectOnly, TestNGPluginConstants.S_PARALLEL);
+//    return Utils.isEmpty(result) ? "false" : result;
+//  }
 
   public boolean hasDisabledListeners(String projectName, boolean projectOnly) {
     if(projectOnly || m_storage.contains(projectName + TestNGPluginConstants.S_DISABLEDLISTENERS)) {

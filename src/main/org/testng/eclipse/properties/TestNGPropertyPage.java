@@ -171,7 +171,7 @@ public class TestNGPropertyPage extends PropertyPage {
     PreferenceStoreUtil storage= TestNGPlugin.getPluginPreferenceStore();
     m_outdirPath.setText(storage.getOutputDir(m_workingProject.getName(), true));
     m_fullPathOutput.setSelection(storage.isOutputAbsolutePath(m_workingProject.getName(), true));
-    m_reportersText.setText(storage.getReporters(m_workingProject.getName(), true));
+//    m_reportersText.setText(storage.getReporters(m_workingProject.getName(), true));
     m_disabledListenersCheckbox.setSelection(storage.hasDisabledListeners(m_workingProject.getName(), true));
     m_projectJar.setSelection(storage.getUseProjectJar(m_workingProject.getName()));
   }
@@ -184,7 +184,7 @@ public class TestNGPropertyPage extends PropertyPage {
   public boolean performOk() {
     PreferenceStoreUtil storage= TestNGPlugin.getPluginPreferenceStore();
     storage.storeOutputDir(m_workingProject.getName(), m_outdirPath.getText(), m_fullPathOutput.getSelection());
-    storage.storeReporters(m_workingProject.getName(), m_reportersText.getText());
+//    storage.storeReporters(m_workingProject.getName(), m_reportersText.getText());
     storage.storeDisabledListeners(m_workingProject.getName(), m_disabledListenersCheckbox.getSelection());
     storage.storeUseProjectJar(m_workingProject.getName(), m_projectJar.getSelection());
 

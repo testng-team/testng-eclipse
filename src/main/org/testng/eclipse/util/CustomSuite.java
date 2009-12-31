@@ -116,8 +116,8 @@ abstract public class CustomSuite extends LaunchSuite {
   private void createXmlFileFromParameters(XMLStringBuffer suiteBuffer) {
     Properties attrs= new Properties();
     attrs.setProperty("name", getSuiteName());
-    attrs.setProperty("parallel", TestNGPlugin.getPluginPreferenceStore()
-        .getParallel(m_projectName, false /* not project only */));
+//    attrs.setProperty("parallel", TestNGPlugin.getPluginPreferenceStore()
+//        .getParallel(m_projectName, false /* not project only */));
     suiteBuffer.push("suite", attrs);
  
     if (m_parameters != null) {

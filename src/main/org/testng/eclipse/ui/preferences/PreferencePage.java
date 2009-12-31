@@ -44,9 +44,9 @@ import java.io.File;
 public class PreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
   private FSBrowseDirectoryFieldEditor m_outputdir;
   private BooleanFieldEditor2 m_absolutePath;
-  private StringFieldEditor m_reporters;
+//  private StringFieldEditor m_reporters;
   private BooleanFieldEditor2 m_disabledDefaultListeners;
-  private ComboFieldEditor m_parallel;
+//  private ComboFieldEditor m_parallel;
   private Button m_useXmlTemplateFile;
   private FileFieldEditor m_xmlTemplateFile;
   
@@ -88,24 +88,24 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
         SWT.NONE, 
         parentComposite);
 
-    m_parallel = new ComboFieldEditor(TestNGPluginConstants.S_PARALLEL,
-        "Parallel settings", // $NON-NLS-1$
-        new String[][] {
-            { "False", "false" },
-            { "Methods", "methods" },
-            { "Classes", "classes" },
-            { "Tests", "tests" },
-        },
-        parentComposite
-    );
-    createReportersFieldEditor(parentComposite);
+//    m_parallel = new ComboFieldEditor(TestNGPluginConstants.S_PARALLEL,
+//        "Parallel settings", // $NON-NLS-1$
+//        new String[][] {
+//            { "False", "false" },
+//            { "Methods", "methods" },
+//            { "Classes", "classes" },
+//            { "Tests", "tests" },
+//        },
+//        parentComposite
+//    );
+//    createReportersFieldEditor(parentComposite);
     createXmlTemplateFileEditor(parentComposite);
 
     addField(m_outputdir);
     addField(m_absolutePath);
     addField(m_disabledDefaultListeners);    
-    addField(m_reporters);
-    addField(m_parallel);
+//    addField(m_reporters);
+//    addField(m_parallel);
     addField(m_xmlTemplateFile);
   }
 
@@ -113,12 +113,13 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
    * Create the UI to specify an XML template file.
    */
   private void createXmlTemplateFileEditor(final Composite parent) {
-    m_useXmlTemplateFile = new Button(parent, SWT.CHECK);
     final Group g = new Group(parent, SWT.SHADOW_ETCHED_OUT);
+    m_useXmlTemplateFile = new Button(g, SWT.CHECK);
     GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
     gridData.horizontalSpan= 3;
     g.setLayoutData(gridData);
     m_useXmlTemplateFile.setText("Use an XML template file");
+    m_useXmlTemplateFile.setLayoutData(gridData);
     m_useXmlTemplateFile.addSelectionListener(new SelectionListener() {
       public void widgetDefaultSelected(SelectionEvent e) {
       }
@@ -140,35 +141,35 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 //    m_xmlTemplateFile.fillIntoGrid(parent, 3);
   }
 
-  private void createReportersFieldEditor(Composite parent) {
-    Composite composite= new Composite(parent, SWT.BORDER);
-    GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
-    gridData.horizontalSpan= 3;
-    composite.setLayoutData(gridData);
-    GridLayout layout= new GridLayout();
-    layout.marginWidth= 0;
-    layout.numColumns= 1;
-    composite.setLayout(layout);
-    m_reporters= new StringFieldEditor(TestNGPluginConstants.S_REPORTERS,
-        "Listeners/Reporters (separated by space or ;)", 
-        StringFieldEditor.UNLIMITED, composite) { //$NON-NLS-1$
-      @Override
-      public int getNumberOfControls() {
-        return 1;
-      }
-    };
-    Label label= m_reporters.getLabelControl(composite);
-    label.setLayoutData(new GridData(SWT.WRAP | GridData.FILL_HORIZONTAL));
-    Text text= m_reporters.getTextControl(composite);
-    gridData= new GridData(GridData.FILL_HORIZONTAL);
-    text.setLayoutData(gridData);
-//    LayoutUtil.setHorizontalGrabbing(m_reporters.getTextControl(composite));
-    
-    label= new Label(composite, SWT.WRAP);
-    label.setText("TestNG provides a few reporters in the package org.testng.reporters:\n " 
-        + "SuiteHTMLReporter, TestHTMLReporter,EmailableReporter,\n JUnitXMLReporter, TextReporter\n\n" 
-        + "(The first 2 are required for the plugin to display the result reports)");
-  }
+//  private void createReportersFieldEditor(Composite parent) {
+//    Composite composite= new Composite(parent, SWT.BORDER);
+//    GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
+//    gridData.horizontalSpan= 3;
+//    composite.setLayoutData(gridData);
+//    GridLayout layout= new GridLayout();
+//    layout.marginWidth= 0;
+//    layout.numColumns= 1;
+//    composite.setLayout(layout);
+//    m_reporters= new StringFieldEditor(TestNGPluginConstants.S_REPORTERS,
+//        "Listeners/Reporters (separated by space or ;)", 
+//        StringFieldEditor.UNLIMITED, composite) { //$NON-NLS-1$
+//      @Override
+//      public int getNumberOfControls() {
+//        return 1;
+//      }
+//    };
+//    Label label= m_reporters.getLabelControl(composite);
+//    label.setLayoutData(new GridData(SWT.WRAP | GridData.FILL_HORIZONTAL));
+//    Text text= m_reporters.getTextControl(composite);
+//    gridData= new GridData(GridData.FILL_HORIZONTAL);
+//    text.setLayoutData(gridData);
+////    LayoutUtil.setHorizontalGrabbing(m_reporters.getTextControl(composite));
+//    
+//    label= new Label(composite, SWT.WRAP);
+//    label.setText("TestNG provides a few reporters in the package org.testng.reporters:\n " 
+//        + "SuiteHTMLReporter, TestHTMLReporter,EmailableReporter,\n JUnitXMLReporter, TextReporter\n\n" 
+//        + "(The first 2 are required for the plugin to display the result reports)");
+//  }
 
   @Override
   public boolean performOk() {
