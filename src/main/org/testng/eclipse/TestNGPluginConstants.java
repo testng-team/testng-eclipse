@@ -22,6 +22,8 @@ public abstract class TestNGPluginConstants {
   public static final String S_DEPRECATED_ABSOLUTEPATH = "generalOutputRelative";
 
   public static final String S_FAILED_TESTS = "failedTests";
+  public static final String S_USE_XML_TEMPLATE_FILE = "useXmlTemplateFile";
+  public static final String S_XML_TEMPLATE_FILE = "xmlTemplateFile";
 
 
   private TestNGPluginConstants() {}

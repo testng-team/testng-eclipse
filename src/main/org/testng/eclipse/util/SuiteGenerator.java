@@ -1,6 +1,5 @@
 package org.testng.eclipse.util;
 
-
 import org.testng.xml.LaunchSuite;
 
 import java.io.File;

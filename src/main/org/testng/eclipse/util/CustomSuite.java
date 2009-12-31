@@ -1,16 +1,24 @@
 package org.testng.eclipse.util;
 
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.testng.TestNG;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.collections.Maps;
 import org.testng.reporters.XMLStringBuffer;
 import org.testng.xml.LaunchSuite;
 import org.testng.xml.Parser;
+import org.testng.xml.XmlMethodSelector;
+import org.testng.xml.XmlSuite;
+import org.xml.sax.SAXException;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,13 +42,13 @@ abstract public class CustomSuite extends LaunchSuite {
   protected int m_logLevel;
 
   private XMLStringBuffer m_suiteBuffer;
-  private List<String> m_suiteFiles;
+//  private List<String> m_suiteFiles;
 
-  public CustomSuite(List<String> suiteFiles, String projectName, int logLevel) {
-    super(false);
-    init(suiteFiles, projectName, "Suites", Collections.<String, String>emptyMap(),
-        TestNG.JDK_ANNOTATION_TYPE, logLevel);
-  }
+//  public CustomSuite(List<String> suiteFiles, String projectName, int logLevel) {
+//    super(false);
+//    init(suiteFiles, projectName, "Suites", Collections.<String, String>emptyMap(),
+//        TestNG.JDK_ANNOTATION_TYPE, logLevel);
+//  }
 
   public CustomSuite(final String projectName,
                      final String suiteName,
@@ -58,7 +66,7 @@ abstract public class CustomSuite extends LaunchSuite {
       final String annotationType,
       final int logLevel) {
 
-    m_suiteFiles = suiteFiles;
+//    m_suiteFiles = suiteFiles;
     m_projectName= projectName;
     m_suiteName= suiteName;
     m_parameters= parameters;
@@ -80,16 +88,38 @@ abstract public class CustomSuite extends LaunchSuite {
     return m_suiteName;
   }
 
+  private void put(Properties p, String key, Object value) {
+    if (value != null) p.put(key, value);
+  }
+
   protected XMLStringBuffer createContentBuffer() {
-    XMLStringBuffer suiteBuffer= new XMLStringBuffer(""); //$NON-NLS-1$
+    IPreferenceStore storage = TestNGPlugin.getDefault().getPreferenceStore();
+    boolean hasEclipseXmlFile = storage.getBoolean(TestNGPluginConstants.S_USE_XML_TEMPLATE_FILE);
+    XMLStringBuffer suiteBuffer = new XMLStringBuffer(""); //$NON-NLS-1$
     suiteBuffer.setDocType("suite SYSTEM \"" + Parser.TESTNG_DTD_URL + "\"");
 
+    if (hasEclipseXmlFile) {
+      createXmlFileFromTemplate(suiteBuffer,
+          storage.getString(TestNGPluginConstants.S_XML_TEMPLATE_FILE));
+    } else {
+      createXmlFileFromParameters(suiteBuffer);
+    }
+
+    // Done with the top of the XML file, now generate the <test> elements
+    initContentBuffer(suiteBuffer);
+
+    suiteBuffer.pop("suite");
+
+    return suiteBuffer;
+  }
+
+  private void createXmlFileFromParameters(XMLStringBuffer suiteBuffer) {
     Properties attrs= new Properties();
     attrs.setProperty("name", getSuiteName());
     attrs.setProperty("parallel", TestNGPlugin.getPluginPreferenceStore()
         .getParallel(m_projectName, false /* not project only */));
     suiteBuffer.push("suite", attrs);
-
+ 
     if (m_parameters != null) {
       for (Map.Entry<String, String> entry : m_parameters.entrySet()) {
         Properties paramAttrs= new Properties();
@@ -98,21 +128,90 @@ abstract public class CustomSuite extends LaunchSuite {
         suiteBuffer.addEmptyElement("parameter", paramAttrs);
       }
     }
+ 
+ //    if (m_suiteFiles.size() > 0) {
+ //      suiteBuffer.push("suite-files");
+ //      for (String suite : m_suiteFiles) {
+ //        Properties s = new Properties();
+ //        s.put("path", suite);
+ //        suiteBuffer.addEmptyElement("suite-file", s);
+ //      }
+ //      suiteBuffer.pop("suite-files");
+ //    }
+  }
 
-    if (m_suiteFiles.size() > 0) {
-      suiteBuffer.push("suite-files");
-      for (String suite : m_suiteFiles) {
-        Properties s = new Properties();
-        s.put("path", suite);
-        suiteBuffer.addEmptyElement("suite-file", s);
+  /**
+   * Fill the top of the XML suiteBuffer with the top of the XML template file
+   */
+  private void createXmlFileFromTemplate(XMLStringBuffer suiteBuffer, String fileName) {
+    try {
+      Collection<XmlSuite> suites = new Parser(fileName).parse();
+      if (suites.size() > 0) {
+        XmlSuite s = suites.iterator().next();
+
+        // Retrieve the <suite> attributes from the template file and transfer
+        // them in the suite we are creating.
+        Properties attr = new Properties();
+        put(attr, "name", s.getName());
+        put(attr, "junit", s.isJUnit());
+        put(attr, "verbose", s.getVerbose());
+        put(attr, "parallel", s.getParallel());
+        put(attr, "thread-count", s.getThreadCount());
+        put(attr, "annotations", s.getAnnotations());
+        put(attr, "time-out", s.getTimeOut());
+        put(attr, "skipfailedinvocationcounts", s.skipFailedInvocationCounts());
+        put(attr, "data-provider-thread-count", s.getDataProviderThreadCount());
+        put(attr, "object-factory", s.getObjectFactory());
+        suiteBuffer.push("suite", attr);
+
+        // Children of <suite>
+        
+        // Listeners
+        if (s.getListeners().size() > 0) {
+          suiteBuffer.push("listeners");
+          for (String l : s.getListeners()) {
+            Properties p = new Properties();
+            p.put("class-name", l);
+            suiteBuffer.addEmptyElement("listener", p);
+          }
+          suiteBuffer.pop("listeners");
+        }
+
+        // Parameters
+        for (Map.Entry<String, String> parameter : s.getParameters().entrySet()) {
+          Properties p = new Properties();
+          p.put("name", parameter.getKey());
+          p.put("value", parameter.getValue());
+          suiteBuffer.addEmptyElement("parameter", p);
+        }
+
+        // Method selectors
+        if (s.getMethodSelectors().size() > 0) {
+          suiteBuffer.push("method-selectors");
+          for (XmlMethodSelector ms : s.getMethodSelectors()) {
+            String cls = ms.getClassName();
+            if (cls != null && cls.length() > 0) {
+              suiteBuffer.push("method-selector");
+              Properties p = new Properties();
+              p.put("name", cls);
+              p.put("priority", ms.getPriority());
+              suiteBuffer.push("selector-class", p);
+              suiteBuffer.pop("method-selector");
+            }
+            // TODO: <script> tag of method-selector
+          }          
+          suiteBuffer.pop("method-selectors");
+        }
       }
-      suiteBuffer.pop("suite-files");
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } catch (ParserConfigurationException e) {
+      e.printStackTrace();
+    } catch (SAXException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
     }
-    initContentBuffer(suiteBuffer);
-
-    suiteBuffer.pop("suite");
-
-    return suiteBuffer;
   }
 
   private XMLStringBuffer getSuiteBuffer() {

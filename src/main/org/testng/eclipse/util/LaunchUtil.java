@@ -51,19 +51,21 @@ import java.util.Set;
 /**
  * An utility class that centralize the work about configuration launchers.
  * 
- * <p/><b>Implementation notes</b>:
+ * <p/>
+ * <b>Implementation notes</b>:
  * <ul>
  * <li>
- * <i>Strategy for existing launch configurations</i>: when an existing launch configuration already exists, 
- *    its attributes are used to initialize the new launch configuration and then these are overwritten with the new attributes
- * </li>
+ * <i>Strategy for existing launch configurations</i>: when an existing launch
+ * configuration already exists, its attributes are used to initialize the new
+ * launch configuration and then these are overwritten with the new attributes</li>
  * <li>
  * <i>Dependency resolving</i>:
- *    <ul>
- *      <li><b>dependsOnMethods</b>: needed only by method-based launch type</li>
- *      <li><b>dependsOnGroups</b>: needed by all non-suite launch types. For the moment a warning is displayed</li>
- *      <li><b>static data provider</b>: this dependency is solved by TestNG core</li>
- *    </ul>
+ * <ul>
+ * <li><b>dependsOnMethods</b>: needed only by method-based launch type</li>
+ * <li><b>dependsOnGroups</b>: needed by all non-suite launch types. For the
+ * moment a warning is displayed</li>
+ * <li><b>static data provider</b>: this dependency is solved by TestNG core</li>
+ * </ul>
  * </li>
  * </ul>
  * 

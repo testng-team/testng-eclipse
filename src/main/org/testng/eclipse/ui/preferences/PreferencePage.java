@@ -5,14 +5,18 @@ import org.eclipse.debug.internal.ui.preferences.BooleanFieldEditor2;
 import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.FileFieldEditor;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
@@ -43,6 +47,8 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
   private StringFieldEditor m_reporters;
   private BooleanFieldEditor2 m_disabledDefaultListeners;
   private ComboFieldEditor m_parallel;
+  private Button m_useXmlTemplateFile;
+  private FileFieldEditor m_xmlTemplateFile;
   
   public PreferencePage() {
     super(GRID);
@@ -93,12 +99,45 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
         parentComposite
     );
     createReportersFieldEditor(parentComposite);
-    
+    createXmlTemplateFileEditor(parentComposite);
+
     addField(m_outputdir);
     addField(m_absolutePath);
     addField(m_disabledDefaultListeners);    
     addField(m_reporters);
     addField(m_parallel);
+    addField(m_xmlTemplateFile);
+  }
+
+  /**
+   * Create the UI to specify an XML template file.
+   */
+  private void createXmlTemplateFileEditor(final Composite parent) {
+    m_useXmlTemplateFile = new Button(parent, SWT.CHECK);
+    final Group g = new Group(parent, SWT.SHADOW_ETCHED_OUT);
+    GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
+    gridData.horizontalSpan= 3;
+    g.setLayoutData(gridData);
+    m_useXmlTemplateFile.setText("Use an XML template file");
+    m_useXmlTemplateFile.addSelectionListener(new SelectionListener() {
+      public void widgetDefaultSelected(SelectionEvent e) {
+      }
+
+      public void widgetSelected(SelectionEvent e) {
+        m_xmlTemplateFile.setEnabled(((Button) e.getSource()).getSelection(), g);
+      }
+    });
+//    m_useXmlTemplateFile = new BooleanFieldEditor2(TestNGPluginConstants.S_USE_XML_TEMPLATE_FILE,
+//        "Use an XML template file", SWT.NONE, parent);
+//    m_useXmlTemplateFile.s
+//    m_useXmlTemplateFile.fillIntoGrid(parent, 3);
+    m_xmlTemplateFile = new FileFieldEditor(TestNGPluginConstants.S_XML_TEMPLATE_FILE,
+        "Template XML file", g);
+    IPreferenceStore storage = TestNGPlugin.getDefault().getPreferenceStore();
+    boolean value = storage.getBoolean(TestNGPluginConstants.S_USE_XML_TEMPLATE_FILE);
+    m_xmlTemplateFile.setEnabled(value, g);
+    m_useXmlTemplateFile.setSelection(value);
+//    m_xmlTemplateFile.fillIntoGrid(parent, 3);
   }
 
   private void createReportersFieldEditor(Composite parent) {
@@ -130,18 +169,20 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
         + "SuiteHTMLReporter, TestHTMLReporter,EmailableReporter,\n JUnitXMLReporter, TextReporter\n\n" 
         + "(The first 2 are required for the plugin to display the result reports)");
   }
-  
-//  public boolean performOk() {
-//    IPreferenceStore storage= TestNGPlugin.getDefault().getPreferenceStore();
-//    storage.setValue(TestNGPluginConstants.S_OUTDIR, m_outputdir.getStringValue());
+
+  @Override
+  public boolean performOk() {
+    IPreferenceStore storage = TestNGPlugin.getDefault().getPreferenceStore();
+    storage.setValue(TestNGPluginConstants.S_USE_XML_TEMPLATE_FILE,
+        m_useXmlTemplateFile.getSelection());
 //    storage.setValue(TestNGPluginConstants.S_ABSOLUTEPATH, m_absolutePath.getBooleanValue());
 //    System.out.println(m_disabledDefaultListeners.getBooleanValue());
 //    System.out.println(storage.getBoolean(TestNGPluginConstants.S_DISABLEDLISTENERS));
 //    storage.setValue(TestNGPluginConstants.S_REPORTERS, m_reporters.getStringValue());
 //    setMessage("Preferences saved", INFORMATION);
 //    
-//    return super.performOk();
-//  }
+    return super.performOk();
+  }
 
   /* (non-Javadoc)
    * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
