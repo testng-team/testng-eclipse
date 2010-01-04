@@ -308,4 +308,19 @@
          point="org.eclipse.core.runtime.preferences">
       <initializer class="org.testng.eclipse.ui.preferences.PreferenceInitializer"/>
    </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="org.testng.eclipse"
+            name="TestNG"
+            parentCategory="TestNG">
+      </category>
+      <wizard
+            category="org.testng.eclipse"
+            class="org.testng.eclipse.wizards.NewTestNGClassWizard"
+            icon="icons/full/main16/testng.gif"
+            id="org.testng.eclipse.wizards.NewTestNGClassWizard"
+            name="TestNG class">
+      </wizard>
+   </extension>
 </plugin>
