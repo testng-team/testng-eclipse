@@ -312,8 +312,7 @@
          point="org.eclipse.ui.newWizards">
       <category
             id="org.testng.eclipse"
-            name="TestNG"
-            parentCategory="TestNG">
+            name="TestNG">
       </category>
       <wizard
             category="org.testng.eclipse"
