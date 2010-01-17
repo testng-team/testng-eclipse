@@ -299,8 +299,7 @@ public class JDTUtil {
     try {
       IType itype = ijp.findType("java.lang.annotation.Annotation");
 
-      return (itype == null) ? TestNGLaunchConfigurationConstants.JDK14_COMPLIANCE
-                             : TestNGLaunchConfigurationConstants.JDK15_COMPLIANCE;
+      return (itype == null) ? "" : TestNGLaunchConfigurationConstants.JDK15_COMPLIANCE;
     }
     catch (JavaModelException jme) {
       TestNGPlugin.log(jme);

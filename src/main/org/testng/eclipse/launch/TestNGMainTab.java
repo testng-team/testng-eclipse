@@ -83,7 +83,6 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
   private LaunchType m_typeOfTestRun = LaunchType.UNDEFINED;
 
   // Runtime group
-  private Combo m_complianceLevelCombo;
   private Combo m_logLevelCombo;
 
   private List <TestngTestSelector> m_launchSelectors = Lists.newArrayList();
@@ -205,8 +204,6 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     int logLevel = ConfigurationHelper.getLogLevel(configuration);
     m_logLevelCombo.select(logLevel);
 
-    updateComplianceLevel(configuration);
-
     LaunchType type = ConfigurationHelper.getType(configuration);
     setType(type);
     if(LaunchType.METHOD == type) {
@@ -236,17 +233,6 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     }
   }
 
-  protected void updateComplianceLevel(ILaunchConfiguration configuration) {
-    final String complianceLevel = ConfigurationHelper.getComplianceLevel(configuration);
-
-    String[] options = m_complianceLevelCombo.getItems();
-    for(int i = 0; i < options.length; i++) {
-      if(options[i].equals(complianceLevel)) {
-        m_complianceLevelCombo.select(i);
-      }
-    }
-  }
-
   /**
    * @see org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
    */
@@ -259,7 +245,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
               m_classMethods, 
               m_groupSelector.getValueMap(),
               m_suiteSelector.getText(),
-              m_complianceLevelCombo.getText(), 
+              TestNGLaunchConfigurationConstants.JDK15_COMPLIANCE, 
               m_logLevelCombo.getText()));
   }
 
@@ -482,27 +468,6 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     // Compliance
     //
     Group group = createGroup(parent, "TestNGMainTab.runtime.type"); //$NON-NLS-1$
-
-    {
-      GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-      gd.horizontalSpan = 2;
-      Label label = new Label(group, SWT.LEFT);
-      label.setLayoutData(gd);
-      label.setText(ResourceUtil.getString("TestNGMainTab.testng.compliance")); // $NON-NLS-1$
-
-      m_complianceLevelCombo = new Combo(group, SWT.DROP_DOWN | SWT.READ_ONLY);
-      m_complianceLevelCombo.add(TestNGLaunchConfigurationConstants.JDK15_COMPLIANCE);
-      m_complianceLevelCombo.add(TestNGLaunchConfigurationConstants.JDK14_COMPLIANCE);
-      m_complianceLevelCombo.select(0);
-      GridData gd2 = new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.GRAB_HORIZONTAL);
-      gd2.widthHint = 70; // HINT: originally minimumWidth (widthHint is supported in older API version)
-      m_complianceLevelCombo.setLayoutData(gd2);
-      m_complianceLevelCombo.addModifyListener(new ModifyListener() {
-        public void modifyText(ModifyEvent evt) {
-          updateLaunchConfigurationDialog();
-        }
-      });
-    }
 
     //
     // Log level
