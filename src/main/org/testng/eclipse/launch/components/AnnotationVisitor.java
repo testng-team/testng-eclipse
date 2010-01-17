@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
  * 
  * @author cbeust
  */
-public class AnnotationVisitor extends JavaDocVisitor {
+public class AnnotationVisitor extends BaseVisitor {
   
   public boolean visit(MethodDeclaration node) {
     if(m_typeIsTest) {

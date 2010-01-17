@@ -9,7 +9,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.util.ResourceUtil;
-import org.testng.internal.annotations.JDK14TagFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -20,11 +19,6 @@ import java.util.List;
 import java.util.Set;
 
 public class Utils {
-  public static final String TEST_ANNOTATION = "@" + JDK14TagFactory.TEST;
-  public static final String CONFIGURATION_ANNOTATION = "@" + JDK14TagFactory.CONFIGURATION; 
-  public static final String FACTORY_ANNOTATION = "@" + JDK14TagFactory.FACTORY;
-  public static final String EXPECTED_EXCEPTIONS_ANNOTATION = "@" + JDK14TagFactory.EXPECTED_EXCEPTIONS; 
-  
   /**
    * Create a line of widgets, made of:
    * - A toggle
@@ -77,16 +71,6 @@ public class Utils {
     }
 
     return result;
-  }
-
-  /**
-   * TODO:  Needs to use the constants defined in TestNG.
-   */
-  public static boolean isTestNGTag(String tagName) {
-    return TEST_ANNOTATION.equals(tagName)
-      || CONFIGURATION_ANNOTATION.equals(tagName)
-      || EXPECTED_EXCEPTIONS_ANNOTATION.equals(tagName)
-      || FACTORY_ANNOTATION.equals(tagName);
   }
 
   public static String[] split(final String string, final String sep) {

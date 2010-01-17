@@ -5,6 +5,7 @@ import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.signature.ASTMethodDescriptor;
 import org.testng.eclipse.util.signature.IMethodDescriptor;
 import org.testng.eclipse.util.signature.MethodDescriptor;
+import org.testng.internal.annotations.Sets;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,14 +18,12 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 public class BaseVisitor extends ASTVisitor implements ITestContent {
-  static final String JDK14_ANNOTATION = TestNG.JAVADOC_ANNOTATION_TYPE;
   static final String JDK15_ANNOTATION = TestNG.JDK_ANNOTATION_TYPE;
   
   // List<MethodDeclaration>
-  private Set m_testMethods = new HashSet();
-  private Set m_factoryMethods = new HashSet();
-  
-  private Map m_groups = new HashMap();
+  private Set<IMethodDescriptor> m_testMethods = Sets.newHashSet();
+  private Set<IMethodDescriptor> m_factoryMethods = Sets.newHashSet();
+  private Set<String> m_groups = Sets.newHashSet();
   protected boolean m_typeIsTest;
   protected String m_annotationType;
   
@@ -48,7 +47,7 @@ public class BaseVisitor extends ASTVisitor implements ITestContent {
     return ((IMethodDescriptor) m_testMethods.iterator().next()).getAnnotationType();
   }
   
-  public Set getTestMethods() {
+  public Set<IMethodDescriptor> getTestMethods() {
     return m_testMethods;
   }
   
@@ -56,8 +55,8 @@ public class BaseVisitor extends ASTVisitor implements ITestContent {
     return m_typeIsTest || m_testMethods.size() > 0 || m_factoryMethods.size() > 0;
   }
     
-  public Collection getGroups() {
-    return m_groups.values();
+  public Collection<String> getGroups() {
+    return m_groups;
   }
 
   protected void addGroup(String groupNames) {
@@ -65,7 +64,7 @@ public class BaseVisitor extends ASTVisitor implements ITestContent {
     final String[] names = Utils.split(groupNames, ",");
     for(int i = 0; i < names.length; i++) {
 //      ppp("    FOUND GROUP:" + names[i]);
-      m_groups.put(names[i], names[i]);
+      m_groups.add(names[i]);
     }
   }
   

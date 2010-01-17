@@ -137,13 +137,13 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
 
     IProject project = jproject.getProject();
 
-    if (!isJDK15(javaVersion)) {
-      List<File> sourceDirs = JDTUtil.getSourceDirFileList(jproject);
-      if (null != sourceDirs) {
-        argv.add(TestNGCommandLineArgs.SRC_COMMAND_OPT);
-        argv.add(Utils.toSinglePath(sourceDirs, ";")); //$NON-NLS-1$
-      }
-    }
+//    if (!isJDK15(javaVersion)) {
+//      List<File> sourceDirs = JDTUtil.getSourceDirFileList(jproject);
+//      if (null != sourceDirs) {
+//        argv.add(TestNGCommandLineArgs.SRC_COMMAND_OPT);
+//        argv.add(Utils.toSinglePath(sourceDirs, ";")); //$NON-NLS-1$
+//      }
+//    }
 
     PreferenceStoreUtil storage = TestNGPlugin.getPluginPreferenceStore();
     argv.add(TestNGCommandLineArgs.OUTDIR_COMMAND_OPT);
@@ -216,11 +216,6 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     vmConfig.setProgramArguments(argv.toArray(new String[argv.size()]));
 
     return vmConfig;
-  }
-
-  private boolean isJDK15(String javaVersion) {
-    return TestNG.JDK_ANNOTATION_TYPE.equalsIgnoreCase(javaVersion)
-        || javaVersion.startsWith("1.5") || javaVersion.startsWith("1.6");
   }
 
   private String[] createClassPath(ILaunchConfiguration configuration, String javaVersion)
@@ -312,31 +307,9 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
 
   private String getTestNGLibraryVersion(final String javaVersion) {
     String testngLib = null;
-    if (isJDK15(javaVersion)) {
-      testngLib = ResourceUtil.getString("TestNG.jdk15.library"); //$NON-NLS-1$
-    } else {
-      testngLib = ResourceUtil.getString("TestNG.jdk14.library"); //$NON-NLS-1$
-    }
+    testngLib = ResourceUtil.getString("TestNG.jdk15.library"); //$NON-NLS-1$
 
     return testngLib;
-  }
-
-  private String toPath(final List<String> content, final String separator) {
-    if ((null == content) || content.isEmpty()) {
-      return ""; //$NON-NLS-1$
-    }
-
-    final StringBuffer buf = new StringBuffer();
-
-    for (int i = 0; i < content.size(); i++) {
-      buf.append(content.get(i));
-
-      if (i < (content.size() - 1)) {
-        buf.append(separator);
-      }
-    }
-
-    return buf.toString();
   }
 
   private static void ppp(final Object msg) {

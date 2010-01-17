@@ -3,15 +3,17 @@
 <plugin
    id="org.testng.eclipse"
    name="TestNG"
-   version="5.11.0.27"
+   version="5.11.0.28"
    provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
    <runtime>
       <library name="eclipse-testng.jar">
          <export name="*"/>
       </library>
-      <library name="lib/testng-jdk14.jar">
-         <export name="*"/>
+      <library name="lib/testng.jar">
+         <export
+               name="*">
+         </export>
       </library>
    </runtime>
    <requires>
