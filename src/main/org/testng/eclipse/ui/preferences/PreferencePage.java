@@ -2,23 +2,18 @@ package org.testng.eclipse.ui.preferences;
 
 
 import org.eclipse.debug.internal.ui.preferences.BooleanFieldEditor2;
-import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.testng.eclipse.TestNGPlugin;
@@ -88,17 +83,6 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
         SWT.NONE, 
         parentComposite);
 
-//    m_parallel = new ComboFieldEditor(TestNGPluginConstants.S_PARALLEL,
-//        "Parallel settings", // $NON-NLS-1$
-//        new String[][] {
-//            { "False", "false" },
-//            { "Methods", "methods" },
-//            { "Classes", "classes" },
-//            { "Tests", "tests" },
-//        },
-//        parentComposite
-//    );
-//    createReportersFieldEditor(parentComposite);
     createXmlTemplateFileEditor(parentComposite);
 
     addField(m_outputdir);
@@ -128,60 +112,27 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
         m_xmlTemplateFile.setEnabled(((Button) e.getSource()).getSelection(), g);
       }
     });
-//    m_useXmlTemplateFile = new BooleanFieldEditor2(TestNGPluginConstants.S_USE_XML_TEMPLATE_FILE,
-//        "Use an XML template file", SWT.NONE, parent);
-//    m_useXmlTemplateFile.s
-//    m_useXmlTemplateFile.fillIntoGrid(parent, 3);
     m_xmlTemplateFile = new FileFieldEditor(TestNGPluginConstants.S_XML_TEMPLATE_FILE,
-        "Template XML file", g);
+        "Template XML file", g) {
+      
+      // Only verify if the XML file exists if the button is checked
+      @Override
+      protected boolean checkState() {
+        if (m_useXmlTemplateFile.getSelection()) return super.checkState();
+        else return true;
+      }
+    };
     IPreferenceStore storage = TestNGPlugin.getDefault().getPreferenceStore();
     boolean value = storage.getBoolean(TestNGPluginConstants.S_USE_XML_TEMPLATE_FILE);
     m_xmlTemplateFile.setEnabled(value, g);
     m_useXmlTemplateFile.setSelection(value);
-//    m_xmlTemplateFile.fillIntoGrid(parent, 3);
   }
-
-//  private void createReportersFieldEditor(Composite parent) {
-//    Composite composite= new Composite(parent, SWT.BORDER);
-//    GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
-//    gridData.horizontalSpan= 3;
-//    composite.setLayoutData(gridData);
-//    GridLayout layout= new GridLayout();
-//    layout.marginWidth= 0;
-//    layout.numColumns= 1;
-//    composite.setLayout(layout);
-//    m_reporters= new StringFieldEditor(TestNGPluginConstants.S_REPORTERS,
-//        "Listeners/Reporters (separated by space or ;)", 
-//        StringFieldEditor.UNLIMITED, composite) { //$NON-NLS-1$
-//      @Override
-//      public int getNumberOfControls() {
-//        return 1;
-//      }
-//    };
-//    Label label= m_reporters.getLabelControl(composite);
-//    label.setLayoutData(new GridData(SWT.WRAP | GridData.FILL_HORIZONTAL));
-//    Text text= m_reporters.getTextControl(composite);
-//    gridData= new GridData(GridData.FILL_HORIZONTAL);
-//    text.setLayoutData(gridData);
-////    LayoutUtil.setHorizontalGrabbing(m_reporters.getTextControl(composite));
-//    
-//    label= new Label(composite, SWT.WRAP);
-//    label.setText("TestNG provides a few reporters in the package org.testng.reporters:\n " 
-//        + "SuiteHTMLReporter, TestHTMLReporter,EmailableReporter,\n JUnitXMLReporter, TextReporter\n\n" 
-//        + "(The first 2 are required for the plugin to display the result reports)");
-//  }
 
   @Override
   public boolean performOk() {
     IPreferenceStore storage = TestNGPlugin.getDefault().getPreferenceStore();
     storage.setValue(TestNGPluginConstants.S_USE_XML_TEMPLATE_FILE,
         m_useXmlTemplateFile.getSelection());
-//    storage.setValue(TestNGPluginConstants.S_ABSOLUTEPATH, m_absolutePath.getBooleanValue());
-//    System.out.println(m_disabledDefaultListeners.getBooleanValue());
-//    System.out.println(storage.getBoolean(TestNGPluginConstants.S_DISABLEDLISTENERS));
-//    storage.setValue(TestNGPluginConstants.S_REPORTERS, m_reporters.getStringValue());
-//    setMessage("Preferences saved", INFORMATION);
-//    
     return super.performOk();
   }
 
