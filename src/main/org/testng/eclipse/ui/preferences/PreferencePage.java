@@ -33,15 +33,11 @@ import java.io.File;
  * are stored in the preference store that belongs to
  * the main plug-in class. That way, preferences can
  * be accessed directly via the preference store.
- * 
- * @author <a href='mailto:the_mindstorm[at]evolva[dot]ro'>Alexandru Popescu</a>
  */
 public class PreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
   private FSBrowseDirectoryFieldEditor m_outputdir;
   private BooleanFieldEditor2 m_absolutePath;
-//  private StringFieldEditor m_reporters;
   private BooleanFieldEditor2 m_disabledDefaultListeners;
-//  private ComboFieldEditor m_parallel;
   private Button m_useXmlTemplateFile;
   private FileFieldEditor m_xmlTemplateFile;
   
@@ -88,8 +84,6 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
     addField(m_outputdir);
     addField(m_absolutePath);
     addField(m_disabledDefaultListeners);    
-//    addField(m_reporters);
-//    addField(m_parallel);
     addField(m_xmlTemplateFile);
   }
 
