@@ -2,10 +2,14 @@ package org.testng.eclipse.ui.util;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.util.ResourceUtil;
@@ -19,6 +23,93 @@ import java.util.List;
 import java.util.Set;
 
 public class Utils {
+  
+  /**
+   * Create a line of widgets, made of:
+   * - A label
+   * - A text field
+   * - A browse button
+   * If checkKey is not null, the Control will be surrounded by a Group and enabled
+   * by a check box.
+   */
+  public static Widgets createTextBrowseControl(Composite p,
+      String checkKey, String labelKey, 
+      SelectionListener buttonListener,
+      final SelectionListener checkListener,
+      ModifyListener textListener, boolean enabled)
+  {
+    final Widgets result = new Widgets();
+
+    Composite parent = p;
+    if (checkKey != null) {
+
+      //
+      // Radio
+      //
+      result.radio = new Button(parent, SWT.CHECK);
+      result.radio.setText(ResourceUtil.getString(checkKey));
+      result.radio.addSelectionListener(new SelectionListener() {
+        public void widgetDefaultSelected(SelectionEvent e) {
+          if (checkListener != null) {
+            checkListener.widgetDefaultSelected(e);
+          }
+        }
+
+        public void widgetSelected(SelectionEvent e) {
+          if (checkListener != null) {
+            checkListener.widgetSelected(e);
+          }
+          enableControls(result, ((Button) e.getSource()).getSelection());
+        }
+
+      });
+
+      //
+      // Group
+      //
+      final Group g = new Group(parent, SWT.SHADOW_ETCHED_OUT);
+      GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+      g.setLayoutData(gd);
+      
+      GridLayout layout = new GridLayout();
+      g.setLayout(layout);
+      layout.numColumns = 3;
+      parent = g;
+    }
+
+    //
+    // Label
+    //
+    Label label = new Label(parent, SWT.NULL);
+    label.setText(ResourceUtil.getString(labelKey));
+
+    //
+    // Text widget
+    //
+    result.text = new Text(parent, SWT.SINGLE | SWT.BORDER);
+    GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
+    result.text.setLayoutData(gd);
+    if (buttonListener == null) gd.grabExcessHorizontalSpace = true;
+    if (textListener != null) result.text.addModifyListener(textListener);
+
+    //
+    // Browse button
+    //
+    if (buttonListener != null) {
+      result.button = new Button(parent, SWT.PUSH);
+      result.button.setText(ResourceUtil.getString("TestNGMainTab.label.browse")); //$NON-NLS-1$
+      result.button.addSelectionListener(buttonListener);
+    }
+
+    enableControls(result, enabled);
+    return result;
+  }
+
+  private static void enableControls(Widgets result, boolean enabled) {
+    if (result.text != null) result.text.setEnabled(enabled);
+    if (result.button != null) result.button.setEnabled(enabled);
+  }
+
   /**
    * Create a line of widgets, made of:
    * - A toggle
@@ -46,7 +137,7 @@ public class Utils {
     result.text = new Text(parent, SWT.SINGLE | SWT.BORDER);
     GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
     result.text.setLayoutData(gd);
-    result.text.addModifyListener(textListener);
+    if (textListener != null) result.text.addModifyListener(textListener);
 
     //
     // Search button

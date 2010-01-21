@@ -1,10 +1,12 @@
 package org.testng.eclipse.util;
 
+import org.testng.reporters.XMLStringBuffer;
 import org.testng.xml.LaunchSuite;
 
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Factory to create custom suites.
@@ -32,5 +34,26 @@ public class SuiteGenerator {
       return new ClassMethodsSuite(projectName, classNames, methodNames, parameters,
           annotationType, logLevel);
     }
+  }
+
+  public static String createSingleClassSuite(String className) {
+    XMLStringBuffer xsb = new XMLStringBuffer("");
+    Properties p = new Properties();
+    p.put("name", "Suite");
+    p.put("parallel", "false");
+    xsb.push("suite", p);
+
+    p = new Properties();
+    p.put("name", "Test");
+    xsb.push("test", p);
+    xsb.push("classes");
+    p = new Properties();
+    p.put("name", className);
+    xsb.addEmptyElement("class", p);
+    xsb.pop("classes");
+    xsb.pop("test");
+    xsb.pop("suite");
+
+    return xsb.toXML();
   }
 }

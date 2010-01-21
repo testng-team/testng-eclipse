@@ -1,19 +1,34 @@
 package org.testng.eclipse.wizards;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.core.runtime.*;
-import org.eclipse.jface.operation.*;
-import java.lang.reflect.InvocationTargetException;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.core.resources.*;
-import org.eclipse.core.runtime.CoreException;
-import java.io.*;
-import org.eclipse.ui.*;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWizard;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
+import org.testng.eclipse.ui.util.Utils;
+import org.testng.eclipse.util.SuiteGenerator;
+import org.testng.reporters.XMLStringBuffer;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 /**
  * This is a sample new wizard. Its role is to create a new file 
@@ -55,7 +70,7 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 		final String containerName = m_page.getSourceFolder();
 		final String fileName = m_page.getClassName() + ".java";
     try {
-      doFinish(containerName, fileName, new NullProgressMonitor());
+      doFinish(containerName, fileName, m_page.getXmlFile(), new NullProgressMonitor());
     } catch (CoreException e) {
       e.printStackTrace();
     }
@@ -84,55 +99,71 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	
 	/**
 	 * The worker method. It will find the container, create the
-	 * file if missing or just replace its contents, and open
+	 * file(s) if missing or just replace its contents, and open
 	 * the editor on the newly created file.
 	 */
-	private void doFinish(String containerName, String fileName, IProgressMonitor monitor)
-		  throws CoreException {
-		// create a sample file
-		monitor.beginTask("Creating " + fileName, 2);
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		IResource resource = root.findMember(new Path(containerName));
-		if (!resource.exists() || !(resource instanceof IContainer)) {
-			throwCoreException("Container \"" + containerName + "\" does not exist.");
-		}
-		IContainer container = (IContainer) resource;
-		final IFile file = container.getFile(new Path(fileName));
-		try {
-			InputStream stream = openContentStream();
-			if (file.exists()) {
-				file.setContents(stream, true, true, monitor);
-			} else {
-				file.create(stream, true, monitor);
-			}
-			stream.close();
-		} catch (IOException e) {
-		}
-		monitor.worked(1);
-		monitor.setTaskName("Opening file for editing...");
+	private void doFinish(String containerName, String fileName, String xmlPath,
+	    IProgressMonitor monitor) throws CoreException {
+	  //
+	  // Create XML file, if applicable
+	  //
+	  if (xmlPath != null) {
+	    openFile(createFile(containerName, xmlPath, createXmlContentStream(), monitor), monitor);
+	  }
+
+	  //
+	  // Create Java file
+	  //
+	  openFile(createFile(containerName, fileName, createJavaContentStream(), monitor), monitor);
+	}
+
+  private void openFile(final IFile javaFile, IProgressMonitor monitor) {
+    monitor.setTaskName("Opening file for editing...");
 		getShell().getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				IWorkbenchPage page =
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 				try {
-					IDE.openEditor(page, file, true);
+					IDE.openEditor(page, javaFile, true);
 				} catch (PartInitException e) {
 				}
 			}
 		});
 		monitor.worked(1);
-	}
+  }
 	
-	/**
-	 * We will initialize file contents with a sample text.
-	 */
+	private IFile createFile(String containerName, String fileName, InputStream contentStream,
+      IProgressMonitor monitor) throws CoreException {
+    monitor.beginTask("Creating " + fileName, 2);
+    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+    IResource resource = root.findMember(new Path(containerName));
+    if (!resource.exists() || !(resource instanceof IContainer)) {
+      throwCoreException("Container \"" + containerName + "\" does not exist.");
+    }
+    IContainer container = (IContainer) resource;
+    final IFile result = container.getFile(new Path(fileName));
+    try {
+      if (result.exists()) {
+        result.setContents(contentStream, true, true, monitor);
+      } else {
+        result.create(contentStream, true, monitor);
+      }
+      contentStream.close();
+    } catch (IOException e) {
+    }
+    monitor.worked(1);
 
-	private InputStream openContentStream() {
+    return result;
+	}
+
+  /**
+	 * Create the content for the Java file.
+	 */
+	private InputStream createJavaContentStream() {
 	  StringBuilder imports = new StringBuilder("import org.testng.annotations.Test;\n");
 	  StringBuilder methods = new StringBuilder();
 	  String dataProvider = "";
 	  String signature = "()";
-
 	  for (String a : NewTestNGClassWizardPage.ANNOTATIONS) {
 	    if (!"".equals(a) && m_page.containsAnnotation(a)) {
 	      imports.append("import org.testng.annotations." + a + ";\n");
@@ -170,7 +201,18 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 		return new ByteArrayInputStream(contents.getBytes());
 	}
 
-  private String toMethod(String a) {
+  /**
+   * Create the content for the XML file.
+   */
+	private InputStream createXmlContentStream() {
+	  String cls = m_page.getClassName();
+	  String pkg = m_page.getPackageName();
+	  String className = Utils.isEmpty(pkg) ? cls : pkg + "." + cls;
+	  return new ByteArrayInputStream(
+	      SuiteGenerator.createSingleClassSuite(className).getBytes());
+	}
+
+	private String toMethod(String a) {
     return Character.toLowerCase(a.charAt(0)) + a.substring(1);
   }
 

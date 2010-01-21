@@ -13,28 +13,32 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
+import org.testng.eclipse.ui.util.Utils;
+import org.testng.eclipse.ui.util.Utils.Widgets;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The "New" wizard page allows setting the container for the new file as well
- * as the file name. The page will only accept file name without the extension
- * OR with the extension that matches the expected one (java).
+ * Generate a new TestNG class.
  */
 public class NewTestNGClassWizardPage extends WizardPage {
   private ISelection m_selection;
   private Text m_sourceFolderText;
   private Text m_packageNameText;
   private Text m_classNameText;
+  private Button m_generateXmlFile;
+  private Text m_xmlFilePath;
 
   private Map<String, Button> m_annotations = new HashMap<String, Button>();
   public static final String[] ANNOTATIONS = new String[] {
@@ -44,11 +48,6 @@ public class NewTestNGClassWizardPage extends WizardPage {
     "BeforeSuite", "AfterSuite", ""
   };
 
-  /**
-   * Constructor for SampleNewWizardPage.
-   * 
-   * @param pageName
-   */
   public NewTestNGClassWizardPage(ISelection selection) {
     super("TestNG class");
     setTitle("TestNG class");
@@ -96,6 +95,70 @@ public class NewTestNGClassWizardPage extends WizardPage {
           b.setText("@" + label);
         }
       }
+    }
+
+    //
+    // Generate XML file
+    //
+    {
+//      SelectionListener browseListener = new SelectionListener() {
+//        public void widgetDefaultSelected(SelectionEvent e) {
+//          m_xmlFilePath.setEnabled(((Button) e.getSource()).getSelection());
+//        }
+//        public void widgetSelected(SelectionEvent e) {
+//          FileDialog fileDialog = new FileDialog(getShell(), SWT.OPEN);
+//          m_xmlFilePath.setText(fileDialog.open());
+//        }
+//      };
+
+      SelectionListener checkListener = new SelectionListener() {
+        public void widgetDefaultSelected(SelectionEvent e) {
+        }
+
+        public void widgetSelected(SelectionEvent e) {
+          dialogChanged();
+        }
+      };
+
+      Widgets w = Utils.createTextBrowseControl(parent,
+        "TestNG.newClass.generateXmlSuiteFile", "TestNG.newClass.suitePath",
+        null /* no browse */,
+        checkListener,
+        null, false /* disabled by default */);
+      m_generateXmlFile = w.radio;
+      m_xmlFilePath = w.text;
+//
+//      Label l = new Label(g, SWT.NULL);
+//      l.setText("File name");
+//      Text t = new Text(g, SWT.BORDER | SWT.SINGLE);
+//      t.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+//      Button browse = new Button(g, SWT.PUSH);
+//      browse.setText("Browse");
+
+//      FieldBrowse fb = new FieldBrowse(g, "File name") {
+//
+//        @Override
+//        protected void onBrowse() {
+//        }
+//
+//        @Override
+//        protected void onTextChanged() {
+//        }
+//        
+//      };
+//      m_generateXmlFile = new Button(g, SWT.CHECK);
+//      GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+//      gridData.horizontalSpan = 3;
+//      g.setLayoutData(gridData);
+//      m_generateXmlFile.addSelectionListener(new SelectionListener() {
+//        public void widgetDefaultSelected(SelectionEvent e) {
+//        }
+//
+//        public void widgetSelected(SelectionEvent e) {
+//          m_xmlFilePath.setEnabled(((Button) e.getSource()).getSelection(), g);
+//        }
+//      });
+
     }
   }
 
@@ -249,7 +312,7 @@ public class NewTestNGClassWizardPage extends WizardPage {
     if (dialog.open() == ContainerSelectionDialog.OK) {
       Object[] result = dialog.getResult();
       if (result.length == 1) {
-        m_packageNameText.setText(((Path) result[0]).toString());
+        m_sourceFolderText.setText(((Path) result[0]).toString());
       }
     }
   }
@@ -262,7 +325,8 @@ public class NewTestNGClassWizardPage extends WizardPage {
         new Path(getSourceFolder()));
     String className = getClassName();
 
-    if (container == null || (container.getType() & (IResource.PROJECT | IResource.FOLDER)) == 0) {
+    if (container == null || (container.getType() &
+        (IResource.ROOT | IResource.PROJECT | IResource.FOLDER)) == 0) {
       updateStatus("The source directory must exist");
       return;
     }
@@ -280,6 +344,10 @@ public class NewTestNGClassWizardPage extends WizardPage {
     }
     if (className.replace('\\', '/').indexOf('/', 1) > 0) {
       updateStatus("Class name must be valid");
+      return;
+    }
+    if (m_generateXmlFile.getSelection() && Utils.isEmpty(m_xmlFilePath.getText())) {
+      updateStatus("You need to specify the location of the XML file");
       return;
     }
 
@@ -301,6 +369,10 @@ public class NewTestNGClassWizardPage extends WizardPage {
 
   public String getSourceFolder() {
     return m_sourceFolderText.getText();
+  }
+
+  public String getXmlFile() {
+    return m_generateXmlFile.getSelection() ? m_xmlFilePath.getText() : null;
   }
 
   public String getPackageName() {
