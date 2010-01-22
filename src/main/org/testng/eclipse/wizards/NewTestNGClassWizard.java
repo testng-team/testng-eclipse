@@ -107,7 +107,7 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	  //
 	  // Create XML file, if applicable
 	  //
-	  if (xmlPath != null) {
+	  if (!Utils.isEmpty(xmlPath)) {
 	    openFile(createFile(containerName, xmlPath, createXmlContentStream(), monitor), monitor);
 	  }
 

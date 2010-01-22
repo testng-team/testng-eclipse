@@ -25,19 +25,19 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.ui.util.Utils.Widgets;
+import org.testng.eclipse.util.ResourceUtil;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Generate a new TestNG class.
+ * Generate a new TestNG class and optionally, the corresponding XML suite file.
  */
 public class NewTestNGClassWizardPage extends WizardPage {
   private ISelection m_selection;
   private Text m_sourceFolderText;
   private Text m_packageNameText;
   private Text m_classNameText;
-  private Button m_generateXmlFile;
   private Text m_xmlFilePath;
 
   private Map<String, Button> m_annotations = new HashMap<String, Button>();
@@ -72,105 +72,8 @@ public class NewTestNGClassWizardPage extends WizardPage {
     setControl(container);
   }
 
-  private void createBottom(Composite parent) {
-    //
-    // Annotations
-    //
-    {
-      Group g = new Group(parent, SWT.SHADOW_ETCHED_OUT);
-      g.setText("Annotations");
-      GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-      g.setLayoutData(gd);
-
-      GridLayout layout = new GridLayout();
-      g.setLayout(layout);
-      layout.numColumns = 3;
-
-      for (String label : ANNOTATIONS) {
-        if ("".equals(label)) {
-          new Label(g, SWT.NONE);
-        } else {
-          Button b = new Button(g, "".equals(label) ? SWT.None : SWT.CHECK);
-          m_annotations.put(label, b);
-          b.setText("@" + label);
-        }
-      }
-    }
-
-    //
-    // Generate XML file
-    //
-    {
-//      SelectionListener browseListener = new SelectionListener() {
-//        public void widgetDefaultSelected(SelectionEvent e) {
-//          m_xmlFilePath.setEnabled(((Button) e.getSource()).getSelection());
-//        }
-//        public void widgetSelected(SelectionEvent e) {
-//          FileDialog fileDialog = new FileDialog(getShell(), SWT.OPEN);
-//          m_xmlFilePath.setText(fileDialog.open());
-//        }
-//      };
-
-      SelectionListener checkListener = new SelectionListener() {
-        public void widgetDefaultSelected(SelectionEvent e) {
-        }
-
-        public void widgetSelected(SelectionEvent e) {
-          dialogChanged();
-        }
-      };
-
-      Widgets w = Utils.createTextBrowseControl(parent,
-        "TestNG.newClass.generateXmlSuiteFile", "TestNG.newClass.suitePath",
-        null /* no browse */,
-        checkListener,
-        null, false /* disabled by default */);
-      m_generateXmlFile = w.radio;
-      m_xmlFilePath = w.text;
-//
-//      Label l = new Label(g, SWT.NULL);
-//      l.setText("File name");
-//      Text t = new Text(g, SWT.BORDER | SWT.SINGLE);
-//      t.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-//      Button browse = new Button(g, SWT.PUSH);
-//      browse.setText("Browse");
-
-//      FieldBrowse fb = new FieldBrowse(g, "File name") {
-//
-//        @Override
-//        protected void onBrowse() {
-//        }
-//
-//        @Override
-//        protected void onTextChanged() {
-//        }
-//        
-//      };
-//      m_generateXmlFile = new Button(g, SWT.CHECK);
-//      GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-//      gridData.horizontalSpan = 3;
-//      g.setLayoutData(gridData);
-//      m_generateXmlFile.addSelectionListener(new SelectionListener() {
-//        public void widgetDefaultSelected(SelectionEvent e) {
-//        }
-//
-//        public void widgetSelected(SelectionEvent e) {
-//          m_xmlFilePath.setEnabled(((Button) e.getSource()).getSelection(), g);
-//        }
-//      });
-
-    }
-  }
-
   private void createTop(Composite parent) {
-    Composite container = new Composite(parent, SWT.NULL);
-    {
-      GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-      container.setLayoutData(gd);
-      GridLayout layout = new GridLayout();
-      layout.numColumns = 3;
-      container.setLayout(layout);
-    }
+    Composite container = createGridContainer(parent, 3);
 
     //
     // Source folder
@@ -235,46 +138,63 @@ public class NewTestNGClassWizardPage extends WizardPage {
     }
   }
 
-//  public void _createControl(Composite parent) {
-//    Composite container = new Composite(parent, SWT.NULL);
-//    GridLayout layout = new GridLayout();
-//    container.setLayout(layout);
-//    layout.numColumns = 3;
-//    layout.verticalSpacing = 9;
-//    Label label = new Label(container, SWT.NULL);
-//    label.setText("&Class name:");
-//
-//    m_containerText = new Text(container, SWT.BORDER | SWT.SINGLE);
-//    GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-//    m_containerText.setLayoutData(gd);
-//    m_containerText.addModifyListener(new ModifyListener() {
-//      public void modifyText(ModifyEvent e) {
-//        dialogChanged();
-//      }
-//    });
-//
-//    Button button = new Button(container, SWT.PUSH);
-//    button.setText("Browse...");
-//    button.addSelectionListener(new SelectionAdapter() {
-//      public void widgetSelected(SelectionEvent e) {
-//        handleBrowse();
-//      }
-//    });
-//    label = new Label(container, SWT.NULL);
-//    label.setText("&File name:");
-//
-//    m_fileText = new Text(container, SWT.BORDER | SWT.SINGLE);
-//    gd = new GridData(GridData.FILL_HORIZONTAL);
-//    m_fileText.setLayoutData(gd);
-//    m_fileText.addModifyListener(new ModifyListener() {
-//      public void modifyText(ModifyEvent e) {
-//        dialogChanged();
-//      }
-//    });
-//    initialize();
-//    dialogChanged();
-//    setControl(container);
-//  }
+  private void createBottom(Composite parent) {
+    //
+    // Annotations
+    //
+    {
+      Group g = new Group(parent, SWT.SHADOW_ETCHED_OUT);
+      g.setText("Annotations");
+      GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+      g.setLayoutData(gd);
+
+      GridLayout layout = new GridLayout();
+      g.setLayout(layout);
+      layout.numColumns = 3;
+
+      for (String label : ANNOTATIONS) {
+        if ("".equals(label)) {
+          new Label(g, SWT.NONE);
+        } else {
+          Button b = new Button(g, "".equals(label) ? SWT.None : SWT.CHECK);
+          m_annotations.put(label, b);
+          b.setText("@" + label);
+        }
+      }
+    }
+
+    //
+    // XML suite file
+    //
+    {
+      Composite container = createGridContainer(parent, 2);
+
+      //
+      // Label
+      //
+      Label label = new Label(container, SWT.NULL);
+      label.setText(ResourceUtil.getString("TestNG.newClass.suitePath"));
+
+      //
+      // Text widget
+      //
+      m_xmlFilePath = new Text(container, SWT.SINGLE | SWT.BORDER);
+      GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
+      gd.grabExcessHorizontalSpace = true;
+      m_xmlFilePath.setLayoutData(gd);
+    }
+  }
+
+  private Composite createGridContainer(Composite parent, int columns) {
+    Composite result = new Composite(parent, SWT.NULL);
+    GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+    result.setLayoutData(gd);
+    GridLayout layout = new GridLayout();
+    layout.numColumns = columns;
+    result.setLayout(layout);
+
+    return result;
+  }
 
   /**
    * Tests if the current workbench selection is a suitable container to use.
@@ -346,10 +266,6 @@ public class NewTestNGClassWizardPage extends WizardPage {
       updateStatus("Class name must be valid");
       return;
     }
-    if (m_generateXmlFile.getSelection() && Utils.isEmpty(m_xmlFilePath.getText())) {
-      updateStatus("You need to specify the location of the XML file");
-      return;
-    }
 
     int dotLoc = className.lastIndexOf('.');
     if (dotLoc != -1) {
@@ -372,7 +288,7 @@ public class NewTestNGClassWizardPage extends WizardPage {
   }
 
   public String getXmlFile() {
-    return m_generateXmlFile.getSelection() ? m_xmlFilePath.getText() : null;
+    return m_xmlFilePath.getText();
   }
 
   public String getPackageName() {
