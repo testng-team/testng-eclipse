@@ -6,11 +6,13 @@ import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.StringButtonFieldEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
@@ -38,7 +40,6 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
   private FSBrowseDirectoryFieldEditor m_outputdir;
   private BooleanFieldEditor2 m_absolutePath;
   private BooleanFieldEditor2 m_disabledDefaultListeners;
-  private Button m_useXmlTemplateFile;
   private FileFieldEditor m_xmlTemplateFile;
   
   public PreferencePage() {
@@ -57,7 +58,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
   public void createFieldEditors() {
     Composite parentComposite= getFieldEditorParent();
     m_outputdir= new FSBrowseDirectoryFieldEditor(TestNGPluginConstants.S_OUTDIR, 
-        "Output directory", //$NON-NLS-1$ 
+        "Output directory:", //$NON-NLS-1$ 
         parentComposite);
     m_outputdir.fillIntoGrid(parentComposite, 3);
     Button btn= m_outputdir.getChangeControl(parentComposite);
@@ -79,55 +80,18 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
         SWT.NONE, 
         parentComposite);
 
-    createXmlTemplateFileEditor(parentComposite);
+    // XML template
+    m_xmlTemplateFile = new FileFieldEditor(TestNGPluginConstants.S_XML_TEMPLATE_FILE,
+        "Template XML file:", false /* no absolute */,
+        StringButtonFieldEditor.VALIDATE_ON_FOCUS_LOST,
+        parentComposite);
+    m_xmlTemplateFile.setEmptyStringAllowed(true);
+    m_xmlTemplateFile.fillIntoGrid(parentComposite, 3);
 
     addField(m_outputdir);
     addField(m_absolutePath);
     addField(m_disabledDefaultListeners);    
     addField(m_xmlTemplateFile);
-  }
-
-  /**
-   * Create the UI to specify an XML template file.
-   */
-  private void createXmlTemplateFileEditor(final Composite parent) {
-    final Group g = new Group(parent, SWT.SHADOW_ETCHED_OUT);
-    m_useXmlTemplateFile = new Button(g, SWT.CHECK);
-    GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
-    gridData.horizontalSpan= 3;
-    g.setLayoutData(gridData);
-    m_useXmlTemplateFile.setText("Use an XML template file");
-    m_useXmlTemplateFile.setLayoutData(gridData);
-    m_useXmlTemplateFile.addSelectionListener(new SelectionListener() {
-      public void widgetDefaultSelected(SelectionEvent e) {
-      }
-
-      public void widgetSelected(SelectionEvent e) {
-        m_xmlTemplateFile.setEnabled(((Button) e.getSource()).getSelection(), g);
-      }
-    });
-    m_xmlTemplateFile = new FileFieldEditor(TestNGPluginConstants.S_XML_TEMPLATE_FILE,
-        "Template XML file", g) {
-      
-      // Only verify if the XML file exists if the button is checked
-      @Override
-      protected boolean checkState() {
-        if (m_useXmlTemplateFile.getSelection()) return super.checkState();
-        else return true;
-      }
-    };
-    IPreferenceStore storage = TestNGPlugin.getDefault().getPreferenceStore();
-    boolean value = storage.getBoolean(TestNGPluginConstants.S_USE_XML_TEMPLATE_FILE);
-    m_xmlTemplateFile.setEnabled(value, g);
-    m_useXmlTemplateFile.setSelection(value);
-  }
-
-  @Override
-  public boolean performOk() {
-    IPreferenceStore storage = TestNGPlugin.getDefault().getPreferenceStore();
-    storage.setValue(TestNGPluginConstants.S_USE_XML_TEMPLATE_FILE,
-        m_useXmlTemplateFile.getSelection());
-    return super.performOk();
   }
 
   /* (non-Javadoc)

@@ -9,6 +9,7 @@ import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.collections.Maps;
+import org.testng.internal.Utils;
 import org.testng.reporters.XMLStringBuffer;
 import org.testng.xml.LaunchSuite;
 import org.testng.xml.Parser;
@@ -94,13 +95,13 @@ abstract public class CustomSuite extends LaunchSuite {
 
   protected XMLStringBuffer createContentBuffer() {
     IPreferenceStore storage = TestNGPlugin.getDefault().getPreferenceStore();
-    boolean hasEclipseXmlFile = storage.getBoolean(TestNGPluginConstants.S_USE_XML_TEMPLATE_FILE);
+    String xmlFile = storage.getString(TestNGPluginConstants.S_XML_TEMPLATE_FILE);
+    boolean hasEclipseXmlFile = !Utils.isStringEmpty(xmlFile);
     XMLStringBuffer suiteBuffer = new XMLStringBuffer(""); //$NON-NLS-1$
     suiteBuffer.setDocType("suite SYSTEM \"" + Parser.TESTNG_DTD_URL + "\"");
 
     if (hasEclipseXmlFile) {
-      createXmlFileFromTemplate(suiteBuffer,
-          storage.getString(TestNGPluginConstants.S_XML_TEMPLATE_FILE));
+      createXmlFileFromTemplate(suiteBuffer, xmlFile);
     } else {
       createXmlFileFromParameters(suiteBuffer);
     }
