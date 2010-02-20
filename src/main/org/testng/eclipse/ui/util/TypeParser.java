@@ -24,8 +24,12 @@ public class TypeParser {
       String source = type.getSource();
       if (source != null) {
         BaseVisitor result = new AnnotationVisitor();
-        ASTParser parser = ASTParser.newParser(AST.JLS3); 
+        ASTParser parser = ASTParser.newParser(AST.JLS3);
+        parser.setKind(ASTParser.K_COMPILATION_UNIT);
+        parser.setResolveBindings(true);
         parser.setSource(source.toCharArray());
+        parser.setProject(type.getJavaProject());
+        parser.setUnitName(type.getCompilationUnit().getPath().toString());
         CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 //      ppp("===== VISITING " + type.getFullyQualifiedName());
         cu.accept(result);

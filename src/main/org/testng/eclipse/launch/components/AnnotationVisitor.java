@@ -1,18 +1,20 @@
 package org.testng.eclipse.launch.components;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * An AST visitor to collect all the groups defined in a compilation unit.
@@ -81,6 +83,10 @@ public class AnnotationVisitor extends BaseVisitor {
               Expression e = (Expression) it2.next();
               addGroup(e.toString());
             }
+          }
+          else if (value instanceof SimpleName) {
+            Object boundValue = value.resolveConstantExpressionValue();
+            addGroup(boundValue.toString());
           }
           else if(value instanceof StringLiteral) {
             addGroup(value.toString());

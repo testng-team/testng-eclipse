@@ -3,12 +3,12 @@ package org.testng.eclipse.launch;
 import org.eclipse.core.internal.resources.File;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.swt.widgets.Composite;
+import org.testng.collections.Maps;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.TestSearchEngine;
-import org.testng.v6.Maps;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
