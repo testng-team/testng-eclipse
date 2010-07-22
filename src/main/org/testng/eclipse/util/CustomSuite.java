@@ -161,6 +161,7 @@ abstract public class CustomSuite extends LaunchSuite {
         put(attr, "annotations", s.getAnnotations());
         put(attr, "time-out", s.getTimeOut());
         put(attr, "skipfailedinvocationcounts", s.skipFailedInvocationCounts());
+        put(attr, "configfailurepolicy", s.getConfigFailurePolicy());
         put(attr, "data-provider-thread-count", s.getDataProviderThreadCount());
         put(attr, "object-factory", s.getObjectFactory());
         suiteBuffer.push("suite", attr);
