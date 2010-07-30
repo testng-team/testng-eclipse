@@ -3,7 +3,6 @@ package org.testng.eclipse.launch.components;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -25,15 +24,17 @@ import java.util.List;
  */
 public class AnnotationVisitor extends BaseVisitor {
   
+  @Override
   public boolean visit(MethodDeclaration node) {
     if(m_typeIsTest) {
       addTestMethod(node, JDK15_ANNOTATION);
-      return false; // no need to continue
+//      return false; // no need to continue
     }
     
     return true;
   }
 
+  @Override
   public boolean visit(MarkerAnnotation node) {
     ASTNode parent = node.getParent();
     if (isTestAnnotation(node.getTypeName().toString())) {
@@ -55,6 +56,7 @@ public class AnnotationVisitor extends BaseVisitor {
     return false;
   }
   
+  @Override
   public boolean visit(NormalAnnotation node) {
     //
     // Test method?
