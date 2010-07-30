@@ -2,6 +2,8 @@ package org.testng.eclipse.wizards;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -23,12 +25,11 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.SuiteGenerator;
-import org.testng.reporters.XMLStringBuffer;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Properties;
 
 /**
  * This is a sample new wizard. Its role is to create a new file 
@@ -56,7 +57,8 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	 * Adding the page to the wizard.
 	 */
 
-	public void addPages() {
+	@Override
+  public void addPages() {
 		m_page = new NewTestNGClassWizardPage(m_selection);
 		addPage(m_page);
 	}
@@ -66,11 +68,14 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	 * the wizard. We will create an operation and run it
 	 * using wizard as execution context.
 	 */
-	public boolean performFinish() {
-		final String containerName = m_page.getSourceFolder();
-		final String fileName = m_page.getClassName() + ".java";
+	@Override
+  public boolean performFinish() {
+		String containerName = m_page.getSourceFolder();
+		String className = m_page.getClassName();
+		String packageName = m_page.getPackageName();
     try {
-      doFinish(containerName, fileName, m_page.getXmlFile(), new NullProgressMonitor());
+      doFinish(containerName, packageName, className, m_page.getXmlFile(),
+          new NullProgressMonitor());
     } catch (CoreException e) {
       e.printStackTrace();
     }
@@ -102,25 +107,27 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	 * file(s) if missing or just replace its contents, and open
 	 * the editor on the newly created file.
 	 */
-	private void doFinish(String containerName, String fileName, String xmlPath,
-	    IProgressMonitor monitor) throws CoreException {
+	private void doFinish(String containerName, String packageName, String className,
+	    String xmlPath, IProgressMonitor monitor) throws CoreException {
 	  //
-	  // Create XML file, if applicable
+	  // Create XML file at the root directory, if applicable
 	  //
 	  if (!Utils.isEmpty(xmlPath)) {
-	    openFile(createFile(containerName, xmlPath, createXmlContentStream(), monitor), monitor);
+	    openFile(createFile(containerName, "", xmlPath, createXmlContentStream(), monitor), monitor);
 	  }
 
 	  //
 	  // Create Java file
 	  //
-	  openFile(createFile(containerName, fileName, createJavaContentStream(), monitor), monitor);
+	  openFile(createFile(containerName, packageName, className + ".java",
+	      createJavaContentStream(className), monitor), monitor);
 	}
 
   private void openFile(final IFile javaFile, IProgressMonitor monitor) {
     monitor.setTaskName("Opening file for editing...");
 		getShell().getDisplay().asyncExec(new Runnable() {
-			public void run() {
+			@Override
+      public void run() {
 				IWorkbenchPage page =
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 				try {
@@ -132,8 +139,8 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 		monitor.worked(1);
   }
 	
-	private IFile createFile(String containerName, String fileName, InputStream contentStream,
-      IProgressMonitor monitor) throws CoreException {
+	private IFile createFile(String containerName, String packageName, String fileName,
+	    InputStream contentStream, IProgressMonitor monitor) throws CoreException {
     monitor.beginTask("Creating " + fileName, 2);
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     IResource resource = root.findMember(new Path(containerName));
@@ -141,12 +148,18 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
       throwCoreException("Container \"" + containerName + "\" does not exist.");
     }
     IContainer container = (IContainer) resource;
-    final IFile result = container.getFile(new Path(fileName));
+    String fullPath = fileName;
+    if (packageName != null && ! "".equals(packageName)) {
+      fullPath = packageName.replace(".", File.separator) + File.separatorChar + fileName;
+    }
+    final IFile result = container.getFile(new Path(fullPath));
     try {
       if (result.exists()) {
         result.setContents(contentStream, true, true, monitor);
       } else {
-        result.create(contentStream, true, monitor);
+        createResourceRecursively(result, monitor);
+        result.setContents(contentStream, IFile.FORCE | IFile.KEEP_HISTORY, monitor);
+//        result.create(contentStream, true, monitor);
       }
       contentStream.close();
     } catch (IOException e) {
@@ -156,10 +169,28 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
     return result;
 	}
 
-  /**
+  protected void createResourceRecursively(IResource resource, IProgressMonitor monitor)
+      throws CoreException {
+    if (resource == null || resource.exists()) return;
+    if (!resource.getParent().exists()) createResourceRecursively(resource.getParent(), monitor);
+    switch (resource.getType()) {
+    case IResource.FILE:
+      ((IFile) resource).create(new ByteArrayInputStream(new byte[0]), true, monitor);
+      break;
+    case IResource.FOLDER:
+      ((IFolder) resource).create(IResource.NONE, true, monitor);
+      break;
+    case IResource.PROJECT:
+      ((IProject) resource).create(monitor);
+      ((IProject) resource).open(monitor);
+      break;
+    }
+  }
+
+	/**
 	 * Create the content for the Java file.
 	 */
-	private InputStream createJavaContentStream() {
+	private InputStream createJavaContentStream(String className) {
 	  StringBuilder imports = new StringBuilder("import org.testng.annotations.Test;\n");
 	  StringBuilder methods = new StringBuilder();
 	  String dataProvider = "";
@@ -191,7 +222,7 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	      "package " + m_page.getPackage() + ";\n\n"
 	      + imports
 	      + "\n"
-	      + "public class NewTest {\n"
+	      + "public class " + className + " {\n"
 	      + "  @Test" + dataProvider + "\n"
 	      + "  public void f" + signature + " {\n"
 	      + "  }\n\n"
@@ -227,7 +258,8 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	 * we can initialize from it.
 	 * @see IWorkbenchWizard#init(IWorkbench, IStructuredSelection)
 	 */
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
+	@Override
+  public void init(IWorkbench workbench, IStructuredSelection selection) {
 		this.m_selection = selection;
 	}
 }
