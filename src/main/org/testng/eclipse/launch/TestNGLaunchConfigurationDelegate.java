@@ -19,14 +19,12 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
+import org.testng.CommandLineArgs;
 import org.testng.ITestNGListener;
-import org.testng.TestNG;
-import org.testng.TestNGCommandLineArgs;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.Utils;
-import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.ListenerContributorUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.ResourceUtil;
@@ -38,13 +36,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
 public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigurationDelegate {
 
+  @Override
   public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch,
       IProgressMonitor monitor) throws CoreException {
     IJavaProject javaProject = getJavaProject(configuration);
@@ -132,7 +130,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       argv.add(pa[i]);
     }
 
-    argv.add(TestNGCommandLineArgs.PORT_COMMAND_OPT);
+    argv.add(CommandLineArgs.PORT);
     argv.add(Integer.toString(port));
 
     IProject project = jproject.getProject();
@@ -146,7 +144,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
 //    }
 
     PreferenceStoreUtil storage = TestNGPlugin.getPluginPreferenceStore();
-    argv.add(TestNGCommandLineArgs.OUTDIR_COMMAND_OPT);
+    argv.add(CommandLineArgs.OUTPUT_DIRECTORY);
     argv.add(storage.getOutputAbsolutePath(jproject).toOSString());
 
 //    String reporters = storage.getReporters(project.getName(), false);
@@ -168,8 +166,8 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       isFirst = false;
     }
     if (!reportersContributors.toString().trim().equals("")) {
-      if (!argv.contains(TestNGCommandLineArgs.LISTENER_COMMAND_OPT)) {
-        argv.add(TestNGCommandLineArgs.LISTENER_COMMAND_OPT);
+      if (!argv.contains(CommandLineArgs.LISTENER)) {
+        argv.add(CommandLineArgs.LISTENER);
         argv.add(reportersContributors.toString().trim());
       } else {
         String listeners = argv.get(argv.size() - 1);
@@ -180,7 +178,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
 
     boolean disabledReporters = storage.hasDisabledListeners(project.getName(), false);
     if (disabledReporters) {
-      argv.add(TestNGCommandLineArgs.USE_DEFAULT_LISTENERS);
+      argv.add(CommandLineArgs.USE_DEFAULT_LISTENERS);
       argv.add("false");
     }
 
