@@ -42,7 +42,6 @@ import java.util.Vector;
 
 public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigurationDelegate {
 
-  @Override
   public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch,
       IProgressMonitor monitor) throws CoreException {
     IJavaProject javaProject = getJavaProject(configuration);

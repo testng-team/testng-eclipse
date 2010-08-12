@@ -126,7 +126,6 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
   private void openFile(final IFile javaFile, IProgressMonitor monitor) {
     monitor.setTaskName("Opening file for editing...");
 		getShell().getDisplay().asyncExec(new Runnable() {
-			@Override
       public void run() {
 				IWorkbenchPage page =
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
@@ -258,7 +257,6 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	 * we can initialize from it.
 	 * @see IWorkbenchWizard#init(IWorkbench, IStructuredSelection)
 	 */
-	@Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
 		this.m_selection = selection;
 	}
