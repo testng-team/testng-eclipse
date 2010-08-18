@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.search.internal.ui.text.FileSearchQuery;
@@ -519,7 +520,7 @@ public class LaunchUtil {
     ISearchQuery query= new FileSearchQuery("@(Test|Before|After|Factory)(\\(.+)?", 
         true /*regexp*/ , 
         true /*casesensitive*/, 
-        FileTextSearchScope.newSearchScope(scopeResources, new String[] {"*.java"}, false));
+        FileTextSearchScope.newSearchScope(scopeResources, getJavaLikeExtensions(), false));
     query.run(new NullProgressMonitor());
     FileSearchResult result= (FileSearchResult) query.getSearchResult(); 
     Object[] elements= result.getElements();
@@ -527,7 +528,19 @@ public class LaunchUtil {
     return elements != null && elements.length > 0 ? TestNG.JDK_ANNOTATION_TYPE : TestNG.JAVADOC_ANNOTATION_TYPE;
   }
   
-  
+  private static String[] getJavaLikeExtensions() {
+    char[][] exts = Util.getJavaLikeExtensions();
+    if (exts != null && exts.length > 0) {
+      String[] extStrs = new String[exts.length];
+      for (int i = 0; i < exts.length; i++) {
+        extStrs[i] = "*." + String.valueOf(exts[i]);
+      }
+      return extStrs;
+    } else {
+      return new String[] {"*.java"};
+    }
+  }
+
   public static ILaunchConfigurationWorkingCopy setFailedTestsJvmArg (String value, 
 		  ILaunchConfigurationWorkingCopy config) {
 	  try {
