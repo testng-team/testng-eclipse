@@ -383,7 +383,7 @@ class ClassMethodsSuite extends CustomSuite {
                            final int logLevel) {
     super(projectName, projectName, parameters, annotationType, logLevel);
     m_classNames = classNames;
-    m_classMethods = sanitize(classMethods);
+    m_classMethods = classMethods != null ? sanitize(classMethods): classMethods;
     if(m_useMethods) {
       m_classNames = new ArrayList<String>(m_classMethods.keySet());
     }
