@@ -7,10 +7,16 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.testng.eclipse.util.LaunchUtil;
 
@@ -38,11 +44,51 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
   }
 
   public void launch(IEditorPart editor, String mode) {
-	  IEditorInput input = editor.getEditorInput();
-	  IJavaElement element = (IJavaElement) input.getAdapter(IJavaElement.class);
-	  if (element != null) {
-		  run(element, mode);
+	  ITypeRoot root = JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
+	  if (root != null) {
+	    IMethod method = resolveSelectedMethod(editor, root);
+	    if (method != null) {
+	      run(method, mode);
+	    }
+	    else if (root instanceof IJavaElement){
+	      run(root, mode);
+	    }
 	  }
+  }
+
+  private IMethod resolveSelectedMethod(IEditorPart editor, ITypeRoot root) {
+    try {
+      ITextSelection selectedText = getTextSelection(editor, root);
+      if(selectedText == null) {
+        return null;
+      }
+      IJavaElement selectedElement = SelectionConverter.getElementAtOffset(root, selectedText);
+      if(!(selectedElement instanceof IMethod)) {
+        return null;
+      }
+      IMethod method= (IMethod) selectedElement;
+      ISourceRange nameRange = method.getNameRange();
+      if(nameRange.getOffset() <= selectedText.getOffset() && selectedText.getOffset() + selectedText.getLength() <= nameRange.getOffset() + nameRange.getLength()) {
+        return method;
+      }
+    } catch (JavaModelException jme) {
+      ;
+    }
+    return null;
+  }
+
+  private ITextSelection getTextSelection(IEditorPart editor, ITypeRoot root) {
+    ISelectionProvider selectionProvider = editor.getSite().getSelectionProvider();
+    if(selectionProvider == null) {
+      return null;
+    }
+
+    ISelection selection = selectionProvider.getSelection();
+    if(!(selection instanceof ITextSelection)) {
+      return null;
+    }
+
+    return (ITextSelection) selection;
   }
 
   protected void run(IJavaElement ije, String mode) {
