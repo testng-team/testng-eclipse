@@ -2,9 +2,8 @@ package org.testng.eclipse;
 
 import org.testng.remote.RemoteTestNG;
 
-
 /**
- * This class/interface 
+ * Constants used by the plug-in. 
  */
 public abstract class TestNGPluginConstants {
   public static final int LAUNCH_ERROR = 1001;

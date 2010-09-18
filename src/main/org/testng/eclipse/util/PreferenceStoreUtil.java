@@ -6,11 +6,13 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.testng.TestNG;
 import org.testng.eclipse.TestNGPluginConstants;
-import org.testng.eclipse.ui.util.Utils;
+
+import java.io.File;
+import java.util.Random;
 
 
 /**
- * This class/interface 
+ * Utility methods to store and retrive data in the preference store.
  */
 public class PreferenceStoreUtil {
   private IPreferenceStore m_storage;
@@ -38,7 +40,15 @@ public class PreferenceStoreUtil {
   public void storeUseProjectJar(String projectName, boolean selection) {
     m_storage.setValue(projectName + TestNGPluginConstants.S_USEPROJECTJAR, selection);
   }
-  
+
+  public File getTemporaryDirectory() {
+    Random r = new Random(System.currentTimeMillis());
+    File result = new File(System.getProperty("java.io.tmpdir") + File.separatorChar
+        + "testng-eclipse-" + r.nextInt());
+
+    return result;
+  }
+
   public IPath getOutputDirectoryPath(IJavaProject project) {
     final String projectName= project.getElementName();
     final String outdir= getOutputDir(projectName, false);

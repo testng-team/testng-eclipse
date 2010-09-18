@@ -186,8 +186,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     List<String> suiteList = new ArrayList<String>();
     List<String> tempSuites = new ArrayList<String>();
 
-    File suiteDir = new File(System.getProperty("java.io.tmpdir") + File.separatorChar
-        + "testng-eclipse");
+    File suiteDir = TestNGPlugin.getPluginPreferenceStore().getTemporaryDirectory();
     for (LaunchSuite launchSuite : launchSuiteList) {
       File suiteFile = launchSuite.save(suiteDir);
 
