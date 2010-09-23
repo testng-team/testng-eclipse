@@ -280,6 +280,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
     ti.setData("runinfo", resultInfo);
     ti.setExpanded(true);
     ti.setImage(getStatusImage(resultInfo.getType(), resultInfo.getStatus()));
+    ti.setText(resultInfo.getTreeLabel());
     
     if(ITestResult.SUCCESS != resultInfo.getStatus()) {
       m_failureIds.add((String) ti.getData("testid"));
@@ -473,23 +474,11 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
   
   private TreeItem testTreeItem(TreeItem parent, RunInfo treeEntry){
     ppp("Creating on " + this + " parent:" + parent + " entry:" + treeEntry);
-    TreeItem treeItem = createNewTreeItem(parent, treeEntry);
-    treeItem.setImage(m_testRunIcon);        
-//    String parentName= (String) parent.getData("testname");
-//    if(treeEntry.getClassName().equals(parentName)) {
-    String text =
-//        treeEntry.getClassName() + "." + treeEntry.getMethodName()
-        treeEntry.getMethodName()
-        + " (" + treeEntry.getTime() + ") "
-        + treeEntry.getParametersDisplay()
-        + " " + treeEntry.getTestDescription();
-    treeItem.setText(text)
-        ;
-//    }
-//    else {
-//      treeItem.setText(treeEntry.getTestDescription());
-//    }
-    return treeItem;
+    TreeItem result = createNewTreeItem(parent, treeEntry);
+    result.setImage(m_testRunIcon);
+    result.setText(treeEntry.getTreeLabel());
+
+    return result;
   }
   
   private void registerTreeEntry(RunInfo runInfo, TreeItem item, boolean allowDups, boolean running) {

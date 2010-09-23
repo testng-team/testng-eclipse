@@ -256,6 +256,17 @@ public class RunInfo {
   public void setJvmArgs(String m_jvmArgs) {
     this.m_jvmArgs = m_jvmArgs;
   }
+
+  /**
+   * The string that will be displayed in the tree view of AbstractHierarchyTab.
+   */
+  public String getTreeLabel() {
+    return getMethodName()
+        + getParametersDisplay()
+        + " " + getTestDescription()
+        + " (" + (getTime() / 1000) + " s) "
+        ;
+  }
   
   /*public static void main(String[] args) {
     String test1= "something\nwrong";
