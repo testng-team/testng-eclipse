@@ -477,9 +477,13 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
     treeItem.setImage(m_testRunIcon);        
 //    String parentName= (String) parent.getData("testname");
 //    if(treeEntry.getClassName().equals(parentName)) {
-    treeItem.setText(treeEntry.getClassName() + "." + treeEntry.getMethodName()
+    String text =
+//        treeEntry.getClassName() + "." + treeEntry.getMethodName()
+        treeEntry.getMethodName()
+        + " (" + treeEntry.getTime() + ") "
         + treeEntry.getParametersDisplay()
-        + " " + treeEntry.getTestDescription())
+        + " " + treeEntry.getTestDescription();
+    treeItem.setText(text)
         ;
 //    }
 //    else {

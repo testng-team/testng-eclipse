@@ -32,8 +32,8 @@ public class RunInfo {
   private int m_status;
   private String m_testDescription;
   private String m_jvmArgs;
-  
-  
+  private long m_time;
+
   public RunInfo(String suiteName) {
     m_id = suiteName;
     m_suiteName = suiteName;
@@ -54,6 +54,7 @@ public class RunInfo {
                  String testDesc,
                  String[] params,
                  String[] paramTypes,
+                 long time,
                  String stackTrace,
                  int status) {
     m_id = suiteName + "." + testName + "." + className + "." + methodName + toString(params, paramTypes);
@@ -66,11 +67,15 @@ public class RunInfo {
     m_testDescription= testDesc != null ? (testDesc.equals(methodName) ? null : testDesc) : null;
     m_parameters= params;
     m_parameterTypes= paramTypes;
+    m_time = time;
     m_stackTrace = stackTrace;
     m_type = RESULT_TYPE;
     m_status = status;
   }
-  
+
+  public long getTime() {
+    return m_time;
+  }
   
   /**
    * @param params

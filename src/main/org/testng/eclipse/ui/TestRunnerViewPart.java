@@ -1336,6 +1336,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
                        trm.getTestDescription(),
                        trm.getParameters(),
                        trm.getParameterTypes(),
+                       trm.getEndMillis() - trm.getStartMillis(),
                        stackTrace,
                        type);
                        
