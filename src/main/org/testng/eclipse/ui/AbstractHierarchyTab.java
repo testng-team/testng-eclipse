@@ -21,8 +21,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 import org.testng.ITestResult;
 import org.testng.eclipse.TestNGPlugin;
@@ -51,7 +53,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
   private final Image m_testFailIcon = TestNGPlugin.getImageDescriptor("obj16/testfail.gif").createImage(); //$NON-NLS-1$
   private final Image m_testRunIcon = TestNGPlugin.getImageDescriptor("obj16/testrun.gif").createImage(); //$NON-NLS-1$
 
-  private final static String FORMATTED_MESSAGE = "{0} ( {1}/{2}/{3}/{4} )";
+  private final static String FORMATTED_MESSAGE = "{0} ( {1}/{2}/{3}/{4} ) ({5} s)";
   
   private Tree fTree;
   
@@ -104,6 +106,12 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
     hierarchyTab.setToolTipText(ResourceUtil.getString(getTooltipKey())); //$NON-NLS-1$
 
     fTree = new Tree(testTreePanel, SWT.V_SCROLL | SWT.SINGLE);
+
+//    TreeColumn column1 = new TreeColumn(fTree, SWT.LEFT);
+//    column1.setText("Method");
+//    TreeColumn column2 = new TreeColumn(fTree, SWT.CENTER);
+//    column2.setText("Time");
+
     gridData = new GridData(GridData.FILL_BOTH
                             | GridData.GRAB_HORIZONTAL
                             | GridData.GRAB_VERTICAL);
@@ -286,7 +294,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
       m_failureIds.add((String) ti.getData("testid"));
     }
     
-    propagateResult(ti.getParentItem(), resultInfo.getStatus());
+    propagateResult(ti.getParentItem(), resultInfo);
     updateView(ti);
   }
   
@@ -313,7 +321,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
       m_failureIds.add(runInfo.getId());
     }
     
-    propagateResult(parentItem, runInfo.getStatus());
+    propagateResult(parentItem, runInfo);
     
     return treeItem;
   }
@@ -338,7 +346,8 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
 	  return treeItem;
   }
   
-  private void propagateResult(TreeItem ti, int state) {
+  private void propagateResult(TreeItem ti, RunInfo childRunInfo) {
+    int state = childRunInfo.getStatus();
     if(null == ti) {
       return;
     }
@@ -364,6 +373,12 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
       ti.setExpanded(true);
       String itemName = RunInfo.SUITE_TYPE == ri.getType() ? ri.getSuiteName() : ri.getTestName();
       
+      Float cumulatedTime = (Float) ti.getData("cumulatedTime");
+      if (cumulatedTime == null) {
+        cumulatedTime = 0.0f;
+      }
+      float c = cumulatedTime + childRunInfo.getTime();
+      ti.setData("cumulatedTime", c);
 
       ti.setText(MessageFormat.format(FORMATTED_MESSAGE,
           new Object[] {
@@ -371,11 +386,12 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
               new Integer(ri.m_passed),
               new Integer(ri.m_failed),
               new Integer(ri.m_skipped),
-              new Integer(ri.m_successPercentageFailed)
+              new Integer(ri.m_successPercentageFailed),
+              c / 1000
           })
       );
       
-      propagateResult(ti.getParentItem(), state);
+      propagateResult(ti.getParentItem(), childRunInfo);
     }
   }
   
@@ -477,6 +493,8 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
     TreeItem result = createNewTreeItem(parent, treeEntry);
     result.setImage(m_testRunIcon);
     result.setText(treeEntry.getTreeLabel());
+//    result.setText(new String[] { treeEntry.getTreeLabel(), "foo", "bar" });
+//    result.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
 
     return result;
   }

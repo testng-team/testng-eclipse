@@ -67,7 +67,7 @@ public class RunInfo {
     m_testDescription= testDesc != null ? (testDesc.equals(methodName) ? null : testDesc) : null;
     m_parameters= params;
     m_parameterTypes= paramTypes;
-    m_time = time;
+    m_time = time >= 0 ? time : 0;
     m_stackTrace = stackTrace;
     m_type = RESULT_TYPE;
     m_status = status;
@@ -264,7 +264,7 @@ public class RunInfo {
     return getMethodName()
         + getParametersDisplay()
         + " " + getTestDescription()
-        + " (" + (getTime() / 1000) + " s) "
+        + " (" + ((float) getTime() / (float) 1000) + " s) "
         ;
   }
   
