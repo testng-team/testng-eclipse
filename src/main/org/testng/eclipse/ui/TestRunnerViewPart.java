@@ -98,7 +98,6 @@ import org.testng.remote.strprotocol.SuiteMessage;
 import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -337,7 +336,13 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private boolean hasErrors() {
-    return (m_failedCount + m_skippedCount + m_successPercentageFailed > 0);
+    return m_failedCount > 0 || m_successPercentageFailed > 0;
+  }
+
+  private int getStatus() {
+    if (hasErrors()) return ITestResult.FAILURE;
+    else if (m_skippedCount > 0) return ITestResult.SKIP;
+    else return ITestResult.SUCCESS;
   }
 
   public void startTestRunListening(IJavaProject project, 
@@ -396,7 +401,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       msg= " (" + (m_stopTime - m_startTime) + " ms)";
     }
     
-    fProgressBar.refresh(hasErrors(), msg);
+    fProgressBar.refresh(getStatus(), msg);
   }
 
   protected void postShowTestResultsView() {

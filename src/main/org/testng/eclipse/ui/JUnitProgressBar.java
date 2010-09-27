@@ -28,6 +28,8 @@ import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
+import org.testng.ITestResult;
+
 /**
  * A progress bar with a red/green indication for success or failure.
  */
@@ -41,8 +43,10 @@ public class JUnitProgressBar extends Canvas {
   private Color fOKColor;
   private Color fFailureColor;
   private Color fStoppedColor;
+  private Color fSkippedColor;
   private Color m_messageColor;
-  private boolean fError;
+  // Defined in ITestResult
+  private int fError;
   private boolean fStopped = false;
 
   private int m_totalTestsCounter;
@@ -77,6 +81,7 @@ public class JUnitProgressBar extends Canvas {
     Display display = parent.getDisplay();
     fFailureColor = new Color(display, 159, 63, 63);
     fOKColor = new Color(display, 95, 191, 95);
+    fSkippedColor = new Color(display, 255, 193, 37);
     fStoppedColor = new Color(display, 120, 120, 120);
     m_messageColor = display.getSystemColor(SWT.COLOR_BLACK);
   }
@@ -93,7 +98,7 @@ public class JUnitProgressBar extends Canvas {
   }
 
   public void reset(int testcounter) {
-    fError = false;
+    fError = ITestResult.FAILURE;
     fStopped = false;
     fCurrentTickCount = 0;
     fColorBarWidth = 0;
@@ -136,8 +141,11 @@ public class JUnitProgressBar extends Canvas {
     if (fStopped) {
       gc.setBackground(fStoppedColor);
     }
-    else if (fError) {
+    else if (fError == ITestResult.FAILURE || fError == ITestResult.SUCCESS_PERCENTAGE_FAILURE) {
       gc.setBackground(fFailureColor);
+    }
+    else if (fError == ITestResult.SKIP) {
+      gc.setBackground(fSkippedColor);
     }
     else {
       gc.setBackground(fOKColor);
@@ -220,8 +228,8 @@ public class JUnitProgressBar extends Canvas {
     int x = fColorBarWidth;
 
     fColorBarWidth = scale(fCurrentTickCount);
-    if (!fError && (failures > 0)) {
-      fError = true;
+    if (fError == ITestResult.SUCCESS && (failures > 0)) {
+      fError = ITestResult.FAILURE;
       x = 1;
     }
     if (fCurrentTickCount == fMaxTickCount) {
@@ -236,8 +244,8 @@ public class JUnitProgressBar extends Canvas {
     redraw();
   }
 
-  public void refresh(boolean hasErrors, String msg) {
-    fError = hasErrors;
+  public void refresh(int status, String msg) {
+    fError = status;
     m_timeMessage= msg;
     redraw();
   }
