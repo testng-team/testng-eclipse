@@ -107,7 +107,7 @@
    </extension>
    <extension
          point="org.testng.eclipse.internal_testRunTabs">
-      <testRunTab class="org.testng.eclipse.ui.TestHierarchyTab"/>
+      <testRunTab class="org.testng.eclipse.ui.SuccessTab"/>
           <testRunTab class="org.testng.eclipse.ui.FailureTab"/>
    </extension>
    <extension
@@ -124,14 +124,14 @@
                   <count
                         value="1">
                   </count>
-                                        <iterate>
-                                                <or>
-                                                        <test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/>
-                                                        <test property="org.eclipse.debug.ui.matchesPattern" value="*.class"/>
-                                                        <instanceof value="org.eclipse.jdt.core.IJavaElement"/>
-                                                </or>
-                                                <test property="org.testng.eclipse.isTest"/>
-                                        </iterate>
+                  <iterate>
+                    <or>
+                      <test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/>
+                      <test property="org.eclipse.debug.ui.matchesPattern" value="*.class"/>
+                      <instanceof value="org.eclipse.jdt.core.IJavaElement"/>
+                    </or>
+                    <test property="org.testng.eclipse.isTest"/>
+                  </iterate>
                </with>
             </enablement>
          </contextualLaunch>

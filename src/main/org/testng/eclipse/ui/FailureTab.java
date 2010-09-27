@@ -1,19 +1,7 @@
-/*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Common Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/cpl-v10.html
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *     Sebastian Davids - sdavids@gmx.de bugs 26754, 41228
-*******************************************************************************/
 package org.testng.eclipse.ui;
 
 import org.eclipse.swt.widgets.TreeItem;
 import org.testng.ITestResult;
-
 
 /*
  * A view that shows the contents of a test suite as a tree, 
