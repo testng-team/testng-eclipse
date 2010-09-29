@@ -1,9 +1,5 @@
 package org.testng.eclipse.properties;
 
-
-import java.io.File;
-import java.util.ArrayList;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -12,13 +8,9 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.debug.internal.ui.actions.StatusInfo;
-import org.eclipse.debug.internal.ui.preferences.BooleanFieldEditor2;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.FolderSelectionDialog;
-import org.eclipse.jface.preference.DirectoryFieldEditor;
-import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.preference.StringButtonFieldEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -27,8 +19,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -42,15 +32,16 @@ import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceSorter;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.TestNGPluginConstants;
-
+import org.testng.eclipse.ui.util.Utils;
+import org.testng.eclipse.ui.util.Utils.Widgets;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.SWTUtil;
 
+import java.util.ArrayList;
+
 public class TestNGPropertyPage extends PropertyPage {
   private static final IStatus ERROR = new StatusInfo(IStatus.ERROR, "");
-  private static final String PATH_TITLE = "Output directory:";
   private Text m_outputdir;
   private Button m_absolutePath;
   private Button m_disabledDefaultListeners;
@@ -59,7 +50,7 @@ public class TestNGPropertyPage extends PropertyPage {
 //  private Button m_projectJar;
 
   public void createControl(Composite parent) {
-    setDescription("Project TestNG settings:");
+    setDescription("Project TestNG settings");
     super.createControl(parent);
   }
 
@@ -68,31 +59,42 @@ public class TestNGPropertyPage extends PropertyPage {
    */
   protected Control createContents(Composite parent) {
     Composite parentComposite = new Composite(parent, SWT.NONE);
-    parentComposite.setLayout(new GridLayout(1, false));
-    parentComposite.setLayoutData(new GridData(GridData.FILL | GridData.GRAB_HORIZONTAL));
 
-    
+    {
+      SelectionAdapter buttonListener = new SelectionAdapter() {
+        public void widgetSelected(SelectionEvent evt) {
+          DirectoryDialog dlg= new DirectoryDialog(m_outputdir.getShell());
+          dlg.setMessage("Select TestNG output directory");
+          String selectedDir= dlg.open();
+          m_outputdir.setText(selectedDir != null ? selectedDir : "");
+          m_absolutePath.setSelection(true);
+        }
+      };
+      Widgets w = Utils.createTextBrowseControl(parentComposite, null,
+          "TestNGPropertyPage.outputDir", buttonListener, null, null, true);
+      m_outputdir = w.text;
 
-    // Output dir 
-    Label pathLabel = new Label(parentComposite, SWT.NONE);
-    pathLabel.setText(PATH_TITLE);
-    m_outputdir = new Text(parentComposite, SWT.SINGLE | SWT.BORDER);
-    m_outputdir.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-    
-    // Browse for output dir button
-    Button browseFS= new Button(parentComposite, SWT.PUSH);
-    browseFS.setText("Browse"); //$NON-NLS-1$
-    SWTUtil.setButtonGridData(browseFS);
-    browseFS.addSelectionListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent evt) {
-        DirectoryDialog dlg= new DirectoryDialog(m_outputdir.getShell());
-        dlg.setMessage("Select TestNG output directory");
-        String selectedDir= dlg.open();
-        m_outputdir.setText(selectedDir != null ? selectedDir : "");
-        m_absolutePath.setSelection(true);
-      }
-    });
+//
+//      // Output dir 
+//      Label pathLabel = new Label(p, SWT.NONE);
+//      pathLabel.setText(PATH_TITLE);
+//      m_outputdir = new Text(p, SWT.SINGLE | SWT.BORDER);
+//      m_outputdir.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
+//      
+//      // Browse for output dir button
+//      Button browseFS= new Button(p, SWT.PUSH);
+//      browseFS.setText("Browse"); //$NON-NLS-1$
+//      SWTUtil.setButtonGridData(browseFS);
+//      browseFS.addSelectionListener(new SelectionAdapter() {
+//        public void widgetSelected(SelectionEvent evt) {
+//          DirectoryDialog dlg= new DirectoryDialog(m_outputdir.getShell());
+//          dlg.setMessage("Select TestNG output directory");
+//          String selectedDir= dlg.open();
+//          m_outputdir.setText(selectedDir != null ? selectedDir : "");
+//          m_absolutePath.setSelection(true);
+//        }
+//      });
+    }
     
     m_absolutePath = new Button(parentComposite, SWT.CHECK);
     m_absolutePath.setText("Absolute output path");
@@ -102,25 +104,40 @@ public class TestNGPropertyPage extends PropertyPage {
     m_disabledDefaultListeners.setText("Disable default listeners");
     m_disabledDefaultListeners.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 4, 1));
 
-    // Template XML
-    Label templateXmlLabel = new Label(parentComposite, SWT.NONE);
-    templateXmlLabel.setText("Template XML file:");
-    m_xmlTemplateFile = new Text(parentComposite, SWT.SINGLE | SWT.BORDER);
-    m_xmlTemplateFile.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        
-    
-    // Browse for template XML button
-    Button browseXML = new Button(parentComposite, SWT.PUSH);
-    browseXML.setText("Browse"); //$NON-NLS-1$
-    SWTUtil.setButtonGridData(browseXML);
-    browseXML.addSelectionListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent evt) {
-        DirectoryDialog dlg= new DirectoryDialog(m_xmlTemplateFile.getShell());
-        dlg.setMessage("Select Template XML file");
-        String selectedDir= dlg.open();
-        m_xmlTemplateFile.setText(selectedDir != null ? selectedDir : "");
-      }
-    });
+    {
+      SelectionAdapter buttonListener = new SelectionAdapter() {
+        public void widgetSelected(SelectionEvent evt) {
+          DirectoryDialog dlg= new DirectoryDialog(m_xmlTemplateFile.getShell());
+          dlg.setMessage("Select Template XML file");
+          String selectedDir= dlg.open();
+          m_xmlTemplateFile.setText(selectedDir != null ? selectedDir : "");
+        }
+      };
+      Widgets w = Utils.createTextBrowseControl(parentComposite, null,
+          "TestNGPropertyPage.templateXml", buttonListener, null, null, true);
+      m_xmlTemplateFile = w.text;
+
+//      // Template XML
+//      Label templateXmlLabel = new Label(parentComposite, SWT.NONE);
+//      templateXmlLabel.setText("Template XML file:");
+//      m_xmlTemplateFile = new Text(parentComposite, SWT.SINGLE | SWT.BORDER);
+//      m_xmlTemplateFile.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+//          
+//      
+//      // Browse for template XML button
+//      Button browseXML = new Button(parentComposite, SWT.PUSH);
+//      browseXML.setText("Browse"); //$NON-NLS-1$
+//      SWTUtil.setButtonGridData(browseXML);
+//      SelectionAdapter listener = new SelectionAdapter() {
+//        public void widgetSelected(SelectionEvent evt) {
+//          DirectoryDialog dlg= new DirectoryDialog(m_xmlTemplateFile.getShell());
+//          dlg.setMessage("Select Template XML file");
+//          String selectedDir= dlg.open();
+//          m_xmlTemplateFile.setText(selectedDir != null ? selectedDir : "");
+//        }
+//      };
+//      browseXML.addSelectionListener(listener);
+    }
 
 //    m_projectJar= new Button(jarsComposite, SWT.CHECK);
 //    m_projectJar.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING, SWT.NONE, false, false, 2, 1));

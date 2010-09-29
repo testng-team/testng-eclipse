@@ -4,6 +4,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -32,12 +33,22 @@ public class Utils {
    * If checkKey is not null, the Control will be surrounded by a Group and enabled
    * by a check box.
    */
-  public static Widgets createTextBrowseControl(Composite p,
+  public static Widgets createTextBrowseControl(Composite parentComposite,
       String checkKey, String labelKey, 
       SelectionListener buttonListener,
       final SelectionListener checkListener,
       ModifyListener textListener, boolean enabled)
   {
+    Composite p = new Composite(parentComposite, SWT.NONE);
+    {
+      parentComposite.setLayout(new GridLayout(1, false));
+      GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+      parentComposite.setLayoutData(gd);
+//      p.setBackground(new Color(p.getDisplay(), 80, 80, 80));
+      p.setLayout(new GridLayout(3, false));
+      p.setLayoutData(gd);
+    }
+
     final Widgets result = new Widgets();
 
     Composite parent = p;
@@ -67,14 +78,16 @@ public class Utils {
       //
       // Group
       //
-      final Group g = new Group(parent, SWT.SHADOW_ETCHED_OUT);
-      GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-      g.setLayoutData(gd);
-      
-      GridLayout layout = new GridLayout();
-      g.setLayout(layout);
-      layout.numColumns = 3;
-      parent = g;
+      {
+        final Group g = new Group(parent, SWT.SHADOW_ETCHED_OUT);
+        GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+        g.setLayoutData(gd);
+        
+        GridLayout layout = new GridLayout();
+        g.setLayout(layout);
+        layout.numColumns = 3;
+        parent = g;
+      }
     }
 
     //
