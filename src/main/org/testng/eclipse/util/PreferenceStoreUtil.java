@@ -28,17 +28,17 @@ public class PreferenceStoreUtil {
     m_storage.setValue(projectName + TestNGPluginConstants.S_OUTDIR, outdir);
     m_storage.setValue(projectName + TestNGPluginConstants.S_ABSOLUTEPATH, isAbsolute);
   }
-
-//  public void storeReporters(String projectName, String reporters) {
-//    m_storage.setValue(projectName + TestNGPluginConstants.S_REPORTERS, reporters);
-//  }
-
+  
   public void storeDisabledListeners(String projectName, boolean selection) {
     m_storage.setValue(projectName + ".disabledListeners", selection);
   }
 
   public void storeUseProjectJar(String projectName, boolean selection) {
     m_storage.setValue(projectName + TestNGPluginConstants.S_USEPROJECTJAR, selection);
+  }
+  
+  public void storeXmlTemplateFile(String projectName, String xmlFile) {
+    m_storage.setValue(projectName + TestNGPluginConstants.S_XML_TEMPLATE_FILE, xmlFile);
   }
 
   public File getTemporaryDirectory() {
@@ -47,6 +47,14 @@ public class PreferenceStoreUtil {
         + "testng-eclipse-" + r.nextInt());
 
     return result;
+  }
+  
+  public String getXmlTemplateFile(String projectName, boolean projectOnly) {
+    if(projectOnly == true) {
+      return m_storage.getString(projectName + TestNGPluginConstants.S_XML_TEMPLATE_FILE);
+    } else {      
+      return "";
+    }
   }
 
   public IPath getOutputDirectoryPath(IJavaProject project) {
