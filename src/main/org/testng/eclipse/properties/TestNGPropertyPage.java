@@ -40,6 +40,12 @@ import org.testng.eclipse.util.SWTUtil;
 
 import java.util.ArrayList;
 
+/**
+ * Project specific properties.
+ *
+ * @author cbeust
+ *
+ */
 public class TestNGPropertyPage extends PropertyPage {
   private static final IStatus ERROR = new StatusInfo(IStatus.ERROR, "");
   private Text m_outputdir;
