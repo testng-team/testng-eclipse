@@ -30,6 +30,7 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditVisitor;
 import org.eclipse.text.edits.UndoEdit;
+import org.testng.eclipse.ui.Images;
 
 /**
  * 
@@ -271,8 +272,7 @@ public class JUnitRewriteCorrectionProposal implements IJavaCompletionProposal
   }
 
   public Image getImage() {
-    // TODO Auto-generated method stub
-    return null;
+    return Images.getTestNGImage();
   }
 
   public IContextInformation getContextInformation() {

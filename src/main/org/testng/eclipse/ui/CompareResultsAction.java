@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.testng.eclipse.ui;
 
-
+import org.eclipse.jface.action.Action;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.util.ResourceUtil;
 
-import org.eclipse.jface.action.Action;
+import static org.testng.eclipse.ui.Images.*;
 
 /**
  * Action to enable/disable stack trace filtering.
@@ -27,13 +27,12 @@ public class CompareResultsAction extends Action {
       setDescription(ResourceUtil.getString("CompareResultsAction.description"));   //$NON-NLS-1$
       setToolTipText(ResourceUtil.getString("CompareResultsAction.tooltip"));  //$NON-NLS-1$
       
-      setDisabledImageDescriptor(TestNGPlugin.getImageDescriptor("dlcl16/compare.gif"));  //$NON-NLS-1$
-      setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/compare.gif"));  //$NON-NLS-1$
-      setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/compare.gif"));  //$NON-NLS-1$
+      setDisabledImageDescriptor(Images.getImageDescriptor(IMG_COMPARE_DISABLED));
+      setHoverImageDescriptor(Images.getImageDescriptor(IMG_COMPARE_HOVER));
+      setImageDescriptor(Images.getImageDescriptor(IMG_COMPARE));
 
       fView= view;
     }
-    
 
 	/*
 	 * @see Action#actionPerformed

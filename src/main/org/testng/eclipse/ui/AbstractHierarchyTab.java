@@ -21,10 +21,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 import org.testng.ITestResult;
 import org.testng.eclipse.TestNGPlugin;
@@ -36,22 +34,24 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import static org.testng.eclipse.ui.Images.*;
+
 /*
  * A view that shows the contents of a test suite as a tree.
  */
 public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuListener {
-  private final Image m_suiteIcon = TestNGPlugin.getImageDescriptor("obj16/suite.gif").createImage(); //$NON-NLS-1$
-  private final Image m_suiteOkeIcon = TestNGPlugin.getImageDescriptor("obj16/suiteok.gif").createImage(); //$NON-NLS-1$
-  private final Image m_suiteSkipIcon = TestNGPlugin.getImageDescriptor("obj16/suiteskip.gif").createImage(); //$NON-NLS-1$
-  private final Image m_suiteFailIcon = TestNGPlugin.getImageDescriptor("obj16/suitefail.gif").createImage(); //$NON-NLS-1$
-  private final Image m_suiteRunIcon = TestNGPlugin.getImageDescriptor("obj16/suiterun.gif").createImage(); //$NON-NLS-1$
+  private final Image m_suiteIcon = Images.getImage(IMG_SUITE);
+  private final Image m_suiteOkeIcon = Images.getImage(IMG_SUITE_OK);
+  private final Image m_suiteSkipIcon = Images.getImage(IMG_SUITE_SKIP);
+  private final Image m_suiteFailIcon = Images.getImage(IMG_SUITE_FAIL);
+  private final Image m_suiteRunIcon = Images.getImage(IMG_SUITE_RUN);
 
-  private final Image m_testHierarchyIcon = TestNGPlugin.getImageDescriptor("obj16/testhier.gif").createImage(); //$NON-NLS-1$ 
-  private final Image m_testIcon = TestNGPlugin.getImageDescriptor("obj16/test.gif").createImage(); //$NON-NLS-1$
-  private final Image m_testOkeIcon = TestNGPlugin.getImageDescriptor("obj16/testok.gif").createImage(); //$NON-NLS-1$
-  private final Image m_testSkipIcon = TestNGPlugin.getImageDescriptor("obj16/testskip.gif").createImage(); //$NON-NLS-1$
-  private final Image m_testFailIcon = TestNGPlugin.getImageDescriptor("obj16/testfail.gif").createImage(); //$NON-NLS-1$
-  private final Image m_testRunIcon = TestNGPlugin.getImageDescriptor("obj16/testrun.gif").createImage(); //$NON-NLS-1$
+  private final Image m_testHierarchyIcon = Images.getImage(IMG_TEST_HIERARCHY); 
+  private final Image m_testIcon = Images.getImage(IMG_TEST);
+  private final Image m_testOkeIcon = Images.getImage(IMG_TEST_OK);
+  private final Image m_testSkipIcon = Images.getImage(IMG_TEST_SKIP);
+  private final Image m_testFailIcon = Images.getImage(IMG_TEST_FAIL);
+  private final Image m_testRunIcon = Images.getImage(IMG_TEST_RUN);
 
   private final static String FORMATTED_MESSAGE = "{0} ( {1}/{2}/{3}/{4} ) ({5} s)";
   
