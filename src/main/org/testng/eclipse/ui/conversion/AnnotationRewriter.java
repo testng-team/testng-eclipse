@@ -1,17 +1,19 @@
 package org.testng.eclipse.ui.conversion;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A rewriter that will convert the current JUnit file to TestNG
@@ -96,7 +98,16 @@ public class AnnotationRewriter
       a.setTypeName(ast.newName("Factory"));
       addAnnotation(ast, visitor, result, suite, a);        
     }
-    
+
+    //
+    // Replace "Assert" with "AssertJUnit"
+    //
+    Set<Expression> asserts = visitor.getAsserts();
+    for (Expression exp : asserts) {
+      Name name = ast.newName("AssertJUnit");
+      result.replace(exp, name, null);
+    }
+
     return result;
   }
 

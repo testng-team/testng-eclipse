@@ -1,14 +1,21 @@
 package org.testng.eclipse.ui.conversion;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.testng.internal.annotations.Sets;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import junit.framework.Assert;
 
 /**
  * This visitor stores all the interesting things in a JUnit class:
@@ -27,6 +34,9 @@ public class JUnitVisitor extends ASTVisitor {
   private MethodDeclaration m_suite = null;
   private SimpleType m_testCase = null;
   private List m_junitImports = new ArrayList();
+
+  // The position and length of all the Assert references
+  private Set<Expression> m_asserts = Sets.newHashSet();
 
   public boolean visit(ImportDeclaration id) {
     String name = id.getName().getFullyQualifiedName();
@@ -64,9 +74,26 @@ public class JUnitVisitor extends ASTVisitor {
     }
     return super.visit(td);
   }
-  
+
+  /**
+   * Find occurrences of "Assert.xxx", which need to be replaced with "AssertJUnit.xxx".
+   */
+  public boolean visit(MethodInvocation node) {
+    Expression exp = node.getExpression();
+    if ("Assert".equals(exp.toString())) {
+      m_asserts.add(exp);
+      System.out.println("Found Assert at " + exp.getStartPosition());
+    }
+    return super.visit(node);
+  }
+
+  public Set<Expression> getAsserts() {
+    return m_asserts;
+  }
+
   private static void ppp(String s) {
     System.out.println("[JUnitVisitor] " + s);
+    Assert.assertTrue(true);
   }
 
   public MethodDeclaration getSetUp() {

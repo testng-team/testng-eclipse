@@ -33,9 +33,7 @@ import org.eclipse.text.edits.UndoEdit;
 import org.testng.eclipse.ui.Images;
 
 /**
- * 
- * This class should implement the interface directly instead of extending
- * an internal class (ASTRewriteCorrectionProposal). Need to fix that.
+ * This class implements the proposal to convert a JUnit class into a TestNG one.
  * 
  * Created on Aug 8, 2005
  * @author cbeust
