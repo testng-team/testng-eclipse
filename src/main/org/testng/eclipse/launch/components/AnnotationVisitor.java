@@ -23,7 +23,9 @@ import java.util.List;
  * @author cbeust
  */
 public class AnnotationVisitor extends BaseVisitor {
-  
+  // Deprecated, remove
+  private static final String JDK15_ANNOTATION = "jdk15";
+
   @Override
   public boolean visit(MethodDeclaration node) {
     if(m_typeIsTest) {

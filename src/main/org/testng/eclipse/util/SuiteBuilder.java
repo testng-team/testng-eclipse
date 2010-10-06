@@ -57,21 +57,21 @@ public class SuiteBuilder {
     return file;
   }
 
-  private static String convert(String annotationType) {
-    AnnotationTypeEnum annoType= AnnotationTypeEnum.JDK;
-    try {
-      annoType= AnnotationTypeEnum.valueOf(annotationType);
-    }
-    catch(RuntimeException re) {
-      TestNGPlugin.log(new Status(IStatus.INFO, 
-                                  TestNGPlugin.PLUGIN_ID, 
-                                  1, 
-                                  "Unknown annotation type '" + annotationType + "' Using default: " + TestNG.JDK_ANNOTATION_TYPE, 
-                                  null));
-    }
-    
-    return annoType.toString();
-  }
+//  private static String convert(String annotationType) {
+//    AnnotationTypeEnum annoType= AnnotationTypeEnum.JDK;
+//    try {
+//      annoType= AnnotationTypeEnum.valueOf(annotationType);
+//    }
+//    catch(RuntimeException re) {
+//      TestNGPlugin.log(new Status(IStatus.INFO, 
+//                                  TestNGPlugin.PLUGIN_ID, 
+//                                  1, 
+//                                  "Unknown annotation type '" + annotationType + "' Using default: " + TestNG.JDK_ANNOTATION_TYPE, 
+//                                  null));
+//    }
+//    
+//    return annoType.toString();
+//  }
   
   private static void createClassTest(IType[] types, IJavaElement ije, XMLStringBuffer buf) {
     String testName = "Test " + ije.getElementName();
@@ -83,7 +83,7 @@ public class SuiteBuilder {
       ITestContent content = TypeParser.parseType(types[i]);
       
       if(content.hasTestMethods()) {
-        attrs.setProperty("annotations", convert(content.getAnnotationType()));
+//        attrs.setProperty("annotations", convert(content.getAnnotationType()));
         
         if(i == 0) {
           buf.push("test", attrs);
@@ -117,7 +117,7 @@ public class SuiteBuilder {
     for(Iterator it = testMethods.iterator(); it.hasNext(); ) {
       IMethodDescriptor imd = (IMethodDescriptor) it.next();
       if(imd.equals(testMethodDescriptor)) {
-        attrs.setProperty("annotations", convert(imd.getAnnotationType()));
+//        attrs.setProperty("annotations", convert(imd.getAnnotationType()));
         methodAttrs.setProperty("name", imd.getName());
       }
     }

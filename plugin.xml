@@ -28,12 +28,13 @@
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.debug.ui"/>
       <import plugin="org.eclipse.jdt.junit"/>
+      <import plugin="org.eclipse.jdt.launching"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
       <import plugin="org.eclipse.search"/>
-      <import plugin="org.eclipse.jdt.launching"/>
+      <import plugin="org.eclipse.ltk.core.refactoring" version="3.5.100"/>
    </requires>
    
  

@@ -115,8 +115,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       ILaunch launch, final IJavaProject jproject, final int port, final String runMode)
       throws CoreException {
 
-    String javaVersion = ConfigurationHelper.getComplianceLevel(jproject, configuration);
-    String[] classPath = createClassPath(configuration, javaVersion);
+    String[] classPath = createClassPath(configuration);
     String progArgs = getProgramArguments(configuration);
     VMRunnerConfiguration vmConfig = new VMRunnerConfiguration(RemoteTestNG.class.getName(), //$NON-NLS-1$
         classPath);
@@ -214,13 +213,13 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     return vmConfig;
   }
 
-  private String[] createClassPath(ILaunchConfiguration configuration, String javaVersion)
+  private String[] createClassPath(ILaunchConfiguration configuration)
       throws CoreException {
     URL url = Platform.getBundle(TestNGPlugin.PLUGIN_ID).getEntry("/"); //$NON-NLS-1$
 
     String[] cp = getClasspath(configuration);
     String[] classPath = null;
-    String testngJarLocation = getTestNGLibraryVersion(javaVersion);
+    String testngJarLocation = getTestNGLibraryVersion();
     String testngJarName = testngJarLocation.indexOf('/') != -1 ? testngJarLocation
         .substring(testngJarLocation.indexOf('/') + 1) : testngJarLocation;
     boolean donotappendjar = false;
@@ -301,7 +300,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     }
   }
 
-  private String getTestNGLibraryVersion(final String javaVersion) {
+  private String getTestNGLibraryVersion() {
     String testngLib = null;
     testngLib = ResourceUtil.getString("TestNG.jdk15.library"); //$NON-NLS-1$
 

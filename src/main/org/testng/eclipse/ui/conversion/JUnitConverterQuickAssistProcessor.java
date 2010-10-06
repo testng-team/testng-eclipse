@@ -1,8 +1,5 @@
 package org.testng.eclipse.ui.conversion;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -14,6 +11,9 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
+import org.testng.eclipse.collections.Lists;
+
+import java.util.List;
 
 public class JUnitConverterQuickAssistProcessor implements
     IQuickAssistProcessor {
@@ -39,7 +39,7 @@ public class JUnitConverterQuickAssistProcessor implements
       IProblemLocation[] locations) 
     throws CoreException 
   {
-    List vResult = new ArrayList();
+    List<IJavaCompletionProposal> vResult = Lists.newArrayList();
     
     if (hasAssists(context)) {
       //
@@ -56,13 +56,13 @@ public class JUnitConverterQuickAssistProcessor implements
       
       IRewriteProvider[] providers = new IRewriteProvider[] {
           new AnnotationRewriter(),
-          new JavaDocRewriter(),
+//          new JavaDocRewriter(),
       };
 
       for (int i = 0; i < providers.length; i++) {
         ASTRewrite rewriter = providers[i].createRewriter(astRoot, ast, visitor);
-//        vResult.add(new JUnitRewriteCorrectionProposal(
-//            providers[i].getName(), cu, rewriter, 1));
+        vResult.add(new JUnitRewriteCorrectionProposal(
+            providers[i].getName(), cu, rewriter, 1));
       }
     }
     

@@ -119,19 +119,19 @@ public class ConfigurationHelper {
     return getListAttribute(configuration, TestNGLaunchConfigurationConstants.METHOD_TEST_LIST);
   }
 
-  public static String getComplianceLevel(ILaunchConfiguration configuration) {
-    return getStringAttribute(configuration, TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR);
-  }
+//  public static String getComplianceLevel(ILaunchConfiguration configuration) {
+//    return getStringAttribute(configuration, TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR);
+//  }
   
-  public static String getComplianceLevel(IJavaProject ijproject, ILaunchConfiguration configuration) {
-    String result = getStringAttribute(configuration, TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR);
-    
-    if(null == result) {
-      result = JDTUtil.getProjectVMVersion(ijproject);
-    }
-    
-    return result;
-  }
+//  public static String getComplianceLevel(IJavaProject ijproject, ILaunchConfiguration configuration) {
+//    String result = getStringAttribute(configuration, TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR);
+//    
+//    if(null == result) {
+//      result = JDTUtil.getProjectVMVersion(ijproject);
+//    }
+//    
+//    return result;
+//  }
   
   public static String getJvmArgs(ILaunchConfiguration configuration) {
 		if (configuration == null)
@@ -260,8 +260,8 @@ public class ConfigurationHelper {
                         projectName);
     config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
                         RemoteTestNG.class.getName());
-    config.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
-                        JDTUtil.getProjectVMVersion(javaProject));
+//    config.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
+//                        JDTUtil.getProjectVMVersion(javaProject));
     config.setAttribute(TestNGLaunchConfigurationConstants.TYPE, LaunchType.CLASS.ordinal());
     config.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL, "2"); 
   }
@@ -323,7 +323,6 @@ public class ConfigurationHelper {
                               classMethods, 
                               groups,
                               parameters,
-                              getComplianceLevel(ijp, configuration),
                               getLogLevel(configuration)
            );      
   }
@@ -399,12 +398,12 @@ public class ConfigurationHelper {
    */
   private static List<LaunchSuite> createLaunchSuites(String projectName, List<String> packages,
       List<String> classNames, Map<String, List<String>> classMethods, List<String> groupNames,
-      Map<String, String> parameters, String annotationType, final int logLevel) 
+      Map<String, String> parameters, final int logLevel) 
   {
     return Arrays.asList(
         new LaunchSuite[] {
             SuiteGenerator.createCustomizedSuite(projectName, packages, classNames, 
-                classMethods, groupNames, parameters, annotationType, logLevel)
+                classMethods, groupNames, parameters, logLevel)
         });
   }
   
@@ -543,8 +542,8 @@ public class ConfigurationHelper {
                                Utils.stringToNullList(launchInfo.m_suiteName));
     configuration.setAttribute(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
                                toClassMethodsMap(classMethods));
-    configuration.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
-                               launchInfo.m_complianceLevel);
+//    configuration.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
+//                               launchInfo.m_complianceLevel);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL,
                                launchInfo.m_logLevel);
     

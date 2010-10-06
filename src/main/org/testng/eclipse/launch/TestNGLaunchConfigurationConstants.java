@@ -90,7 +90,7 @@ public abstract class TestNGLaunchConfigurationConstants {
   
   public static final String LOG_LEVEL = make("LOG_LEVEL");  //$NON-NLS-1$ 
   
-  public static final String TESTNG_COMPLIANCE_LEVEL_ATTR = make("COMPLIANCE_LEVEL"); //$NON-NLS-1$
+//  public static final String TESTNG_COMPLIANCE_LEVEL_ATTR = make("COMPLIANCE_LEVEL"); //$NON-NLS-1$
   
   public static final String VM_ENABLEASSERTION_OPTION = "-ea";
   

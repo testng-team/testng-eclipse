@@ -291,22 +291,22 @@ public class JDTUtil {
     return sourcePaths;
   }
 
-  public static String getProjectVMVersion(IJavaProject ijp) {
-    if(null == ijp) {
-      return "";
-    }
-    
-    try {
-      IType itype = ijp.findType("java.lang.annotation.Annotation");
-
-      return (itype == null) ? "" : TestNGLaunchConfigurationConstants.JDK15_COMPLIANCE;
-    }
-    catch (JavaModelException jme) {
-      TestNGPlugin.log(jme);
-    }
-
-    return "";
-  }
+//  public static String getProjectVMVersion(IJavaProject ijp) {
+//    if(null == ijp) {
+//      return "";
+//    }
+//    
+//    try {
+//      IType itype = ijp.findType("java.lang.annotation.Annotation");
+//
+//      return (itype == null) ? "" : TestNGLaunchConfigurationConstants.JDK15_COMPLIANCE;
+//    }
+//    catch (JavaModelException jme) {
+//      TestNGPlugin.log(jme);
+//    }
+//
+//    return "";
+//  }
   
   public static IJavaElement findElement(IJavaProject javaProject, RunInfo runInfo) 
   throws JavaModelException {

@@ -75,7 +75,6 @@ public class QuickRunAction extends Action {
     m_runInfo.setJvmArgs(ConfigurationHelper.getJvmArgs(config));
     LaunchUtil.launchMethodConfiguration(m_javaProject, 
         imethod, 
-        ConfigurationHelper.getComplianceLevel(m_javaProject, config), 
         m_runMode, m_runInfo);    
   }
   

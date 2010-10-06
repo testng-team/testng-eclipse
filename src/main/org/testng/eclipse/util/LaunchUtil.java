@@ -184,7 +184,7 @@ public class LaunchUtil {
 
     attrs.put(TestNGLaunchConfigurationConstants.TYPE, LaunchType.CLASS.ordinal());
     attrs.put(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST, classNames);
-    attrs.put(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR, annotationType);
+//    attrs.put(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR, annotationType);
     attrs.put(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST, 
         ConfigurationHelper.toClassMethodsMap(classMethods));
 
@@ -224,14 +224,12 @@ public class LaunchUtil {
   
   public static void launchMethodConfiguration(IJavaProject javaProject,
           IMethod imethod,
-          String complianceLevel,
           String runMode) {
-	  launchMethodConfiguration (javaProject, imethod, complianceLevel, runMode, null);
+	  launchMethodConfiguration (javaProject, imethod, runMode, null);
   }
   
   public static void launchMethodConfiguration(IJavaProject javaProject,
           IMethod imethod,
-          String complianceLevel,
           String runMode,
           RunInfo runInfo) {
 	     
@@ -248,7 +246,7 @@ public class LaunchUtil {
       groupDependencyWarning(imethod.getElementName(), groups);
     }
 
-    launchMethodBasedConfiguration(javaProject, methods, complianceLevel, runMode, runInfo);
+    launchMethodBasedConfiguration(javaProject, methods, runMode, runInfo);
   }
  
   /**
@@ -267,7 +265,7 @@ public class LaunchUtil {
   
   
   private static void launchMethodBasedConfiguration(IJavaProject ijp,  
-		  IMethod[] methods, String annotationType, String runMode, RunInfo runInfo) {
+		  IMethod[] methods, String runMode, RunInfo runInfo) {
     Set typesSet= new HashSet();
     for(int i= 0; i < methods.length; i++) {
       typesSet.add(methods[i].getDeclaringType());
@@ -293,7 +291,7 @@ public class LaunchUtil {
       typeNames.add(types[i].getFullyQualifiedName());
     }
     String name = typeNames.get(0).toString() + "." + methodNames.get(0).toString();
-    final String complianceLevel= annotationType != null ? annotationType : getQuickComplianceLevel(types);
+//    final String complianceLevel= annotationType != null ? annotationType : getQuickComplianceLevel(types);
   
     ILaunchConfigurationWorkingCopy workingCopy= createLaunchConfiguration(ijp.getProject(), name, runInfo);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
@@ -308,8 +306,8 @@ public class LaunchUtil {
                              ConfigurationHelper.toClassMethodsMap(classMethods));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
                              solveParameters(methods));
-    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
-                             complianceLevel);
+//    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
+//                             complianceLevel);
     if (runInfo != null) {
     	// set the class and method
     	
@@ -370,8 +368,8 @@ public class LaunchUtil {
                              ConfigurationHelper.toClassMethodsMap(classMethods));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
                              typeNames);
-    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
-                             getQuickComplianceLevel(types));
+//    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
+//                             getQuickComplianceLevel(types));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
                              solveParameters(types));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.METHOD_TEST_LIST,
@@ -506,27 +504,27 @@ public class LaunchUtil {
    * Uses the Eclipse search support to look for @Test annotation and decide
    * if the compliance level should be set to JDK or JAVADOC.
    */
-  private static String getQuickComplianceLevel(IType[] types) {
-    List resources= new ArrayList();
-    for(int i= 0; i < types.length; i++) {
-      try {
-        resources.add(types[i].getCompilationUnit().getCorrespondingResource());
-      }
-      catch(JavaModelException jmex) {
-        ;
-      }
-    }
-    IResource[] scopeResources= (IResource[]) resources.toArray(new IResource[resources.size()]);
-    ISearchQuery query= new FileSearchQuery("@(Test|Before|After|Factory)(\\(.+)?", 
-        true /*regexp*/ , 
-        true /*casesensitive*/, 
-        FileTextSearchScope.newSearchScope(scopeResources, getJavaLikeExtensions(), false));
-    query.run(new NullProgressMonitor());
-    FileSearchResult result= (FileSearchResult) query.getSearchResult(); 
-    Object[] elements= result.getElements();
-    
-    return elements != null && elements.length > 0 ? TestNG.JDK_ANNOTATION_TYPE : TestNG.JAVADOC_ANNOTATION_TYPE;
-  }
+//  private static String getQuickComplianceLevel(IType[] types) {
+//    List resources= new ArrayList();
+//    for(int i= 0; i < types.length; i++) {
+//      try {
+//        resources.add(types[i].getCompilationUnit().getCorrespondingResource());
+//      }
+//      catch(JavaModelException jmex) {
+//        ;
+//      }
+//    }
+//    IResource[] scopeResources= (IResource[]) resources.toArray(new IResource[resources.size()]);
+//    ISearchQuery query= new FileSearchQuery("@(Test|Before|After|Factory)(\\(.+)?", 
+//        true /*regexp*/ , 
+//        true /*casesensitive*/, 
+//        FileTextSearchScope.newSearchScope(scopeResources, getJavaLikeExtensions(), false));
+//    query.run(new NullProgressMonitor());
+//    FileSearchResult result= (FileSearchResult) query.getSearchResult(); 
+//    Object[] elements= result.getElements();
+//    
+//    return elements != null && elements.length > 0 ? TestNG.JDK_ANNOTATION_TYPE : TestNG.JAVADOC_ANNOTATION_TYPE;
+//  }
   
   private static String[] getJavaLikeExtensions() {
     char[][] exts = Util.getJavaLikeExtensions();

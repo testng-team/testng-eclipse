@@ -1,6 +1,8 @@
 package org.testng.eclipse.launch.components;
 
-import org.testng.TestNG;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.signature.ASTMethodDescriptor;
 import org.testng.eclipse.util.signature.IMethodDescriptor;
@@ -8,18 +10,9 @@ import org.testng.eclipse.util.signature.MethodDescriptor;
 import org.testng.internal.annotations.Sets;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-
 public class BaseVisitor extends ASTVisitor implements ITestContent {
-  static final String JDK15_ANNOTATION = TestNG.JDK_ANNOTATION_TYPE;
-  
   // List<MethodDeclaration>
   private Set<IMethodDescriptor> m_testMethods = Sets.newHashSet();
   private Set<IMethodDescriptor> m_factoryMethods = Sets.newHashSet();

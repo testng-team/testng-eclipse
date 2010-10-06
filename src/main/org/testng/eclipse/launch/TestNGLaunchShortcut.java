@@ -118,7 +118,7 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
       
       case IJavaElement.METHOD:
       {
-        LaunchUtil.launchMethodConfiguration(ijp, (IMethod) ije, null /*complianceLevel*/, mode); 
+        LaunchUtil.launchMethodConfiguration(ijp, (IMethod) ije, mode); 
         
         return;
       }
