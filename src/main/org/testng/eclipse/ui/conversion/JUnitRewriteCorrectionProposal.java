@@ -128,6 +128,10 @@ public class JUnitRewriteCorrectionProposal implements IJavaCompletionProposal
     return null;
   }
 
+  /**
+   * @return an HTML version of the change that's about to be made, with changes
+   * highlighted in bold.
+   */
   private String getHtml() {
     final StringBuffer buf= new StringBuffer();
 
@@ -139,12 +143,12 @@ public class JUnitRewriteCorrectionProposal implements IJavaCompletionProposal
       final TextEdit rootEdit= change.getPreviewEdit(change.getEdit());
 
       class EditAnnotator extends TextEditVisitor {
-        private int fWrittenToPos = 0;
+        private int m_writtenToPos = 0;
 
         public void unchangedUntil(int pos) {
-          if (pos > fWrittenToPos) {
-            appendContent(previewContent, fWrittenToPos, pos, buf, true);
-            fWrittenToPos = pos;
+          if (pos > m_writtenToPos) {
+            appendContent(previewContent, m_writtenToPos, pos, buf, true);
+            m_writtenToPos = pos;
           }
         }
 
@@ -184,7 +188,7 @@ public class JUnitRewriteCorrectionProposal implements IJavaCompletionProposal
           buf.append("<b>"); //$NON-NLS-1$
           appendContent(previewContent, edit.getOffset(), edit.getExclusiveEnd(), buf, false);
           buf.append("</b>"); //$NON-NLS-1$
-          fWrittenToPos = edit.getExclusiveEnd();
+          m_writtenToPos = edit.getExclusiveEnd();
           return false;
         }
       }
@@ -199,7 +203,7 @@ public class JUnitRewriteCorrectionProposal implements IJavaCompletionProposal
     return buf.toString();
   }
 
-  private final int surroundLines= 1;
+  private final int m_surroundLines= 1;
 
   private void appendContent(IDocument text, int startOffset, int endOffset, StringBuffer buf, 
       boolean surroundLinesOnly) {
@@ -209,14 +213,14 @@ public class JUnitRewriteCorrectionProposal implements IJavaCompletionProposal
 
       boolean dotsAdded= false;
       if (surroundLinesOnly && startOffset == 0) { // no surround lines for the top no-change range
-        startLine= Math.max(endLine - surroundLines, 0);
+        startLine= Math.max(endLine - m_surroundLines, 0);
         buf.append("...<br>"); //$NON-NLS-1$
         dotsAdded= true;
       }
 
       for (int i= startLine; i <= endLine; i++) {
         if (surroundLinesOnly) {
-          if ((i - startLine > surroundLines) && (endLine - i > surroundLines)) {
+          if ((i - startLine > m_surroundLines) && (endLine - i > m_surroundLines)) {
             if (!dotsAdded) {
               buf.append("...<br>"); //$NON-NLS-1$
               dotsAdded= true;
@@ -247,7 +251,8 @@ public class JUnitRewriteCorrectionProposal implements IJavaCompletionProposal
             buf.append(ch);
           }
         }
-        if (to == end && to != endOffset) { // new line when at the end of the line, and not end of range
+        if (to == end && to != endOffset) {
+          // new line when at the end of the line, and not end of range
           buf.append("<br>"); //$NON-NLS-1$
         }
       }
@@ -274,17 +279,11 @@ public class JUnitRewriteCorrectionProposal implements IJavaCompletionProposal
   }
 
   public IContextInformation getContextInformation() {
-    // TODO Auto-generated method stub
     return null;
   }
 
   public int getRelevance() {
-    // TODO Auto-generated method stub
     return 0;
   }
-//  public JUnitRewriteCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance) {
-//    super(name, cu, rewrite, relevance, TestNGMainTab.getTestNGImage());
-//    // TODO Auto-generated constructor stub
-//  }
 
 }
