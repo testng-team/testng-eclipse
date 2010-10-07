@@ -23,6 +23,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -34,17 +35,20 @@ import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.launch.components.Filters;
-import org.testng.eclipse.ui.Images;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.ProjectChooserDialog;
 import org.testng.eclipse.ui.util.TestSelectionDialog;
 import org.testng.eclipse.ui.util.Utils;
+import org.testng.eclipse.util.CustomSuite;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SWTUtil;
+import org.testng.eclipse.util.SuiteGenerator;
 import org.testng.eclipse.util.TestSearchEngine;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -234,14 +238,14 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
    */
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
     ConfigurationHelper.updateLaunchConfiguration(configuration,
-        new ConfigurationHelper.LaunchInfo(m_projectText.getText(), 
-              m_typeOfTestRun, 
-              Utils.stringToList(m_classSelector.getText().trim()), 
-              Utils.stringToList(m_packageSelector.getText().trim()), 
-              m_classMethods, 
+        new ConfigurationHelper.LaunchInfo(m_projectText.getText(),
+              m_typeOfTestRun,
+              Utils.stringToList(m_classSelector.getText().trim()),
+              Utils.stringToList(m_packageSelector.getText().trim()),
+              m_classMethods,
               m_groupSelector.getValueMap(),
               m_suiteSelector.getText(),
-              TestNGLaunchConfigurationConstants.JDK15_COMPLIANCE, 
+              TestNGLaunchConfigurationConstants.JDK15_COMPLIANCE,
               m_logLevelCombo.getText()));
   }
 
@@ -267,7 +271,26 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
    */
   @Override
   public Image getImage() {
-    return Images.getTestNGImage();
+    return getTestNGImage();
+  }
+
+  /**
+   * Retrieve the TestNG icon Image object.
+   * <p>
+   * Code adopted from <code>org.eclipse.jdt.internal.debug.ui.JavaDebugImages</code>
+   * and <code>org.eclipse.jdt.internal.debug.ui.JDIDebugUIPlugin</code> classes.
+   */
+  public static Image getTestNGImage() {
+    final String key = "icon";
+    if(m_imageRegistry == null) {
+      Display display = Display.getCurrent();
+      if(display == null) {
+        display = Display.getDefault();
+      }
+      m_imageRegistry = new ImageRegistry(display);
+      m_imageRegistry.put(key, TestNGPlugin.getImageDescriptor("main16/testng.gif"));
+    }
+    return m_imageRegistry.get(key);
   }
 
   public void validatePage() {
@@ -330,7 +353,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
   /**
    * Displays the selection dialog for the specified launch type.
-   * 
+   *
    * Package access for callbacks.
    * @param testngType - one of TestNGLaunchConfigurationConstants
    */
@@ -361,7 +384,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
           break;
         case PACKAGE:
           types = TestSearchEngine.findPackages(getLaunchConfigurationDialog(),
-              new Object[] {m_selectedProject});
+              m_selectedProject);
           dialog = TestSelectionDialog.createPackageSelectionDialog(getShell(), m_selectedProject,
               types);
           break;
@@ -374,6 +397,9 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     }
     catch(InvocationTargetException e) {
       TestNGPlugin.log(e.getTargetException());
+    }
+    if (dialog == null) {
+      return;
     }
     dialog.setBlockOnOpen(true);
     dialog.setTitle(ResourceUtil.getString("TestNGMainTab.testdialog.title")); //$NON-NLS-1$

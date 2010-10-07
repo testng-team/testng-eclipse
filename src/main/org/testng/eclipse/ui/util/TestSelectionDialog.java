@@ -26,7 +26,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.TwoPaneElementSelector;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.util.ResourceUtil;
@@ -93,27 +92,27 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 			final Shell shell, final IJavaProject jproject,
 			final Object[] types, final Filters.ITypeFilter filter) {
 		return createJavaElementDialog (shell, jproject, types,
-		    LaunchType.CLASS, 
+		    LaunchType.CLASS,
 				"TestNGMainTab.testdialog.selectTestClass", filter);
 	}
 
 	public static TestSelectionDialog createPackageSelectionDialog(
 			final Shell shell, final IJavaProject jproject, final Object[] types) {
 		return createJavaElementDialog (shell, jproject, types,
-		    LaunchType.PACKAGE, 
+		    LaunchType.PACKAGE,
 				"TestNGMainTab.testdialog.selectPackage", null);
 	}
-	
+
 	public static TestSelectionDialog createMethodSelectionDialog(
 			final Shell shell, final IJavaProject jproject, final Object[] types) {
 		return createJavaElementDialog (shell, jproject, types,
-		    LaunchType.METHOD, 
+		    LaunchType.METHOD,
 				"TestNGMainTab.testdialog.selectMethod", null);
 	}
-	
-	
-	private static TestSelectionDialog createJavaElementDialog(final Shell shell, 
-			final IJavaProject jproject, final Object[] types, 
+
+
+	private static TestSelectionDialog createJavaElementDialog(final Shell shell,
+			final IJavaProject jproject, final Object[] types,
 			final LaunchType testngType, final String title, final Filters.ITypeFilter filter
 			) {
 		TestSelectionDialog result = new TestSelectionDialog(shell,
@@ -125,8 +124,8 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 		result.setMessage(ResourceUtil
 				.getString(title));
 		return result;
-		
-		
+
+
 	}
 
 	private TestSelectionDialog(final Shell shell, final LaunchType type,
