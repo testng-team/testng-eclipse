@@ -4,7 +4,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -44,8 +43,7 @@ public class JUnitRewriteCorrectionProposal implements IJavaCompletionProposal
   private ICompilationUnit m_cu;
 
   public JUnitRewriteCorrectionProposal(String name, ICompilationUnit cu,
-      ASTRewrite rewriter, int i)
-  {
+      ASTRewrite rewriter, int i) {
     m_rewriter = rewriter;
     m_cu = cu;
   }

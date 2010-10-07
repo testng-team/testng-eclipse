@@ -42,7 +42,17 @@ public class BaseRewriter {
       id.setName(ast.newName("org.testng.AssertJUnit"));
       lr.insertFirst(id, null);
     }
-    
+
+    //
+    // Add import for fail()
+    //
+    if (visitor.hasFail()) {
+      ListRewrite lr = result.getListRewrite(astRoot, CompilationUnit.IMPORTS_PROPERTY);
+      ImportDeclaration id = ast.newImportDeclaration();
+      id.setName(ast.newName("org.testng.Assert"));
+      lr.insertFirst(id, null);
+    }
+
     //
     // Remove "extends TestCase"
     //

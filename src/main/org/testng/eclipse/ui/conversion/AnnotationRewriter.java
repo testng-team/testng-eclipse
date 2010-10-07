@@ -108,10 +108,10 @@ public class AnnotationRewriter
     }
 
     //
-    // Replace "fail()" with "AssertJUnit.fail()"
+    // Replace "fail()" with "Assert.fail()"
     //
     for (MethodInvocation fail : visitor.getFails()) {
-      SimpleName exp = ast.newSimpleName("AssertJUnit");
+      SimpleName exp = ast.newSimpleName("Assert");
       result.set(fail, MethodInvocation.EXPRESSION_PROPERTY, exp, null);
     }
 
