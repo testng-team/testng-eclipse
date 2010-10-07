@@ -1,14 +1,16 @@
 package org.testng.eclipse.ui.conversion;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.testng.collections.Lists;
 import org.testng.internal.annotations.Sets;
 
 import java.util.ArrayList;
@@ -28,7 +30,7 @@ import junit.framework.Assert;
  * @author cbeust
  */
 public class JUnitVisitor extends ASTVisitor {
-  private List m_testMethods = new ArrayList();
+  private List<MethodDeclaration> m_testMethods = Lists.newArrayList();
   private MethodDeclaration m_setUp = null;
   private MethodDeclaration m_tearDown = null;
   private MethodDeclaration m_suite = null;
@@ -37,6 +39,7 @@ public class JUnitVisitor extends ASTVisitor {
 
   // The position and length of all the Assert references
   private Set<Expression> m_asserts = Sets.newHashSet();
+  private boolean m_hasTestMethods = false;
 
   public boolean visit(ImportDeclaration id) {
     String name = id.getName().getFullyQualifiedName();
@@ -49,7 +52,19 @@ public class JUnitVisitor extends ASTVisitor {
   public boolean visit(MethodDeclaration md) {
     String methodName = md.getName().getFullyQualifiedName();
     if (methodName.indexOf("test") != -1) {
-      m_testMethods.add(md);
+      m_hasTestMethods = true;
+      boolean hasTestAnnotation = false;
+      List<IExtendedModifier> modifiers = md.modifiers();
+      for (IExtendedModifier m : modifiers) {
+        if (m.isAnnotation()) {
+          Annotation a = (Annotation) m;
+          if ("Test".equals(a.getTypeName().toString())) {
+            hasTestAnnotation = true;
+            break;
+          }
+        }
+      }
+      if (! hasTestAnnotation) m_testMethods.add(md);
     }
     else if (methodName.equals("setUp")) {
       m_setUp = md;
@@ -80,9 +95,8 @@ public class JUnitVisitor extends ASTVisitor {
    */
   public boolean visit(MethodInvocation node) {
     Expression exp = node.getExpression();
-    if ("Assert".equals(exp.toString())) {
+    if (exp != null && "Assert".equals(exp.toString())) {
       m_asserts.add(exp);
-      System.out.println("Found Assert at " + exp.getStartPosition());
     }
     return super.visit(node);
   }
@@ -120,8 +134,12 @@ public class JUnitVisitor extends ASTVisitor {
     m_tearDown = tearDown;
   }
 
-  public List getTestMethods() {
+  public List<MethodDeclaration> getTestMethods() {
     return m_testMethods;
+  }
+
+  public boolean hasTestMethods() {
+    return m_hasTestMethods || m_testMethods.size() > 0;
   }
 
   public void setTestMethods(List testMethods) {
@@ -136,4 +154,7 @@ public class JUnitVisitor extends ASTVisitor {
     return m_junitImports;
   }
 
+  public boolean hasAsserts() {
+    return m_asserts.size() > 0;
+  }
 }

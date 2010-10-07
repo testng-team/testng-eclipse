@@ -49,7 +49,7 @@ public class AnnotationRewriter
         lr.insertFirst(id, null);
       }
 
-      if (visitor.getTestMethods().size() > 0) {
+      if (visitor.hasTestMethods()) {
         ImportDeclaration id = ast.newImportDeclaration();
         id.setName(ast.newName("org.testng.annotations.Test"));
         lr.insertFirst(id, null);          
@@ -62,14 +62,10 @@ public class AnnotationRewriter
       }
     }
     
-    //
-    // Add @Test annotations
-    //
-    List testMethods = visitor.getTestMethods();
-    for (int i = 0; i < testMethods.size(); i++) {
+    for (MethodDeclaration md : visitor.getTestMethods()) {
       NormalAnnotation a = ast.newNormalAnnotation();
       a.setTypeName(ast.newName("Test"));
-      addAnnotation(ast, visitor, result, (MethodDeclaration) testMethods.get(i), a);        
+      addAnnotation(ast, visitor, result, md, a);
     }
     
     //
