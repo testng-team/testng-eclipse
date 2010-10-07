@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.core.PackageFragment;
 import org.eclipse.jdt.internal.core.ResolvedSourceMethod;
 import org.testng.eclipse.launch.components.ITestContent;
 
-public class FindTestNGResourcesUtil {
+public class FindTestNGResourceUtil {
 
   public static Set<IType> findClasses(IJavaElement[] javaElements, IProgressMonitor progressMonitor) {
     SearchPattern searchPattern = SearchPattern.createPattern("Test",

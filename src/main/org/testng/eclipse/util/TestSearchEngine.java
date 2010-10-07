@@ -4,7 +4,7 @@ package org.testng.eclipse.util;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.launch.components.ITestContent;
-import org.testng.eclipse.ui.util.FindTestNGResourcesUtil;
+import org.testng.eclipse.ui.util.FindTestNGResourceUtil;
 import org.testng.eclipse.ui.util.TypeParser;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -237,7 +237,7 @@ public class TestSearchEngine {
       if (elements != null) {
         for (int i = 0; i < elements.length; i++) {
           if (elements[i] instanceof IJavaElement) {
-            Set<IType> searchResults = FindTestNGResourcesUtil.findClasses(
+            Set<IType> searchResults = FindTestNGResourceUtil.findClasses(
                 new IJavaElement[] { (IJavaElement) elements[i] }, pm);
             if (searchResults != null && searchResults.size() > 0) {
               ppp("found " + searchResults.size() + " results");
@@ -347,7 +347,7 @@ public class TestSearchEngine {
     Set<String> result = new HashSet<String>();
     progressMonitor.beginTask(ResourceUtil.getString("TestSearchEngine.message.searching"), 1); //$NON-NLS-1$
     try {
-      result = FindTestNGResourcesUtil.findPackages(javaProject, progressMonitor);
+      result = FindTestNGResourceUtil.findPackages(javaProject, progressMonitor);
     } catch (Exception e) {
       TestNGPlugin.log(e);
       if (progressMonitor.isCanceled()) {
