@@ -39,6 +39,13 @@ public class JUnitVisitor extends ASTVisitor {
 
   // The position and length of all the Assert references
   private Set<Expression> m_asserts = Sets.newHashSet();
+  private boolean m_hasAsserts = false;
+
+  // The position and length of all the fail() calls
+  private Set<MethodInvocation> m_fails = Sets.newHashSet();
+
+  // True if there are test methods (if they are annotated with @Test, they won't
+  // show up in m_testMethods).
   private boolean m_hasTestMethods = false;
 
   public boolean visit(ImportDeclaration id) {
@@ -97,6 +104,9 @@ public class JUnitVisitor extends ASTVisitor {
     Expression exp = node.getExpression();
     if (exp != null && "Assert".equals(exp.toString())) {
       m_asserts.add(exp);
+    } else if ("fail".equals(node.getName().toString())) {
+      m_hasAsserts = true;
+      m_fails.add(node);
     }
     return super.visit(node);
   }
@@ -155,6 +165,10 @@ public class JUnitVisitor extends ASTVisitor {
   }
 
   public boolean hasAsserts() {
-    return m_asserts.size() > 0;
+    return m_hasAsserts || m_asserts.size() > 0;
+  }
+
+  public Set<MethodInvocation> getFails() {
+    return m_fails;
   }
 }

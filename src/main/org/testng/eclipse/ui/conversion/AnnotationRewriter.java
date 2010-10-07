@@ -6,8 +6,11 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -102,6 +105,14 @@ public class AnnotationRewriter
     for (Expression exp : asserts) {
       Name name = ast.newName("AssertJUnit");
       result.replace(exp, name, null);
+    }
+
+    //
+    // Replace "fail()" with "AssertJUnit.fail()"
+    //
+    for (MethodInvocation fail : visitor.getFails()) {
+      SimpleName exp = ast.newSimpleName("AssertJUnit");
+      result.set(fail, MethodInvocation.EXPRESSION_PROPERTY, exp, null);
     }
 
     return result;
