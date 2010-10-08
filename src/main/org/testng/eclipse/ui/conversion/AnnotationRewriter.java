@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -21,10 +22,10 @@ import java.util.Set;
 /**
  * A rewriter that will convert the current JUnit file to TestNG
  * using JDK5 annotations
+ *
+ * @author CŽdric Beust <cedric@beust.com>
  */
-public class AnnotationRewriter 
-  extends BaseRewriter 
-  implements IRewriteProvider
+public class AnnotationRewriter implements IRewriteProvider
 {
   public ASTRewrite createRewriter(CompilationUnit astRoot,
       AST ast,
@@ -33,70 +34,42 @@ public class AnnotationRewriter
   {
     final ASTRewrite result = ASTRewrite.create(astRoot.getAST());
     
-    performCommonRewrites(astRoot, ast, visitor, result);
-    
     //
-    // Add TestNG imports
+    // Remove all the JUnit imports
     //
-    {
-      ListRewrite lr = result.getListRewrite(astRoot, CompilationUnit.IMPORTS_PROPERTY);
-      if (visitor.getSetUp() != null) {
-        ImportDeclaration id = ast.newImportDeclaration();
-        id.setName(ast.newName("org.testng.annotations.BeforeMethod"));
-        lr.insertFirst(id, null);
-      }
-
-      if (visitor.getTearDown() != null) {
-        ImportDeclaration id = ast.newImportDeclaration();
-        id.setName(ast.newName("org.testng.annotations.AfterMethod"));
-        lr.insertFirst(id, null);
-      }
-
-      if (visitor.hasTestMethods()) {
-        ImportDeclaration id = ast.newImportDeclaration();
-        id.setName(ast.newName("org.testng.annotations.Test"));
-        lr.insertFirst(id, null);          
-      }
-
-      if (visitor.getSuite() != null) {
-        ImportDeclaration id = ast.newImportDeclaration();
-        id.setName(ast.newName("org.testng.annotations.Factory"));
-        lr.insertFirst(id, null);          
-      }
-    }
-    
-    for (MethodDeclaration md : visitor.getTestMethods()) {
-      NormalAnnotation a = ast.newNormalAnnotation();
-      a.setTypeName(ast.newName("Test"));
-      addAnnotation(ast, visitor, result, md, a);
+    List<ImportDeclaration> oldImports = visitor.getJUnitImports();
+    for (int i = 0; i < oldImports.size(); i++) {
+      result.remove((ImportDeclaration) oldImports.get(i), null);
     }
     
     //
-    // Addd @BeforeMethod/@AfterMethod annotations
+    // Add imports as needed
     //
-    MethodDeclaration setUp = visitor.getSetUp();
-    if (null != setUp) {
-      NormalAnnotation a = ast.newNormalAnnotation();
-      a.setTypeName(ast.newName("BeforeMethod"));
-      addAnnotation(ast, visitor, result, setUp, a);
-    }
-    
-    MethodDeclaration tearDown = visitor.getTearDown();
-    if (null != tearDown) {
-      NormalAnnotation a = ast.newNormalAnnotation();
-      a.setTypeName(ast.newName("AfterMethod"));
-      addAnnotation(ast, visitor, result, tearDown, a);
+    maybeAddImport(ast, result, astRoot, visitor.hasAsserts(), "org.testng.AssertJUnit");
+    maybeAddImport(ast, result, astRoot, visitor.hasFail(), "org.testng.Assert");
+    maybeAddImport(ast, result, astRoot, visitor.getSetUp() != null,
+        "org.testng.annotations.BeforeMethod");
+    maybeAddImport(ast, result, astRoot, visitor.hasTestMethods(), "org.testng.annotations.Test");
+    maybeAddImport(ast, result, astRoot, visitor.getTearDown() != null,
+        "org.testng.annotations.AfterMethod");
+    maybeAddImport(ast, result, astRoot, visitor.getSuite() != null,
+        "org.testng.annotations.Factory");
+
+    //
+    // Remove "extends TestCase"
+    //
+    SimpleType td = visitor.getTestCase();
+    if (null != td) {
+      result.remove(td, null);
     }
 
     //
-    // suite
+    // Addd the annotations as needed
     //
-    MethodDeclaration suite = visitor.getSuite();
-    if (null != suite) {
-      NormalAnnotation a = ast.newNormalAnnotation();
-      a.setTypeName(ast.newName("Factory"));
-      addAnnotation(ast, visitor, result, suite, a);        
-    }
+    maybeAddAnnotations(ast, visitor, result, visitor.getTestMethods(), "Test");
+    maybeAddAnnotation(ast, visitor, result, visitor.getSetUp(), "BeforeMethod");
+    maybeAddAnnotation(ast, visitor, result, visitor.getTearDown(), "AfterMethod");
+    maybeAddAnnotation(ast, visitor, result, visitor.getSuite(), "Factory");
 
     //
     // Replace "Assert" with "AssertJUnit"
@@ -116,6 +89,43 @@ public class AnnotationRewriter
     }
 
     return result;
+  }
+
+  private void maybeAddImport(AST ast, ASTRewrite rewriter, CompilationUnit astRoot, boolean add,
+      String imp) {
+    if (add) {
+      addImport(ast, rewriter, astRoot, imp);
+    }
+  }
+  private void addImport(AST ast, ASTRewrite rewriter, CompilationUnit astRoot, String imp) {
+    ListRewrite lr = rewriter.getListRewrite(astRoot, CompilationUnit.IMPORTS_PROPERTY);
+    ImportDeclaration id = ast.newImportDeclaration();
+    id.setName(ast.newName(imp));
+    lr.insertFirst(id, null);
+  }
+
+  /**
+   * Add the given annotation if the method is non null
+   */
+  private void maybeAddAnnotation(AST ast, JUnitVisitor visitor, ASTRewrite rewriter,
+      MethodDeclaration method, String annotation)
+  {
+    if (null != method) {
+      NormalAnnotation a = ast.newNormalAnnotation();
+      a.setTypeName(ast.newName(annotation));
+      addAnnotation(ast, visitor, rewriter, method, a);
+    }
+  }
+
+  /**
+   * Add the given annotation if the method is non null
+   */
+  private void maybeAddAnnotations(AST ast, JUnitVisitor visitor, ASTRewrite rewriter,
+      List<MethodDeclaration> methods, String annotation)
+  {
+    for (MethodDeclaration method : methods) {
+      maybeAddAnnotation(ast, visitor, rewriter, method, annotation);
+    }
   }
 
   private void addAnnotation(AST ast, JUnitVisitor visitor, ASTRewrite rewriter, MethodDeclaration md, 

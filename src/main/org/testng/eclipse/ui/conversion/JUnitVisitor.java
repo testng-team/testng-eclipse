@@ -35,7 +35,7 @@ public class JUnitVisitor extends ASTVisitor {
   private MethodDeclaration m_tearDown = null;
   private MethodDeclaration m_suite = null;
   private SimpleType m_testCase = null;
-  private List m_junitImports = new ArrayList();
+  private List<ImportDeclaration> m_junitImports = new ArrayList();
 
   // The position and length of all the Assert references
   private Set<Expression> m_asserts = Sets.newHashSet();
@@ -158,7 +158,7 @@ public class JUnitVisitor extends ASTVisitor {
     return m_testCase;
   }
 
-  public List getJUnitImports() {
+  public List<ImportDeclaration> getJUnitImports() {
     return m_junitImports;
   }
 
