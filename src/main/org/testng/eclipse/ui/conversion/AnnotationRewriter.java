@@ -1,15 +1,15 @@
 package org.testng.eclipse.ui.conversion;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -47,10 +47,10 @@ public class AnnotationRewriter implements IRewriteProvider
     //
     maybeAddImport(ast, result, astRoot, visitor.hasAsserts(), "org.testng.AssertJUnit");
     maybeAddImport(ast, result, astRoot, visitor.hasFail(), "org.testng.Assert");
-    maybeAddImport(ast, result, astRoot, visitor.getSetUp() != null,
+    maybeAddImport(ast, result, astRoot, !visitor.getBeforeMethods().isEmpty(),
         "org.testng.annotations.BeforeMethod");
     maybeAddImport(ast, result, astRoot, visitor.hasTestMethods(), "org.testng.annotations.Test");
-    maybeAddImport(ast, result, astRoot, visitor.getTearDown() != null,
+    maybeAddImport(ast, result, astRoot, !visitor.getAfterMethods().isEmpty(),
         "org.testng.annotations.AfterMethod");
     maybeAddImport(ast, result, astRoot, visitor.getSuite() != null,
         "org.testng.annotations.Factory");
@@ -66,10 +66,12 @@ public class AnnotationRewriter implements IRewriteProvider
     //
     // Addd the annotations as needed
     //
-    maybeAddAnnotations(ast, visitor, result, visitor.getTestMethods(), "Test");
-    maybeAddAnnotation(ast, visitor, result, visitor.getSetUp(), "BeforeMethod");
-    maybeAddAnnotation(ast, visitor, result, visitor.getTearDown(), "AfterMethod");
-    maybeAddAnnotation(ast, visitor, result, visitor.getSuite(), "Factory");
+    maybeAddAnnotations(ast, visitor, result, visitor.getTestMethods(), "Test", null);
+    maybeAddAnnotations(ast, visitor, result, visitor.getBeforeMethods(), "BeforeMethod",
+        "@Before" /* annotation to remove */);
+    maybeAddAnnotations(ast, visitor, result, visitor.getAfterMethods(), "AfterMethod",
+        "@After" /* annotation to remove */);
+    maybeAddAnnotation(ast, visitor, result, visitor.getSuite(), "Factory", null);
 
     //
     // Replace "Assert" with "AssertJUnit"
@@ -113,35 +115,48 @@ public class AnnotationRewriter implements IRewriteProvider
    * Add the given annotation if the method is non null
    */
   private void maybeAddAnnotation(AST ast, JUnitVisitor visitor, ASTRewrite rewriter,
-      MethodDeclaration method, String annotation)
+      MethodDeclaration method, String annotation, String annotationToRemove)
   {
-    if (null != method) {
-      NormalAnnotation a = ast.newNormalAnnotation();
-      a.setTypeName(ast.newName(annotation));
-      addAnnotation(ast, visitor, rewriter, method, a);
+    if (method != null) {
+      addAnnotation(ast, visitor, rewriter, method, createAnnotation(ast, annotation),
+          annotationToRemove);
     }
   }
 
+  private NormalAnnotation createAnnotation(AST ast, String name) {
+    NormalAnnotation result = ast.newNormalAnnotation();
+    result.setTypeName(ast.newName(name));
+    return result;
+  }
   /**
    * Add the given annotation if the method is non null
    */
   private void maybeAddAnnotations(AST ast, JUnitVisitor visitor, ASTRewrite rewriter,
-      List<MethodDeclaration> methods, String annotation)
+      List<MethodDeclaration> methods, String annotation, String annotationToRemove)
   {
     for (MethodDeclaration method : methods) {
-      maybeAddAnnotation(ast, visitor, rewriter, method, annotation);
+      maybeAddAnnotation(ast, visitor, rewriter, method, annotation, annotationToRemove);
     }
   }
 
   private void addAnnotation(AST ast, JUnitVisitor visitor, ASTRewrite rewriter, MethodDeclaration md, 
-      NormalAnnotation a) 
+      NormalAnnotation a, String annotationToRemove)
   {
-    List oldModifiers = md.modifiers();
-    List newModifiers = new ArrayList();
-    for (int k = 0; k < oldModifiers.size(); k++) {
-      newModifiers.add(oldModifiers.get(k));
-    }
     ListRewrite lr = rewriter.getListRewrite(md, MethodDeclaration.MODIFIERS2_PROPERTY);
+
+    // Remove the annotation if applicable
+    if (annotationToRemove != null) {
+      List modifiers = md.modifiers();
+      for (int k = 0; k < modifiers.size(); k++) {
+        Object old = modifiers.get(k);
+        if (old instanceof Annotation && old.toString().equals(annotationToRemove)) {
+          lr.remove((Annotation) old, null);
+          break;
+        }
+      }
+    }
+
+    // Add the annotation
     lr.insertFirst(a, null);
   }
 

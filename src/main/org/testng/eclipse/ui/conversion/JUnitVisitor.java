@@ -31,8 +31,8 @@ import junit.framework.Assert;
  */
 public class JUnitVisitor extends ASTVisitor {
   private List<MethodDeclaration> m_testMethods = Lists.newArrayList();
-  private MethodDeclaration m_setUp = null;
-  private MethodDeclaration m_tearDown = null;
+  private List<MethodDeclaration> m_beforeMethods = Lists.newArrayList();
+  private List<MethodDeclaration> m_afterMethods = Lists.newArrayList();
   private MethodDeclaration m_suite = null;
   private SimpleType m_testCase = null;
   private List<ImportDeclaration> m_junitImports = new ArrayList();
@@ -57,32 +57,38 @@ public class JUnitVisitor extends ASTVisitor {
 
   public boolean visit(MethodDeclaration md) {
     String methodName = md.getName().getFullyQualifiedName();
-    if (methodName.indexOf("test") != -1) {
-      m_hasTestMethods = true;
-      boolean hasTestAnnotation = false;
-      List<IExtendedModifier> modifiers = md.modifiers();
-      for (IExtendedModifier m : modifiers) {
-        if (m.isAnnotation()) {
-          Annotation a = (Annotation) m;
-          if ("Test".equals(a.getTypeName().toString())) {
-            hasTestAnnotation = true;
-            break;
-          }
-        }
-      }
-      if (! hasTestAnnotation) m_testMethods.add(md);
+    if (methodName.indexOf("test") != -1 && ! hasAnnotation(md, "Test")) {
+      m_testMethods.add(md);
     }
-    else if (methodName.equals("setUp")) {
-      m_setUp = md;
+    else if (methodName.equals("setUp") || hasAnnotation(md, "Before")) {
+      m_beforeMethods.add(md);
     }
-    else if (methodName.equals("tearDown")) {
-      m_tearDown = md;
+    else if (methodName.equals("tearDown") || hasAnnotation(md, "After")) {
+      m_afterMethods.add(md);
     }
     else if (methodName.equals("suite")) {
       m_suite = md;
     }
     
     return super.visit(md);
+  }
+
+  /**
+   * @return true if the given method is annotated with the annotation
+   */
+  private boolean hasAnnotation(MethodDeclaration md, String annotation) {
+    @SuppressWarnings("unchecked")
+    List<IExtendedModifier> modifiers = md.modifiers();
+    for (IExtendedModifier m : modifiers) {
+      if (m.isAnnotation()) {
+        Annotation a = (Annotation) m;
+        if (annotation.equals(a.getTypeName().toString())) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   public boolean visit(TypeDeclaration td) {
@@ -121,12 +127,8 @@ public class JUnitVisitor extends ASTVisitor {
     Assert.assertTrue(true);
   }
 
-  public MethodDeclaration getSetUp() {
-    return m_setUp;
-  }
-
-  public void setSetUp(MethodDeclaration setUp) {
-    m_setUp = setUp;
+  public List<MethodDeclaration> getBeforeMethods() {
+    return m_beforeMethods;
   }
 
   public MethodDeclaration getSuite() {
@@ -137,12 +139,8 @@ public class JUnitVisitor extends ASTVisitor {
     m_suite = suite;
   }
 
-  public MethodDeclaration getTearDown() {
-    return m_tearDown;
-  }
-
-  public void setTearDown(MethodDeclaration tearDown) {
-    m_tearDown = tearDown;
+  public List<MethodDeclaration> getAfterMethods() {
+    return m_afterMethods;
   }
 
   public List<MethodDeclaration> getTestMethods() {
