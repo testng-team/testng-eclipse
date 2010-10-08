@@ -5,16 +5,19 @@ import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.testng.collections.Lists;
+import org.testng.eclipse.collections.Maps;
 import org.testng.internal.annotations.Sets;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import junit.framework.Assert;
@@ -35,7 +38,9 @@ public class JUnitVisitor extends ASTVisitor {
   private List<MethodDeclaration> m_afterMethods = Lists.newArrayList();
   private MethodDeclaration m_suite = null;
   private SimpleType m_testCase = null;
-  private List<ImportDeclaration> m_junitImports = new ArrayList();
+  private List<ImportDeclaration> m_junitImports = Lists.newArrayList();
+  // List of all the methods that have @Test(expected)
+  private Set<MemberValuePair> m_testsWithExpected = Sets.newHashSet();
 
   // The position and length of all the Assert references
   private Set<MethodInvocation> m_asserts = Sets.newHashSet();
@@ -59,6 +64,13 @@ public class JUnitVisitor extends ASTVisitor {
     String methodName = md.getName().getFullyQualifiedName();
     if (methodName.indexOf("test") != -1 && ! hasAnnotation(md, "Test")) {
       m_testMethods.add(md);
+    }
+    else if (hasAnnotation(md, "Test")) {
+      m_hasTestMethods = true;  // to make sure we import org.testng.annotations.Test
+      MemberValuePair expected = hasExpected(md);
+      if (expected != null) {
+        m_testsWithExpected.add(expected);
+      }
     }
     else if (methodName.equals("setUp") || hasAnnotation(md, "Before")) {
       m_beforeMethods.add(md);
@@ -89,6 +101,28 @@ public class JUnitVisitor extends ASTVisitor {
     }
 
     return false;
+  }
+
+  /**
+   * @return true if the given method is annotated @Test(expected = ...)
+   */
+  private MemberValuePair hasExpected(MethodDeclaration md) {
+    @SuppressWarnings("unchecked")
+    List<IExtendedModifier> modifiers = md.modifiers();
+    for (IExtendedModifier m : modifiers) {
+      if (m.isAnnotation()) {
+        Annotation a = (Annotation) m;
+        if ("Test".equals(a.getTypeName().toString())) {
+          NormalAnnotation na = (NormalAnnotation) a;
+          for (Object o : na.values()) {
+            MemberValuePair mvp = (MemberValuePair) o;
+            if (mvp.getName().toString().equals("expected")) return mvp;
+          }
+        }
+      }
+    }
+
+    return null;
   }
 
   public boolean visit(TypeDeclaration td) {
@@ -173,5 +207,9 @@ public class JUnitVisitor extends ASTVisitor {
 
   public boolean hasFail() {
     return m_fails.size() > 0;
+  }
+
+  public Set<MemberValuePair> getTestsWithExpected() {
+    return m_testsWithExpected;
   }
 }

@@ -4,8 +4,8 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -15,8 +15,8 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -93,6 +93,13 @@ public class AnnotationRewriter implements IRewriteProvider
     for (MethodInvocation fail : visitor.getFails()) {
       SimpleName exp = ast.newSimpleName("Assert");
       result.set(fail, MethodInvocation.EXPRESSION_PROPERTY, exp, null);
+    }
+
+    //
+    // Replace @Test(expected) with @Test(expectedExceptions)
+    //
+    for (MemberValuePair mvp : visitor.getTestsWithExpected()) {
+      result.replace(mvp.getName(), ast.newSimpleName("expectedExceptions"), null);
     }
 
     return result;
