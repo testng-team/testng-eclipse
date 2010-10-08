@@ -3,7 +3,7 @@ package org.testng.eclipse;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-public class JTest extends TestCase {
+public class JUnit3Test1 extends TestCase {
 
 	public void test1() {
 		Assert.assertEquals(true, true);
