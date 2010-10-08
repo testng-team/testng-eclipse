@@ -38,7 +38,7 @@ public class JUnitVisitor extends ASTVisitor {
   private List<ImportDeclaration> m_junitImports = new ArrayList();
 
   // The position and length of all the Assert references
-  private Set<Expression> m_asserts = Sets.newHashSet();
+  private Set<MethodInvocation> m_asserts = Sets.newHashSet();
 
   // The position and length of all the fail() calls
   private Set<MethodInvocation> m_fails = Sets.newHashSet();
@@ -101,15 +101,18 @@ public class JUnitVisitor extends ASTVisitor {
    */
   public boolean visit(MethodInvocation node) {
     Expression exp = node.getExpression();
-    if (exp != null && "Assert".equals(exp.toString())) {
-      m_asserts.add(exp);
-    } else if ("fail".equals(node.getName().toString())) {
+    String method = node.getName().toString();
+    if ((exp != null && "Assert".equals(exp.toString())) || method.startsWith("assert")) {
+      // Method prefixed with "Assert."
+      m_asserts.add(node);
+    } else if ("fail".equals(method)) {
+      // assert or fail not prefixed with "Assert."
       m_fails.add(node);
     }
     return super.visit(node);
   }
 
-  public Set<Expression> getAsserts() {
+  public Set<MethodInvocation> getAsserts() {
     return m_asserts;
   }
 

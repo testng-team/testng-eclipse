@@ -74,10 +74,15 @@ public class AnnotationRewriter implements IRewriteProvider
     //
     // Replace "Assert" with "AssertJUnit"
     //
-    Set<Expression> asserts = visitor.getAsserts();
-    for (Expression exp : asserts) {
+    Set<MethodInvocation> asserts = visitor.getAsserts();
+    for (MethodInvocation m : asserts) {
+      Expression exp = m.getExpression();
       Name name = ast.newName("AssertJUnit");
-      result.replace(exp, name, null);
+      if (exp != null) {
+        result.replace(exp, name, null);
+      } else {
+        result.set(m, MethodInvocation.EXPRESSION_PROPERTY, name, null);
+      }
     }
 
     //
