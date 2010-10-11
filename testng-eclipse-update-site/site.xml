@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.testng.feature_5.11.0.11.jar" id="org.testng.feature" version="5.11.0.11"/>
+   <feature url="features/org.testng.eclipse_5.14.2.5.jar" id="org.testng.eclipse" version="5.14.2.5">
+      <category name="org.testng.eclipse"/>
+   </feature>
+   <category-def name="org.testng.eclipse" label="TestNG"/>
 </site>

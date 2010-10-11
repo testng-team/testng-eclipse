@@ -1,0 +1,14 @@
+2010-10-11 10:02:21.891:INFO::Logging to StdErrLog::DEBUG=false via org.eclipse.jetty.util.log.StdErrLog
+Oct 11, 2010 10:03:14 AM org.apache.commons.httpclient.HttpMethodBase processCookieHeaders
+WARNING: Cookie rejected: "$Version=0; JSESSIONID=1759FC2A797724491207968D8BCE7DDA; $Path=/servlets". Illegal path attribute "/servlets". Path of origin: "/update_1.6.x/p2.index"
+Oct 11, 2010 10:03:14 AM org.apache.commons.httpclient.HttpMethodBase processCookieHeaders
+WARNING: Cookie rejected: "$Version=0; JSESSIONID=CB9DD7E97E42935F88BB0A8AFA77D5C5; $Path=/servlets". Illegal path attribute "/servlets". Path of origin: "/update_1.6.x/content.jar"
+Oct 11, 2010 10:03:14 AM org.apache.commons.httpclient.HttpMethodBase processCookieHeaders
+WARNING: Cookie rejected: "$Version=0; JSESSIONID=FEB2B074AEEDB655E0A8E6C381F7A945; $Path=/servlets". Illegal path attribute "/servlets". Path of origin: "/update_1.6.x/content.xml"
+Oct 11, 2010 10:03:30 AM org.apache.commons.httpclient.HttpMethodBase processCookieHeaders
+WARNING: Cookie rejected: "$Version=0; JSESSIONID=89F15D187676FB230ADD7E6A27BA40BA; $Path=/servlets". Illegal path attribute "/servlets". Path of origin: "/update_1.6.x/p2.index"
+Oct 11, 2010 10:03:30 AM org.apache.commons.httpclient.HttpMethodBase processCookieHeaders
+WARNING: Cookie rejected: "$Version=0; JSESSIONID=E20A01D3A17E55770C8B3E42A9124B3A; $Path=/servlets". Illegal path attribute "/servlets". Path of origin: "/update_1.6.x/artifacts.jar"
+Oct 11, 2010 10:03:30 AM org.apache.commons.httpclient.HttpMethodBase processCookieHeaders
+WARNING: Cookie rejected: "$Version=0; JSESSIONID=F2F52639398BACD0CB6447FCA0F064D6; $Path=/servlets". Illegal path attribute "/servlets". Path of origin: "/update_1.6.x/artifacts.xml"
+2010-10-11 10:04:06.142:INFO::Logging to StdErrLog::DEBUG=false via org.eclipse.jetty.util.log.StdErrLog
