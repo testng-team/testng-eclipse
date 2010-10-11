@@ -39,8 +39,8 @@ public class JUnitVisitor extends ASTVisitor {
   private MethodDeclaration m_suite = null;
   private SimpleType m_testCase = null;
   private List<ImportDeclaration> m_junitImports = Lists.newArrayList();
-  // List of all the methods that have @Test(expected)
-  private Set<MemberValuePair> m_testsWithExpected = Sets.newHashSet();
+  // List of all the methods that have @Test(expected) or @Test(timeout)
+  private Map<MemberValuePair, String> m_testsWithExpected = Maps.newHashMap();
 
   // The position and length of all the Assert references
   private Set<MethodInvocation> m_asserts = Sets.newHashSet();
@@ -67,9 +67,13 @@ public class JUnitVisitor extends ASTVisitor {
     }
     else if (hasAnnotation(md, "Test")) {
       m_hasTestMethods = true;  // to make sure we import org.testng.annotations.Test
-      MemberValuePair expected = hasExpected(md);
-      if (expected != null) {
-        m_testsWithExpected.add(expected);
+      MemberValuePair mvp = getAttribute(md, "expected");
+      if (mvp != null) {
+        m_testsWithExpected.put(mvp, "expectedExceptions");
+      }
+      mvp = getAttribute(md, "timeout");
+      if (mvp != null) {
+        m_testsWithExpected.put(mvp, "timeOut");
       }
     }
     else if (methodName.equals("setUp") || hasAnnotation(md, "Before")) {
@@ -106,7 +110,7 @@ public class JUnitVisitor extends ASTVisitor {
   /**
    * @return true if the given method is annotated @Test(expected = ...)
    */
-  private MemberValuePair hasExpected(MethodDeclaration md) {
+  private MemberValuePair getAttribute(MethodDeclaration md, String attribute) {
     @SuppressWarnings("unchecked")
     List<IExtendedModifier> modifiers = md.modifiers();
     for (IExtendedModifier m : modifiers) {
@@ -116,7 +120,7 @@ public class JUnitVisitor extends ASTVisitor {
           NormalAnnotation na = (NormalAnnotation) a;
           for (Object o : na.values()) {
             MemberValuePair mvp = (MemberValuePair) o;
-            if (mvp.getName().toString().equals("expected")) return mvp;
+            if (mvp.getName().toString().equals(attribute)) return mvp;
           }
         }
       }
@@ -209,7 +213,10 @@ public class JUnitVisitor extends ASTVisitor {
     return m_fails.size() > 0;
   }
 
-  public Set<MemberValuePair> getTestsWithExpected() {
+  /**
+   * All the @Test annotated methods that have attributes that need to be replaced.
+   */
+  public Map<MemberValuePair, String> getTestsWithExpected() {
     return m_testsWithExpected;
   }
 }

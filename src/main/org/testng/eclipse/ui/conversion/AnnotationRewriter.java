@@ -97,9 +97,10 @@ public class AnnotationRewriter implements IRewriteProvider
 
     //
     // Replace @Test(expected) with @Test(expectedExceptions)
+    // and @Test(timeout) with @Test(timeOut)
     //
-    for (MemberValuePair mvp : visitor.getTestsWithExpected()) {
-      result.replace(mvp.getName(), ast.newSimpleName("expectedExceptions"), null);
+    for (Map.Entry<MemberValuePair, String> pair : visitor.getTestsWithExpected().entrySet()) {
+      result.replace(pair.getKey().getName(), ast.newSimpleName(pair.getValue()), null);
     }
 
     return result;
