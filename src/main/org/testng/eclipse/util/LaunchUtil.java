@@ -330,21 +330,29 @@ public class LaunchUtil {
   /**
    * Launch a compilation unit (a source file) based test.
    */
-  public static void launchCompilationUnitConfiguration(IJavaProject ijp, ICompilationUnit icu, String mode) {
-    IType[] types= null;
-    try {
-      types = icu.getTypes();
+  public static void launchCompilationUnitConfiguration(IJavaProject ijp,
+      List<ICompilationUnit> units, String mode) {
+    List<IType> types = Lists.newArrayList();
+    String confName = null;
+    for (ICompilationUnit icu : units) {
+      try {
+        for (IType type : icu.getTypes()) {
+          types.add(type);
+        }
+      }
+      catch(JavaModelException jme) {
+        TestNGPlugin.log(new Status(IStatus.ERROR, TestNGPlugin.PLUGIN_ID, TestNGPluginConstants.LAUNCH_ERROR, "No types in compilation unit " + icu.getElementName(), jme));
+      }
+
+      if(null == types) return;
+
+      IType mainType= icu.findPrimaryType();
+      if (confName == null) {
+        confName= mainType != null ? mainType.getElementName() : icu.getElementName();
+      }
     }
-    catch(JavaModelException jme) {
-      TestNGPlugin.log(new Status(IStatus.ERROR, TestNGPlugin.PLUGIN_ID, TestNGPluginConstants.LAUNCH_ERROR, "No types in compilation unit " + icu.getElementName(), jme));
-    }
 
-    if(null == types) return;
-
-    IType mainType= icu.findPrimaryType();
-    final String confName= mainType != null ? mainType.getElementName() : icu.getElementName();
-
-    launchTypeBasedConfiguration(ijp, confName, types, mode);
+    launchTypeBasedConfiguration(ijp, confName, types.toArray(new IType[types.size()]), mode);
   }
 
   private static void launchTypeBasedConfiguration(IJavaProject ijp, String confName, IType[] types, String mode) {

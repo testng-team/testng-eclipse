@@ -3,7 +3,7 @@
 <plugin
    id="org.testng.eclipse"
    name="TestNG"
-   version="5.14.2.5"
+   version="5.14.2.7"
    provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
    <runtime>
@@ -122,9 +122,6 @@
          <contextualLaunch>
             <enablement>
                <with variable="selection">
-                  <count
-                        value="1">
-                  </count>
                   <iterate>
                     <or>
                       <test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/>

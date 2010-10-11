@@ -18,7 +18,11 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IEditorPart;
+import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.util.LaunchUtil;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Right-click launcher.
@@ -29,16 +33,31 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
 
   public void launch(ISelection selection, String mode) {
     if(selection instanceof StructuredSelection) {
-      Object obj = ((StructuredSelection) selection).getFirstElement();
-      IJavaElement element= null;
-      if(obj instanceof IJavaElement) {
-        element= (IJavaElement) obj;
+      List<ICompilationUnit> units = Lists.newArrayList();
+      IJavaElement ije = null;
+      IJavaProject project = null;
+
+      for (Object obj : ((StructuredSelection) selection).toArray()) { 
+        IJavaElement element= null;
+        if(obj instanceof IJavaElement) {
+          element= (IJavaElement) obj;
+        }
+        else if(obj instanceof IAdaptable) {
+          element= (IJavaElement) ((IAdaptable) obj).getAdapter(IJavaElement.class);
+        }
+        project = element.getJavaProject();
+
+        if (element != null) {
+          if (element instanceof ICompilationUnit) {
+            units.add((ICompilationUnit) element);
+          } else {
+            System.out.println("Ignoring non compilation unit selection: " + element);
+          }
+        }
       }
-      else if(obj instanceof IAdaptable) {
-        element= (IJavaElement) ((IAdaptable) obj).getAdapter(IJavaElement.class);
-      }
-      if(null != element) {
-        run(element, mode);
+      
+      if (! units.isEmpty()) {
+        LaunchUtil.launchCompilationUnitConfiguration(project, units, mode); 
       }
     }
   }
@@ -104,7 +123,8 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
       
       case IJavaElement.COMPILATION_UNIT:
       {
-        LaunchUtil.launchCompilationUnitConfiguration(ijp, (ICompilationUnit) ije, mode); 
+        LaunchUtil.launchCompilationUnitConfiguration(ijp,
+            Arrays.asList(new ICompilationUnit[] { (ICompilationUnit) ije }), mode); 
 
         return;
       }
