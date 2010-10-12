@@ -1,4 +1,0 @@
-#p=$HOME/java/testng-eclipse-update-site/plugins/org.testng.eclipse_5.13.0.6.jar
-p=/tmp/org.testng.eclipse_5.13.0.6.jar
-(cd /tmp; rm -rf p; mkdir p; cd p; jar xf $p && jar xf eclipse-testng.jar && file org/testng/eclipse/TestNGPlugin.class)
-
