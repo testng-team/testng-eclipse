@@ -59,7 +59,8 @@ public class RunInfo {
                  long time,
                  String stackTrace,
                  int status) {
-    m_id = suiteName + "." + className + "." + methodName + toString(params, paramTypes);
+    m_id = suiteName + "." + testName + "." + className + "."
+        + methodName + toString(params, paramTypes);
     if (testDesc != null) m_idWithDesc = m_id + "." + testDesc;
     else m_idWithDesc = m_id;
     m_suiteName = suiteName;

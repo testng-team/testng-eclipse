@@ -276,7 +276,10 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
   @Override
   public void updateTestResult(RunInfo resultInfo) {
 
-    TreeItem ti = (TreeItem) getRunningEntry(resultInfo.getId(), resultInfo.getTestDescription());
+    TreeItem ti = getRunningEntry(resultInfo.getId(), resultInfo.getTestDescription());
+    if (ti == null) {
+      throw new IllegalArgumentException("Couldn't find " + resultInfo.getId());
+    }
 //    System.out.println("treeItem:" + ti + " resultInfo:" + resultInfo);
     
     if(null == ti) {
@@ -317,7 +320,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
       parentItem = getTree(enclosingTestId);
     }
     
-    TreeItem treeItem = createTestTreeItem(parentItem, runInfo);
+    TreeItem treeItem = createMethodTreeItem(parentItem, runInfo);
     
     if(ITestResult.SUCCESS != runInfo.getStatus()) {
       m_failureIds.add(runInfo.getId());
@@ -332,6 +335,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
 	  if (parentItem == null) {
 		  throw new IllegalArgumentException ("parentItem must not be null");
 	  }
+	  ppp("Creating new treeItem for " + runInfo.getId());
 	  TreeItem treeItem = new TreeItem(parentItem, SWT.NONE);
 	  treeItem.setImage(getStatusImage(runInfo.getType(), runInfo.getStatus()));
 	  treeItem.setData("runinfo", runInfo);
@@ -433,6 +437,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
     boolean running= false;
     boolean allowDups= true;
       
+    String suiteTestId = runInfo.getSuiteName() + "." + runInfo.getTestName();
     switch(runInfo.getType()) {
       case RunInfo.SUITE_TYPE:
         if(!m_treeItemMap.containsKey(runInfo.getId())) {
@@ -441,6 +446,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
           treeItem.setData("runinfo", runInfo);
           treeItem.setData("testid", runInfo.getId());
           configureTreeItem(runInfo, treeItem, m_suiteRunIcon, runInfo.getSuiteName());
+          registerTreeEntryMap(runInfo.getId(), treeItem);
         }
         break;
 
@@ -450,44 +456,48 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
         TreeItem suiteItem = getTree(runInfo.getSuiteName());
         treeItem = createNewTreeItem(suiteItem, runInfo);
         configureTreeItem(runInfo, treeItem, m_testRunIcon, runInfo.getTestName());
+        registerTreeEntryMap(suiteTestId, treeItem);
       }
       break;
 
     case RunInfo.RESULT_TYPE:
       ppp("Creating RESULT_TYPE:" + runInfo);
-      String enclosingTestId = runInfo.getSuiteName() + "." + runInfo.getClassName();
-      TreeItem parentItem = getTree(enclosingTestId);
+      String classId = suiteTestId + "." + runInfo.getClassName();
+      TreeItem parentItem = getTree(classId);
 
-      if (null != parentItem) {
-        running= true;
-        allowDups= false;
+      if (parentItem != null) {
+        running = true;
+        allowDups = false;
       }
       else {
         // Create the parent class node (we can't do this on TEST_TYPE since we don't have
         // a class yet, only the surrounding <test> tag
-        parentItem = createNewTreeItem(
-            getTree(runInfo.getSuiteName() + "." + runInfo.getTestName()),
-            runInfo);
+        parentItem = new TreeItem(getTree(suiteTestId), SWT.NONE);
+        parentItem.setData("runinfo", runInfo);
+//        parentItem = createNewTreeItem(getTree(suiteTestId), runInfo);
         parentItem.setText(runInfo.getClassName());
-        registerTreeEntryMap(runInfo.getSuiteName() + "." + runInfo.getClassName(), parentItem);
-
-        // the failures in beforeSuite/beforeTest are reported before a test context exists
-        createResultEntry(runInfo);
-  //      newTreeEntry(new RunInfo(treeEntry.getSuiteName(), treeEntry.getTestName()));
-        parentItem = getTree(enclosingTestId);
+        registerTreeEntryMap(classId, parentItem);
       }
+        // the failures in beforeSuite/beforeTest are reported before a test context exists
+//      createResultEntry(runInfo);
+  //      newTreeEntry(new RunInfo(treeEntry.getSuiteName(), treeEntry.getTestName()));
+//        parentItem = getTree(classId);
       // if it's for failure tab, at this point do not create a TreeItem
 //      if (!delayItemCreation){
-        treeItem = createTestTreeItem(parentItem, runInfo);
+      treeItem = getTree(runInfo.getId());
+      if (treeItem == null) {
+        ppp("@@@ Couldn't find " + runInfo.getId() + ", creating new method node " + runInfo);
+        treeItem = createMethodTreeItem(parentItem, runInfo);
+      }
+      registerTreeEntry(runInfo, treeItem, allowDups, true);
 //      } else {
 //        ppp("Delaying creation of " + testItem + " entry:" + treeEntry);
 //      }
       break;
     }
 
-    if (treeItem != null) {
-      registerTreeEntry(runInfo, treeItem, allowDups, running);
-    }
+//    if (treeItem != null) {
+//    }
   }
 
 //  @Override
@@ -568,11 +578,10 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
     );
   }
   
-  private TreeItem createTestTreeItem(TreeItem parent, RunInfo treeEntry){
-    ppp("Creating on " + this + " parent:" + parent + " entry:" + treeEntry);
-    TreeItem result = createNewTreeItem(parent, treeEntry);
+  private TreeItem createMethodTreeItem(TreeItem parent, RunInfo runInfo){
+    TreeItem result = createNewTreeItem(parent, runInfo);
     result.setImage(m_testRunIcon);
-    result.setText(treeEntry.getTreeLabel());
+    result.setText(runInfo.getTreeLabel());
 //    result.setText(new String[] { treeEntry.getTreeLabel(), "foo", "bar" });
 //    result.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
 
@@ -582,7 +591,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
   private TreeItem getTree(String id) {
     TreeItem result = m_treeItemMap.get(id);
     if (result == null) {
-      System.out.println("Could not find id:" + id);
+      ppp("Could not find id:@" + id + "@");
 //      throw new IllegalArgumentException("Couldn't find an item with id " + id);
     }
     return result;
@@ -768,8 +777,8 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
 
   private static final boolean DEBUG = true;
 
-  private static void ppp(final Object msg) {
-    if (DEBUG) {
+  private void ppp(final Object msg) {
+    if (DEBUG && SuccessTab.class.isAssignableFrom(getClass())) {
       System.out.println("[AbstractHierarchyTab] " + msg);
     }
   }
