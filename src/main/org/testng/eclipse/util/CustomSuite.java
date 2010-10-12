@@ -36,6 +36,18 @@ import java.util.Properties;
  * @author cbeust
  */
 abstract public class CustomSuite extends LaunchSuite {
+  /**
+   * The name of the <suite> tag used when the user is launching something else than
+   * an XML file.
+   */
+  public static final String DEFAULT_SUITE_TAG_NAME = "Default suite";
+  
+  /**
+   * The name of the <test> tag used when the user is launching something else than
+   * an XML file.
+   */
+  public static final String DEFAULT_TEST_TAG_NAME = "Default test";
+
   protected String m_projectName;
   protected String m_suiteName;
   protected Map<String, String> m_parameters;
@@ -369,7 +381,7 @@ class ClassMethodsSuite extends CustomSuite {
                            final Map<String, List<String>> classMethods,
                            final Map<String, String> parameters,
                            final int logLevel) {
-    super(projectName, projectName, parameters, logLevel);
+    super(projectName, DEFAULT_SUITE_TAG_NAME, parameters, logLevel);
     m_classNames = classNames;
     m_classMethods = classMethods != null ? sanitize(classMethods): classMethods;
     if(m_useMethods) {
@@ -407,7 +419,8 @@ class ClassMethodsSuite extends CustomSuite {
 
   @Override
   protected String getTestName() {
-    return m_classNames.size() == 1 ? (String) m_classNames.iterator().next() : "classes";
+    return m_classNames.size() == 1 ? (String) m_classNames.iterator().next()
+        : DEFAULT_TEST_TAG_NAME;
   }
 
   @Override

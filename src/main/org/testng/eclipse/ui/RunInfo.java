@@ -1,6 +1,8 @@
 package org.testng.eclipse.ui;
 
 
+import org.testng.eclipse.util.CustomSuite;
+
 import java.util.regex.Pattern;
 /**
  * Carries along information about a test result.
@@ -17,8 +19,8 @@ public class RunInfo {
   private String m_id;
   private String m_idWithDesc;
   private int m_type;
-  private String m_suiteName;
-  private String m_testName;
+  private String m_suiteName = CustomSuite.DEFAULT_SUITE_TAG_NAME;
+  private String m_testName = CustomSuite.DEFAULT_TEST_TAG_NAME;
   private String m_className;
   private String m_methodName;
   private String[] m_parameters;
@@ -57,7 +59,7 @@ public class RunInfo {
                  long time,
                  String stackTrace,
                  int status) {
-    m_id = suiteName + "." + testName + "." + className + "." + methodName + toString(params, paramTypes);
+    m_id = suiteName + "." + className + "." + methodName + toString(params, paramTypes);
     if (testDesc != null) m_idWithDesc = m_id + "." + testDesc;
     else m_idWithDesc = m_id;
     m_suiteName = suiteName;
@@ -87,7 +89,7 @@ public class RunInfo {
     
     StringBuffer buf= new StringBuffer("(");
     for(int i= 0; i < params.length; i++) {
-      if(i > 0) buf.append(", ");
+      if(i > 0) buf.append(",");
       if("java.lang.String".equals(paramTypes[i]) && !("null".equals(params[i]) || "\"\"".equals(params[i]))) {
         String p= escapeNewLines2(params[i]);
         buf.append("\"").append(p).append("\"");
@@ -147,26 +149,43 @@ public class RunInfo {
   public String toString() {
     StringBuffer buffer = new StringBuffer();
     buffer.append("RunInfo[");
-    buffer.append("id: ");
+    buffer.append("type:" + m_type);
+    buffer.append(" id:");
     buffer.append(m_id);
-    buffer.append(" suiteName: ");
-    buffer.append(m_suiteName);
-    buffer.append(" testName: ");
-    buffer.append(m_testName);
-    buffer.append(" className: ");
-    buffer.append(m_className);
-    buffer.append(" methodName: ");
-    buffer.append(m_methodName);
-    buffer.append(" methodCount: ");
-    buffer.append(m_methodCount);
-    buffer.append(" passed: ");
-    buffer.append(m_passed);
-    buffer.append(" failed: ");
-    buffer.append(m_failed);
-    buffer.append(" skipped: ");
-    buffer.append(m_skipped);
-    buffer.append(" successPercentageFailed: ");
-    buffer.append(m_successPercentageFailed);
+    if (m_suiteName != null) {
+      buffer.append(" suiteName:");
+      buffer.append(m_suiteName);
+    }
+    if (m_testName != null) {
+      buffer.append(" testName:");
+      buffer.append(m_testName);
+    }
+    if (m_className != null) {
+      buffer.append(" className:");
+      buffer.append(m_className);
+    }
+    if (m_methodName != null) {
+      buffer.append(" methodName:");
+      buffer.append(m_methodName);
+    }
+    if (m_methodCount != 0) {
+      buffer.append("   methodCount:");
+      buffer.append(m_methodCount);
+    }
+    if (m_passed != 0) {
+      buffer.append(" passed:");
+      buffer.append(m_passed);
+    }
+    if (m_failed > 0) {
+      buffer.append(" failed:");
+      buffer.append(m_failed);
+    }
+    if (m_skipped > 0) {
+      buffer.append(" skipped:");
+      buffer.append(m_skipped);
+    }
+//    buffer.append(" successPercentageFailed:");
+//    buffer.append(m_successPercentageFailed);
     buffer.append("]");
     
     return buffer.toString();

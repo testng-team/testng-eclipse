@@ -349,6 +349,7 @@ public class LaunchUtil {
       IType mainType= icu.findPrimaryType();
       if (confName == null) {
         confName= mainType != null ? mainType.getElementName() : icu.getElementName();
+        if (units.size() > 0) confName = confName + ", ...";
       }
     }
 

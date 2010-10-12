@@ -87,6 +87,7 @@ import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
 import org.testng.ITestResult;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.util.CustomSuite;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.LaunchUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
@@ -1334,8 +1335,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private RunInfo createRunInfo(TestResultMessage trm, String stackTrace, int type) {
+    String testName = trm.getName();
+    if (testName == null) {
+      testName = CustomSuite.DEFAULT_TEST_TAG_NAME;
+    }
     return new RunInfo(trm.getSuiteName(),
-                       trm.getName(),
+                       testName,
                        trm.getTestClass(),
                        trm.getMethod(),
                        trm.getTestDescription(),
