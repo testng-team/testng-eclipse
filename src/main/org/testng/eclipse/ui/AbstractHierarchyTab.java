@@ -399,9 +399,9 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
               c / 1000
           })
       );
-      
-      propagateResult(ti.getParentItem(), childRunInfo);
     }
+
+    propagateResult(ti.getParentItem(), childRunInfo);
   }
   
   private Image getStatusImage(int type, int state) {
@@ -775,7 +775,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
 	  return ResourceUtil.getString(key);
   }
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   private void ppp(final Object msg) {
     if (DEBUG && SuccessTab.class.isAssignableFrom(getClass())) {
