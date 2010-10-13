@@ -1301,23 +1301,34 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         if(isDisposed()) {
           return;
         }
-        
-        int newMaxBar = (m_methodTotalCount * m_testsTotalCount) / (m_testCount + 1);
-        fProgressBar.setMaximum(newMaxBar, m_methodTotalCount);
+
+        updateProgressBar();
 //        m_progressBar.setMaximum(newMaxBar);
 //        System.out.println("se maresteeee");
       }
     });
   }
 
+  private void updateProgressBar() {
+    postSyncRunnable(new Runnable() {
+      public void run() {
+        int newMaxBar = (m_methodTotalCount * m_testsTotalCount) / (m_testCount + 1);
+        fProgressBar.setMaximum(newMaxBar, m_methodTotalCount);
+      }
+    });
+  }
+
   public void onFinish(TestMessage tm) {
     m_testCount++;
-    
-    // HINT: fix the total number of methods
-    if(m_methodCount != m_methodTotalCount) {
+
+    // The method count is more accurate than m_methodTotalCount since it also takes
+    // data providers and other dynamic invocations into account.
+    if (m_methodCount != m_methodTotalCount) {
         m_methodTotalCount= m_methodCount; // trust the methodCount
     }
-    
+
+    updateProgressBar();
+
     final String entryId = new RunInfo(tm.getSuiteName(), tm.getTestName()).getId();
     
     postSyncRunnable(new Runnable() {
