@@ -19,6 +19,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
@@ -244,7 +245,14 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
       return null;
     }
 
-    return (TestRunnerViewPart) page.findView(TestRunnerViewPart.NAME);
+    // If something went wrong, the JDT will return an ErrorViewPart, which cannot
+    // be case into TestRunnerViewPart
+    IViewPart view = page.findView(TestRunnerViewPart.NAME);
+    if (view instanceof TestRunnerViewPart) {
+      return (TestRunnerViewPart) view;
+    } else {
+      return null;
+    }
   }
 
   public static URL makeIconFileURL(String name) throws MalformedURLException {
