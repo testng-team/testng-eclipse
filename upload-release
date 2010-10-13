@@ -33,8 +33,9 @@ done
 file org/testng/eclipse/TestNGPlugin.class
 
 cd $DIR/..
-ssh beust.com@beust.com mkdir w/eclipse-$number
-scp -r * beust.com@beust.com:w/eclipse-$number
-ssh beust.com@beust.com "(cd w && rm eclipse && ln -s eclipse-$number eclipse)"
+target=w/eclipse-old
+ssh beust.com@beust.com mkdir ${target}/eclipse-$number
+scp -r * beust.com@beust.com:${target//eclipse-$number
+ssh beust.com@beust.com "(cd w && rm eclipse && ln -s ${target//eclipse-$number eclipse)"
 
 
