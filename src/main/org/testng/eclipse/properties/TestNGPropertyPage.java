@@ -19,6 +19,8 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -36,7 +38,6 @@ import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.ui.util.Utils.Widgets;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
-import org.testng.eclipse.util.SWTUtil;
 
 import java.util.ArrayList;
 
@@ -53,7 +54,7 @@ public class TestNGPropertyPage extends PropertyPage {
   private Button m_disabledDefaultListeners;
   private Text m_xmlTemplateFile;
   private IProject m_workingProject;
-//  private Button m_projectJar;
+  private Button m_projectJar;
 
   public void createControl(Composite parent) {
     setDescription("Project TestNG settings");
@@ -145,17 +146,30 @@ public class TestNGPropertyPage extends PropertyPage {
 //      browseXML.addSelectionListener(listener);
     }
 
+//    Composite jarsComposite= new Composite(parentComposite, SWT.BORDER);
+//    jarsComposite.setLayout(new GridLayout(3, false));
+//    jarsComposite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 3, 1));
+    
+//    Label jarOrderLabel= new Label(parentComposite, SWT.NONE);
+//    jarOrderLabel.setText("Use project TestNG jar:");
 //    m_projectJar= new Button(jarsComposite, SWT.CHECK);
-//    m_projectJar.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING, SWT.NONE, false, false, 2, 1));
+//    m_projectJar.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING, SWT.NONE, false, false, 2,
+     
+    m_projectJar= new Button(parentComposite, SWT.CHECK);
+    m_projectJar.setText("Use project TestNG jar");
+    m_projectJar.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING, SWT.NONE,
+        false /* don't grab excess horizontal */,
+        false /* don't grab excess vertical */,
+        2, 1));
     
 //    Label projectJarLabel= new Label(jarsComposite, SWT.WRAP | SWT.BOLD);
-//    projectJarLabel.setText("The project TestNG jar must be newer than version 5.2 (prior versions are not compatible).");
+//    projectJarLabel.setText("The project TestNG jar must be newer than version 5.2");
 //    Font normalFont= projectJarLabel.getFont();
 //    FontData fd= normalFont.getFontData()[0];
 //    fd.setStyle(fd.getStyle() | SWT.ITALIC | SWT.BOLD);
 //    projectJarLabel.setFont(new Font(projectJarLabel.getDisplay(), fd));
 //    projectJarLabel.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 3, 1));
-    
+
     loadDefaults();
 
     return parentComposite;
@@ -163,7 +177,7 @@ public class TestNGPropertyPage extends PropertyPage {
 
   
   public void dispose() {
-    //m_projectJar.dispose();
+    m_projectJar.dispose();
     m_outputdir.dispose();
     m_absolutePath.dispose();
     m_disabledDefaultListeners.dispose();
@@ -181,7 +195,7 @@ public class TestNGPropertyPage extends PropertyPage {
     m_absolutePath.setSelection(storage.isOutputAbsolutePath(m_workingProject.getName(), true));
     m_disabledDefaultListeners.setSelection(storage.hasDisabledListeners(m_workingProject.getName(), true));
     m_xmlTemplateFile.setText(storage.getXmlTemplateFile(m_workingProject.getName(), true));
-    //m_projectJar.setSelection(storage.getUseProjectJar(m_workingProject.getName()));
+    m_projectJar.setSelection(storage.getUseProjectJar(m_workingProject.getName()));
   }
 
   protected void performDefaults() {
@@ -194,7 +208,7 @@ public class TestNGPropertyPage extends PropertyPage {
     storage.storeOutputDir(m_workingProject.getName(), m_outputdir.getText(), m_absolutePath.getSelection());
     storage.storeDisabledListeners(m_workingProject.getName(), m_disabledDefaultListeners.getSelection());
     storage.storeXmlTemplateFile(m_workingProject.getName(), m_xmlTemplateFile.getText());
-    //storage.storeUseProjectJar(m_workingProject.getName(), m_projectJar.getSelection());
+    storage.storeUseProjectJar(m_workingProject.getName(), m_projectJar.getSelection());
 
     if(super.performOk()) {
       setMessage("Project preferences are saved", INFORMATION);
