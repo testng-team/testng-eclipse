@@ -1,10 +1,10 @@
-DIR=$HOME/java/testng-eclipse-update-site/plugins
+UPDATE_SITE=$HOME/java/testng-eclipse-update-site/
 
 
 if [ $# -gt 0 ]
 then
   number=$1
-  jar=$DIR/org.testng.eclipse_$number.jar
+  jar=$UPDATE_SITE/plugins/org.testng.eclipse_$number.jar
   shift
 else
   echo "Specify the plug-in jar file"
@@ -32,10 +32,10 @@ done
 
 file org/testng/eclipse/TestNGPlugin.class
 
-cd $DIR/..
+cd $UPDATE_SITE
 target=w/eclipse-old
 ssh beust.com@beust.com mkdir ${target}/eclipse-$number
-scp -r * beust.com@beust.com:${target//eclipse-$number
-ssh beust.com@beust.com "(cd w && rm eclipse && ln -s ${target//eclipse-$number eclipse)"
+scp -r * beust.com@beust.com:${target}/eclipse-$number
+ssh beust.com@beust.com "(rm w/eclipse && ln -s ${target}/eclipse-$number w/eclipse)"
 
 
