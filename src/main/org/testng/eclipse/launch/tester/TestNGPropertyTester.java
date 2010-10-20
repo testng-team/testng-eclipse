@@ -10,6 +10,7 @@ public class TestNGPropertyTester extends PropertyTester {
   private FileExtender m_fileExtender= new FileExtender();
   
   public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
+    boolean result = false;
     if (!(receiver instanceof IAdaptable)) {
       throw new IllegalArgumentException("Element must be of type 'IAdaptable', is " + receiver == null ? "null" : receiver.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
     }
@@ -18,11 +19,13 @@ public class TestNGPropertyTester extends PropertyTester {
     }
 
     if("isTest".equals(property)) {
-      return isTestClass(receiver, property, args, expectedValue);
+      result = isTestClass(receiver, property, args, expectedValue);
     }
     else {
-      return isTestSuite(receiver, property, args, expectedValue);
+      result = isTestSuite(receiver, property, args, expectedValue);
     }
+
+    return true;
   }
 
   private boolean isTestClass(Object receiver, String property, Object[] args, Object expectedValue) {
