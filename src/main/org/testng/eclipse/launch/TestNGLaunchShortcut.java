@@ -11,8 +11,10 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.core.PackageFragment;
 import org.eclipse.jdt.internal.core.PackageFragmentRoot;
+import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.text.ITextSelection;
@@ -37,13 +39,19 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
 
   public void launch(ISelection selection, String mode) {
     if(selection instanceof StructuredSelection) {
-      List<ICompilationUnit> units = Lists.newArrayList();
-      IJavaElement ije = null;
+      List<IType> types = Lists.newArrayList();
       IJavaProject project = null;
 
       for (Object obj : ((StructuredSelection) selection).toArray()) { 
         IJavaElement element= null;
-        if(obj instanceof IJavaElement) {
+        // Special case for IMethod: we run it directly here (and it must appear before
+        // the test for IJavaElement, which would return true but is more general).
+        // Anything above IMethod will be accumulated in the types collection since
+        // it can contain more than one TestNG type.
+        if (obj instanceof IMethod) {
+          run((IMethod) obj, mode);
+        }
+        else if(obj instanceof IJavaElement) {
           element= (IJavaElement) obj;
         }
         else if(obj instanceof IAdaptable) {
@@ -52,27 +60,37 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
         project = element.getJavaProject();
 
         try {
-          maybeAddJavaElement(element, units);
+          maybeAddJavaElement(element, types);
         } catch (JavaModelException e) {
           TestNGPlugin.log(e);
         }
 
       }
       
-      if (! units.isEmpty()) {
-        LaunchUtil.launchCompilationUnitConfiguration(project, units, mode); 
+      if (! types.isEmpty()) {
+        LaunchUtil.launchTypesConfiguration(project, types, mode);
       }
     }
   }
 
-  private void maybeAddJavaElement(IJavaElement element, List<ICompilationUnit> units)
+  private void maybeAddJavaElement(IJavaElement element, List<IType> units)
       throws JavaModelException {
+    p("Examining Java element:" + element);
     if (element != null) {
-      if (element instanceof ICompilationUnit) {
-        units.add((ICompilationUnit) element);
+      if (element instanceof JavaProject) {
+        JavaProject p = (JavaProject) element;
+        for (IJavaElement e : p.getChildren()) {
+          maybeAddJavaElement(e, units);
+        }
+      } else if (element instanceof SourceType) {
+        units.add((SourceType) element);
+      } else if (element instanceof ICompilationUnit) {
+        units.addAll(Arrays.asList(((ICompilationUnit) element).getTypes()));
       } else if (element instanceof PackageFragment) {
         PackageFragment p = (PackageFragment) element;
-        units.addAll(Arrays.asList(p.getCompilationUnits()));
+        for (ICompilationUnit icu : p.getCompilationUnits()) {
+          units.addAll(Arrays.asList(icu.getTypes()));
+        }
       } else if (element instanceof PackageFragmentRoot) {
         PackageFragmentRoot pfr = (PackageFragmentRoot) element;
         for (IJavaElement e : pfr.getChildren()) {

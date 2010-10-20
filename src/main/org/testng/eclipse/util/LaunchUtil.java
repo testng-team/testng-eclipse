@@ -27,7 +27,6 @@ import org.eclipse.search.internal.ui.text.FileSearchResult;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.text.FileTextSearchScope;
 import org.eclipse.ui.PlatformUI;
-import org.testng.TestNG;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.collections.Lists;
@@ -333,7 +332,7 @@ public class LaunchUtil {
   public static void launchCompilationUnitConfiguration(IJavaProject ijp,
       List<ICompilationUnit> units, String mode) {
     List<IType> types = Lists.newArrayList();
-    String confName = null;
+    IType mainType = null;
     for (ICompilationUnit icu : units) {
       try {
         for (IType type : icu.getTypes()) {
@@ -346,14 +345,29 @@ public class LaunchUtil {
 
       if(null == types) return;
 
-      IType mainType= icu.findPrimaryType();
-      if (confName == null) {
-        confName= mainType != null ? mainType.getElementName() : icu.getElementName();
-        if (units.size() > 0) confName = confName + ", ...";
-      }
+      mainType = icu.findPrimaryType();
     }
 
-    launchTypeBasedConfiguration(ijp, confName, types.toArray(new IType[types.size()]), mode);
+    launchTypeBasedConfiguration(ijp, createConfName(mainType, units.size()),
+        types.toArray(new IType[types.size()]), mode);
+  }
+
+  /**
+   * @return the name of this configuration, which will be displayed in the menu. For
+   * one type, it's the name of this type. For more than one type, just show the name
+   * of the first type followed by ellipses.
+   */
+  private static String createConfName(IType mainType, int unitCount) {
+    String result = mainType.getElementName();
+    if (unitCount > 0) result = result + ", ...";
+
+    return result;
+  }
+
+  public static void launchTypesConfiguration(IJavaProject project, List<IType> types, String mode)
+  {
+    launchTypeBasedConfiguration(project, createConfName(types.get(0), types.size()),
+        types.toArray(new IType[types.size()]), mode);
   }
 
   private static void launchTypeBasedConfiguration(IJavaProject ijp, String confName, IType[] types, String mode) {
@@ -625,4 +639,5 @@ public class LaunchUtil {
 	  catch (CoreException ce) {}
 	  return config;
   }
+
 }
