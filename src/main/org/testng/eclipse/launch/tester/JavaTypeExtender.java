@@ -1,9 +1,8 @@
 package org.testng.eclipse.launch.tester;
 
-import org.testng.eclipse.util.TestSearchEngine;
-
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.jdt.core.IJavaElement;
+import org.testng.eclipse.util.TestSearchEngine;
 
 
 public class JavaTypeExtender extends PropertyTester {
@@ -12,8 +11,10 @@ public class JavaTypeExtender extends PropertyTester {
     if(!(receiver instanceof IJavaElement)) {
       return false;
     }
-    
-    IJavaElement javaElement = (IJavaElement) receiver;
+    return isTest((IJavaElement) receiver);
+  }
+
+  public static boolean isTest(IJavaElement javaElement) {
     int javaElementType = javaElement.getElementType();
     
     if(IJavaElement.JAVA_PROJECT == javaElementType
