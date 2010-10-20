@@ -11,6 +11,8 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.PackageFragment;
+import org.eclipse.jdt.internal.core.PackageFragmentRoot;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.text.ITextSelection;
@@ -18,7 +20,9 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IEditorPart;
+import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Lists;
+import org.testng.eclipse.launch.tester.JavaTypeExtender;
 import org.testng.eclipse.util.LaunchUtil;
 
 import java.util.Arrays;
@@ -47,19 +51,44 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
         }
         project = element.getJavaProject();
 
-        if (element != null) {
-          if (element instanceof ICompilationUnit) {
-            units.add((ICompilationUnit) element);
-          } else {
-            System.out.println("Ignoring non compilation unit selection: " + element);
-          }
+        try {
+          maybeAddJavaElement(element, units);
+        } catch (JavaModelException e) {
+          TestNGPlugin.log(e);
         }
+
       }
       
       if (! units.isEmpty()) {
         LaunchUtil.launchCompilationUnitConfiguration(project, units, mode); 
       }
     }
+  }
+
+  private void maybeAddJavaElement(IJavaElement element, List<ICompilationUnit> units)
+      throws JavaModelException {
+    if (element != null) {
+      if (element instanceof ICompilationUnit) {
+        units.add((ICompilationUnit) element);
+      } else if (element instanceof PackageFragment) {
+        PackageFragment p = (PackageFragment) element;
+        units.addAll(Arrays.asList(p.getCompilationUnits()));
+      } else if (element instanceof PackageFragmentRoot) {
+        PackageFragmentRoot pfr = (PackageFragmentRoot) element;
+        for (IJavaElement e : pfr.getChildren()) {
+          if (JavaTypeExtender.isTest(e)) {
+            maybeAddJavaElement(e, units);
+          }
+        }
+      } else {
+        p("Ignoring non compilation unit selection: " + element);
+      }
+    }
+  }
+
+  private static void p(String s) {
+    TestNGPlugin.log("[TestNGLaunchShortcut] " + s);
+//    System.out.println("[TestNGLaunchShortcut] " + s);
   }
 
   public void launch(IEditorPart editor, String mode) {

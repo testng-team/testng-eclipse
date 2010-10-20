@@ -122,6 +122,7 @@
          <contextualLaunch>
             <enablement>
                <with variable="selection">
+<!--
                   <iterate>
                     <or>
                       <test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/>
@@ -130,6 +131,7 @@
                     </or>
                     <test property="org.testng.eclipse.isTest"/>
                   </iterate>
+-->
                </with>
             </enablement>
          </contextualLaunch>
