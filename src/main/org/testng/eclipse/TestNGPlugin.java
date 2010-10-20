@@ -1,11 +1,6 @@
 package org.testng.eclipse;
 
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.AbstractSet;
-import java.util.HashSet;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -33,6 +28,11 @@ import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.SWTUtil;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.AbstractSet;
+import java.util.HashSet;
 
 /**
  * The plug-in runtime class for the TestNG plug-in.
@@ -82,6 +82,10 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
     return m_pluginInstance.m_preferenceUtil; 
   }
   
+  public static void log(String s) {
+    log(new Status(IStatus.INFO, getPluginId(), IStatus.OK, s, null)); //$NON-NLS-1$
+  }
+
   public static void log(Throwable e) {
     log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, "Error", e)); //$NON-NLS-1$
   }
@@ -93,6 +97,7 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
   /**
    * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
    */
+  @Override
   public void start(BundleContext context) throws Exception {
     super.start(context);
 
@@ -106,6 +111,7 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
   /**
    * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
    */
+  @Override
   public void stop(BundleContext context) throws Exception {
     try {
       // Dispose the font
