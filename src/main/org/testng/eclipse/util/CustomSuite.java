@@ -419,8 +419,9 @@ class ClassMethodsSuite extends CustomSuite {
 
   @Override
   protected String getTestName() {
-    return m_classNames.size() == 1 ? (String) m_classNames.iterator().next()
-        : DEFAULT_TEST_TAG_NAME;
+    return DEFAULT_TEST_TAG_NAME;
+//    return m_classNames.size() == 1 ? (String) m_classNames.iterator().next()
+//        : DEFAULT_TEST_TAG_NAME;
   }
 
   @Override

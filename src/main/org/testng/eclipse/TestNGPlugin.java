@@ -321,7 +321,7 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
     return null;
   }
   
-  private boolean isEmtpy(String string) {
+  public static boolean isEmtpy(String string) {
     return null == string || "".equals(string.trim());
   } 
   

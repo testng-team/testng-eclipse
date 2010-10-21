@@ -3,7 +3,7 @@ package org.testng.eclipse.ui;
 /*
  * A view that shows the contents of a test suite as a tree.
  */
-public class SuccessTab extends AbstractHierarchyTab  {
+public class SuccessTab extends AbstractTab  {
    
   protected String getTooltipKey() {
 	  return "HierarchyRunView.tab.tooltip";
