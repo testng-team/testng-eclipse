@@ -126,6 +126,7 @@ public class RunInfo {
    *
    * @return the Objects hashcode.
    */
+  @Override
   public int hashCode() {
     return m_id.hashCode();
   }
@@ -135,6 +136,7 @@ public class RunInfo {
    *
    * @return <code>true</code> if this <code>RunInfo</code> is the same as the o argument.
    */
+  @Override
   public boolean equals(Object o) {
     if(this == o) {
       return true;
@@ -283,8 +285,8 @@ public class RunInfo {
   public String getTreeLabel() {
     return getMethodName()
         + getParametersDisplay()
-        + " " + getTestDescription()
-        + " (" + ((float) getTime() / (float) 1000) + " s) "
+        + " [" + getTestDescription()
+        + "] (" + ((float) getTime() / (float) 1000) + " s) "
         ;
   }
   
