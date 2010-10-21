@@ -12,6 +12,7 @@ package org.testng.eclipse.ui;
 
 
 import org.eclipse.swt.custom.CTabFolder;
+import org.testng.eclipse.util.ResourceUtil;
 
 /**
  * A TestRunTab is shown as a tab in a tabbed folder.
@@ -82,5 +83,9 @@ public abstract class TestRunTab {
    * Select previous test failure.
    */
   public void selectPrevious() {
+  }
+
+  protected String getResourceString(String key) {
+    return ResourceUtil.getString(key);
   }
 }
