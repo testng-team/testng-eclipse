@@ -4,12 +4,12 @@ package org.testng.eclipse.util;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.testng.TestNG;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.collections.Maps;
 import org.testng.internal.Utils;
+import org.testng.remote.RemoteTestNG;
 import org.testng.reporters.XMLStringBuffer;
 import org.testng.xml.LaunchSuite;
 import org.testng.xml.Parser;
@@ -226,7 +226,7 @@ abstract public class CustomSuite extends LaunchSuite {
   }
 
   public String getFileName() {
-    return "testng-customsuite.xml";
+    return RemoteTestNG.DEBUG_SUITE_FILE;
   }
 
   /** 
