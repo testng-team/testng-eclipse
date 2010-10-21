@@ -71,11 +71,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     launch.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_RUN_NAME_ATTR,
         getRunNameAttr(configuration));
 
-    // Don't launch RemoteTestNG if we are in debug mode since we assume that the developer
-    // launched it as a separate process
-//    if (! TestNGPlugin.isDebug()) {
-      runner.run(runConfig, launch, monitor);
-//    }
+    runner.run(runConfig, launch, monitor);
   }
 
   private static void ppp(String s) {
@@ -130,6 +126,11 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     }
   }
 
+  private String getRemoteClassName() {
+    return TestNGPlugin.isDebug() ? EmptyRemoteTestNG.class.getName()
+        : RemoteTestNG.class.getName();
+  }
+
   /**
    * Add a VMRunner with a class path that includes org.eclipse.jdt.junit
    * plugin. In addition it adds the port for the RemoteTestRunner as an
@@ -141,7 +142,8 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
 
     String[] classPath = createClassPath(configuration);
     String progArgs = getProgramArguments(configuration);
-    VMRunnerConfiguration vmConfig = new VMRunnerConfiguration(RemoteTestNG.class.getName(), //$NON-NLS-1$
+    VMRunnerConfiguration vmConfig =
+        new VMRunnerConfiguration(getRemoteClassName(), //$NON-NLS-1$
         classPath);
 
     // insert the program arguments
