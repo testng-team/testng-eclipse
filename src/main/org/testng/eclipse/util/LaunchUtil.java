@@ -359,7 +359,7 @@ public class LaunchUtil {
    */
   private static String createConfName(IType mainType, int unitCount) {
     String result = mainType.getElementName();
-    if (unitCount > 0) result = result + ", ...";
+    if (unitCount > 1) result = result + ", ...";
 
     return result;
   }
