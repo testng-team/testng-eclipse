@@ -34,10 +34,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.testng.ITestResult;
 import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.util.ResourceUtil;
 
-import java.text.MessageFormat;
+import java.util.Hashtable;
 import java.util.Map;
 
 abstract public class AbstractTab extends TestRunTab implements IMenuListener {
@@ -56,8 +57,14 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
 
   private final static String FORMATTED_MESSAGE = "{0} ( {1}/{2}/{3}/{4} ) ({5} s)";
 
+  // Strings used to store data on the TreeItem nodes
+  private static final String DATA_RUN_INFO = "runInfo";
+  private static final String DATA_CUMULATED_TIME = "cumulatedTime";
+  private static final String DATA_TEXT_FORMAT = "textFormat";
+
   private Tree m_tree;
   private TestRunnerViewPart m_testRunnerPart;
+//  private boolean m_moveSelection = false;
 
   @Override
   public String getSelectedTestId() {
@@ -151,7 +158,7 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   }
 
   void handleDoubleClick(MouseEvent e) {
-    RunInfo testInfo = getTestInfo();
+    RunInfo testInfo = getSelectionRunInfo();
 
     if(null == testInfo) {
       return;
@@ -167,10 +174,13 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     }
   }
 
-  private RunInfo getTestInfo() {
+  /**
+   * @return the RunInfo associated with the current selection, or null it not applicable.
+   */
+  private RunInfo getSelectionRunInfo() {
     TreeItem[] treeItems= m_tree.getSelection();
     
-    return treeItems.length == 0 ? null : (RunInfo) treeItems[0].getData("runinfo");
+    return treeItems.length == 0 ? null : (RunInfo) treeItems[0].getData(DATA_RUN_INFO);
   }
 
   /**
@@ -179,7 +189,7 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   public void menuAboutToShow(IMenuManager manager) {
     if(m_tree.getSelectionCount() > 0) {
       TreeItem treeItem = m_tree.getSelection()[0];
-      RunInfo  testInfo = (RunInfo) treeItem.getData("runinfo");
+      RunInfo  testInfo = (RunInfo) treeItem.getData(DATA_RUN_INFO);
 
       manager.add(new OpenTestAction(m_testRunnerPart, testInfo));
       manager.add(new Separator());
@@ -206,27 +216,41 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   public void updateTestResult(RunInfo resultInfo) {
     p("New result: " + resultInfo);
     TreeItem ti = m_treeItemMap.get(resultInfo.getId());
+    TreeItem parentItem = null;
     if (ti == null) {
-      TreeItem parentItem = maybeCreateParents(resultInfo);
-      ti = new TreeItem(parentItem, SWT.None);
-      Float cumulatedTime = (Float) ti.getData("cumulatedTime");
-      if (cumulatedTime == null) {
-        cumulatedTime = 0.0f;
-      }
-      float c = 0.0f;
-//      float c = cumulatedTime + childRunInfo.getTime();
-//      ti.setData("cumulatedTime", c);
-      ti.setText(MessageFormat.format(FORMATTED_MESSAGE,
-          new Object[] {
-              resultInfo.getMethodName(),
-              new Integer(resultInfo.m_passed),
-              new Integer(resultInfo.m_failed),
-              new Integer(resultInfo.m_skipped),
-              new Integer(resultInfo.m_successPercentageFailed),
-              c / 1000
-          })
-      );
+      parentItem = maybeCreateParents(resultInfo);
+      ti = createTreeItem(parentItem, resultInfo, resultInfo.getTreeLabel());
       registerTreeItem(resultInfo.getId(), ti);
+    } else {
+      parentItem = ti.getParentItem();
+    }
+    ti.setImage(getStatusImage(resultInfo.getType(), resultInfo.getStatus()));
+
+    propagateTestResult(parentItem, resultInfo);
+  }
+
+  private void propagateTestResult(TreeItem ti, RunInfo childRunInfo) {
+    System.out.println("Propagating treeItem:" + ti);
+    Float cumulatedTime = (Float) ti.getData(DATA_CUMULATED_TIME);
+    if (cumulatedTime == null) {
+      cumulatedTime = 0.0f;
+    }
+    float c = cumulatedTime + childRunInfo.getTime();
+    ti.setData(DATA_CUMULATED_TIME, c);
+    RunInfo resultInfo = (RunInfo) ti.getData(DATA_RUN_INFO);
+//    ti.setText(MessageFormat.format(FORMATTED_MESSAGE,
+//        new Object[] {
+//            (String) ti.getData(DATA_TEXT_FORMAT),
+//            resultInfo.getMethodName(),
+//            new Integer(resultInfo.m_passed),
+//            new Integer(resultInfo.m_failed),
+//            new Integer(resultInfo.m_skipped),
+//            new Integer(resultInfo.m_successPercentageFailed),
+//            c / 1000
+//        })
+//    );
+    if (ti.getParentItem() != null) {
+      propagateTestResult(ti.getParentItem(), childRunInfo);
     }
   }
 
@@ -234,18 +258,20 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     System.out.println("[AbstractTab] " + string);
   }
 
-  private TreeItem createTreeItem(Tree parent) {
+  private TreeItem createTreeItem(Tree parent, RunInfo runInfo, String text) {
     TreeItem result = new TreeItem(parent, SWT.None);
-    return configureTreeItem(result);
+    return configureTreeItem(result, runInfo, text);
   }
 
-  private TreeItem createTreeItem(TreeItem parent) {
+  private TreeItem createTreeItem(TreeItem parent, RunInfo runInfo, String text) {
     TreeItem result = new TreeItem(parent, SWT.None);
-    return configureTreeItem(result);
+    return configureTreeItem(result, runInfo, text);
   }
   
-  private TreeItem configureTreeItem(TreeItem result) {
+  private TreeItem configureTreeItem(TreeItem result, RunInfo runInfo, String text) {
     result.setExpanded(true);
+    result.setData(DATA_RUN_INFO, runInfo);
+    result.setText(text);
     return result;
   }
 
@@ -257,28 +283,76 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     String suiteId = resultInfo.getSuiteName();
     TreeItem suiteTreeItem = m_treeItemMap.get(suiteId);
     if (suiteTreeItem == null) {
-      suiteTreeItem = createTreeItem(m_tree);
-      suiteTreeItem.setText(resultInfo.getSuiteName());
+      suiteTreeItem = createTreeItem(m_tree, resultInfo, resultInfo.getSuiteName());
       registerTreeItem(suiteId, suiteTreeItem);
     }
 
     String testId = suiteId + "." + resultInfo.getTestName();
     TreeItem testTreeItem = m_treeItemMap.get(testId);
     if (testTreeItem == null) {
-      testTreeItem = createTreeItem(suiteTreeItem);
-      testTreeItem.setText(resultInfo.getTestName());
+      testTreeItem = createTreeItem(suiteTreeItem, resultInfo, resultInfo.getTestName());
       registerTreeItem(testId, testTreeItem);
     }
 
     String classId = testId + "." + resultInfo.getClassName();
     TreeItem classTreeItem = m_treeItemMap.get(classId);
     if (classTreeItem == null) {
-      classTreeItem = createTreeItem(testTreeItem);
-      classTreeItem.setText(resultInfo.getClassName());
+      classTreeItem = createTreeItem(testTreeItem, resultInfo, resultInfo.getClassName());
       registerTreeItem(classId, classTreeItem);
     }
 
     return classTreeItem;
+  }
+
+  private Image getStatusImage(int type, int state) {
+    if(RunInfo.SUITE_TYPE == type) {
+      switch(state) {
+        case ITestResult.SUCCESS:
+          return m_suiteOkeIcon;
+        case ITestResult.FAILURE:
+        case ITestResult.SUCCESS_PERCENTAGE_FAILURE:
+          return m_suiteFailIcon;
+        case ITestResult.SKIP:
+          return m_suiteSkipIcon;
+      }
+    }
+    else {
+      switch(state) {
+        case ITestResult.SUCCESS:
+          return m_testOkeIcon;
+        case ITestResult.FAILURE:
+        case ITestResult.SUCCESS_PERCENTAGE_FAILURE:
+          return m_testFailIcon;
+        case ITestResult.SKIP:
+          return m_testSkipIcon;
+      }
+    }
+    
+    return null;
+  }
+
+  @Override
+  public void aboutToStart() {
+    m_tree.removeAll();
+    m_treeItemMap = new Hashtable<String, TreeItem>();
+//    m_runningItems= new Hashtable<String, List<TreeItem>>();
+//    m_duplicateItemsIndex= 0;
+//    m_moveSelection = false;
+  }
+
+  @Override
+  public void activate() {
+//    m_moveSelection = false;
+    testSelected();
+  }
+
+  @Override
+  public void setFocus() {
+    m_tree.setFocus();
+  }
+
+  private void testSelected() {
+    m_testRunnerPart.handleTestSelected(getSelectionRunInfo());
   }
 
   private void registerTreeItem(String id, TreeItem treeItem) {
