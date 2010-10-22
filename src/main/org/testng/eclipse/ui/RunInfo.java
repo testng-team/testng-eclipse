@@ -48,7 +48,14 @@ public class RunInfo {
     m_testName = testName;
     m_type = TEST_TYPE;
   }
-  
+
+//  public RunInfo(TestResultMessage trm) {
+//    this(trm.getSuiteName(), trm.getName(), trm.getTestClass(), trm.getMethod(),
+//        trm.getTestDescription(), trm.getParameters(), trm.getParameterTypes(),
+//        trm.getEndMillis() - trm.getStartMillis(), trm.getStackTrace(),
+//        trm.getResult());
+//  }
+
   public RunInfo(String suiteName, 
                  String testName, 
                  String className, 

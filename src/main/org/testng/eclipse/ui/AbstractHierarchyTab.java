@@ -251,28 +251,28 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
   /**
    * Called on suite and test events.
    */
-  @Override
-  public void updateEntry(String id) {
-    TreeItem ti = getTree(id);
-    
-    if(null == ti) {
-      return;
-    }
-    
-    RunInfo ri = (RunInfo) ti.getData("runinfo");
-    int state = ITestResult.SUCCESS;
-    if(ri.m_failed + ri.m_successPercentageFailed > 0) {
-      state = ITestResult.FAILURE;
-    }
-    else if(ri.m_skipped > 0) {
-      state = ITestResult.SKIP;
-    }
-
-    onPostUpdate(ti, state);
-    if (! ti.isDisposed()) {
-      ti.setImage(getStatusImage(ri.getType(), state));
-    }
-  }
+//  @Override
+//  public void updateEntry(String id) {
+//    TreeItem ti = getTree(id);
+//    
+//    if(null == ti) {
+//      return;
+//    }
+//    
+//    RunInfo ri = (RunInfo) ti.getData("runinfo");
+//    int state = ITestResult.SUCCESS;
+//    if(ri.m_failed + ri.m_successPercentageFailed > 0) {
+//      state = ITestResult.FAILURE;
+//    }
+//    else if(ri.m_skipped > 0) {
+//      state = ITestResult.SKIP;
+//    }
+//
+//    onPostUpdate(ti, state);
+//    if (! ti.isDisposed()) {
+//      ti.setImage(getStatusImage(ri.getType(), state));
+//    }
+//  }
 
   /**
    * Called after an item has been updated, meant to be overridden by subclasses

@@ -64,8 +64,8 @@ public abstract class TestRunTab {
   public void updateTestResult(RunInfo resultInfo) {
   }
 
-  public void updateEntry(String id) {
-  }
+//  public void updateEntry(String id) {
+//  }
   
   /**
    * A new tree entry got posted.

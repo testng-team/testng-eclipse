@@ -252,6 +252,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private Set testDescriptions;
   
 
+  @Override
   public void init(IViewSite site, IMemento memento) throws PartInitException {
     super.init(site, memento);
     m_stateMemento = memento;
@@ -551,6 +552,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     ViewForm top = new ViewForm(m_sashForm, SWT.NONE);
     m_tabFolder = createTestRunTabs(top);
     m_tabFolder.setLayoutData(new Layout() {
+        @Override
         protected Point computeSize (Composite composite, int wHint, int hHint, boolean flushCache) {
             if (wHint != SWT.DEFAULT && hHint != SWT.DEFAULT)
                 return new Point(wHint, hHint);
@@ -942,6 +944,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       return fActionOrientation;
     }
 
+    @Override
     public void run() {
       if(isChecked()) {
         fOrientation = fActionOrientation;
@@ -983,6 +986,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       setSystem(true);
     }
 
+    @Override
     public IStatus runInUIThread(IProgressMonitor monitor) {
       if(!isDisposed()) {
 //        doShowStatus();
@@ -998,6 +1002,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       fRunning = false;
     }
 
+    @Override
     public boolean shouldSchedule() {
       return fRunning;
     }
@@ -1009,6 +1014,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       setSystem(true);
     }
 
+    @Override
     public IStatus run(IProgressMonitor monitor) {
       // wait until the test run terminates
       m_runLock.acquire();
@@ -1016,6 +1022,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       return Status.OK_STATUS;
     }
 
+    @Override
     public boolean belongsTo(Object family) {
       return family == TestRunnerViewPart.FAMILY_RUN;
     }
@@ -1029,6 +1036,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   /**
    * @see IWorkbenchPart#getTitleImage()
    */
+  @Override
   public Image getTitleImage() {
     return m_viewIcon;
   }
@@ -1134,6 +1142,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
     }
       
+    @Override
     public void run() {
       if(null != m_LastLaunch) {
         DebugUITools.launch(m_LastLaunch.getLaunchConfiguration(), m_LastLaunch.getLaunchMode());
@@ -1219,6 +1228,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunchf.gif")); //$NON-NLS-1$
     }
     
+    @Override
     public void run() {
       if(null != m_LastLaunch && hasErrors()) {
         LaunchUtil.launchFailedSuiteConfiguration(m_workingProject, 
@@ -1257,16 +1267,16 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_suiteCount++;
     final String entryId = new RunInfo(suiteMessage.getSuiteName()).getId();
     
-    postSyncRunnable(new Runnable() {
-      public void run() {
-        if(isDisposed()) {
-          return;
-        }
-        for(int i = 0; i < m_tabsList.size(); i++) {
-          ((TestRunTab) m_tabsList.elementAt(i)).updateEntry(entryId);
-        }
-      }
-    });
+//    postSyncRunnable(new Runnable() {
+//      public void run() {
+//        if(isDisposed()) {
+//          return;
+//        }
+//        for(int i = 0; i < m_tabsList.size(); i++) {
+//          ((TestRunTab) m_tabsList.elementAt(i)).updateEntry(entryId);
+//        }
+//      }
+//    });
     
     if(m_suitesTotalCount == m_suiteCount) {
       fNextAction.setEnabled(hasErrors());
@@ -1336,9 +1346,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         if(isDisposed()) {
           return;
         }
-        for(int i = 0; i < m_tabsList.size(); i++) {
-          ((TestRunTab) m_tabsList.elementAt(i)).updateEntry(entryId);
-        }
+//        for(int i = 0; i < m_tabsList.size(); i++) {
+//          ((TestRunTab) m_tabsList.elementAt(i)).updateEntry(entryId);
+//        }
         
         fProgressBar.stepTests();
       }
