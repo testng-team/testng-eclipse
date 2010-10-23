@@ -27,6 +27,7 @@ abstract public class BaseTreeItem implements ITreeItem {
   
   private void init(RunInfo runInfo) {
     m_runInfo = runInfo;
+    m_treeItem.setExpanded(true);
     m_treeItem.setData(DATA_TREE_ITEM, this);
   }
 

@@ -1277,10 +1277,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //      }
 //    });
 
-    for(int i = 0; i < m_tabsList.size(); i++) {
-      ((TestRunTab) m_tabsList.elementAt(i)).onFinish(suiteMessage);
-    }
-
     if(m_suitesTotalCount == m_suiteCount) {
       fNextAction.setEnabled(hasErrors());
       fPrevAction.setEnabled(hasErrors());

@@ -43,7 +43,6 @@ import org.testng.eclipse.ui.tree.SuiteTreeItem;
 import org.testng.eclipse.ui.tree.TestMethodTreeItem;
 import org.testng.eclipse.ui.tree.TestTreeItem;
 import org.testng.eclipse.util.ResourceUtil;
-import org.testng.remote.strprotocol.SuiteMessage;
 
 import java.util.Hashtable;
 import java.util.Map;
@@ -242,6 +241,8 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
       }
       propagateTestResult(parentItem, runInfo);
     }
+
+    postExpandAll();
   }
 
   /**
@@ -466,8 +467,7 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   protected void onPostUpdate(TreeItem ti, int state) {
   }
 
-  @Override
-  public void onFinish(SuiteMessage suiteMessage) {
+  private void postExpandAll() {
     Runnable expandRunnable = new Runnable() {
       public void run() {
         m_tree.selectAll();
