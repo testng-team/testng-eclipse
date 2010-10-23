@@ -224,26 +224,33 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
 
   @Override
   public void updateTestResult(RunInfo runInfo) {
-    p("New result: " + runInfo);
-    String id = getId(runInfo);
-    ITreeItem iti = m_treeItemMap.get(id);
-    TreeItem ti;
-    TreeItem parentItem = null;
-    if (iti == null) {
-      parentItem = maybeCreateParents(runInfo).getTreeItem();
-      iti = new TestMethodTreeItem(parentItem, runInfo);
-      ti = iti.getTreeItem();
-      registerTreeItem(id, iti);
-    } else {
-      ti = iti.getTreeItem();
-      parentItem = ti.getParentItem();
+    if (acceptTestResult(runInfo)) {
+      p("New result: " + runInfo);
+      String id = getId(runInfo);
+      ITreeItem iti = m_treeItemMap.get(id);
+      TreeItem ti;
+      TreeItem parentItem = null;
+      if (iti == null) {
+        parentItem = maybeCreateParents(runInfo).getTreeItem();
+        iti = new TestMethodTreeItem(parentItem, runInfo);
+        ti = iti.getTreeItem();
+        registerTreeItem(id, iti);
+      } else {
+        ti = iti.getTreeItem();
+        parentItem = ti.getParentItem();
+      }
+      propagateTestResult(parentItem, runInfo);
     }
-//    ti.setImage(getStatusImage(trm.getResult());
-
-    propagateTestResult(parentItem, runInfo);
   }
 
-//  public void _updateTestResult(RunInfo resultInfo) {
+  /**
+   * Override in subclasses to filter out nodes.
+   */
+  protected boolean acceptTestResult(RunInfo runInfo) {
+    return true;
+  }
+
+  //  public void _updateTestResult(RunInfo resultInfo) {
 //    p("New result: " + resultInfo);
 //    ITreeItem iti = m_treeItemMap.get(resultInfo.getId());
 //    TreeItem ti;
@@ -264,8 +271,8 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
 
   private void propagateTestResult(TreeItem ti, RunInfo trm) {
     ITreeItem treeItem = BaseTreeItem.getTreeItem(ti);
-    System.out.println("Propagating treeItem:" + ti + " ITreeItem:"
-        + treeItem);
+//    System.out.println("Propagating treeItem:" + ti + " ITreeItem:"
+//        + treeItem);
     treeItem.addToCumulatedTime(trm.getTime());
     treeItem.update(trm);
 //    RunInfo ri = BaseTreeItem.getTreeItem(ti).getRunInfo();
