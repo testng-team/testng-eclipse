@@ -1265,7 +1265,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   public void onFinish(SuiteMessage suiteMessage) {
     m_suiteCount++;
-    final String entryId = new RunInfo(suiteMessage.getSuiteName()).getId();
     
 //    postSyncRunnable(new Runnable() {
 //      public void run() {
@@ -1277,7 +1276,11 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //        }
 //      }
 //    });
-    
+
+    for(int i = 0; i < m_tabsList.size(); i++) {
+      ((TestRunTab) m_tabsList.elementAt(i)).onFinish(suiteMessage);
+    }
+
     if(m_suitesTotalCount == m_suiteCount) {
       fNextAction.setEnabled(hasErrors());
       fPrevAction.setEnabled(hasErrors());
