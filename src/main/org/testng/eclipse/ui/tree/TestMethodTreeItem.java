@@ -7,29 +7,29 @@ import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.ui.Images;
 import org.testng.eclipse.ui.RunInfo;
 
+import java.text.MessageFormat;
+
 /**
  * A tree node representing a test method.
  * 
- * @author cbeust
+ * @author Cedric Beust <cedric@beust.com>
  */
 public class TestMethodTreeItem extends BaseTreeItem implements ITreeItem {
+  private final static String FORMATTED_MESSAGE = "{0} {1} ({2} s)";
+
   public TestMethodTreeItem(TreeItem parent, RunInfo runInfo) {
     super(parent, runInfo);
     update(runInfo);
   }
 
   public void update(RunInfo runInfo) {
-    long time = runInfo.getTime();
+    String label = runInfo.getMethodName() + runInfo.getParametersDisplay();
     String description = TestNGPlugin.isEmtpy(runInfo.getTestDescription())
         ? ""
         : " [" + runInfo.getTestDescription() + "]";
-    String label = runInfo.getMethodName()
-        + runInfo.getParametersDisplay()
-        + description
-        + " (" + ((float) time / 1000) + " s) "
-        ;
+    float time = ((float) runInfo.getTime() / 1000);
 
-    getTreeItem().setText(label);
+    getTreeItem().setText(MessageFormat.format(FORMATTED_MESSAGE, label, description, time));
     getTreeItem().setImage(getImage(runInfo.getStatus()));
   }
 

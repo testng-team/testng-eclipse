@@ -6,6 +6,11 @@ import org.testng.eclipse.ui.RunInfo;
 
 import java.text.MessageFormat;
 
+/**
+ * A node that represents the suite (the root of the tree).
+ *
+ * @author Cedric Beust <cedric@beust.com>
+ */
 public class SuiteTreeItem extends BaseTreeItem implements ITreeItem {
   private final static String FORMATTED_MESSAGE = "{0} ( {1}/{2}/{3}/{4} ) ({5} s)";
   private int m_passed;
