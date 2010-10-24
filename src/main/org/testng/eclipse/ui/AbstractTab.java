@@ -34,7 +34,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.testng.ITestResult;
 import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.ui.tree.BaseTreeItem;
 import org.testng.eclipse.ui.tree.ClassTreeItem;
@@ -122,27 +121,27 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   
   private void addListeners() {
     m_tree.addSelectionListener(new SelectionListener() {
-        public void widgetSelected(SelectionEvent e) {
-          activate();
-        }
+      public void widgetSelected(SelectionEvent e) {
+        activate();
+      }
 
-        public void widgetDefaultSelected(SelectionEvent e) {
-          activate();
-        }
-      });
+      public void widgetDefaultSelected(SelectionEvent e) {
+        activate();
+      }
+    });
 
     m_tree.addDisposeListener(new DisposeListener() {
-        public void widgetDisposed(DisposeEvent e) {
-          disposeIcons();
-        }
-      });
+      public void widgetDisposed(DisposeEvent e) {
+        disposeIcons();
+      }
+    });
 
     m_tree.addMouseListener(new MouseAdapter() {
-        @Override
-        public void mouseDoubleClick(MouseEvent e) {
-          handleDoubleClick(e);
-        }
-      });
+      @Override
+      public void mouseDoubleClick(MouseEvent e) {
+        handleDoubleClick(e);
+      }
+    });
   }
 
   void disposeIcons() {
@@ -168,7 +167,6 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     }
 
     if (testInfo instanceof TestMethodTreeItem) {
-//      OpenTestAction action = new OpenTestAction(fTestRunnerPart, testInfo.m_className, testInfo.m_methodName);
       OpenTestAction action = new OpenTestAction(m_testRunnerPart, testInfo.getRunInfo());
       
       if(action.isEnabled()) {
@@ -251,50 +249,11 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     return true;
   }
 
-  //  public void _updateTestResult(RunInfo resultInfo) {
-//    p("New result: " + resultInfo);
-//    ITreeItem iti = m_treeItemMap.get(resultInfo.getId());
-//    TreeItem ti;
-//    TreeItem parentItem = null;
-//    if (iti == null) {
-//      parentItem = maybeCreateParents(resultInfo).getTreeItem();
-//      iti = new TestMethodTreeItem(parentItem, resultInfo);
-//      ti = iti.getTreeItem();
-//      registerTreeItem(resultInfo.getId(), iti);
-//    } else {
-//      ti = iti.getTreeItem();
-//      parentItem = ti.getParentItem();
-//    }
-//    ti.setImage(getStatusImage(resultInfo.getType(), resultInfo.getStatus()));
-//
-//    propagateTestResult(parentItem, resultInfo);
-//  }
-
   private void propagateTestResult(TreeItem ti, RunInfo trm) {
     ITreeItem treeItem = BaseTreeItem.getTreeItem(ti);
-//    System.out.println("Propagating treeItem:" + ti + " ITreeItem:"
-//        + treeItem);
     treeItem.addToCumulatedTime(trm.getTime());
     treeItem.update(trm);
-//    RunInfo ri = BaseTreeItem.getTreeItem(ti).getRunInfo();
-//    Float cumulatedTime = (Float) ti.getData(DATA_CUMULATED_TIME);
-//    if (cumulatedTime == null) {
-//      cumulatedTime = 0.0f;
-//    }
-//    float c = cumulatedTime + childRunInfo.getTime();
-//    ti.setData(DATA_CUMULATED_TIME, c);
-//    RunInfo resultInfo = (RunInfo) ti.getData(DATA_RUN_INFO);
-//    ti.setText(MessageFormat.format(FORMATTED_MESSAGE,
-//        new Object[] {
-//            (String) ti.getData(DATA_TEXT_FORMAT),
-//            resultInfo.getMethodName(),
-//            new Integer(resultInfo.m_passed),
-//            new Integer(resultInfo.m_failed),
-//            new Integer(resultInfo.m_skipped),
-//            new Integer(resultInfo.m_successPercentageFailed),
-//            c / 1000
-//        })
-//    );
+
     if (ti.getParentItem() != null) {
       propagateTestResult(ti.getParentItem(), trm);
     }
@@ -303,23 +262,6 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   private void p(String string) {
     System.out.println("[AbstractTab] " + string);
   }
-
-//  private TreeItem createTreeItem(Tree parent, RunInfo runInfo, String text) {
-//    TreeItem result = new TreeItem(parent, SWT.None);
-//    return configureTreeItem(result, runInfo, text);
-//  }
-//
-//  private TreeItem createTreeItem(TreeItem parent, RunInfo runInfo, String text) {
-//    TreeItem result = new TreeItem(parent, SWT.None);
-//    return configureTreeItem(result, runInfo, text);
-//  }
-//  
-//  private TreeItem configureTreeItem(TreeItem result, RunInfo runInfo, String text) {
-//    result.setExpanded(true);
-//    result.setData(DATA_RUN_INFO, runInfo);
-//    result.setText(text);
-//    return result;
-//  }
 
   /**
    * @return the parent tree item for this ResultInfo, possibly creating all the
@@ -350,40 +292,10 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     return classTreeItem;
   }
 
-  private Image getStatusImage(int type, int state) {
-    if(RunInfo.SUITE_TYPE == type) {
-      switch(state) {
-        case ITestResult.SUCCESS:
-          return m_suiteOkeIcon;
-        case ITestResult.FAILURE:
-        case ITestResult.SUCCESS_PERCENTAGE_FAILURE:
-          return m_suiteFailIcon;
-        case ITestResult.SKIP:
-          return m_suiteSkipIcon;
-      }
-    }
-    else {
-      switch(state) {
-        case ITestResult.SUCCESS:
-          return m_testOkeIcon;
-        case ITestResult.FAILURE:
-        case ITestResult.SUCCESS_PERCENTAGE_FAILURE:
-          return m_testFailIcon;
-        case ITestResult.SKIP:
-          return m_testSkipIcon;
-      }
-    }
-    
-    return null;
-  }
-
   @Override
   public void aboutToStart() {
     m_tree.removeAll();
     m_treeItemMap = new Hashtable<String, ITreeItem>();
-//    m_runningItems= new Hashtable<String, List<TreeItem>>();
-//    m_duplicateItemsIndex= 0;
-//    m_moveSelection = false;
   }
 
   @Override
@@ -396,6 +308,9 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     m_tree.setFocus();
   }
 
+  /**
+   * Expand all the nodes in the tree.
+   */
   private class ExpandAllAction extends Action {
     public ExpandAllAction() {
       setText(ResourceUtil.getString("ExpandAllAction.text")); //$NON-NLS-1$
@@ -433,30 +348,6 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   private void registerTreeItem(String id, ITreeItem treeItem) {
     m_treeItemMap.put(id, treeItem);
   }
-
-//  @Override
-//  public void updateEntry(String id) {
-//    ITreeItem iti = m_treeItemMap.get(id);
-//    
-//    if (iti == null) {
-//      return;
-//    }
-//    
-//    RunInfo ri = iti.getRunInfo();
-//    int state = ITestResult.SUCCESS;
-//    if(ri.m_failed + ri.m_successPercentageFailed > 0) {
-//      state = ITestResult.FAILURE;
-//    }
-//    else if(ri.m_skipped > 0) {
-//      state = ITestResult.SKIP;
-//    }
-//
-//    TreeItem ti = iti.getTreeItem();
-//    onPostUpdate(ti, state);
-//    if (! ti.isDisposed()) {
-//      ti.setImage(getStatusImage(ri.getType(), state));
-//    }
-//  }
 
   /**
    * Called after an item has been updated, meant to be overridden by subclasses
