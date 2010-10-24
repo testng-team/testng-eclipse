@@ -100,7 +100,6 @@ import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -144,7 +143,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private CTabFolder m_tabFolder;
   
   /** The collection of TestRunTab. */
-  protected Vector m_tabsList = new Vector();
+  protected Vector<TestRunTab> m_tabsList = new Vector<TestRunTab>();
 
   /** The currently active run tab. */
   private TestRunTab m_activeRunTab;
@@ -278,7 +277,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     if(page != null) {
       int p = page.intValue();
       m_tabFolder.setSelection(p);
-      m_activeRunTab = (TestRunTab) m_tabsList.get(p);
+      m_activeRunTab = m_tabsList.get(p);
     }
 
     Integer ratio = memento.getInteger(TAG_RATIO);
@@ -490,7 +489,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
     loadTestRunTabs(tabFolder);
     tabFolder.setSelection(0);
-    m_activeRunTab = (TestRunTab) m_tabsList.firstElement();
+    m_activeRunTab = m_tabsList.firstElement();
 
     tabFolder.addSelectionListener(new SelectionAdapter() {
         @Override
@@ -533,10 +532,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   private void testTabChanged(SelectionEvent event) {
     String selectedTestId = m_activeRunTab.getSelectedTestId();
-    
-    for(Enumeration e = m_tabsList.elements(); e.hasMoreElements();) {
-      TestRunTab v = (TestRunTab) e.nextElement();
 
+    for (TestRunTab v : m_tabsList) {
       v.setSelectedTest(selectedTestId);
       
       if(((CTabFolder) event.widget).getSelection().getText() == v.getName()) {
@@ -627,8 +624,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         fProgressBar.reset(testCount);
         clearStatus();
         
-        for(Enumeration e = m_tabsList.elements(); e.hasMoreElements();) {
-          TestRunTab v = (TestRunTab) e.nextElement();
+        for (TestRunTab v : m_tabsList) {
           v.aboutToStart();
         }
       }
@@ -966,9 +962,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
           }
           treeEntry = (RunInfo) m_treeEntriesQueue.remove(0);
         }
-        for(Enumeration e = m_tabsList.elements(); e.hasMoreElements();) {
 
-          TestRunTab v = (TestRunTab) e.nextElement();
+        for (TestRunTab v : m_tabsList) {
           v.newTreeEntry(treeEntry);
         }
       }
@@ -1072,8 +1067,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         fProgressBar.step(progressStep);
 //        updateProgressBar(m_progressBar.getSelection() + 1, (progressStep == 0));
 
-        for(int i = 0; i < m_tabsList.size(); i++) {
-          ((TestRunTab) m_tabsList.elementAt(i)).updateTestResult(runInfo);
+        for (TestRunTab v : m_tabsList) {
+          v.updateTestResult(runInfo);
         }
       }
     });
@@ -1085,8 +1080,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         if(isDisposed()) {
           return;
         }
-        for(int i = 0; i < m_tabsList.size(); i++) {
-          ((TestRunTab) m_tabsList.elementAt(i)).newTreeEntry(runInfo);
+        for (TestRunTab v : m_tabsList) {
+          v.newTreeEntry(runInfo);
         }
       }
     });
