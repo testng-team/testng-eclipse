@@ -1,8 +1,11 @@
 package org.testng.eclipse.ui.tree;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.testng.ITestResult;
+import org.testng.eclipse.ui.Images;
 import org.testng.eclipse.ui.RunInfo;
 
 abstract public class BaseTreeItem implements ITreeItem {
@@ -46,4 +49,22 @@ abstract public class BaseTreeItem implements ITreeItem {
   public RunInfo getRunInfo() {
     return m_runInfo;
   }
+
+  /**
+   * @return the icon to display for a suite with the given state.
+   */
+  protected Image getSuiteImage(int state) {
+    switch(state) {
+      case ITestResult.SUCCESS:
+        return Images.getImage(Images.IMG_SUITE_OK);
+      case ITestResult.FAILURE:
+      case ITestResult.SUCCESS_PERCENTAGE_FAILURE:
+        return Images.getImage(Images.IMG_SUITE_FAIL);
+      case ITestResult.SKIP:
+        return Images.getImage(Images.IMG_SUITE_SKIP);
+      default:
+        throw new IllegalArgumentException("Illegal state:" + state);
+    }
+  }
+
 }

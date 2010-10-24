@@ -15,5 +15,6 @@ public class TestTreeItem extends BaseTreeItem implements ITreeItem {
 
   public void update(RunInfo runInfo) {
     getTreeItem().setText(runInfo.getTestName());
+    getTreeItem().setImage(getSuiteImage(runInfo.getStatus()));
   }
 }

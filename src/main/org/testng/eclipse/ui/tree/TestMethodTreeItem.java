@@ -18,7 +18,6 @@ public class TestMethodTreeItem extends BaseTreeItem implements ITreeItem {
     update(runInfo);
   }
 
-  @Override
   public void update(RunInfo runInfo) {
     long time = runInfo.getTime();
     String description = TestNGPlugin.isEmtpy(runInfo.getTestDescription())

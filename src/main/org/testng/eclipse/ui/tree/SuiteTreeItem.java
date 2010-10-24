@@ -1,9 +1,7 @@
 package org.testng.eclipse.ui.tree;
 
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Tree;
 import org.testng.ITestResult;
-import org.testng.eclipse.ui.Images;
 import org.testng.eclipse.ui.RunInfo;
 
 import java.text.MessageFormat;
@@ -40,21 +38,7 @@ public class SuiteTreeItem extends BaseTreeItem implements ITreeItem {
           getTime() / 1000
       })
     );
-    getTreeItem().setImage(getImage(runInfo.getStatus()));
-  }
-
-  private Image getImage(int state) {
-    switch(state) {
-      case ITestResult.SUCCESS:
-        return Images.getImage(Images.IMG_SUITE_OK);
-      case ITestResult.FAILURE:
-      case ITestResult.SUCCESS_PERCENTAGE_FAILURE:
-        return Images.getImage(Images.IMG_SUITE_FAIL);
-      case ITestResult.SKIP:
-        return Images.getImage(Images.IMG_SUITE_SKIP);
-      default:
-        throw new IllegalArgumentException("Illegal state:" + state);
-    }
+    getTreeItem().setImage(getSuiteImage(runInfo.getStatus()));
   }
 
 }

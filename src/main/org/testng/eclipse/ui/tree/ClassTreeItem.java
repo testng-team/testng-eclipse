@@ -11,6 +11,7 @@ public class ClassTreeItem extends BaseTreeItem implements ITreeItem {
 
   public void update(RunInfo runInfo) {
     getTreeItem().setText(runInfo.getClassName());
+    getTreeItem().setImage(getSuiteImage(runInfo.getStatus()));
   }
 
 }
