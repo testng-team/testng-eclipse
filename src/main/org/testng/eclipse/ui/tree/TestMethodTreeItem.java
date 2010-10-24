@@ -3,11 +3,12 @@ package org.testng.eclipse.ui.tree;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.TreeItem;
 import org.testng.ITestResult;
+import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.ui.Images;
 import org.testng.eclipse.ui.RunInfo;
 
 /**
- * The representation in the tree of a test method.
+ * A tree node representing a test method.
  * 
  * @author cbeust
  */
@@ -17,12 +18,16 @@ public class TestMethodTreeItem extends BaseTreeItem implements ITreeItem {
     update(runInfo);
   }
 
+  @Override
   public void update(RunInfo runInfo) {
     long time = runInfo.getTime();
+    String description = TestNGPlugin.isEmtpy(runInfo.getTestDescription())
+        ? ""
+        : " [" + runInfo.getTestDescription() + "]";
     String label = runInfo.getMethodName()
         + runInfo.getParametersDisplay()
-        + " [" + runInfo.getTestDescription()
-        + "] (" + ((float) time / 1000) + " s) "
+        + description
+        + " (" + ((float) time / 1000) + " s) "
         ;
 
     getTreeItem().setText(label);
