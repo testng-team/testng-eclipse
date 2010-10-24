@@ -47,6 +47,14 @@ import org.testng.eclipse.util.ResourceUtil;
 import java.util.Hashtable;
 import java.util.Map;
 
+/**
+ * This class is responsible for the tree display in the runner view part. It
+ * has two subclasses, SuccessTab and FailureTab. Whenever a new test result
+ * message arrives from RemoteTestNG, updateTestResult() is invoked, which then
+ * creates or updates the corresponding node in the tree.
+ *
+ * @author Cedric Beust <cedric@beust.com>
+ */
 abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   private final Image m_suiteIcon = Images.getImage(IMG_SUITE);
   private final Image m_suiteOkeIcon = Images.getImage(IMG_SUITE_OK);
@@ -61,18 +69,14 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   private final Image m_testFailIcon = Images.getImage(IMG_TEST_FAIL);
   private final Image m_testRunIcon = Images.getImage(IMG_TEST_RUN);
 
-  // Strings used to store data on the TreeItem nodes
-//  private static final String DATA_RUN_INFO = "runInfo";
-//  private static final String DATA_CUMULATED_TIME = "cumulatedTime";
-//  private static final String DATA_TEXT_FORMAT = "textFormat";
-
   private Tree m_tree;
   private TestRunnerViewPart m_testRunnerPart;
-//  private boolean m_moveSelection = false;
 
   @Override
   public String getSelectedTestId() {
-    return null;
+    TreeItem[] treeItems = m_tree.getSelection();
+
+    return treeItems == null ? null : BaseTreeItem.getTreeItem(treeItems[0]).getRunInfo().getId();
   }
 
   @Override
@@ -96,11 +100,6 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     hierarchyTab.setToolTipText(ResourceUtil.getString(getTooltipKey())); //$NON-NLS-1$
 
     m_tree = new Tree(testTreePanel, SWT.V_SCROLL | SWT.SINGLE);
-
-//    TreeColumn column1 = new TreeColumn(fTree, SWT.LEFT);
-//    column1.setText("Method");
-//    TreeColumn column2 = new TreeColumn(fTree, SWT.CENTER);
-//    column2.setText("Time");
 
     gridData = new GridData(GridData.FILL_BOTH
                             | GridData.GRAB_HORIZONTAL
@@ -389,9 +388,7 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
 
   @Override
   public void activate() {
-//    m_moveSelection = false;
     testSelected();
-//    expandAll();
   }
 
   @Override

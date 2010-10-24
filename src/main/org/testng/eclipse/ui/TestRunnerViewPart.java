@@ -1,21 +1,4 @@
-/*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Common Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/cpl-v10.html
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *     Julien Ruaux: jruaux@octo.com see bug 25324 Ability to know when tests are finished [junit]
- *     Vincent Massol: vmassol@octo.com 25324 Ability to know when tests are finished [junit]
- *     Sebastian Davids: sdavids@gmx.de 35762 JUnit View wasting a lot of screen space [JUnit]
- *     
- * Modified by:
- *     Alexandru Popescu: the_mindstorm@evolva.ro
- ******************************************************************************/
 package org.testng.eclipse.ui;
-
 
 import org.eclipse.core.internal.resources.Workspace;
 import org.eclipse.core.resources.IFile;
@@ -108,6 +91,8 @@ import java.util.Vector;
 
 /**
  * A ViewPart that shows the results of a test run.
+ *
+ * @author Cedric Beust <cedric@beust.com>
  */
 public class TestRunnerViewPart extends ViewPart 
 implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
@@ -533,11 +518,11 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private void testTabChanged(SelectionEvent event) {
     String selectedTestId = m_activeRunTab.getSelectedTestId();
 
-    for (TestRunTab v : m_tabsList) {
-      v.setSelectedTest(selectedTestId);
+    for (TestRunTab tab : m_tabsList) {
+      tab.setSelectedTest(selectedTestId);
       
-      if(((CTabFolder) event.widget).getSelection().getText() == v.getName()) {
-        m_activeRunTab = v;
+      if(((CTabFolder) event.widget).getSelection().getText() == tab.getName()) {
+        m_activeRunTab = tab;
         m_activeRunTab.activate();
       }
     }
@@ -624,8 +609,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         fProgressBar.reset(testCount);
         clearStatus();
         
-        for (TestRunTab v : m_tabsList) {
-          v.aboutToStart();
+        for (TestRunTab tab : m_tabsList) {
+          tab.aboutToStart();
         }
       }
     });
@@ -949,27 +934,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
-  private class TreeEntryQueueDrainer implements Runnable {
-    public void run() {
-      while(true) {
-
-        RunInfo treeEntry;
-        synchronized(m_treeEntriesQueue) {
-          if(m_treeEntriesQueue.isEmpty() || isDisposed()) {
-            fQueueDrainRequestOutstanding = false;
-
-            return;
-          }
-          treeEntry = (RunInfo) m_treeEntriesQueue.remove(0);
-        }
-
-        for (TestRunTab v : m_tabsList) {
-          v.newTreeEntry(treeEntry);
-        }
-      }
-    }
-  }
-
   /**
    * Background job running in UI thread for updating components info. 
    */
@@ -1042,18 +1006,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   public void propertyChange(PropertyChangeEvent event) {
   }
 
-  private void postNewTreeEntry(RunInfo runInfo) {
-    synchronized(m_treeEntriesQueue) {
-      m_treeEntriesQueue.add(runInfo);
-      if(!fQueueDrainRequestOutstanding) {
-        fQueueDrainRequestOutstanding = true;
-        if(!isDisposed()) {
-          getDisplay().asyncExec(new TreeEntryQueueDrainer());
-        }
-      }
-    }
-  }
-  
   private void postTestResult(final RunInfo runInfo, final int progressStep) {
     postSyncRunnable(new Runnable() {
       public void run() {
@@ -1067,34 +1019,13 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         fProgressBar.step(progressStep);
 //        updateProgressBar(m_progressBar.getSelection() + 1, (progressStep == 0));
 
-        for (TestRunTab v : m_tabsList) {
-          v.updateTestResult(runInfo);
+        for (TestRunTab tab : m_tabsList) {
+          tab.updateTestResult(runInfo);
         }
       }
     });
   }
-  
-  private void postTestStarted(final RunInfo runInfo) {
-    postSyncRunnable(new Runnable() {
-      public void run() {
-        if(isDisposed()) {
-          return;
-        }
-        for (TestRunTab v : m_tabsList) {
-          v.newTreeEntry(runInfo);
-        }
-      }
-    });
-  }
-  
-  /*private void updateProgressBar(int value, boolean success) {
-    if(!success || hasErrors()) {
-      m_progressBar.setForeground(fFailureColor);
-      m_progressBar.setBackground(fFailureColor);
-    }
-    m_progressBar.setSelection(value);
-  }*/
-  
+
   ///~ [CURRENT WORK] ~///
   private IPartListener2 fPartListener = new IPartListener2() {
     public void partActivated(IWorkbenchPartReference ref) {
@@ -1251,12 +1182,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_startTime= System.currentTimeMillis();
   }
 
-  public void onStart(SuiteMessage suiteMessage) {
-    RunInfo ri= new RunInfo(suiteMessage.getSuiteName());
-    ri.m_methodCount= suiteMessage.getTestMethodCount();
-
-    postNewTreeEntry(ri);
-  }
+//  public void onStart(SuiteMessage suiteMessage) {
+//    RunInfo ri= new RunInfo(suiteMessage.getSuiteName());
+//    ri.m_methodCount= suiteMessage.getTestMethodCount();
+//
+//    postNewTreeEntry(ri);
+//  }
 
   public void onFinish(SuiteMessage suiteMessage) {
     m_suiteCount++;
@@ -1298,7 +1229,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     ri.m_methodCount= tm.getTestMethodCount();
     m_methodTotalCount += tm.getTestMethodCount();
     
-    postNewTreeEntry(ri);
+//    postNewTreeEntry(ri);
     
     postSyncRunnable(new Runnable() {
       public void run() {
@@ -1402,21 +1333,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     );
   }
 
-  /**
-   * FIXME: currently not used; it should be use to mark the currently running
-   * tests.
-   */
-  public void onTestStart(TestResultMessage trm) {
-//    System.out.println("[INFO:onTestStart]:" + trm.getMessageAsString());
-    postTestStarted(createRunInfo(trm, null, ITestResult.SUCCESS));
-  }
-  
   public Set getTestDescriptions() {
-	if (testDescriptions == null) {
-		testDescriptions = new HashSet();
-	}
-	return testDescriptions;
-}
+  	if (testDescriptions == null) {
+  		testDescriptions = new HashSet();
+  	}
+  	return testDescriptions;
+  }
   
     /**
 	 * If any test descriptions of failed tests have been saved, pass them along
@@ -1454,4 +1376,17 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 					m_LastLaunch.getLaunchMode());
 		}
 	}
+
+	/**
+   * FIXME: currently not used; it should be use to mark the currently running
+   * tests.
+   */
+  public void onTestStart(TestResultMessage trm) {
+////    System.out.println("[INFO:onTestStart]:" + trm.getMessageAsString());
+//    postTestStarted(createRunInfo(trm, null, ITestResult.SUCCESS));
+  }
+
+  public void onStart(SuiteMessage suiteMessage) {
+  }
+
 }

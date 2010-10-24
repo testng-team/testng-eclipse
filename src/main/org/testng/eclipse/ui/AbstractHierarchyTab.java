@@ -48,6 +48,9 @@ import java.util.Map;
 
 /*
  * A view that shows the contents of a test suite as a tree.
+ *
+ * This class has been replaced by AbstractTab, delete it once I'm
+ * sure that feature parity has been reached.
  */
 public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuListener {
   private final Image m_suiteIcon = Images.getImage(IMG_SUITE);
@@ -443,7 +446,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
     return null;
   }
 
-  @Override
+//  @Override
   public void newTreeEntry(RunInfo runInfo) {
     TreeItem treeItem = null;
     boolean running= false;

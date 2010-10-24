@@ -28,30 +28,31 @@ public abstract class TestRunTab {
   public abstract void createTabControl(CTabFolder tabFolder, TestRunnerViewPart runner);
 
   /**
-   * Returns the name of the currently selected Test in the View
+   * @return the id of the currently selected node in the tree view or null if no nodes
+   * are selected.
    */
   public abstract String getSelectedTestId();
 
   /**
-   * Activates the TestRunView
+   * Activates the TestRunView.
    */
   public void activate() {
   }
 
   /**
-   * Sets the focus in the TestRunView
+   * Sets the focus in the TestRunView.
    */
   public void setFocus() {
   }
 
   /**
-   * Informs that the suite is about to start
+   * Informs that the suite is about to start.
    */
   public void aboutToStart() {
   }
 
   /**
-   * Returns the name of the RunView
+   * Returns the name of the tab.
    */
   public abstract String getName();
 
@@ -61,16 +62,10 @@ public abstract class TestRunTab {
   public void setSelectedTest(String testId) {
   }
 
-  public void updateTestResult(RunInfo resultInfo) {
-  }
-
-//  public void updateEntry(String id) {
-//  }
-  
   /**
-   * A new tree entry got posted.
+   * Called by the TestRunnerViewPart whenenver a new test result is received.
    */
-  public void newTreeEntry(RunInfo treeEntry) {
+  public void updateTestResult(RunInfo resultInfo) {
   }
 
   /**
