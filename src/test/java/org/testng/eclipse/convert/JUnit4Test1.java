@@ -1,4 +1,4 @@
-package org.testng.eclipse;
+package org.testng.eclipse.convert;
 
 import org.junit.After;
 import org.junit.Before;
