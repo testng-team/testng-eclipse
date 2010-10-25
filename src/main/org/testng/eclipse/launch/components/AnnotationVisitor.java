@@ -72,9 +72,9 @@ public class AnnotationVisitor extends BaseVisitor {
         m_annotationType = JDK15_ANNOTATION;
       }
       
-      List pairs = node.values();
-      for (Iterator it = pairs.iterator(); it.hasNext(); ) {
-        MemberValuePair mvp = (MemberValuePair) it.next();
+      @SuppressWarnings("unchecked")
+      List<MemberValuePair> pairs = node.values();
+      for (MemberValuePair mvp : pairs) {
         Name attribute = mvp.getName();
         String name = attribute.getFullyQualifiedName();
         if ("groups".equals(name)) {
@@ -82,9 +82,9 @@ public class AnnotationVisitor extends BaseVisitor {
           // Array?
           if (value instanceof ArrayInitializer) {
             ArrayInitializer ai = (ArrayInitializer) value;
-            List expressions = ai.expressions();
-            for (Iterator it2 = expressions.iterator(); it2.hasNext(); ) {
-              Expression e = (Expression) it2.next();
+            @SuppressWarnings("unchecked")
+            List<Expression> expressions = ai.expressions();
+            for (Expression e : expressions) {
               addGroup(e.toString());
             }
           }
