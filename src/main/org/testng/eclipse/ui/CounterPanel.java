@@ -61,11 +61,11 @@ public class CounterPanel extends Composite {
 //    fl.marginWidth = 0;
 //    fl.marginHeight = 0;
     GridLayout gl= new GridLayout(1, false);
-    gl.marginWidth= 0;
-    gl.marginHeight= 0;
-    GridData gd= new GridData(GridData.FILL_BOTH);
+//    gl.marginWidth= 0;
+//    gl.marginHeight= 0;
+//    GridData gd= new GridData(GridData.FILL_BOTH);
     setLayout(gl);
-    setLayoutData(gd);
+//    setLayoutData(gd);
 
     createReportUpperRow();
 

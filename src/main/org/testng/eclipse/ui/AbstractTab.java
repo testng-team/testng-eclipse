@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.testng.eclipse.collections.Maps;
+import org.testng.eclipse.collections.Sets;
 import org.testng.eclipse.ui.tree.BaseTreeItem;
 import org.testng.eclipse.ui.tree.ClassTreeItem;
 import org.testng.eclipse.ui.tree.ITreeItem;
@@ -45,6 +46,8 @@ import org.testng.eclipse.util.ResourceUtil;
 
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * This class is responsible for the tree display in the runner view part. It
@@ -213,6 +216,8 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   protected abstract String getSelectedTestKey();
 
   private Map<String, ITreeItem> m_treeItemMap = Maps.newHashMap();
+  private Set<RunInfo> m_runInfos = Sets.newHashSet();
+  private String m_searchFilter;
 
   private String getId(RunInfo runInfo) {
     return runInfo.getSuiteName() + "." + runInfo.getTestName() + "." + runInfo.getClassName()
@@ -221,7 +226,14 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
 
   @Override
   public void updateTestResult(RunInfo runInfo) {
-    if (acceptTestResult(runInfo)) {
+    m_runInfos.add(runInfo);
+    privateUpdateTestResult(runInfo);
+  }
+
+  private void privateUpdateTestResult(RunInfo runInfo) {
+    // Check the search filter here as well so that results that are still coming
+    // in from RemoteTestNG get tested against it as well
+    if (acceptTestResult(runInfo) && matchesSearchFilter(runInfo)) {
       p("New result: " + runInfo);
       String id = getId(runInfo);
       ITreeItem iti = m_treeItemMap.get(id);
@@ -240,6 +252,22 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     }
 
     postExpandAll();
+  }
+
+  @Override
+  public void updateSearchFilter(String text) {
+    m_tree.removeAll();
+    m_treeItemMap.clear();
+    m_searchFilter = text;
+    for (final RunInfo runInfo : m_runInfos) {
+      if (matchesSearchFilter(runInfo)) {
+        privateUpdateTestResult(runInfo);
+      }
+    }
+  }
+
+  private boolean matchesSearchFilter(RunInfo runInfo) {
+    return Pattern.matches(".*" + m_searchFilter + ".*", runInfo.getMethodDisplay());
   }
 
   /**

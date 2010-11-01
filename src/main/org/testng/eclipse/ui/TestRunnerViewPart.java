@@ -36,6 +36,8 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -47,7 +49,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Layout;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorActionBarContributor;
@@ -234,6 +238,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   // Stores any test descriptions of failed tests. For any test class 
   // that implements ITest, this will be the returned value of getTestName().
   private Set testDescriptions;
+  private Text m_searchText;
   
 
   @Override
@@ -255,7 +260,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
     return null;
   }
-
 
   private void restoreLayoutState(IMemento memento) {
     Integer page = memento.getInteger(TAG_PAGE);
@@ -635,9 +639,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
     configureToolBar();
 
-    m_counterComposite = createProgressCountPanel(parent);
-    m_counterComposite.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
-                                                 | GridData.HORIZONTAL_ALIGN_FILL));
+    createProgressCountPanel(parent);
 
     SashForm sashForm = createSashForm(parent);
     sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -771,33 +773,51 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     return getViewSite().getActionBars().getStatusLineManager();
   }
 
-  protected Composite createProgressCountPanel(Composite parent) {
+  protected void createProgressCountPanel(Composite parent) {
     Display display= parent.getDisplay();
     fFailureColor= new Color(display, 159, 63, 63);
     fOKColor= new Color(display, 95, 191, 95);
-    
-    Composite  composite = new Composite(parent, SWT.NONE);
-    GridLayout layout = new GridLayout();
-//    layout.numColumns = 1;
-    composite.setLayout(layout);
-    setCounterColumns(layout);
 
-    fProgressBar = new JUnitProgressBar(composite);
-    fProgressBar.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
-                                            | GridData.HORIZONTAL_ALIGN_FILL));
+    {
+      m_counterComposite = new Composite(parent, SWT.NONE);
+      m_counterComposite.setLayoutData(
+          new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+      GridLayout layout = new GridLayout();
+      m_counterComposite.setLayout(layout);
+      setCounterColumns(layout);
 
-//    m_progressBar= new ProgressBar(composite, SWT.SMOOTH);
-//    m_progressBar.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
-//        | GridData.HORIZONTAL_ALIGN_FILL));
-//    m_progressBar.addPaintListener(new ProgressBarTextPainter(this));
-//    m_progressBar.setForeground(fOKColor);
+      fProgressBar = new JUnitProgressBar(m_counterComposite);
+      fProgressBar.setLayoutData(
+          new GridData(GridData.GRAB_HORIZONTAL| GridData.HORIZONTAL_ALIGN_FILL));
+    }
 
-    m_counterPanel = new CounterPanel(composite);
-    m_counterPanel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
-                                             | GridData.HORIZONTAL_ALIGN_FILL));
+    {
+      Composite line2 = new Composite(parent, SWT.NONE);
+      line2.setLayoutData(
+          new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+      GridLayout layout = new GridLayout();
+      layout.numColumns = 3;
+      line2.setLayout(layout);
+      new Label(line2, SWT.NONE).setText("Search:");
+      m_searchText = new Text(line2, SWT.SINGLE | SWT.BORDER);
+      m_searchText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+      m_searchText.addKeyListener(new KeyListener() {
 
+        public void keyPressed(KeyEvent e) {
+        }
 
-    return composite;
+        public void keyReleased(KeyEvent e) {
+          for (TestRunTab tab : m_tabsList) {
+            tab.updateSearchFilter(m_searchText.getText());
+          }
+        }
+
+      });
+
+      m_counterPanel = new CounterPanel(line2);
+//      m_counterPanel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
+//                                               | GridData.HORIZONTAL_ALIGN_FILL));
+    }
   }
 
   /*private static class ProgressBarTextPainter implements PaintListener {

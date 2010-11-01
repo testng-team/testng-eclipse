@@ -83,4 +83,7 @@ public abstract class TestRunTab {
   protected String getResourceString(String key) {
     return ResourceUtil.getString(key);
   }
+
+  public void updateSearchFilter(String text) {
+  }
 }
