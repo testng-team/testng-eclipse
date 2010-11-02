@@ -12,7 +12,7 @@ import org.testng.eclipse.ui.RunInfo;
 public class TestTableSorter extends ViewerSorter {
   private static final int DESCENDING = 1;
   private int m_column;
-  private int m_direction = DESCENDING;
+  private int m_direction = 0; // start in ascending order
   private SummaryTab m_tab;
 
   public TestTableSorter(SummaryTab tab) {

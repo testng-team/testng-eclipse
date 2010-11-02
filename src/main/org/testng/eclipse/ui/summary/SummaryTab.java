@@ -6,6 +6,7 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -25,6 +26,7 @@ import org.testng.eclipse.ui.TestRunTab;
 import org.testng.eclipse.ui.TestRunnerViewPart;
 import org.testng.eclipse.util.ResourceUtil;
 
+import java.text.MessageFormat;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,6 +47,8 @@ public class SummaryTab extends TestRunTab  {
   }
 
   private Map<String, TestResult> m_testResults = Maps.newHashMap();
+
+  private TestNameFilter m_searchFilter;
 
   protected String getTooltipKey() {
     return "Summary.tab.tooltip";
@@ -89,9 +93,15 @@ public class SummaryTab extends TestRunTab  {
     m_testViewer.setSorter(tableSorter);
 
     //
+    // Filter
+    //
+    m_searchFilter = new TestNameFilter();
+    m_testViewer.setFilters(new ViewerFilter[] { m_searchFilter });
+
+    //
     // Columns
     //
-    String[] titles = { "Test name", "Time", "Class count", "Method count" };
+    String[] titles = { "Test name", "Time (seconds)", "Class count", "Method count" };
     int[] bounds = { 150, 150, 100, 100 };
     for (int i = 0; i < titles.length; i++) {
       final int index = i;
@@ -150,7 +160,7 @@ public class SummaryTab extends TestRunTab  {
         String testId = runInfo.getTestId();
         switch(columnIndex) {
           case 0:  return ((RunInfo) element).getTestName();
-          case 1: return Long.toString(getTestTime(testId));
+          case 1: return MessageFormat.format("{0}", ((float) getTestTime(testId)) / 1000);
           case 2: return Integer.toString(getTestClassCount(testId));
           case 3: return Integer.toString(getTestMethodCount(testId));
           default: return "";
@@ -204,6 +214,12 @@ public class SummaryTab extends TestRunTab  {
   public void aboutToStart() {
     m_tests.clear();
     m_testResults.clear();
+    m_testViewer.refresh();
+  }
+
+  @Override
+  public void updateSearchFilter(String text) {
+    m_searchFilter.setFilter(text);
     m_testViewer.refresh();
   }
 
