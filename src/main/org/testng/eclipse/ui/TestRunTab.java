@@ -29,9 +29,17 @@ public abstract class TestRunTab {
 
   /**
    * @return the id of the currently selected node in the tree view or null if no nodes
-   * are selected.
+   * are selected. If the user selects an item on a tab and then switches to another tab,
+   * the new tab can then try to make a best effort to keep the same item selected.
    */
   public abstract String getSelectedTestId();
+
+  /**
+   * Ask this tab to select the item with the given id, if possible. Used when the user
+   * switches tabs.
+   */
+  public void setSelectedTest(String testId) {
+  }
 
   /**
    * Activates the TestRunView.
@@ -55,12 +63,6 @@ public abstract class TestRunTab {
    * Returns the name of the tab.
    */
   public abstract String getName();
-
-  /**
-   * Sets the current Test in the View
-   */
-  public void setSelectedTest(String testId) {
-  }
 
   /**
    * Called by the TestRunnerViewPart whenenver a new test result is received.

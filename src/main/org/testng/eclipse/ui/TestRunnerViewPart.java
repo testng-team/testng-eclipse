@@ -524,7 +524,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
     for (TestRunTab tab : m_tabsList) {
       tab.setSelectedTest(selectedTestId);
-      
+
       if(((CTabFolder) event.widget).getSelection().getText() == tab.getName()) {
         m_activeRunTab = tab;
         m_activeRunTab.activate();

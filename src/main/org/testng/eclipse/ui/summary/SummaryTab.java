@@ -1,8 +1,12 @@
 package org.testng.eclipse.ui.summary;
 
 import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -31,7 +35,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A view that shows a summary of the test run.
+ * A view that shows a summary of the test run and allows the user to sort these results
+ * by timings, names, counts, etc...
  */
 public class SummaryTab extends TestRunTab  {
 
@@ -40,6 +45,7 @@ public class SummaryTab extends TestRunTab  {
   /** The table that contains all the tests */
   private TableViewer m_testViewer;
 
+  /** A test result, updated whenever we receive a new test result */
   class TestResult {
     Long time = 0L;
     Set<String> methods = Sets.newHashSet();
@@ -49,6 +55,9 @@ public class SummaryTab extends TestRunTab  {
   private Map<String, TestResult> m_testResults = Maps.newHashMap();
 
   private TestNameFilter m_searchFilter;
+
+  /** The id of the currently selected item */
+  private String m_selectedId;
 
   protected String getTooltipKey() {
     return "Summary.tab.tooltip";
@@ -62,7 +71,7 @@ public class SummaryTab extends TestRunTab  {
   public void createTabControl(CTabFolder tabFolder, TestRunnerViewPart runner) {
     CTabItem tab = new CTabItem(tabFolder, SWT.NONE);
     tab.setText(getName());
-//    hierarchyTab.setImage(m_testHierarchyIcon);
+//    tab.setImage(m_testHierarchyIcon);
 
     Composite composite = new Composite(tabFolder, SWT.NONE);
     GridLayout gridLayout = new GridLayout();
@@ -72,7 +81,7 @@ public class SummaryTab extends TestRunTab  {
     composite.setLayout(gridLayout);
 
     //
-    // Tests
+    // Test table
     //
     Label label = new Label(composite, SWT.NONE);
     label.setText("Tests");
@@ -97,6 +106,27 @@ public class SummaryTab extends TestRunTab  {
     //
     m_searchFilter = new TestNameFilter();
     m_testViewer.setFilters(new ViewerFilter[] { m_searchFilter });
+
+    //
+    // Selection
+    //
+    m_testViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+
+      public void selectionChanged(SelectionChangedEvent event) {
+        ISelection selection = event.getSelection();
+        if (selection instanceof StructuredSelection) {
+          StructuredSelection ss = (StructuredSelection) selection;
+          RunInfo selected = ((RunInfo) ss.getFirstElement());
+          if (selected != null) {
+            String selectedId = ((RunInfo) ss.getFirstElement()).getTestId();
+            if (m_selectedId != null && !m_selectedId.startsWith(selectedId)) {
+              m_selectedId = selectedId;
+            }
+          }
+        }
+      }
+
+    });
 
     //
     // Columns
@@ -127,6 +157,9 @@ public class SummaryTab extends TestRunTab  {
       });
     }
 
+    //
+    // Content provider
+    //
     m_testViewer.setContentProvider(new IStructuredContentProvider() {
 
       public void dispose() {
@@ -140,6 +173,10 @@ public class SummaryTab extends TestRunTab  {
       }
       
     });
+
+    //
+    // Label provider
+    //
     m_testViewer.setLabelProvider(new ITableLabelProvider() {
       
       public void removeListener(ILabelProviderListener listener) {
@@ -189,7 +226,24 @@ public class SummaryTab extends TestRunTab  {
 
   @Override
   public String getSelectedTestId() {
-    return null;
+    return m_selectedId;
+  }
+
+  @Override
+  public void setSelectedTest(String id) {
+    if (id == null) return;
+
+    m_selectedId = id;
+    // We might be receiving the id of a method, but we only store test names,
+    // so just find the name of the test that contains this method and select
+    // the corresponding row. Note that we still store the original id so that
+    // when the user switches to a different tab, their selection there remains
+    // untouched.
+    for (String test : m_testResults.keySet()) {
+      if (id.startsWith(test)) {
+        m_testViewer.setSelection(new StructuredSelection(m_tests.get(test)));
+      }
+    }
   }
 
   @Override

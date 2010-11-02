@@ -90,7 +90,18 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     if (treeItems == null || treeItems.length == 0) {
       return null;
     } else {
-      return BaseTreeItem.getTreeItem(treeItems[0]).getRunInfo().getId();
+      return BaseTreeItem.getTreeItem(treeItems[0]).getRunInfo().getMethodId();
+    }
+  }
+
+  @Override
+  public void setSelectedTest(String testId) {
+    if (testId == null) return;
+    ITreeItem node = m_treeItemMap.get(testId);
+    if (node != null) {
+      m_tree.select(node.getTreeItem());
+    } else {
+      m_tree.deselectAll();
     }
   }
 
@@ -251,11 +262,6 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   private Set<RunInfo> m_runInfos = Sets.newHashSet();
   private String m_searchFilter = "";
 
-  private String getId(RunInfo runInfo) {
-    return runInfo.getSuiteName() + "." + runInfo.getTestName() + "." + runInfo.getClassName()
-        + "." + runInfo.getMethodName();
-  }
-
   @Override
   public void updateTestResult(RunInfo runInfo) {
     m_runInfos.add(runInfo);
@@ -267,7 +273,7 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     // in from RemoteTestNG get tested against it as well
     if (acceptTestResult(runInfo) && matchesSearchFilter(runInfo)) {
       p("New result: " + runInfo);
-      String id = getId(runInfo);
+      String id = runInfo.getMethodId();
       ITreeItem iti = m_treeItemMap.get(id);
       TreeItem ti;
       TreeItem parentItem = null;
@@ -333,25 +339,25 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
    * @return the parent tree item for this ResultInfo, possibly creating all the
    * other parents if they don't exist yet.
    */
-  private ITreeItem maybeCreateParents(RunInfo trm) {
-    String suiteId = trm.getSuiteName();
+  private ITreeItem maybeCreateParents(RunInfo runInfo) {
+    String suiteId = runInfo.getSuiteName();
     ITreeItem suiteTreeItem = m_treeItemMap.get(suiteId);
     if (suiteTreeItem == null) {
-      suiteTreeItem = new SuiteTreeItem(m_tree, trm);
+      suiteTreeItem = new SuiteTreeItem(m_tree, runInfo);
       registerTreeItem(suiteId, suiteTreeItem);
     }
 
-    String testId = suiteId + "." + trm.getTestName();
+    String testId = runInfo.getTestId();
     ITreeItem testTreeItem = m_treeItemMap.get(testId);
     if (testTreeItem == null) {
-      testTreeItem = new TestTreeItem(suiteTreeItem.getTreeItem(), trm);
+      testTreeItem = new TestTreeItem(suiteTreeItem.getTreeItem(), runInfo);
       registerTreeItem(testId, testTreeItem);
     }
 
-    String classId = testId + "." + trm.getClassName();
+    String classId = runInfo.getClassId();
     ITreeItem classTreeItem = m_treeItemMap.get(classId);
     if (classTreeItem == null) {
-      classTreeItem = new ClassTreeItem(testTreeItem.getTreeItem(), trm);
+      classTreeItem = new ClassTreeItem(testTreeItem.getTreeItem(), runInfo);
       registerTreeItem(classId, classTreeItem);
     }
 
