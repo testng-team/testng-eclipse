@@ -1,4 +1,4 @@
-package org.testng.eclipse.ui;
+package org.testng.eclipse.ui.summary;
 
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -9,6 +9,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -18,6 +20,9 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.collections.Sets;
+import org.testng.eclipse.ui.RunInfo;
+import org.testng.eclipse.ui.TestRunTab;
+import org.testng.eclipse.ui.TestRunnerViewPart;
 import org.testng.eclipse.util.ResourceUtil;
 
 import java.util.Map;
@@ -32,7 +37,14 @@ public class SummaryTab extends TestRunTab  {
 
   /** The table that contains all the tests */
   private TableViewer m_testViewer;
-  private Map<String, Long> m_testTimes = Maps.newHashMap();
+
+  class TestResult {
+    Long time = 0L;
+    Set<String> methods = Sets.newHashSet();
+    Set<String> classes = Sets.newHashSet();
+  }
+
+  private Map<String, TestResult> m_testResults = Maps.newHashMap();
 
   protected String getTooltipKey() {
     return "Summary.tab.tooltip";
@@ -59,7 +71,8 @@ public class SummaryTab extends TestRunTab  {
     // Tests
     //
     Label label = new Label(composite, SWT.NONE);
-    label.setText("Summary tab");
+    label.setText("Tests");
+    label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
 
     tab.setControl(composite);
     tab.setToolTipText(ResourceUtil.getString(getTooltipKey())); //$NON-NLS-1$
@@ -68,15 +81,40 @@ public class SummaryTab extends TestRunTab  {
     table.setHeaderVisible(true);
     table.setLinesVisible(true);
     table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    String[] titles = { "Test name", "Time" };
-    int[] bounds = { 150, 150 };
+
+    //
+    // Table sorter
+    //
+    final TestTableSorter tableSorter = new TestTableSorter(this);
+    m_testViewer.setSorter(tableSorter);
+
+    //
+    // Columns
+    //
+    String[] titles = { "Test name", "Time", "Class count", "Method count" };
+    int[] bounds = { 150, 150, 100, 100 };
     for (int i = 0; i < titles.length; i++) {
+      final int index = i;
       TableViewerColumn viewerColumn = new TableViewerColumn(m_testViewer, SWT.NONE);
       final TableColumn column = viewerColumn.getColumn();
       column.setText(titles[i]);
       column.setWidth(bounds[i]);
       column.setResizable(true);
       column.setMoveable(true);      
+      column.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          tableSorter.setColumn(index);
+          int dir = m_testViewer.getTable().getSortDirection();
+          if (m_testViewer.getTable().getSortColumn() == column) {
+            dir = dir == SWT.UP ? SWT.DOWN : SWT.UP;
+          } else {
+            dir = SWT.DOWN;
+          }
+          m_testViewer.getTable().setSortDirection(dir);
+          m_testViewer.getTable().setSortColumn(column);
+          m_testViewer.refresh();        }
+      });
     }
 
     m_testViewer.setContentProvider(new IStructuredContentProvider() {
@@ -109,10 +147,12 @@ public class SummaryTab extends TestRunTab  {
       
       public String getColumnText(Object element, int columnIndex) {
         RunInfo runInfo = (RunInfo) element;
-        String testId = getTestId(runInfo);
+        String testId = runInfo.getTestId();
         switch(columnIndex) {
           case 0:  return ((RunInfo) element).getTestName();
-          case 1: return m_testTimes.get(testId).toString();
+          case 1: return Long.toString(getTestTime(testId));
+          case 2: return Integer.toString(getTestClassCount(testId));
+          case 3: return Integer.toString(getTestMethodCount(testId));
           default: return "";
         }
       }
@@ -125,10 +165,18 @@ public class SummaryTab extends TestRunTab  {
     m_testViewer.setInput(m_tests);
   }
 
-  private String getTestId(RunInfo runInfo) {
-    return runInfo.getSuiteName() + "." + runInfo.getTestName();
+  protected int getTestMethodCount(String testId) {
+    return m_testResults.get(testId).methods.size();
   }
-  
+
+  public long getTestTime(String testId) {
+    return m_testResults.get(testId).time;
+  }
+
+  public int getTestClassCount(String testId) {
+    return m_testResults.get(testId).classes.size();
+  }
+
   @Override
   public String getSelectedTestId() {
     return null;
@@ -139,15 +187,24 @@ public class SummaryTab extends TestRunTab  {
     //
     // Update tests
     //
-    String testId = getTestId(runInfo);
+    String testId = runInfo.getTestId();
     m_tests.put(testId, runInfo);
-    Long time = m_testTimes.get(testId);
-    if (time == null) {
-      time = 0L;
+    TestResult tr = m_testResults.get(testId);
+    if (tr == null) {
+      tr = new TestResult();
+      m_testResults.put(testId, tr);
     }
-    time += runInfo.getTime();
-    m_testTimes.put(testId, time);
-    m_testViewer.setInput(m_tests);
+    tr.time += runInfo.getTime();
+    tr.methods.add(runInfo.getMethodId());
+    tr.classes.add(runInfo.getClassId());
+    m_testViewer.refresh();
+  }
+
+  @Override
+  public void aboutToStart() {
+    m_tests.clear();
+    m_testResults.clear();
+    m_testViewer.refresh();
   }
 
 }

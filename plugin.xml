@@ -110,7 +110,7 @@
          point="org.testng.eclipse.internal_testRunTabs">
       <testRunTab class="org.testng.eclipse.ui.SuccessTab"/>
       <testRunTab class="org.testng.eclipse.ui.FailureTab"/>
-      <testRunTab class="org.testng.eclipse.ui.SummaryTab"/>
+      <testRunTab class="org.testng.eclipse.ui.summary.SummaryTab"/>
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchShortcuts">

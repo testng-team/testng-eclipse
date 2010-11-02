@@ -324,7 +324,7 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   }
 
   private void p(String string) {
-    if (true) {
+    if (false) {
       System.out.println("[AbstractTab] " + string);
     }
   }
