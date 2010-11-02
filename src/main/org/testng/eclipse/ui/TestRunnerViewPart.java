@@ -137,7 +137,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   /** The currently active run tab. */
   private TestRunTab m_activeRunTab;
 
-  private FailureTrace m_failureTraceComponent;
+//  private FailureTrace m_failureTraceComponent;
   
   private SashForm   m_sashForm;
 
@@ -145,7 +145,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private Composite   m_counterComposite;
   
   final Image m_viewIcon = TestNGPlugin.getImageDescriptor("main16/testng_noshadow.gif").createImage();//$NON-NLS-1$
-  final Image fStackViewIcon = TestNGPlugin.getImageDescriptor("eview16/stackframe.gif").createImage(); //$NON-NLS-1$
+//  final Image fStackViewIcon = TestNGPlugin.getImageDescriptor("eview16/stackframe.gif").createImage(); //$NON-NLS-1$
 
   /**
    * Actions
@@ -369,7 +369,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
     TestNGPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
     getViewSite().getPage().removePartListener(fPartListener);
-    fStackViewIcon.dispose();
+//    fStackViewIcon.dispose();
     m_viewIcon.dispose();
     fOKColor.dispose();
     fFailureColor.dispose();
@@ -474,7 +474,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   protected CTabFolder createTestRunTabs(Composite parent) {
     CTabFolder tabFolder = new CTabFolder(parent, SWT.TOP);
-    tabFolder.setLayoutData(new GridData(GridData.FILL_BOTH | GridData.GRAB_VERTICAL));
+    tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
     loadTestRunTabs(tabFolder);
     tabFolder.setSelection(0);
@@ -532,62 +532,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
-  private SashForm createSashForm(Composite parent) {
-    m_sashForm = new SashForm(parent, SWT.VERTICAL);
-
-    ViewForm top = new ViewForm(m_sashForm, SWT.NONE);
-    m_tabFolder = createTestRunTabs(top);
-    m_tabFolder.setLayoutData(new Layout() {
-        @Override
-        protected Point computeSize (Composite composite, int wHint, int hHint, boolean flushCache) {
-            if (wHint != SWT.DEFAULT && hHint != SWT.DEFAULT)
-                return new Point(wHint, hHint);
-                
-            Control [] children = composite.getChildren ();
-            int count = children.length;
-            int maxWidth = 0, maxHeight = 0;
-            for (int i=0; i<count; i++) {
-                Control child = children [i];
-                Point pt = child.computeSize (SWT.DEFAULT, SWT.DEFAULT, flushCache);
-                maxWidth = Math.max (maxWidth, pt.x);
-                maxHeight = Math.max (maxHeight, pt.y);
-            }
-            
-            if (wHint != SWT.DEFAULT)
-                maxWidth= wHint;
-            if (hHint != SWT.DEFAULT)
-                maxHeight= hHint;
-            
-            return new Point(maxWidth, maxHeight);
-        }
-        
-        @Override
-        protected void layout(Composite composite, boolean flushCache) {
-            Rectangle rect= composite.getClientArea();
-            Control[] children = composite.getChildren();
-            for (int i = 0; i < children.length; i++) {
-                children[i].setBounds(rect);
-            }
-        }
-    });
-    top.setContent(m_tabFolder);
-
-    ViewForm bottom = new ViewForm(m_sashForm, SWT.NONE);
-    CLabel   label = new CLabel(bottom, SWT.NONE);
-    label.setText(ResourceUtil.getString("TestRunnerViewPart.label.failure")); //$NON-NLS-1$
-    label.setImage(fStackViewIcon);
-    bottom.setTopLeft(label);
-
-    ToolBar failureToolBar = new ToolBar(bottom, SWT.FLAT | SWT.WRAP);
-    bottom.setTopCenter(failureToolBar);
-    m_failureTraceComponent = new FailureTrace(bottom, this, failureToolBar);
-    bottom.setContent(m_failureTraceComponent.getComposite());
-
-    m_sashForm.setWeights(new int[] { 50, 50 });
-
-    return m_sashForm;
-  }
-
   private void reset(final int suiteCount, final int testCount) {
     m_suitesTotalCount = suiteCount;
     m_testsTotalCount = testCount;
@@ -609,7 +553,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         }
         
         m_counterPanel.reset();
-        m_failureTraceComponent.clear();
+//        m_failureTraceComponent.clear();
         fProgressBar.reset(testCount);
         clearStatus();
         
@@ -641,8 +585,42 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
     createProgressCountPanel(parent);
 
-    SashForm sashForm = createSashForm(parent);
-    sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
+    m_tabFolder = createTestRunTabs(parent);
+//    m_tabFolder.setLayoutData(new Layout() {
+//      @Override
+//      protected Point computeSize (Composite composite, int wHint, int hHint, boolean flushCache) {
+//          if (wHint != SWT.DEFAULT && hHint != SWT.DEFAULT)
+//              return new Point(wHint, hHint);
+//              
+//          Control [] children = composite.getChildren ();
+//          int count = children.length;
+//          int maxWidth = 0, maxHeight = 0;
+//          for (int i=0; i<count; i++) {
+//              Control child = children [i];
+//              Point pt = child.computeSize (SWT.DEFAULT, SWT.DEFAULT, flushCache);
+//              maxWidth = Math.max (maxWidth, pt.x);
+//              maxHeight = Math.max (maxHeight, pt.y);
+//          }
+//          
+//          if (wHint != SWT.DEFAULT)
+//              maxWidth= wHint;
+//          if (hHint != SWT.DEFAULT)
+//              maxHeight= hHint;
+//          
+//          return new Point(maxWidth, maxHeight);
+//      }
+//      
+//      @Override
+//      protected void layout(Composite composite, boolean flushCache) {
+//          Rectangle rect= composite.getClientArea();
+//          Control[] children = composite.getChildren();
+//          for (int i = 0; i < children.length; i++) {
+//              children[i].setBounds(rect);
+//          }
+//      }
+//  });
+//    SashForm sashForm = createSashForm(parent);
+//    sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
 
     TestNGPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 
@@ -844,15 +822,15 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }*/
   
-  public void handleTestSelected(final RunInfo testInfo) {
-    postSyncRunnable(new Runnable() {
-      public void run() {
-        if(!isDisposed()) {
-          m_failureTraceComponent.showFailure(testInfo);
-        }
-      }
-    });
-  }
+//  public void handleTestSelected(final RunInfo testInfo) {
+//    postSyncRunnable(new Runnable() {
+//      public void run() {
+//        if(!isDisposed()) {
+//          m_failureTraceComponent.showFailure(testInfo);
+//        }
+//      }
+//    });
+//  }
 
   public IJavaProject getLaunchedProject() {
     return m_workingProject;
