@@ -24,11 +24,6 @@ public class FailureTab extends AbstractTab  {
   }
 
   @Override
-  protected String getSelectedTestKey() {
-    return "[FailureTab.setSelectedTest]";
-  }
-
-  @Override
   protected boolean acceptTestResult(RunInfo runInfo) {
     int status = runInfo.getStatus();
     return ITestResult.FAILURE == status;

@@ -213,8 +213,6 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
 
   protected abstract String getTooltipKey();
   
-  protected abstract String getSelectedTestKey();
-
   private Map<String, ITreeItem> m_treeItemMap = Maps.newHashMap();
   private Set<RunInfo> m_runInfos = Sets.newHashSet();
   private String m_searchFilter;

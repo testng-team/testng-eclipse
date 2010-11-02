@@ -15,10 +15,4 @@ public class SuccessTab extends AbstractTab  {
   public String getName() {
     return getResourceString("HierarchyRunView.tab.title"); //$NON-NLS-1$
   }
-
-  protected String getSelectedTestKey(){
-	  return "[TestHierarchyTab.setSelectedTest]";
-  }
- 
-  
 }
