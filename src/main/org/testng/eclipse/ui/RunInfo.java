@@ -224,7 +224,7 @@ public class RunInfo {
    * @return
    */
   public String getParametersDisplay() {
-    if(null == m_parameters || m_parameters.length == 0) return "()";
+    if(null == m_parameters || m_parameters.length == 0) return "";
 
     return toString(m_parameters, m_parameterTypes);
   }
