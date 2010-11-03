@@ -99,40 +99,42 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
   }
 
   @Override
-  public void createTabControl(CTabFolder tabFolder, TestRunnerViewPart runner) {
+  public Composite createTabControl(Composite tabFolder, TestRunnerViewPart runner) {
     fTestRunnerPart = runner;
 
-    CTabItem hierarchyTab = new CTabItem(tabFolder, SWT.NONE);
-    hierarchyTab.setText(getName());
-    hierarchyTab.setImage(m_testHierarchyIcon);
+//    CTabItem hierarchyTab = new CTabItem(tabFolder, SWT.NONE);
+//    hierarchyTab.setText(ResourceUtil.getString(getNameKey()));
+//    hierarchyTab.setImage(m_testHierarchyIcon);
+//
+//    Composite  testTreePanel = new Composite(tabFolder, SWT.NONE);
+//    GridLayout gridLayout = new GridLayout();
+//    gridLayout.marginHeight = 0;
+//    gridLayout.marginWidth = 0;
+//    testTreePanel.setLayout(gridLayout);
+//
+//    GridData gridData = new GridData(GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
+//    testTreePanel.setLayoutData(gridData);
+//
+//    hierarchyTab.setControl(testTreePanel);
+//    hierarchyTab.setToolTipText(ResourceUtil.getString(getTooltipKey())); //$NON-NLS-1$
+//
+//    fTree = new Tree(testTreePanel, SWT.V_SCROLL | SWT.SINGLE);
+//
+////    TreeColumn column1 = new TreeColumn(fTree, SWT.LEFT);
+////    column1.setText("Method");
+////    TreeColumn column2 = new TreeColumn(fTree, SWT.CENTER);
+////    column2.setText("Time");
+//
+//    gridData = new GridData(GridData.FILL_BOTH
+//                            | GridData.GRAB_HORIZONTAL
+//                            | GridData.GRAB_VERTICAL);
+//
+//    fTree.setLayoutData(gridData);
+//
+//    initMenu();
+//    addListeners();
 
-    Composite  testTreePanel = new Composite(tabFolder, SWT.NONE);
-    GridLayout gridLayout = new GridLayout();
-    gridLayout.marginHeight = 0;
-    gridLayout.marginWidth = 0;
-    testTreePanel.setLayout(gridLayout);
-
-    GridData gridData = new GridData(GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
-    testTreePanel.setLayoutData(gridData);
-
-    hierarchyTab.setControl(testTreePanel);
-    hierarchyTab.setToolTipText(ResourceUtil.getString(getTooltipKey())); //$NON-NLS-1$
-
-    fTree = new Tree(testTreePanel, SWT.V_SCROLL | SWT.SINGLE);
-
-//    TreeColumn column1 = new TreeColumn(fTree, SWT.LEFT);
-//    column1.setText("Method");
-//    TreeColumn column2 = new TreeColumn(fTree, SWT.CENTER);
-//    column2.setText("Time");
-
-    gridData = new GridData(GridData.FILL_BOTH
-                            | GridData.GRAB_HORIZONTAL
-                            | GridData.GRAB_VERTICAL);
-
-    fTree.setLayoutData(gridData);
-
-    initMenu();
-    addListeners();
+    return null;
   }
 
   private void initMenu() {
@@ -795,10 +797,10 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
     }
   }
   
-  protected abstract String getTooltipKey();
+//  protected abstract String getTooltipKey();
   
   protected abstract String getSelectedTestKey();
 
-  @Override
-  public abstract String getName();
+//  @Override
+//  public abstract String getName();
 }

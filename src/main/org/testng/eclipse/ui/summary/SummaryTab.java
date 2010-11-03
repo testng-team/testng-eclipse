@@ -59,37 +59,35 @@ public class SummaryTab extends TestRunTab  {
   /** The id of the currently selected item */
   private String m_selectedId;
 
-  protected String getTooltipKey() {
+  public String getTooltipKey() {
     return "Summary.tab.tooltip";
   }
 
-  public String getName() {
-    return getResourceString("Summary.tab.title"); //$NON-NLS-1$
+  @Override
+  public String getNameKey() {
+    return "Summary.tab.title"; //$NON-NLS-1$
   }
 
   @Override
-  public void createTabControl(CTabFolder tabFolder, TestRunnerViewPart runner) {
-    CTabItem tab = new CTabItem(tabFolder, SWT.NONE);
-    tab.setText(getName());
-//    tab.setImage(m_testHierarchyIcon);
+  public Image getImage() {
+    return null;
+  }
 
-    Composite composite = new Composite(tabFolder, SWT.NONE);
+  @Override
+  public Composite createTabControl(Composite parent, TestRunnerViewPart runner) {
+    Composite result = new Composite(parent, SWT.NONE);
     GridLayout gridLayout = new GridLayout();
-    gridLayout.marginHeight = 0;
-    gridLayout.marginWidth = 0;
     gridLayout.numColumns = 1;
-    composite.setLayout(gridLayout);
+    result.setLayout(gridLayout);
 
     //
     // Test table
     //
-    Label label = new Label(composite, SWT.NONE);
+    Label label = new Label(result, SWT.NONE);
     label.setText("Tests");
     label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
 
-    tab.setControl(composite);
-    tab.setToolTipText(ResourceUtil.getString(getTooltipKey())); //$NON-NLS-1$
-    m_testViewer = new TableViewer(composite);
+    m_testViewer = new TableViewer(result);
     Table table = m_testViewer.getTable();
     table.setHeaderVisible(true);
     table.setLinesVisible(true);
@@ -210,6 +208,8 @@ public class SummaryTab extends TestRunTab  {
     });
 
     m_testViewer.setInput(m_tests);
+
+    return result;
   }
 
   protected int getTestMethodCount(String testId) {

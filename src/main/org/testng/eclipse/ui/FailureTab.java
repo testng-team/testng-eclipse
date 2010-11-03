@@ -14,13 +14,13 @@ public class FailureTab extends AbstractTab  {
 //  }
    
   @Override
-  protected String getTooltipKey() {
+  public String getTooltipKey() {
     return "FailureRunView.tab.tooltip";
   }
  
   @Override
-  public String getName() {
-    return getResourceString("FailureRunView.tab.title"); //$NON-NLS-1$
+  public String getNameKey() {
+    return "FailureRunView.tab.title"; //$NON-NLS-1$
   }
 
   @Override

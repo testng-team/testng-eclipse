@@ -106,28 +106,26 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   }
 
   @Override
-  public void createTabControl(CTabFolder tabFolder, TestRunnerViewPart runner) {
+  public Image getImage() {
+    return m_testHierarchyIcon;
+  }
+
+  @Override
+  public Composite createTabControl(Composite parent, TestRunnerViewPart runner) {
     m_testRunnerPart = runner;
 
-    CTabItem hierarchyTab = new CTabItem(tabFolder, SWT.NONE);
-    hierarchyTab.setText(getName());
-    hierarchyTab.setImage(m_testHierarchyIcon);
-
-    Composite treeComposite = new Composite(tabFolder, SWT.NONE);
+    Composite result = new Composite(parent, SWT.NONE);
     GridLayout gridLayout = new GridLayout();
     gridLayout.marginHeight = 0;
     gridLayout.marginWidth = 0;
     gridLayout.numColumns = 3;
-    treeComposite.setLayout(gridLayout);
+    result.setLayout(gridLayout);
 
     GridData gridData = new GridData(GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
-    treeComposite.setLayoutData(gridData);
-
-    hierarchyTab.setControl(treeComposite);
-    hierarchyTab.setToolTipText(ResourceUtil.getString(getTooltipKey())); //$NON-NLS-1$
+    result.setLayoutData(gridData);
 
     // The sash is the parent of both the tree and the stack trace component
-    SashForm m_sashForm = new SashForm(treeComposite, SWT.HORIZONTAL);
+    SashForm m_sashForm = new SashForm(result, SWT.HORIZONTAL);
     m_sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
     //
@@ -154,6 +152,8 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
 
     initMenu();
     addListeners();
+
+    return result;
   }
 
   private void initMenu() {
@@ -256,8 +256,6 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     }
   }
 
-  protected abstract String getTooltipKey();
-  
   private Map<String, ITreeItem> m_treeItemMap = Maps.newHashMap();
   private Set<RunInfo> m_runInfos = Sets.newHashSet();
   private String m_searchFilter = "";

@@ -32,6 +32,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.events.ControlEvent;
@@ -507,7 +508,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       try {
 
         TestRunTab testRunTab = (TestRunTab) configs[i].createExecutableExtension("class"); //$NON-NLS-1$
-        testRunTab.createTabControl(tabFolder, this);
+        createTabControl(testRunTab, tabFolder, this);
         m_tabsList.addElement(testRunTab);
       }
       catch(CoreException e) {
@@ -519,13 +520,26 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
+  private void createTabControl(TestRunTab testRunTab, CTabFolder tabFolder,
+      TestRunnerViewPart testRunnerViewPart) {
+    Composite composite = testRunTab.createTabControl(tabFolder, this);
+
+    CTabItem tab = new CTabItem(tabFolder, SWT.NONE);
+    tab.setText(ResourceUtil.getString(testRunTab.getNameKey()));
+    tab.setImage(testRunTab.getImage());
+    tab.setToolTipText(ResourceUtil.getString(testRunTab.getTooltipKey())); //$NON-NLS-1$
+
+    tab.setControl(composite);
+  }
+
   private void testTabChanged(SelectionEvent event) {
     String selectedTestId = m_activeRunTab.getSelectedTestId();
 
     for (TestRunTab tab : m_tabsList) {
       tab.setSelectedTest(selectedTestId);
 
-      if(((CTabFolder) event.widget).getSelection().getText() == tab.getName()) {
+      String name = ResourceUtil.getString(tab.getNameKey());
+      if(((CTabFolder) event.widget).getSelection().getText() == name) {
         m_activeRunTab = tab;
         m_activeRunTab.activate();
       }
