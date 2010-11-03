@@ -4,6 +4,11 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.testng.eclipse.ui.RunInfo;
 
+/**
+ * A viewer filter that uses a string to perform its filterin.
+ *
+ * @author CŽdric Beust <cedric@beust.com>
+ */
 public class TestNameFilter extends ViewerFilter {
 
   private String m_searchString;
