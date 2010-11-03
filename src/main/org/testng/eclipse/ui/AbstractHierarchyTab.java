@@ -753,7 +753,7 @@ public abstract class AbstractHierarchyTab extends TestRunTab implements IMenuLi
   }
   
   private void testSelected() {
-    fTestRunnerPart.handleTestSelected(getTestInfo());
+//    fTestRunnerPart.handleTestSelected(getTestInfo());
   }
 
   protected void expandAll() {
