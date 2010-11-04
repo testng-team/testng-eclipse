@@ -98,4 +98,7 @@ public abstract class TestRunTab {
 
   public void saveState(IMemento memento) {
   }
+
+  public void setOrientation(boolean horizontal) {
+  }
 }

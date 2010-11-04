@@ -18,11 +18,12 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
@@ -30,6 +31,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -38,7 +40,6 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IMemento;
-import org.eclipse.ui.IViewSite;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.collections.Sets;
@@ -90,6 +91,7 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   private Tree m_tree;
   private TestRunnerViewPart m_testRunnerPart;
   private SashForm m_sashForm;
+  private Composite m_parentComposite;
 
   @Override
   public String getSelectedTestId() {
@@ -160,6 +162,8 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     initImages();
     initMenu();
     addListeners();
+
+    m_parentComposite = result;
 
     return result;
   }
@@ -502,12 +506,29 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
 
   @Override
   public void restoreState(IMemento memento) {
-    if (memento != null) {
-      Integer ratio = memento.getInteger(getRatioTag());
-      if (ratio != null) {
-        m_sashForm.setWeights(new int[] { ratio.intValue(), 1000 - ratio.intValue() });
-      }
+    if (memento == null) return;
+
+    Integer ratio = memento.getInteger(getRatioTag());
+    if (ratio != null) {
+      m_sashForm.setWeights(new int[] { ratio.intValue(), 1000 - ratio.intValue() });
     }
+
   }
+
+  @Override
+  public void setOrientation(boolean horizontal) {
+    m_sashForm.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
+  }
+
+//  private void addResizeListener(Composite parent) {
+//    parent.addControlListener(new ControlListener() {
+//      public void controlMoved(ControlEvent e) {
+//      }
+//
+//      public void controlResized(ControlEvent e) {
+//        computeOrientation();
+//      }
+//    });
+//  }
 
 }

@@ -38,6 +38,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -49,7 +50,6 @@ import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
@@ -93,11 +93,6 @@ import java.util.Vector;
 public class TestRunnerViewPart extends ViewPart 
 implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
-  //orientations
-  static final int VIEW_ORIENTATION_VERTICAL = 0;
-  static final int VIEW_ORIENTATION_HORIZONTAL = 1;
-  static final int VIEW_ORIENTATION_AUTOMATIC = 2;
-
   /** used by IWorkbenchSiteProgressService */
   private static final Object FAMILY_RUN = new Object();
 
@@ -129,9 +124,22 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   /** The currently active run tab. */
   private TestRunTab m_activeRunTab;
 
-//  private FailureTrace m_failureTraceComponent;
-  
-//  private SashForm   m_sashForm;
+  // Orientations
+  static final int VIEW_ORIENTATION_VERTICAL = 0;
+  static final int VIEW_ORIENTATION_HORIZONTAL = 1;
+  static final int VIEW_ORIENTATION_AUTOMATIC = 2;
+
+  /**
+   * The current orientation; either <code>VIEW_ORIENTATION_HORIZONTAL</code>
+   * <code>VIEW_ORIENTATION_VERTICAL</code>, or <code>VIEW_ORIENTATION_AUTOMATIC</code>.
+   */
+  private int fOrientation = VIEW_ORIENTATION_AUTOMATIC;
+
+  /**
+   * The current orientation; either <code>VIEW_ORIENTATION_HORIZONTAL</code>
+   * <code>VIEW_ORIENTATION_VERTICAL</code>.
+   */
+  private int fCurrentOrientation;
 
   protected CounterPanel     m_counterPanel;
   private Composite   m_counterComposite;
@@ -157,18 +165,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
    * Whether the output scrolls and reveals tests as they are executed.
    */
   protected boolean fAutoScroll = true;
-
-  /**
-   * The current orientation; either <code>VIEW_ORIENTATION_HORIZONTAL</code>
-   * <code>VIEW_ORIENTATION_VERTICAL</code>, or <code>VIEW_ORIENTATION_AUTOMATIC</code>.
-   */
-  private int fOrientation = VIEW_ORIENTATION_AUTOMATIC;
-
-  /**
-   * The current orientation; either <code>VIEW_ORIENTATION_HORIZONTAL</code>
-   * <code>VIEW_ORIENTATION_VERTICAL</code>.
-   */
-  private int fCurrentOrientation;
 
   protected JUnitProgressBar fProgressBar;
 
@@ -207,7 +203,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   // Persistence tags.
   static final String TAG_PAGE = "page"; //$NON-NLS-1$
   static final String TAG_ORIENTATION = "orientation"; //$NON-NLS-1$
-  
+
   //~ counters
   protected int m_suitesTotalCount;
   protected int m_testsTotalCount;
@@ -268,7 +264,51 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     if(orientation != null) {
       fOrientation = orientation.intValue();
     }
-//    computeOrientation();
+
+    computeOrientation();
+  }
+
+  void computeOrientation() {
+    if (fOrientation != VIEW_ORIENTATION_AUTOMATIC) {
+      fCurrentOrientation = fOrientation;
+      setOrientation(fCurrentOrientation);
+    }
+    else {
+      Point size = m_parentComposite.getSize();
+      if((size.x != 0) && (size.y != 0)) {
+        if(size.x > size.y) {
+          setOrientation(VIEW_ORIENTATION_HORIZONTAL);
+        }
+        else {
+          setOrientation(VIEW_ORIENTATION_VERTICAL);
+        }
+      }
+    }
+  }
+
+  private void setOrientation(int orientation) {
+
+    boolean horizontal = orientation == VIEW_ORIENTATION_HORIZONTAL;
+    for (TestRunTab trt : m_tabsList) {
+      trt.setOrientation(horizontal);
+    }
+
+    for(int i = 0; i < fToggleOrientationActions.length; ++i) {
+      fToggleOrientationActions[i].setChecked(
+          fOrientation == fToggleOrientationActions[i].getOrientation());
+    }
+    fCurrentOrientation = orientation;
+
+    GridLayout layout = (GridLayout) m_counterComposite.getLayout();
+//    layout.numColumns = 1;
+    setCounterColumns(layout);
+
+    try {
+      m_parentComposite.layout();
+    }
+    catch(Throwable cause) {
+      cause.printStackTrace();
+    }
   }
 
   /**
@@ -637,35 +677,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_stateMemento = null;
   }
 
-//  private void addResizeListener(Composite parent) {
-//    parent.addControlListener(new ControlListener() {
-//      public void controlMoved(ControlEvent e) {
-//      }
-//
-//      public void controlResized(ControlEvent e) {
-//        computeOrientation();
-//      }
-//    });
-//  }
-
-//  void computeOrientation() {
-//    if(fOrientation != VIEW_ORIENTATION_AUTOMATIC) {
-//      fCurrentOrientation = fOrientation;
-//      setOrientation(fCurrentOrientation);
-//    }
-//    else {
-//      Point size = m_parentComposite.getSize();
-//      if((size.x != 0) && (size.y != 0)) {
-//        if(size.x > size.y) {
-//          setOrientation(VIEW_ORIENTATION_HORIZONTAL);
-//        }
-//        else {
-//          setOrientation(VIEW_ORIENTATION_VERTICAL);
-//        }
-//      }
-//    }
-//  }
-
   @Override
   public void saveState(IMemento memento) {
     int activePage = m_tabFolder.getSelectionIndex();
@@ -860,31 +871,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     return false;
   }
 
-//  private void setOrientation(int orientation) {
-//    if((m_sashForm == null) || m_sashForm.isDisposed()) {
-//      return;
-//    }
-//
-//    boolean horizontal = orientation == VIEW_ORIENTATION_HORIZONTAL;
-//    m_sashForm.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
-//    for(int i = 0; i < fToggleOrientationActions.length; ++i) {
-//      fToggleOrientationActions[i].setChecked(fOrientation
-//                                              == fToggleOrientationActions[i].getOrientation());
-//    }
-//    fCurrentOrientation = orientation;
-//
-//    GridLayout layout = (GridLayout) m_counterComposite.getLayout();
-////    layout.numColumns = 1;
-//    setCounterColumns(layout);
-//
-//    try {
-//      m_parentComposite.layout();
-//    }
-//    catch(Throwable cause) {
-//      cause.printStackTrace();
-//    }
-//  }
-
   private void setCounterColumns(GridLayout layout) {
     if(fCurrentOrientation == VIEW_ORIENTATION_HORIZONTAL) {
       layout.numColumns = 2;
@@ -923,7 +909,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     public void run() {
       if(isChecked()) {
         fOrientation = fActionOrientation;
-//        computeOrientation();
+        computeOrientation();
       }
     }
   }
