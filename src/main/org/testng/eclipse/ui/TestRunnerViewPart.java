@@ -30,35 +30,26 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
-import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.custom.ViewForm;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
@@ -140,7 +131,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
 //  private FailureTrace m_failureTraceComponent;
   
-  private SashForm   m_sashForm;
+//  private SashForm   m_sashForm;
 
   protected CounterPanel     m_counterPanel;
   private Composite   m_counterComposite;
@@ -215,9 +206,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   // Persistence tags.
   static final String TAG_PAGE = "page"; //$NON-NLS-1$
-  static final String TAG_RATIO = "ratio"; //$NON-NLS-1$
   static final String TAG_ORIENTATION = "orientation"; //$NON-NLS-1$
-
   
   //~ counters
   protected int m_suitesTotalCount;
@@ -244,6 +233,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   @Override
   public void init(IViewSite site, IMemento memento) throws PartInitException {
+    ppp("Init, memento:" + memento);
     super.init(site, memento);
     m_stateMemento = memento;
 
@@ -270,16 +260,15 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       m_activeRunTab = m_tabsList.get(p);
     }
 
-    Integer ratio = memento.getInteger(TAG_RATIO);
-    if(ratio != null) {
-      m_sashForm.setWeights(new int[] { ratio.intValue(), 1000 - ratio.intValue() });
+    for (TestRunTab trt : m_tabsList) {
+      trt.restoreState(memento);
     }
 
     Integer orientation = memento.getInteger(TAG_ORIENTATION);
     if(orientation != null) {
       fOrientation = orientation.intValue();
     }
-    computeOrientation();
+//    computeOrientation();
   }
 
   /**
@@ -587,8 +576,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   @Override
   public void createPartControl(Composite parent) {
+    ppp("createPartControl");
     m_parentComposite = parent;
-    addResizeListener(parent);
+//    addResizeListener(parent);
 
     GridLayout gridLayout = new GridLayout();
     gridLayout.marginWidth = 0;
@@ -600,6 +590,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     createProgressCountPanel(parent);
 
     m_tabFolder = createTestRunTabs(parent);
+
 //    m_tabFolder.setLayoutData(new Layout() {
 //      @Override
 //      protected Point computeSize (Composite composite, int wHint, int hHint, boolean flushCache) {
@@ -640,59 +631,50 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
     getViewSite().getPage().addPartListener(fPartListener);
 
-    if(m_stateMemento != null) {
+    if (m_stateMemento != null) {
       restoreLayoutState(m_stateMemento);
     }
     m_stateMemento = null;
   }
 
-  private void addResizeListener(Composite parent) {
-    parent.addControlListener(new ControlListener() {
-      public void controlMoved(ControlEvent e) {
-      }
+//  private void addResizeListener(Composite parent) {
+//    parent.addControlListener(new ControlListener() {
+//      public void controlMoved(ControlEvent e) {
+//      }
+//
+//      public void controlResized(ControlEvent e) {
+//        computeOrientation();
+//      }
+//    });
+//  }
 
-      public void controlResized(ControlEvent e) {
-        computeOrientation();
-      }
-    });
-  }
-
-  void computeOrientation() {
-    if(fOrientation != VIEW_ORIENTATION_AUTOMATIC) {
-      fCurrentOrientation = fOrientation;
-      setOrientation(fCurrentOrientation);
-    }
-    else {
-      Point size = m_parentComposite.getSize();
-      if((size.x != 0) && (size.y != 0)) {
-        if(size.x > size.y) {
-          setOrientation(VIEW_ORIENTATION_HORIZONTAL);
-        }
-        else {
-          setOrientation(VIEW_ORIENTATION_VERTICAL);
-        }
-      }
-    }
-  }
+//  void computeOrientation() {
+//    if(fOrientation != VIEW_ORIENTATION_AUTOMATIC) {
+//      fCurrentOrientation = fOrientation;
+//      setOrientation(fCurrentOrientation);
+//    }
+//    else {
+//      Point size = m_parentComposite.getSize();
+//      if((size.x != 0) && (size.y != 0)) {
+//        if(size.x > size.y) {
+//          setOrientation(VIEW_ORIENTATION_HORIZONTAL);
+//        }
+//        else {
+//          setOrientation(VIEW_ORIENTATION_VERTICAL);
+//        }
+//      }
+//    }
+//  }
 
   @Override
   public void saveState(IMemento memento) {
-    if(m_sashForm == null) {
-      // part has not been created
-      if(m_stateMemento != null) { //Keep the old state;
-        memento.putMemento(m_stateMemento);
-      }
-
-      return;
-    }
-
     int activePage = m_tabFolder.getSelectionIndex();
     memento.putInteger(TAG_PAGE, activePage);
-
-    int[] weigths = m_sashForm.getWeights();
-    int   ratio = (weigths[0] * 1000) / (weigths[0] + weigths[1]);
-    memento.putInteger(TAG_RATIO, ratio);
     memento.putInteger(TAG_ORIENTATION, fOrientation);
+
+    for (TestRunTab tab : m_tabsList) {
+      tab.saveState(memento);
+    }
   }
 
   private void configureToolBar() {
@@ -878,30 +860,30 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     return false;
   }
 
-  private void setOrientation(int orientation) {
-    if((m_sashForm == null) || m_sashForm.isDisposed()) {
-      return;
-    }
-
-    boolean horizontal = orientation == VIEW_ORIENTATION_HORIZONTAL;
-    m_sashForm.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
-    for(int i = 0; i < fToggleOrientationActions.length; ++i) {
-      fToggleOrientationActions[i].setChecked(fOrientation
-                                              == fToggleOrientationActions[i].getOrientation());
-    }
-    fCurrentOrientation = orientation;
-
-    GridLayout layout = (GridLayout) m_counterComposite.getLayout();
-//    layout.numColumns = 1;
-    setCounterColumns(layout);
-
-    try {
-      m_parentComposite.layout();
-    }
-    catch(Throwable cause) {
-      cause.printStackTrace();
-    }
-  }
+//  private void setOrientation(int orientation) {
+//    if((m_sashForm == null) || m_sashForm.isDisposed()) {
+//      return;
+//    }
+//
+//    boolean horizontal = orientation == VIEW_ORIENTATION_HORIZONTAL;
+//    m_sashForm.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
+//    for(int i = 0; i < fToggleOrientationActions.length; ++i) {
+//      fToggleOrientationActions[i].setChecked(fOrientation
+//                                              == fToggleOrientationActions[i].getOrientation());
+//    }
+//    fCurrentOrientation = orientation;
+//
+//    GridLayout layout = (GridLayout) m_counterComposite.getLayout();
+////    layout.numColumns = 1;
+//    setCounterColumns(layout);
+//
+//    try {
+//      m_parentComposite.layout();
+//    }
+//    catch(Throwable cause) {
+//      cause.printStackTrace();
+//    }
+//  }
 
   private void setCounterColumns(GridLayout layout) {
     if(fCurrentOrientation == VIEW_ORIENTATION_HORIZONTAL) {
@@ -941,7 +923,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     public void run() {
       if(isChecked()) {
         fOrientation = fActionOrientation;
-        computeOrientation();
+//        computeOrientation();
       }
     }
   }
@@ -999,9 +981,10 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
-
   private static void ppp(final Object message) {
-//    System.out.println("[TestRunnerViewPart]:- " + message);
+    if (false) {
+      System.out.println("[TestRunnerViewPart] " + message);
+    }
   }
 
   /**

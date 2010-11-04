@@ -2,6 +2,8 @@ package org.testng.eclipse.ui;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IViewSite;
 import org.testng.eclipse.util.ResourceUtil;
 
 /**
@@ -89,5 +91,11 @@ public abstract class TestRunTab {
    */
   public Image getImage() {
     return null;
+  }
+
+  public void restoreState(IMemento memento) {
+  }
+
+  public void saveState(IMemento memento) {
   }
 }

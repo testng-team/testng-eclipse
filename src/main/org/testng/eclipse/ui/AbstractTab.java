@@ -18,10 +18,9 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.events.DisposeEvent;
@@ -38,6 +37,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IViewSite;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.collections.Sets;
@@ -63,26 +64,32 @@ import java.util.regex.Pattern;
  * @author Cedric Beust <cedric@beust.com>
  */
 abstract public class AbstractTab extends TestRunTab implements IMenuListener {
-  private final Image m_suiteIcon = Images.getImage(IMG_SUITE);
-  private final Image m_suiteOkeIcon = Images.getImage(IMG_SUITE_OK);
-  private final Image m_suiteSkipIcon = Images.getImage(IMG_SUITE_SKIP);
-  private final Image m_suiteFailIcon = Images.getImage(IMG_SUITE_FAIL);
-  private final Image m_suiteRunIcon = Images.getImage(IMG_SUITE_RUN);
+  private Image m_suiteIcon;
+  private Image m_suiteOkeIcon;
+  private Image m_suiteSkipIcon;
+  private Image m_suiteFailIcon;
+  private Image m_suiteRunIcon;
 
-  private final Image m_testHierarchyIcon = Images.getImage(IMG_TEST_HIERARCHY); 
-  private final Image m_testIcon = Images.getImage(IMG_TEST);
-  private final Image m_testOkeIcon = Images.getImage(IMG_TEST_OK);
-  private final Image m_testSkipIcon = Images.getImage(IMG_TEST_SKIP);
-  private final Image m_testFailIcon = Images.getImage(IMG_TEST_FAIL);
-  private final Image m_testRunIcon = Images.getImage(IMG_TEST_RUN);
-  private final Image m_stackViewIcon = TestNGPlugin.getImageDescriptor("eview16/stackframe.gif")
-      .createImage(); //$NON-NLS-1$
+  private Image m_testHierarchyIcon; 
+  private Image m_testIcon;
+  private Image m_testOkeIcon;
+  private Image m_testSkipIcon;
+  private Image m_testFailIcon;
+  private Image m_testRunIcon;
+  private Image m_stackViewIcon;
+
+  // Persistence tags
+  static final String TAG_RATIO = "ratio"; //$NON-NLS-1$
+
+  /** Used to persist the state of the layout */
+  private IMemento m_stateMemento;
 
   /** The component that displays the stack trace when an item is selected */
   private FailureTrace m_failureTraceComponent;
 
   private Tree m_tree;
   private TestRunnerViewPart m_testRunnerPart;
+  private SashForm m_sashForm;
 
   @Override
   public String getSelectedTestId() {
@@ -125,7 +132,7 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     result.setLayoutData(gridData);
 
     // The sash is the parent of both the tree and the stack trace component
-    SashForm m_sashForm = new SashForm(result, SWT.HORIZONTAL);
+    m_sashForm = new SashForm(result, SWT.HORIZONTAL);
     m_sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
     //
@@ -150,6 +157,7 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
 
     m_sashForm.setWeights(new int[] { 50, 50 });
 
+    initImages();
     initMenu();
     addListeners();
 
@@ -191,21 +199,21 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   }
 
   void disposeIcons() {
-    m_suiteIcon.dispose();
-    m_suiteOkeIcon.dispose();
-    m_suiteFailIcon.dispose();
-    m_suiteSkipIcon.dispose();
-    m_suiteRunIcon.dispose();
-
-    m_testHierarchyIcon.dispose();
-    m_testIcon.dispose();
-    m_testOkeIcon.dispose();
-    m_testFailIcon.dispose();
-    m_testSkipIcon.dispose();
-    m_testRunIcon.dispose();
-
-    m_stackViewIcon.dispose();
-}
+//    if (m_suiteIcon != null) m_suiteIcon.dispose();
+//    if (m_suiteOkeIcon != null) m_suiteOkeIcon.dispose();
+//    if (m_suiteFailIcon != null) m_suiteFailIcon.dispose();
+//    if (m_suiteSkipIcon != null) m_suiteSkipIcon.dispose();
+//    if (m_suiteRunIcon != null) m_suiteRunIcon.dispose();
+//
+//    if (m_testHierarchyIcon != null) m_testHierarchyIcon.dispose();
+//    if (m_testIcon != null) m_testIcon.dispose();
+//    if (m_testOkeIcon != null) m_testOkeIcon.dispose();
+//    if (m_testFailIcon != null) m_testFailIcon.dispose();
+//    if (m_testSkipIcon != null) m_testSkipIcon.dispose();
+//    if (m_testRunIcon != null) m_testRunIcon.dispose();
+//
+//    if (m_stackViewIcon != null) m_stackViewIcon.dispose();
+  }
 
   void handleDoubleClick(MouseEvent e) {
     ITreeItem testInfo = getSelectedTreeItem();
@@ -454,4 +462,52 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
 
     m_tree.getDisplay().syncExec(expandRunnable);
   }
+
+  private void initImages() {
+    m_suiteIcon = Images.getImage(IMG_SUITE);
+    m_suiteOkeIcon = Images.getImage(IMG_SUITE_OK);
+    m_suiteSkipIcon = Images.getImage(IMG_SUITE_SKIP);
+    m_suiteFailIcon = Images.getImage(IMG_SUITE_FAIL);
+    m_suiteRunIcon = Images.getImage(IMG_SUITE_RUN);
+
+    m_testHierarchyIcon = Images.getImage(IMG_TEST_HIERARCHY); 
+    m_testIcon = Images.getImage(IMG_TEST);
+    m_testOkeIcon = Images.getImage(IMG_TEST_OK);
+    m_testSkipIcon = Images.getImage(IMG_TEST_SKIP);
+    m_testFailIcon = Images.getImage(IMG_TEST_FAIL);
+    m_testRunIcon = Images.getImage(IMG_TEST_RUN);
+    m_stackViewIcon = TestNGPlugin.getImageDescriptor("eview16/stackframe.gif")
+        .createImage(); //$NON-NLS-1$
+  }
+
+  private String getRatioTag() {
+    return getNameKey() + "." + TAG_RATIO;
+  }
+
+  @Override
+  public void saveState(IMemento memento) {
+    if(m_sashForm == null) {
+      // part has not been created
+      if(m_stateMemento != null) { //Keep the old state;
+        memento.putMemento(m_stateMemento);
+      }
+
+      return;
+    }
+
+    int[] weigths = m_sashForm.getWeights();
+    int   ratio = (weigths[0] * 1000) / (weigths[0] + weigths[1]);
+    memento.putInteger(getRatioTag(), ratio);
+  }
+
+  @Override
+  public void restoreState(IMemento memento) {
+    if (memento != null) {
+      Integer ratio = memento.getInteger(getRatioTag());
+      if (ratio != null) {
+        m_sashForm.setWeights(new int[] { ratio.intValue(), 1000 - ratio.intValue() });
+      }
+    }
+  }
+
 }
