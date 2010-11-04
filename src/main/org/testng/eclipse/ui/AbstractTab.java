@@ -319,7 +319,10 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
 
   private boolean matchesSearchFilter(RunInfo runInfo) {
     if ("".equals(m_searchFilter)) return true;
-    else return Pattern.matches(".*" + m_searchFilter + ".*", runInfo.getMethodDisplay());
+    else {
+      return Pattern.matches(".*" + m_searchFilter.toLowerCase() + ".*",
+          runInfo.getMethodDisplay().toLowerCase());
+    }
   }
 
   /**

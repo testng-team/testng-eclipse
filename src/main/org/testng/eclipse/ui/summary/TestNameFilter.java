@@ -20,7 +20,7 @@ public class TestNameFilter extends ViewerFilter {
     }
 
     RunInfo p = (RunInfo) element;
-    if (p.getTestName().matches(m_searchString)) {
+    if (p.getTestName().toLowerCase().matches(m_searchString.toLowerCase())) {
       return true;
     }
 
