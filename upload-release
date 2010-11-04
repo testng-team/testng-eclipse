@@ -26,7 +26,7 @@ do
   if [ $v != "3100" ]
   then
     echo "Class $i has version $v, expected 3100"
-    break
+    exit -1
   fi
 done
 
@@ -34,8 +34,9 @@ file org/testng/eclipse/TestNGPlugin.class
 
 cd $UPDATE_SITE
 target=w/eclipse-old
-ssh beust.com@beust.com mkdir ${target}/eclipse-$number
-scp -r * beust.com@beust.com:${target}/eclipse-$number
-ssh beust.com@beust.com "(rm w/eclipse && ln -s ${target}/eclipse-$number w/eclipse)"
+dir=${target}/eclipse-$number
+ssh beust.com@beust.com "(rm -rf ${target}/eclipse-$number && mkdir $dir)"
+scp -r * beust.com@beust.com:$dir
+ssh beust.com@beust.com "(cd w && rm -f eclipse && ln -s eclipse-old/eclipse-$number eclipse)"
 
 
