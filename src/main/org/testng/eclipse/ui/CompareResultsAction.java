@@ -10,18 +10,19 @@
  *******************************************************************************/
 package org.testng.eclipse.ui;
 
-import org.eclipse.jface.action.Action;
-import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.util.ResourceUtil;
+import static org.testng.eclipse.ui.Images.IMG_COMPARE;
+import static org.testng.eclipse.ui.Images.IMG_COMPARE_DISABLED;
+import static org.testng.eclipse.ui.Images.IMG_COMPARE_HOVER;
 
-import static org.testng.eclipse.ui.Images.*;
+import org.eclipse.jface.action.Action;
+import org.testng.eclipse.util.ResourceUtil;
 
 /**
  * Action to enable/disable stack trace filtering.
  */
 public class CompareResultsAction extends Action {
-	private FailureTrace fView;	
-	
+  private FailureTrace fView;
+
     public CompareResultsAction(FailureTrace view) {
       super(ResourceUtil.getString("CompareResultsAction.label"));   //$NON-NLS-1$
       setDescription(ResourceUtil.getString("CompareResultsAction.description"));   //$NON-NLS-1$
@@ -34,12 +35,17 @@ public class CompareResultsAction extends Action {
       fView= view;
     }
 
-	/*
-	 * @see Action#actionPerformed
-	 */		
-	public void run() {
-		CompareResultDialog dialog= new CompareResultDialog(fView.getShell(), fView.getFailedTest());
-		dialog.create();
-		dialog.open();
-	}
+  /*
+   * @see Action#actionPerformed
+   */
+  public void run() {
+    RunInfo failedTest = fView.getFailedTest();
+    if (failedTest.getStackTrace() != null) {
+      CompareResultDialog dialog= new CompareResultDialog(fView.getShell(), failedTest);
+      dialog.create();
+      dialog.open();
+    }
+  }
 }
+
+
