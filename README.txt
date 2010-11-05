@@ -23,6 +23,31 @@ This will cause both the Eclipse client and RemoteTestNG to issue a more verbose
 
 -Dtestng.eclipse.debug
 
-Use this flag if you need to debug and break into RemoteTestNG. In this case, you need to start the RemoteTestNG process youself as a regular Java application and with the "-debug" flag. Then start the Eclipse client with this system property, and then the two processes will communicate on a hardcoded port (as opposed to the random port which they usually use). Now that you launched both processes yourself, you can set up break point and inspect variables on either.
+Use this flag if you need to debug and break into RemoteTestNG. In this case, you need to start the RemoteTestNG process youself as a regular Java application and with the "-debug" flag. Then start the Eclipse client with this system property, and then the two processes will communicate on a hardcoded port, 12345 (as opposed to the random port which they usually use) and through a hardcoded XMl file ("${java.io.tmpdir}/testng-customsuite.xml").
 
+Now that you launched both processes yourself, you can set up break point and inspect variables on either.
+
+
+Protocol
+=====
+
+When a new run is launched, TestNGLaunchConfigurationDelegate creates a VMRunnerConfigurationClient that launches RemoteTestNG with a host, a port and an XML file. Then Eclipse listens on this host and port.
+
+The base class that provides the basic listening functions is AbstractRemoteTestRunnerClient, which is defined in TestNG. The Eclipse plug-in subclasses this class with an EclipseTestRunnerClient. TestRunnerViewPart creates an instance of this class and then calls startListening() on it.
+
+Whenever a new message is received, AbstractRemoteTestRunnerClient looks up the type of the message and then calls the subclass's corresponding method:
+
+SUITE -> notifyStart(GenericMessage)
+TEST -> notifySuiteEvents(SuiteMessage)
+TEST_RESULT -> notifyTestEvents(TestMessage)
+other -> notifyResultEvents(TestResultMessage)
+
+RemoteTestNG starts by opening a connection to the port passed on the command line and when it succeeds, runs the suites and uses listeners to send messages to the Eclipse client.
+
+All these messages implement IStringMessage and they are of several kinds:
+
+GenericMessage: general information message (such as an initial notification of the number of suites/tests)
+TestMessage
+SuiteMessage
+TestResultMessage
 
