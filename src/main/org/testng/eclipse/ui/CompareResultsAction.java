@@ -39,12 +39,9 @@ public class CompareResultsAction extends Action {
    * @see Action#actionPerformed
    */
   public void run() {
-    RunInfo failedTest = fView.getFailedTest();
-    if (failedTest.getStackTrace() != null) {
-      CompareResultDialog dialog= new CompareResultDialog(fView.getShell(), failedTest);
-      dialog.create();
-      dialog.open();
-    }
+    CompareResultDialog dialog= new CompareResultDialog(fView.getShell(), fView.getFailedTest());
+    dialog.create();
+    dialog.open();
   }
 }
 

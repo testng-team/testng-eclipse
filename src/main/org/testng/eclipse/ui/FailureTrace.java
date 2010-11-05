@@ -182,8 +182,7 @@ class FailureTrace implements IMenuListener {
    * @param failure the failed test
    */
   public void showFailure(RunInfo failure) {
-//    System.out.println("showFailure");
-    if(null == failure) {
+    if (null == failure || failure.getStackTrace() == null) {
       fCompareAction.setEnabled(false);
       clear();
       return;
