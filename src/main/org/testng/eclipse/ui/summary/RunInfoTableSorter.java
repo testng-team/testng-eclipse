@@ -1,7 +1,6 @@
 package org.testng.eclipse.ui.summary;
 
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.testng.eclipse.ui.RunInfo;
 
 /**
@@ -9,25 +8,10 @@ import org.testng.eclipse.ui.RunInfo;
  *
  * @author Cedric Beust <cedric@beust.com>
  */
-public class TestTableSorter extends ViewerSorter {
-  private static final int DESCENDING = 1;
-  private int m_column;
-  private int m_direction = 0; // start in ascending order
-  private SummaryTab m_tab;
+public class RunInfoTableSorter extends AbstractTableSorter {
 
-  public TestTableSorter(SummaryTab tab) {
-    m_tab = tab;
-  }
-
-  public void setColumn(int column) {
-    if (column == m_column) {
-      // Same column as last sort; toggle the direction
-      m_direction = 1 - m_direction;
-    } else {
-      // New column; do an ascending sort
-      m_column = column;
-      m_direction = DESCENDING;
-    }
+  public RunInfoTableSorter(SummaryTab tab) {
+    super(tab);
   }
 
   public int compare(Viewer viewer, Object e1, Object e2) {
@@ -55,10 +39,6 @@ public class TestTableSorter extends ViewerSorter {
           break;
     }
 
-    if (m_direction == DESCENDING) {
-      result = -result;
-    }
-
-    return result;
+    return adjustDirection(result);
   }
 }

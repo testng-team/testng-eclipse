@@ -1,5 +1,6 @@
 package org.testng.eclipse.ui.summary;
 
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -87,24 +88,34 @@ public class SummaryTab extends TestRunTab  {
     //
     // Test table
     //
-    Label label = new Label(result, SWT.NONE);
-    label.setText("Tests");
-    label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
-    createTestViewer(result);
+    {
+      createLabel(result, "Tests");
+      createTestViewer(result);
+    }
 
     //
     // Excluded methods
     //
-    createExcludedMethodViewer(result);
+    {
+      createLabel(result, "Excluded methods");
+      createExcludedMethodViewer(result);
+    }
 
     return result;
   }
 
+  private void createLabel(Composite parent, String text) {
+    Label result = new Label(parent, SWT.NONE);
+    result.setText(text);
+    result.setFont(JFaceResources.getBannerFont());
+    result.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+  }
+
   private void createExcludedMethodViewer(Composite result) {
     m_excludedMethodViewer = createViewer(result,
-        new String[] { "Excluded methods" },
-        new int[] { 300 },
-        null
+        new String[] { "Class name", "Method name" },
+        new int[] { 300, 300 },
+        new StringTableSorter(this)
         );
 
     //
@@ -126,9 +137,17 @@ public class SummaryTab extends TestRunTab  {
       }
 
       public String getColumnText(Object element, int columnIndex) {
-        String value = (String) element;
+        String fqn = (String) element;
+        String pkgName = fqn;
+        String className = fqn;
+        int ind = fqn.lastIndexOf(".");
+        if (ind >= 0) {
+          pkgName = fqn.substring(0, ind);
+          className = fqn.substring(ind + 1);
+        }
         switch(columnIndex) {
-          case 0:  return value;
+          case 0:  return pkgName;
+          case 1:  return className;
           default: return "";
         }
       }
@@ -160,41 +179,17 @@ public class SummaryTab extends TestRunTab  {
     //
     // Table sorter
     //
-    final TestTableSorter tableSorter = new TestTableSorter(this);
     m_testViewer = createViewer(result,
         new String[] { "Test name", "Time (seconds)", "Class count", "Method count" },
         new int[] { 150, 150, 100, 100 },
-        tableSorter
+        new RunInfoTableSorter(this)
         );
-
-    m_testViewer.setSorter(tableSorter);
 
     //
     // Filter
     //
     m_searchFilter = new TestNameFilter();
     m_testViewer.setFilters(new ViewerFilter[] { m_searchFilter });
-
-    //
-    // Selection
-    //
-    m_testViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-
-      public void selectionChanged(SelectionChangedEvent event) {
-        ISelection selection = event.getSelection();
-        if (selection instanceof StructuredSelection) {
-          StructuredSelection ss = (StructuredSelection) selection;
-          RunInfo selected = ((RunInfo) ss.getFirstElement());
-          if (selected != null) {
-            String selectedId = ((RunInfo) ss.getFirstElement()).getTestId();
-            if (m_selectedId != null && !m_selectedId.startsWith(selectedId)) {
-              m_selectedId = selectedId;
-            }
-          }
-        }
-      }
-
-    });
 
     //
     // Content provider
@@ -252,12 +247,14 @@ public class SummaryTab extends TestRunTab  {
   }
 
   private TableViewer createViewer(Composite parent, String[] columns, int[] bounds,
-      final TestTableSorter tableSorter) {
+      final AbstractTableSorter tableSorter) {
     final TableViewer result = new TableViewer(parent);
     final Table table = result .getTable();
     table.setHeaderVisible(true);
     table.setLinesVisible(true);
     table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+    result.setSorter(tableSorter);
 
     for (int i = 0; i < columns.length; i++) {
       final int index = i;
@@ -284,6 +281,27 @@ public class SummaryTab extends TestRunTab  {
           result.refresh();        }
       });
     }
+
+    //
+    // Row selection
+    //
+    result.addSelectionChangedListener(new ISelectionChangedListener() {
+
+      public void selectionChanged(SelectionChangedEvent event) {
+        ISelection selection = event.getSelection();
+        if (selection instanceof StructuredSelection) {
+          StructuredSelection ss = (StructuredSelection) selection;
+          RunInfo selected = ((RunInfo) ss.getFirstElement());
+          if (selected != null) {
+            String selectedId = ((RunInfo) ss.getFirstElement()).getTestId();
+            if (m_selectedId != null && !m_selectedId.startsWith(selectedId)) {
+              m_selectedId = selectedId;
+            }
+          }
+        }
+      }
+
+    });
 
     return result;
   }
