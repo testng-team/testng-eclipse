@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.ToolBar;
+import org.testng.ITestResult;
 import org.testng.eclipse.TestNGPlugin;
 
 /**
@@ -183,7 +184,7 @@ class FailureTrace implements IMenuListener {
    */
   public void showFailure(RunInfo failure) {
 //    System.out.println("showFailure");
-    if(null == failure) {
+    if(null == failure || failure.getStatus() != ITestResult.FAILURE) {
       fCompareAction.setEnabled(false);
       clear();
       return;
