@@ -66,6 +66,7 @@ import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
 import org.testng.ITestResult;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.ui.summary.SummaryTab;
 import org.testng.eclipse.util.CustomSuite;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.LaunchUtil;
@@ -215,6 +216,11 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   protected volatile int m_failedCount;
   protected volatile int m_skippedCount;
   protected volatile int m_successPercentageFailed;
+
+  /**
+   * The summary tab.
+   */
+  private SummaryTab m_summaryTab;
   
   /**
    * The client side of the remote test runner
@@ -539,6 +545,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         TestRunTab testRunTab = (TestRunTab) configs[i].createExecutableExtension("class"); //$NON-NLS-1$
         createTabControl(testRunTab, tabFolder, this);
         m_tabsList.addElement(testRunTab);
+        if (testRunTab instanceof SummaryTab) {
+          m_summaryTab = (SummaryTab) testRunTab;
+        }
       }
       catch(CoreException e) {
         status.add(e.getStatus());
@@ -1171,6 +1180,10 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //  }
 
   public void onFinish(SuiteMessage suiteMessage) {
+    // Do this again in onFinish() in case the set of excluded methods changed since
+    // onStart()
+    m_summaryTab.setExcludedMethods(suiteMessage.getExcludedMethods());
+
     m_suiteCount++;
     
 //    postSyncRunnable(new Runnable() {
@@ -1368,6 +1381,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   public void onStart(SuiteMessage suiteMessage) {
+    m_summaryTab.setExcludedMethods(suiteMessage.getExcludedMethods());
   }
 
 }

@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.collections.Sets;
 import org.testng.eclipse.ui.RunInfo;
@@ -28,6 +29,7 @@ import org.testng.eclipse.ui.TestRunTab;
 import org.testng.eclipse.ui.TestRunnerViewPart;
 
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,6 +44,9 @@ public class SummaryTab extends TestRunTab  {
   /** The table that contains all the tests */
   private TableViewer m_testViewer;
 
+  /** The table that contains the excluded methods */
+  private TableViewer m_excludedMethodViewer;
+
   /** A test result, updated whenever we receive a new test result */
   class TestResult {
     Long time = 0L;
@@ -55,6 +60,8 @@ public class SummaryTab extends TestRunTab  {
 
   /** The id of the currently selected item */
   private String m_selectedId;
+
+  private List<String> m_excludedMethods = Lists.newArrayList();
 
   public String getTooltipKey() {
     return "Summary.tab.tooltip";
@@ -83,17 +90,83 @@ public class SummaryTab extends TestRunTab  {
     Label label = new Label(result, SWT.NONE);
     label.setText("Tests");
     label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
+    createTestViewer(result);
 
-    m_testViewer = new TableViewer(result);
-    Table table = m_testViewer.getTable();
-    table.setHeaderVisible(true);
-    table.setLinesVisible(true);
-    table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    //
+    // Excluded methods
+    //
+    createExcludedMethodViewer(result);
 
+    return result;
+  }
+
+  private void createExcludedMethodViewer(Composite result) {
+    m_excludedMethodViewer = createViewer(result,
+        new String[] { "Excluded methods" },
+        new int[] { 300 },
+        null
+        );
+
+    //
+    // Label provider
+    //
+    m_excludedMethodViewer.setLabelProvider(new ITableLabelProvider() {
+
+      public void removeListener(ILabelProviderListener listener) {
+      }
+
+      public boolean isLabelProperty(Object element, String property) {
+        return false;
+      }
+
+      public void dispose() {
+      }
+
+      public void addListener(ILabelProviderListener listener) {
+      }
+
+      public String getColumnText(Object element, int columnIndex) {
+        String value = (String) element;
+        switch(columnIndex) {
+          case 0:  return value;
+          default: return "";
+        }
+      }
+
+      public Image getColumnImage(Object element, int columnIndex) {
+        return null;
+      }
+    });
+
+    //
+    // Content provider
+    //
+    m_excludedMethodViewer.setContentProvider(new IStructuredContentProvider() {
+
+      public void dispose() {
+      }
+
+      public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+      }
+
+      public Object[] getElements(Object inputElement) {
+        return ((List<String>) inputElement).toArray();
+      }
+
+    });
+  }
+
+  private void createTestViewer(Composite result) {
     //
     // Table sorter
     //
     final TestTableSorter tableSorter = new TestTableSorter(this);
+    m_testViewer = createViewer(result,
+        new String[] { "Test name", "Time (seconds)", "Class count", "Method count" },
+        new int[] { 150, 150, 100, 100 },
+        tableSorter
+        );
+
     m_testViewer.setSorter(tableSorter);
 
     //
@@ -122,35 +195,6 @@ public class SummaryTab extends TestRunTab  {
       }
 
     });
-
-    //
-    // Columns
-    //
-    String[] titles = { "Test name", "Time (seconds)", "Class count", "Method count" };
-    int[] bounds = { 150, 150, 100, 100 };
-    for (int i = 0; i < titles.length; i++) {
-      final int index = i;
-      TableViewerColumn viewerColumn = new TableViewerColumn(m_testViewer, SWT.NONE);
-      final TableColumn column = viewerColumn.getColumn();
-      column.setText(titles[i]);
-      column.setWidth(bounds[i]);
-      column.setResizable(true);
-      column.setMoveable(true);      
-      column.addSelectionListener(new SelectionAdapter() {
-        @Override
-        public void widgetSelected(SelectionEvent e) {
-          tableSorter.setColumn(index);
-          int dir = m_testViewer.getTable().getSortDirection();
-          if (m_testViewer.getTable().getSortColumn() == column) {
-            dir = dir == SWT.UP ? SWT.DOWN : SWT.UP;
-          } else {
-            dir = SWT.DOWN;
-          }
-          m_testViewer.getTable().setSortDirection(dir);
-          m_testViewer.getTable().setSortColumn(column);
-          m_testViewer.refresh();        }
-      });
-    }
 
     //
     // Content provider
@@ -205,6 +249,41 @@ public class SummaryTab extends TestRunTab  {
     });
 
     m_testViewer.setInput(m_tests);
+  }
+
+  private TableViewer createViewer(Composite parent, String[] columns, int[] bounds,
+      final TestTableSorter tableSorter) {
+    final TableViewer result = new TableViewer(parent);
+    final Table table = result .getTable();
+    table.setHeaderVisible(true);
+    table.setLinesVisible(true);
+    table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+    for (int i = 0; i < columns.length; i++) {
+      final int index = i;
+      TableViewerColumn viewerColumn = new TableViewerColumn(result, SWT.NONE);
+      final TableColumn column = viewerColumn.getColumn();
+      column.setText(columns[i]);
+      column.setWidth(bounds[i]);
+      column.setResizable(true);
+      column.setMoveable(true);
+      column.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          if (tableSorter != null) {
+            tableSorter.setColumn(index);
+          }
+          int dir = table.getSortDirection();
+          if (table.getSortColumn() == column) {
+            dir = dir == SWT.UP ? SWT.DOWN : SWT.UP;
+          } else {
+            dir = SWT.DOWN;
+          }
+          table.setSortDirection(dir);
+          table.setSortColumn(column);
+          result.refresh();        }
+      });
+    }
 
     return result;
   }
@@ -266,6 +345,7 @@ public class SummaryTab extends TestRunTab  {
     m_tests.clear();
     m_testResults.clear();
     m_testViewer.refresh();
+    m_excludedMethodViewer.getTable().clearAll();
   }
 
   @Override
@@ -274,4 +354,13 @@ public class SummaryTab extends TestRunTab  {
     m_testViewer.refresh();
   }
 
+  public void setExcludedMethods(final List<String> excludedMethods) {
+    m_excludedMethods = excludedMethods;
+    m_excludedMethodViewer.getTable().getDisplay().syncExec(new Runnable() {
+      public void run() {
+        m_excludedMethodViewer.setInput(excludedMethods);
+        m_excludedMethodViewer.refresh();
+      }
+    });
+  }
 }
