@@ -57,12 +57,15 @@ public class SummaryTab extends TestRunTab  {
 
   private Map<String, TestResult> m_testResults = Maps.newHashMap();
 
-  private TestNameFilter m_searchFilter;
+  // The filters for the two tables
+  private RunInfoFilter m_testSearchFilter;
+  private StringFilter m_excludedMethodFilter;
 
   /** The id of the currently selected item */
   private String m_selectedId;
 
   private List<String> m_excludedMethods = Lists.newArrayList();
+
 
   public String getTooltipKey() {
     return "Summary.tab.tooltip";
@@ -112,10 +115,12 @@ public class SummaryTab extends TestRunTab  {
   }
 
   private void createExcludedMethodViewer(Composite result) {
+    m_excludedMethodFilter = new StringFilter();
     m_excludedMethodViewer = createViewer(result,
         new String[] { "Class name", "Method name" },
         new int[] { 300, 300 },
-        new StringTableSorter(this)
+        new StringTableSorter(this),
+        m_excludedMethodFilter
         );
 
     //
@@ -179,17 +184,13 @@ public class SummaryTab extends TestRunTab  {
     //
     // Table sorter
     //
+    m_testSearchFilter = new RunInfoFilter();
     m_testViewer = createViewer(result,
         new String[] { "Test name", "Time (seconds)", "Class count", "Method count" },
         new int[] { 150, 150, 100, 100 },
-        new RunInfoTableSorter(this)
+        new RunInfoTableSorter(this),
+        m_testSearchFilter
         );
-
-    //
-    // Filter
-    //
-    m_searchFilter = new TestNameFilter();
-    m_testViewer.setFilters(new ViewerFilter[] { m_searchFilter });
 
     //
     // Content provider
@@ -247,7 +248,7 @@ public class SummaryTab extends TestRunTab  {
   }
 
   private TableViewer createViewer(Composite parent, String[] columns, int[] bounds,
-      final AbstractTableSorter tableSorter) {
+      final AbstractTableSorter tableSorter, ViewerFilter filter) {
     final TableViewer result = new TableViewer(parent);
     final Table table = result .getTable();
     table.setHeaderVisible(true);
@@ -283,6 +284,11 @@ public class SummaryTab extends TestRunTab  {
     }
 
     //
+    // Filter
+    //
+    result.setFilters(new ViewerFilter[] { filter });
+
+    //
     // Row selection
     //
     result.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -302,6 +308,11 @@ public class SummaryTab extends TestRunTab  {
       }
 
     });
+
+    //
+    // Filter
+    //
+    result.setFilters(new ViewerFilter[] { filter });
 
     return result;
   }
@@ -368,8 +379,11 @@ public class SummaryTab extends TestRunTab  {
 
   @Override
   public void updateSearchFilter(String text) {
-    m_searchFilter.setFilter(text);
+    m_testSearchFilter.setFilter(text);
     m_testViewer.refresh();
+
+    m_excludedMethodFilter.setFilter(text);
+    m_excludedMethodViewer.refresh();
   }
 
   public void setExcludedMethods(final List<String> excludedMethods) {

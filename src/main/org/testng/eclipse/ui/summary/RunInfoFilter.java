@@ -9,9 +9,7 @@ import org.testng.eclipse.ui.RunInfo;
  *
  * @author CŽdric Beust <cedric@beust.com>
  */
-public class TestNameFilter extends ViewerFilter {
-
-  private String m_searchString;
+public class RunInfoFilter extends AbstractFilter {
 
   @Override
   public boolean select(Viewer viewer, Object parentElement, Object element) {
@@ -20,14 +18,8 @@ public class TestNameFilter extends ViewerFilter {
     }
 
     RunInfo p = (RunInfo) element;
-    if (p.getTestName().toLowerCase().matches(m_searchString.toLowerCase())) {
-      return true;
-    }
 
-    return false;  }
-
-  public void setFilter(String text) {
-    m_searchString = ".*" + text + ".*"; 
+    return p.getTestName().toLowerCase().matches(m_searchString.toLowerCase());
   }
 
 }
