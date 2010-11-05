@@ -13,6 +13,8 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -22,9 +24,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.collections.Sets;
+import org.testng.eclipse.ui.OpenTestAction;
 import org.testng.eclipse.ui.RunInfo;
 import org.testng.eclipse.ui.TestRunTab;
 import org.testng.eclipse.ui.TestRunnerViewPart;
@@ -66,6 +70,8 @@ public class SummaryTab extends TestRunTab  {
 
   private List<String> m_excludedMethods = Lists.newArrayList();
 
+  private TestRunnerViewPart m_testRunnerPart;
+
 
   public String getTooltipKey() {
     return "Summary.tab.tooltip";
@@ -83,6 +89,7 @@ public class SummaryTab extends TestRunTab  {
 
   @Override
   public Composite createTabControl(Composite parent, TestRunnerViewPart runner) {
+    m_testRunnerPart = runner;
     Composite result = new Composite(parent, SWT.NONE);
     GridLayout gridLayout = new GridLayout();
     gridLayout.numColumns = 1;
@@ -123,6 +130,25 @@ public class SummaryTab extends TestRunTab  {
         m_excludedMethodFilter
         );
 
+    m_excludedMethodViewer.getTable().addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseDoubleClick(MouseEvent e) {
+        handleDoubleClick(e);
+      }
+
+      private void handleDoubleClick(MouseEvent e) {
+        TableItem[] items = ((Table) e.getSource()).getSelection();
+        if (items.length > 0) {
+          String fqn = items[0].getData().toString();
+          System.out.println("Double click " + fqn);
+          String[] parsed = parseFqn(fqn);
+          OpenTestAction openAction
+              = new OpenTestAction(m_testRunnerPart, parsed[0], parsed[1], true /* activate */);
+          openAction.run();
+        }
+      }
+    });
+
     //
     // Label provider
     //
@@ -143,16 +169,10 @@ public class SummaryTab extends TestRunTab  {
 
       public String getColumnText(Object element, int columnIndex) {
         String fqn = (String) element;
-        String pkgName = fqn;
-        String className = fqn;
-        int ind = fqn.lastIndexOf(".");
-        if (ind >= 0) {
-          pkgName = fqn.substring(0, ind);
-          className = fqn.substring(ind + 1);
-        }
+        String[] parsed = parseFqn(fqn);
         switch(columnIndex) {
-          case 0:  return pkgName;
-          case 1:  return className;
+          case 0:  return parsed[0];
+          case 1:  return parsed[1];
           default: return "";
         }
       }
@@ -180,6 +200,17 @@ public class SummaryTab extends TestRunTab  {
     });
   }
 
+  private String[] parseFqn(String fqn) {
+    String packageName = fqn;
+    String className = fqn;
+    int ind = fqn.lastIndexOf(".");
+    if (ind >= 0) {
+      packageName = fqn.substring(0, ind);
+      className = fqn.substring(ind + 1);
+    }
+    return new String[] { packageName, className };
+  }
+
   private void createTestViewer(Composite result) {
     //
     // Table sorter
@@ -191,6 +222,27 @@ public class SummaryTab extends TestRunTab  {
         new RunInfoTableSorter(this),
         m_testSearchFilter
         );
+
+    //
+    // Row selection
+    //
+    m_testViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+
+      public void selectionChanged(SelectionChangedEvent event) {
+        ISelection selection = event.getSelection();
+        if (selection instanceof StructuredSelection) {
+          StructuredSelection ss = (StructuredSelection) selection;
+          RunInfo selected = ((RunInfo) ss.getFirstElement());
+          if (selected != null) {
+            String selectedId = ((RunInfo) ss.getFirstElement()).getTestId();
+            if (m_selectedId != null && !m_selectedId.startsWith(selectedId)) {
+              m_selectedId = selectedId;
+            }
+          }
+        }
+      }
+
+    });
 
     //
     // Content provider
@@ -287,27 +339,6 @@ public class SummaryTab extends TestRunTab  {
     // Filter
     //
     result.setFilters(new ViewerFilter[] { filter });
-
-    //
-    // Row selection
-    //
-    result.addSelectionChangedListener(new ISelectionChangedListener() {
-
-      public void selectionChanged(SelectionChangedEvent event) {
-        ISelection selection = event.getSelection();
-        if (selection instanceof StructuredSelection) {
-          StructuredSelection ss = (StructuredSelection) selection;
-          RunInfo selected = ((RunInfo) ss.getFirstElement());
-          if (selected != null) {
-            String selectedId = ((RunInfo) ss.getFirstElement()).getTestId();
-            if (m_selectedId != null && !m_selectedId.startsWith(selectedId)) {
-              m_selectedId = selectedId;
-            }
-          }
-        }
-      }
-
-    });
 
     //
     // Filter

@@ -307,20 +307,20 @@ public class JDTUtil {
 //
 //    return "";
 //  }
-  
-  public static IJavaElement findElement(IJavaProject javaProject, RunInfo runInfo) 
-  throws JavaModelException {
-    IType type = javaProject.findType(runInfo.getClassName());
-    if(null == type) {
+
+  public static IJavaElement findElement(IJavaProject javaProject, String className,
+      String methodName, String[] paramTypes) throws JavaModelException {
+
+    IType type = javaProject.findType(className);
+    if (null == type) {
       return null;
     }
 
-    if(null == runInfo.getMethodName()) {
+    if (null == methodName) {
       return type;
     }
 
-    String[] paramTypes= runInfo.getParameterTypes();
-    if(null == paramTypes) {
+    if (null == paramTypes) {
       paramTypes= new String[0];
     }
     List params= new ArrayList(paramTypes.length);
@@ -329,12 +329,20 @@ public class JDTUtil {
       String typeName= idx == -1 ? paramTypes[i] : paramTypes[i].substring(idx + 1);
       params.add(Signature.createTypeSignature(typeName, false));
     }
-    IMethod method= findMethodInTypeHierarchy(type, runInfo.getMethodName(), (String[]) params.toArray(new String[paramTypes.length]));
-    if(null == method) {
-      method = fuzzyFindMethodInTypeHierarchy(type, runInfo.getMethodName(), paramTypes);
+    IMethod method= findMethodInTypeHierarchy(type, methodName,
+        (String[]) params.toArray(new String[paramTypes.length]));
+    if (null == method) {
+      method = fuzzyFindMethodInTypeHierarchy(type, methodName, paramTypes);
     }
     
     return method;
+  }
+
+  public static IJavaElement findElement(IJavaProject javaProject, RunInfo runInfo)
+      throws JavaModelException {
+
+    return findElement(javaProject, runInfo.getClassName(), runInfo.getMethodName(),
+        runInfo.getParameterTypes());
   }
   
   public static IJavaElement findElement(IJavaProject javaProject, String className) 
