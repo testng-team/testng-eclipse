@@ -49,9 +49,6 @@ public class SummaryTab extends TestRunTab  {
   /** The table that contains all the tests */
   private TableViewer m_testViewer;
 
-  /** The table that contains the excluded methods */
-  private TableViewer m_excludedMethodViewer;
-
   /** A test result, updated whenever we receive a new test result */
   class TestResult {
     Long time = 0L;
@@ -59,7 +56,14 @@ public class SummaryTab extends TestRunTab  {
     Set<String> classes = Sets.newHashSet();
   }
 
+  /** The model for the excluded method table */
   private Map<String, TestResult> m_testResults = Maps.newHashMap();
+
+  /** The table that contains the excluded methods */
+  private TableViewer m_excludedMethodViewer;
+
+  /** The model for the excluded method table */
+  private List<String> m_excludedMethods = Lists.newArrayList();
 
   // The filters for the two tables
   private RunInfoFilter m_testSearchFilter;
@@ -68,11 +72,10 @@ public class SummaryTab extends TestRunTab  {
   /** The id of the currently selected item */
   private String m_selectedId;
 
-  private List<String> m_excludedMethods = Lists.newArrayList();
-
   private TestRunnerViewPart m_testRunnerPart;
 
 
+  @Override
   public String getTooltipKey() {
     return "Summary.tab.tooltip";
   }
@@ -334,11 +337,6 @@ public class SummaryTab extends TestRunTab  {
           result.refresh();        }
       });
     }
-
-    //
-    // Filter
-    //
-    result.setFilters(new ViewerFilter[] { filter });
 
     //
     // Filter
