@@ -5,9 +5,11 @@ import org.eclipse.core.runtime.Platform;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.remote.strprotocol.AbstractRemoteTestRunnerClient;
 import org.testng.remote.strprotocol.GenericMessage;
+import org.testng.remote.strprotocol.IMessageSender;
 import org.testng.remote.strprotocol.IRemoteSuiteListener;
 import org.testng.remote.strprotocol.IRemoteTestListener;
 import org.testng.remote.strprotocol.MessageHelper;
+import org.testng.remote.strprotocol.StringMessageSender;
 import org.testng.remote.strprotocol.SuiteMessage;
 import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
@@ -15,11 +17,25 @@ import org.testng.remote.strprotocol.TestResultMessage;
 
 public class EclipseTestRunnerClient extends AbstractRemoteTestRunnerClient {
 
+  /**
+   * @deprecated Use the method that takes a marshaller.
+   */
+  @Deprecated
+  public synchronized void startListening(IRemoteSuiteListener suiteListener,
+      IRemoteTestListener testListener,
+      int port)
+  {
+    StringMessageSender marshaller = new StringMessageSender("localhost", port);
+    marshaller.initReceiver();
+    startListening(suiteListener, testListener, marshaller);
+  }
+
   public synchronized void startListening(IRemoteSuiteListener suiteListener,
                                           IRemoteTestListener testListener,
-                                          int port) 
+                                          IMessageSender messageMarshaller) 
   {
-    ServerConnection srvConnection= new ServerConnection(port) {
+    ServerConnection srvConnection= new ServerConnection(messageMarshaller) {
+      @Override
       protected void handleThrowable(Throwable cause) {
         TestNGPlugin.log(cause);
       };
@@ -31,6 +47,7 @@ public class EclipseTestRunnerClient extends AbstractRemoteTestRunnerClient {
     );
   }
   
+  @Override
   protected void notifyStart(final GenericMessage genericMessage) {
     for(int i = 0; i < m_suiteListeners.length; i++) {
       final IRemoteSuiteListener listener = m_suiteListeners[i];
@@ -43,6 +60,7 @@ public class EclipseTestRunnerClient extends AbstractRemoteTestRunnerClient {
 
   }
 
+  @Override
   protected void notifySuiteEvents(final SuiteMessage suiteMessage) {
     for(int i = 0; i < m_suiteListeners.length; i++) {
       final IRemoteSuiteListener listener = m_suiteListeners[i];
@@ -59,6 +77,7 @@ public class EclipseTestRunnerClient extends AbstractRemoteTestRunnerClient {
     }
   }
 
+  @Override
   protected void notifyTestEvents(final TestMessage testMessage) {
     for(int i = 0; i < m_testListeners.length; i++) {
       final IRemoteTestListener listener = m_testListeners[i];
@@ -75,6 +94,7 @@ public class EclipseTestRunnerClient extends AbstractRemoteTestRunnerClient {
     }
   }
 
+  @Override
   protected void notifyResultEvents(final TestResultMessage testResultMessage) {
     for(int i = 0; i < m_testListeners.length; i++) {
       final IRemoteTestListener listener = m_testListeners[i];

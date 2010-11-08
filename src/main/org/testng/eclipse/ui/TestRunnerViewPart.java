@@ -73,8 +73,10 @@ import org.testng.eclipse.util.LaunchUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.remote.strprotocol.GenericMessage;
+import org.testng.remote.strprotocol.IMessageSender;
 import org.testng.remote.strprotocol.IRemoteSuiteListener;
 import org.testng.remote.strprotocol.IRemoteTestListener;
+import org.testng.remote.strprotocol.StringMessageSender;
 import org.testng.remote.strprotocol.SuiteMessage;
 import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
@@ -385,7 +387,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       stopTest();
     }
     fTestRunnerClient = new EclipseTestRunnerClient();
-    fTestRunnerClient.startListening(this, this, port);
+    IMessageSender messageMarshaller = new StringMessageSender("localhost", port);
+    messageMarshaller.initReceiver();
+    fTestRunnerClient.startListening(this, this, messageMarshaller);
     
     m_rerunAction.setEnabled(true);
     m_rerunFailedAction.setEnabled(false);
