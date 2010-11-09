@@ -28,6 +28,7 @@ import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.ListenerContributorUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.ResourceUtil;
+import org.testng.remote.RemoteArgs;
 import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
 
@@ -154,7 +155,8 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       argv.add(pa[i]);
     }
 
-    argv.add(CommandLineArgs.PORT);
+    argv.add(RemoteArgs.PORT);
+//    argv.add(CommandLineArgs.PORT);
     argv.add(Integer.toString(port));
 
     IProject project = jproject.getProject();

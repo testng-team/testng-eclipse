@@ -76,7 +76,7 @@ import org.testng.remote.strprotocol.GenericMessage;
 import org.testng.remote.strprotocol.IMessageSender;
 import org.testng.remote.strprotocol.IRemoteSuiteListener;
 import org.testng.remote.strprotocol.IRemoteTestListener;
-import org.testng.remote.strprotocol.StringMessageSender;
+import org.testng.remote.strprotocol.SerializedMessageSender;
 import org.testng.remote.strprotocol.SuiteMessage;
 import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
@@ -383,11 +383,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     
     aboutToLaunch(subName);
     
-    if(null != fTestRunnerClient) {
-      stopTest();
-    }
+//    if(null != fTestRunnerClient) {
+//      stopTest();
+//    }
     fTestRunnerClient = new EclipseTestRunnerClient();
-    IMessageSender messageMarshaller = new StringMessageSender("localhost", port);
+    IMessageSender messageMarshaller = new SerializedMessageSender("localhost", port);
+//    IMessageSender messageMarshaller = new StringMessageSender("localhost", port);
     messageMarshaller.initReceiver();
     fTestRunnerClient.startListening(this, this, messageMarshaller);
     
@@ -1161,8 +1162,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   /// ~ ITestNGRemoteEventListener
   public void onInitialization(GenericMessage genericMessage) {
-    final int suiteCount = Integer.parseInt(genericMessage.getProperty("suiteCount")); //$NON-NLS-1$
-    final int testCount = Integer.parseInt(genericMessage.getProperty("testCount")); //$NON-NLS-1$
+    int suiteCount = genericMessage.getSuiteCount();
+    int testCount = genericMessage.getTestCount();
     reset(suiteCount, testCount);
     stopUpdateJobs();
     m_updateUIJob= new UpdateUIJob("Update TestNG"); //$NON-NLS-1$ 

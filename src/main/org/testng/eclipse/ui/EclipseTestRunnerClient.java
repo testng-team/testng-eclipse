@@ -17,6 +17,8 @@ import org.testng.remote.strprotocol.TestResultMessage;
 
 public class EclipseTestRunnerClient extends AbstractRemoteTestRunnerClient {
 
+  private StringMessageSender m_marshaller;
+
   /**
    * @deprecated Use the method that takes a marshaller.
    */
@@ -25,9 +27,19 @@ public class EclipseTestRunnerClient extends AbstractRemoteTestRunnerClient {
       IRemoteTestListener testListener,
       int port)
   {
-    StringMessageSender marshaller = new StringMessageSender("localhost", port);
-    marshaller.initReceiver();
-    startListening(suiteListener, testListener, marshaller);
+    // Always use the string protocol here for backward compatibility
+    m_marshaller = new StringMessageSender("localhost", port);
+    m_marshaller.initReceiver();
+    startListening(suiteListener, testListener, m_marshaller);
+  }
+
+  @Override
+  public synchronized void stopTest() {
+    if (m_marshaller != null) {
+      m_marshaller.shutDown();
+      m_marshaller = null;
+    }
+    super.stopTest();
   }
 
   public synchronized void startListening(IRemoteSuiteListener suiteListener,
