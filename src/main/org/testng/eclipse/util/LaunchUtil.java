@@ -370,6 +370,11 @@ public class LaunchUtil {
         types.toArray(new IType[types.size()]), mode);
   }
 
+  public static boolean useStringProtocol(ILaunchConfiguration configuration) {
+    String jvmArgs = ConfigurationHelper.getJvmArgs(configuration);
+     return jvmArgs.indexOf("-Dtestng.eclipse.stringprotocol") >= 0;
+  }
+
   private static void launchTypeBasedConfiguration(IJavaProject ijp, String confName, IType[] types, String mode) {
     Map classMethods= new HashMap();
     List typeNames = new ArrayList();

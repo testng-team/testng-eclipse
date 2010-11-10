@@ -25,6 +25,7 @@ import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.Utils;
+import org.testng.eclipse.util.LaunchUtil;
 import org.testng.eclipse.util.ListenerContributorUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.ResourceUtil;
@@ -72,11 +73,18 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     launch.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_RUN_NAME_ATTR,
         getRunNameAttr(configuration));
 
+    StringBuilder sb = new StringBuilder();
+    for (String arg : runConfig.getProgramArguments()) {
+      sb.append(arg).append(" ");
+    }
+    p("Launching " + runConfig.getClassToLaunch() + " " + sb.toString());
     runner.run(runConfig, launch, monitor);
   }
 
-  private static void ppp(String s) {
-    System.out.println("[TestNGLaunchConfigurationDelegate] " + s);
+  private static void p(String s) {
+    if (TestNGPlugin.isVerbose()) {
+      System.out.println("[TestNGLaunchConfigurationDelegate] " + s);
+    }
   }
 
   @SuppressWarnings("unchecked")
@@ -133,9 +141,12 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
   }
 
   /**
+   * This class creates the parameters to launch RemoteTestNG with the
+   * correct parameters.
+   *
    * Add a VMRunner with a class path that includes org.eclipse.jdt.junit
    * plugin. In addition it adds the port for the RemoteTestRunner as an
-   * argument
+   * argument.
    */
   protected VMRunnerConfiguration createVMRunner(final ILaunchConfiguration configuration,
       ILaunch launch, final IJavaProject jproject, final int port, final String runMode)
@@ -155,8 +166,15 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       argv.add(pa[i]);
     }
 
-    argv.add(RemoteArgs.PORT);
-//    argv.add(CommandLineArgs.PORT);
+    // Use -serPort (serialized protocol) or -port (string protocol) based on
+    // a system property
+    if (LaunchUtil.useStringProtocol(configuration)) {
+      p("Using the string protocol");
+      argv.add(CommandLineArgs.PORT);
+    } else {
+      p("Using the serialized protocol");
+      argv.add(RemoteArgs.PORT);
+    }
     argv.add(Integer.toString(port));
 
     IProject project = jproject.getProject();

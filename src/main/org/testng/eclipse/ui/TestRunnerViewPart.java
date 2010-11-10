@@ -77,6 +77,7 @@ import org.testng.remote.strprotocol.IMessageSender;
 import org.testng.remote.strprotocol.IRemoteSuiteListener;
 import org.testng.remote.strprotocol.IRemoteTestListener;
 import org.testng.remote.strprotocol.SerializedMessageSender;
+import org.testng.remote.strprotocol.StringMessageSender;
 import org.testng.remote.strprotocol.SuiteMessage;
 import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
@@ -387,11 +388,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //      stopTest();
 //    }
     fTestRunnerClient = new EclipseTestRunnerClient();
-    IMessageSender messageMarshaller = new SerializedMessageSender("localhost", port);
-//    IMessageSender messageMarshaller = new StringMessageSender("localhost", port);
+    IMessageSender messageMarshaller = LaunchUtil.useStringProtocol(launch.getLaunchConfiguration())
+        ? new StringMessageSender("localhost", port)
+        : new SerializedMessageSender("localhost", port);
     messageMarshaller.initReceiver();
     fTestRunnerClient.startListening(this, this, messageMarshaller);
-    
+
     m_rerunAction.setEnabled(true);
     m_rerunFailedAction.setEnabled(false);
     m_openReportAction.setEnabled(true);
