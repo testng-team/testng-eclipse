@@ -1189,7 +1189,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   public void onFinish(SuiteMessage suiteMessage) {
     // Do this again in onFinish() in case the set of excluded methods changed since
     // onStart()
-    m_summaryTab.setExcludedMethods(suiteMessage.getExcludedMethods());
+    m_summaryTab.setExcludedMethodsModel(suiteMessage);
 
     m_suiteCount++;
     
@@ -1388,7 +1388,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   public void onStart(SuiteMessage suiteMessage) {
-    m_summaryTab.setExcludedMethods(suiteMessage.getExcludedMethods());
+    m_summaryTab.setExcludedMethodsModel(suiteMessage);
   }
 
 }

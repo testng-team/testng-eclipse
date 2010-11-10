@@ -32,6 +32,7 @@ import org.testng.eclipse.ui.OpenTestAction;
 import org.testng.eclipse.ui.RunInfo;
 import org.testng.eclipse.ui.TestRunTab;
 import org.testng.eclipse.ui.TestRunnerViewPart;
+import org.testng.remote.strprotocol.SuiteMessage;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -63,7 +64,7 @@ public class SummaryTab extends TestRunTab  {
   private TableViewer m_excludedMethodViewer;
 
   /** The model for the excluded method table */
-  private List<String> m_excludedMethods = Lists.newArrayList();
+  private List<ExcludedMethod> m_excludedMethodsModel = Lists.newArrayList();
 
   // The filters for the two tables
   private RunInfoFilter m_testSearchFilter;
@@ -127,8 +128,8 @@ public class SummaryTab extends TestRunTab  {
   private void createExcludedMethodViewer(Composite result) {
     m_excludedMethodFilter = new StringFilter();
     m_excludedMethodViewer = createViewer(result,
-        new String[] { "Class name", "Method name" },
-        new int[] { 300, 300 },
+        new String[] { "Class name", "Method name", "Description" },
+        new int[] { 300, 250, 300 },
         new StringTableSorter(this),
         m_excludedMethodFilter
         );
@@ -142,11 +143,11 @@ public class SummaryTab extends TestRunTab  {
       private void handleDoubleClick(MouseEvent e) {
         TableItem[] items = ((Table) e.getSource()).getSelection();
         if (items.length > 0) {
-          String fqn = items[0].getData().toString();
-          System.out.println("Double click " + fqn);
-          String[] parsed = parseFqn(fqn);
+          ExcludedMethod em = (ExcludedMethod) items[0].getData();
+          System.out.println("Double click " + em.packageName + "." + em.methodName);
           OpenTestAction openAction
-              = new OpenTestAction(m_testRunnerPart, parsed[0], parsed[1], true /* activate */);
+              = new OpenTestAction(m_testRunnerPart, em.packageName, em.methodName,
+                    true /* activate */);
           openAction.run();
         }
       }
@@ -171,11 +172,11 @@ public class SummaryTab extends TestRunTab  {
       }
 
       public String getColumnText(Object element, int columnIndex) {
-        String fqn = (String) element;
-        String[] parsed = parseFqn(fqn);
+        ExcludedMethod em = (ExcludedMethod) element;
         switch(columnIndex) {
-          case 0:  return parsed[0];
-          case 1:  return parsed[1];
+          case 0: return em.packageName;
+          case 1: return em.methodName;
+          case 2: return em.description;
           default: return "";
         }
       }
@@ -415,11 +416,25 @@ public class SummaryTab extends TestRunTab  {
     m_excludedMethodViewer.refresh();
   }
 
-  public void setExcludedMethods(final List<String> excludedMethods) {
-    m_excludedMethods = excludedMethods;
+  private class ExcludedMethod {
+    public String packageName;
+    public String methodName;
+    public String description;
+  }
+
+  public void setExcludedMethodsModel(final SuiteMessage message) {
+    m_excludedMethodsModel.clear();
+    for (String method : message.getExcludedMethods()) {
+      ExcludedMethod em = new ExcludedMethod();
+      String[] parsed = parseFqn(method);
+      em.packageName = parsed[0];
+      em.methodName = parsed[1];
+      em.description = message.getDescriptionForMethod(method);
+      m_excludedMethodsModel.add(em);
+    }
     m_excludedMethodViewer.getTable().getDisplay().syncExec(new Runnable() {
       public void run() {
-        m_excludedMethodViewer.setInput(excludedMethods);
+        m_excludedMethodViewer.setInput(m_excludedMethodsModel);
         m_excludedMethodViewer.refresh();
       }
     });
