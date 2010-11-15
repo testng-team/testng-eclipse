@@ -3,7 +3,7 @@
 <plugin
    id="org.testng.eclipse"
    name="TestNG"
-   version="5.14.3.20101104_0944"
+   version="5.14.3.20101112_1252_beta"
    provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
    <runtime>
@@ -246,6 +246,14 @@
             categoryId="org.eclipse.debug.ui.category.run"
             id="org.testng.eclipse.shortcut.testngSuite.debug">
       </command>
+      <command
+            name="Convert to TestNG"
+            description="Convert the selection to TestNG"
+            categoryId="org.eclipse.jdt.ui.category.refactoring"
+            id="org.testng.eclipse.refactoring.convert"
+            defaultHandler="org.testng.eclipse.refactoring.ConvertFromJUnit3Action"
+            >
+      </command>
    </extension>
 
 
@@ -317,4 +325,40 @@
             name="TestNG class">
       </wizard>
    </extension>
-</plugin>
+
+   <extension
+         point="org.eclipse.ltk.core.refactoring.refactoringContributions">
+      <contribution
+            class="org.testng.eclipse.refactoring.ConvertFromJUnit3RefactoringContribution"
+            id="org.testng.eclipse.convert">
+      </contribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+<!--
+      <actionSet
+            id="org.testng.eclipse.actionSet"
+            label="TestNG actionSet">
+         <menu
+               id="org.testng.eclipse.menu1"
+               label="TestNG actionSet menu"
+               path="edit">
+            <separator
+                  name="org.testng.eclipse.separator1">
+            </separator>
+         </menu>
+-->
+         <action
+               class="org.testng.eclipse.refactoring.ConvertFromJUnit3Action"
+               definitionId="org.testng.eclipse.refactoring.convert"
+               id="org.testng.eclipse.actionConvert"
+               label="Convert to TestNG"
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
+               style="push">
+         </action>
+<!--
+      </actionSet>
+-->
+   </extension>
+
+ </plugin>
