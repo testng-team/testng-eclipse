@@ -34,7 +34,8 @@
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
       <import plugin="org.eclipse.search"/>
-      <import plugin="org.eclipse.ltk.core.refactoring" version="3.5.0"/>
+      <import plugin="org.eclipse.ltk.core.refactoring"/>
+      <import plugin="org.eclipse.ltk.ui.refactoring" version="3.5.0"/>
    </requires>
    
  
@@ -251,7 +252,7 @@
             description="Convert the selection to TestNG"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.testng.eclipse.refactoring.convert"
-            defaultHandler="org.testng.eclipse.refactoring.ConvertFromJUnit3Action"
+            defaultHandler="org.testng.eclipse.refactoring.ConvertFromJUnitAction"
             >
       </command>
    </extension>
@@ -329,16 +330,16 @@
    <extension
          point="org.eclipse.ltk.core.refactoring.refactoringContributions">
       <contribution
-            class="org.testng.eclipse.refactoring.ConvertFromJUnit3RefactoringContribution"
+            class="org.testng.eclipse.refactoring.ConvertFromJUnitRefactoringContribution"
             id="org.testng.eclipse.convert">
       </contribution>
    </extension>
    <extension
          point="org.eclipse.ui.actionSets">
-<!--
       <actionSet
             id="org.testng.eclipse.actionSet"
             label="TestNG actionSet">
+<!--
          <menu
                id="org.testng.eclipse.menu1"
                label="TestNG actionSet menu"
@@ -349,16 +350,14 @@
          </menu>
 -->
          <action
-               class="org.testng.eclipse.refactoring.ConvertFromJUnit3Action"
+               class="org.testng.eclipse.refactoring.ConvertFromJUnitAction"
                definitionId="org.testng.eclipse.refactoring.convert"
                id="org.testng.eclipse.actionConvert"
                label="Convert to TestNG"
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
                style="push">
          </action>
-<!--
       </actionSet>
--->
    </extension>
 
  </plugin>
