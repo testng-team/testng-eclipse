@@ -116,7 +116,7 @@ public class JUnitVisitor extends ASTVisitor {
     for (IExtendedModifier m : modifiers) {
       if (m.isAnnotation()) {
         Annotation a = (Annotation) m;
-        if ("Test".equals(a.getTypeName().toString())) {
+        if ("Test".equals(a.getTypeName().toString()) && a instanceof NormalAnnotation) {
           NormalAnnotation na = (NormalAnnotation) a;
           for (Object o : na.values()) {
             MemberValuePair mvp = (MemberValuePair) o;
