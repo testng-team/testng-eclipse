@@ -138,7 +138,7 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
    */
   public void launchRemoved(final ILaunch launch) {
     n_trackedLaunches.remove(launch);
-    SWTUtil.getDisplay().asyncExec(new Runnable() {
+    asyncExec(new Runnable() {
         public void run() {
           TestRunnerViewPart testRunnerViewPart = findTestRunnerViewPartInActivePage();
           if((testRunnerViewPart != null)
@@ -149,6 +149,10 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
           }
         }
       });
+  }
+
+  public static void asyncExec(Runnable runnable) {
+    SWTUtil.getDisplay().asyncExec(runnable);
   }
 
   /**
@@ -193,7 +197,7 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
     
     n_trackedLaunches.remove(launch);
 
-    SWTUtil.getDisplay().asyncExec(new Runnable() {
+    asyncExec(new Runnable() {
         public void run() {
           connectTestRunner(launch, ijp, name, finalPort);
         }

@@ -4,6 +4,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ui.IWorkbenchPage;
 
 public class ConvertFromJUnitRefactoringDescriptor extends RefactoringDescriptor {
 
@@ -17,7 +18,7 @@ public class ConvertFromJUnitRefactoringDescriptor extends RefactoringDescriptor
   public Refactoring createRefactoring(RefactoringStatus status)
       throws CoreException
   {
-    return new ConvertFromJUnitRefactoring(status);
+    return new ConvertFromJUnitRefactoring(null /* window */, null /* page */, status);
   }
 
 }
