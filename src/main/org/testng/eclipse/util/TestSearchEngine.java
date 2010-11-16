@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
@@ -359,6 +360,10 @@ public class TestSearchEngine {
     }
   }
 
+  /**
+   * Collect all the types under the parameter element, which is expected to be either
+   * an IJavaProject, an IPackageFragmentRoot or a IPackageFragment.
+   */
   private static void collectTypes(Object element,
                                    IProgressMonitor pm,
                                    Set result,
@@ -377,6 +382,7 @@ public class TestSearchEngine {
         }
         element = ((IJavaElement) element).getParent();
       }
+
       if(element instanceof ICompilationUnit) {
         ICompilationUnit cu = (ICompilationUnit) element;
 
@@ -388,7 +394,21 @@ public class TestSearchEngine {
           }
         }
       }
-      else if(element instanceof IJavaElement) {
+      else if (element instanceof IPackageFragmentRoot) {
+        // Do this test before instanceof IJavaElement (which is more general)
+        IPackageFragmentRoot pfr = (IPackageFragmentRoot) element;
+        for (Object javaElement : pfr.getChildren()) {
+          collectTypes(javaElement, pm, result, filter);
+        }
+      }
+      else if (element instanceof IPackageFragment) {
+        // Do this test before instanceof IJavaElement (which is more general)
+        IPackageFragment pfr = (IPackageFragment) element;
+        for (Object javaElement : pfr.getChildren()) {
+          collectTypes(javaElement, pm, result, filter);
+        }
+      }
+      else if (element instanceof IJavaElement) {
         findTestTypes(((IJavaElement) element).getJavaProject(), result, filter);
       }
     }

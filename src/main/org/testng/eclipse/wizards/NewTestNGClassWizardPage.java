@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 import org.testng.eclipse.util.ResourceUtil;
+import org.testng.eclipse.util.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -243,19 +244,12 @@ public class NewTestNGClassWizardPage extends WizardPage {
     IResource resource = (IResource) pf.getAdapter(IResource.class);
     IProject p = (IProject) resource.getProject();
     IJavaProject jp = JavaCore.create(p);
-    try {
-      for (IClasspathEntry entry : jp.getRawClasspath()) {
-        if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-          String source = entry.getPath().toOSString();
-          if (resource.getFullPath().toString().startsWith(source)) {
-            m_sourceFolderText.setText(source);
-            break;
-          }
-        }
+    for (IClasspathEntry entry : Utils.getSourceFolders(jp)) {
+      String source = entry.getPath().toOSString();
+      if (resource.getFullPath().toString().startsWith(source)) {
+        m_sourceFolderText.setText(source);
+        break;
       }
-    }
-    catch(JavaModelException ex) {
-      ex.printStackTrace();
     }
   }
 

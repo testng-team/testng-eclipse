@@ -1,42 +1,39 @@
 package org.testng.eclipse.refactoring;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.jdt.internal.debug.ui.threadgroups.JavaDebugTargetProxy;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextFileChange;
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.launch.components.Filters.ITypeFilter;
-import org.testng.eclipse.ui.conversion.AnnotationRewriter;
-import org.testng.eclipse.ui.conversion.JUnitVisitor;
-import org.testng.eclipse.util.TestSearchEngine;
+import org.testng.eclipse.collections.Lists;
+import org.testng.eclipse.collections.Maps;
+import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.Utils;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * A composite change that gathers all the changes needs to convert the current
+ * selection (project or package) from JUnit to TestNG. This composite change
+ * creates one change per class to convert.
+ *
+ * @author Cedric Beust <cedric@beust.com>
+ *
+ */
 public class ConvertFromJUnitCompositeChange extends CompositeChange {
 
   private IProgressMonitor m_pm;
   private IWorkbenchWindow m_window;
   private IWorkbenchPage m_page;
+
+  private Map<IClasspathEntry, List<IType>> m_classes = Maps.newHashMap();
 
   public ConvertFromJUnitCompositeChange(IProgressMonitor pm,
       IWorkbenchWindow window, IWorkbenchPage page) {
@@ -44,81 +41,37 @@ public class ConvertFromJUnitCompositeChange extends CompositeChange {
     m_pm = pm;
     m_window = window;
     m_page = page;
+    markAsSynthetic();
     computeChanges();
   }
 
   private void computeChanges() {
     TestNGPlugin.asyncExec(new Runnable() {
       public void run() {
-        IRunnableContext context = new FindTestsRunnableContext();
-        Object selection = Utils.getSelectedProjectOrPackage(m_page);
-        IJavaProject project = (IJavaProject)
-            (selection instanceof IJavaProject ? selection : null);
-        IPackageFragmentRoot pfr = (IPackageFragmentRoot)
-            (selection instanceof IPackageFragmentRoot ? selection : null);
-        try {
-          ITypeFilter filter = new ITypeFilter() {
-
-            public boolean accept(IType type) {
-              IResource obj = (IResource) type.getAdapter(IResource.class);
-              IContainer container = null;
-              if (obj instanceof IContainer) {
-                container = (IContainer) obj;
-              } else if (obj != null) {
-                container = ((IResource) obj).getParent();
+        List<IType> types = Utils.findSelectedTypes(m_page);
+        for (IType type : types) {
+          for (IClasspathEntry entry : Utils.getSourceFolders(JDTUtil.getJavaProjectContext())) {
+            String source = entry.getPath().toOSString();
+            if (type.getResource().getFullPath().toOSString().startsWith(source)) {
+              List<IType> l = m_classes.get(entry);
+              if (l == null) {
+                l = Lists.newArrayList();
+                m_classes.put(entry, l);
               }
-              if (container != null) {
-                String sourcePath = container.getFullPath().toString();
-                return sourcePath.contains("/test/");
-//                return type.getFullyQualifiedName().contains("JUnit3Test2");
-              } else {
-                return false;
-              }
+              l.add(type);
             }
-            
-          };
-          IType[] types = TestSearchEngine.findTests(context, new Object[] { project }, filter);
-          for (IType type : types) {
-            
-            add(createChange(type));
-            System.out.println("  type:" + type.getFullyQualifiedName());
           }
-        } catch (InvocationTargetException e) {
-          e.printStackTrace();
-        } catch (InterruptedException e) {
-          e.printStackTrace();
+        }
+
+        // Now create one composite change per source folder
+        for (Map.Entry<IClasspathEntry, List<IType>> entry : m_classes.entrySet()) {
+          add(new SourceFolderChange(entry.getKey(), entry.getValue()));
         }
         
       }
     });
   }
 
-  private Change createChange(IType type) {
-    TextFileChange result = null;
-    ICompilationUnit cu = type.getCompilationUnit();
-    // creation of DOM/AST from a ICompilationUnit
-    ASTParser parser = ASTParser.newParser(AST.JLS3);
-    parser.setSource(cu);
-    CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);
-    JUnitVisitor visitor = new JUnitVisitor();
-    astRoot.accept(visitor);
-
-//    AST ast = context.getASTRoot().getAST();
-    AST ast = astRoot.getAST();
-    ASTRewrite rewriter = new AnnotationRewriter().createRewriter(astRoot, ast, visitor);
-    try {
-      TextEdit edit = rewriter.rewriteAST();
-      result = new TextFileChange(cu.getElementName(), (IFile) cu.getResource());
-      result.setEdit(edit);
-    } catch (JavaModelException e) {
-      e.printStackTrace();
-    } catch (IllegalArgumentException e) {
-      e.printStackTrace();
-    }
-    System.out.println("Finished rewriting " + getName());
-
-    return result;
-  }
   @Override
   public String getName() {
     return "src/test/java";

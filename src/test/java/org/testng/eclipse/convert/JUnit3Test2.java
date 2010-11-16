@@ -8,4 +8,5 @@ public class JUnit3Test2 extends TestCase {
     assertEquals(true, true);
     System.out.println("Worked");
   }
+
 }
