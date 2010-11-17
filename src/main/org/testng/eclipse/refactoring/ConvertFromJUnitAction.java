@@ -32,7 +32,6 @@ public class ConvertFromJUnitAction extends AbstractHandler
   }
 
   public Object execute(ExecutionEvent event) throws ExecutionException {
-    System.out.println("Execute");
     run();
     return null;
   }

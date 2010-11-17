@@ -360,15 +360,23 @@
               name="testng-eclipse.separator2"
               visible="true">
         </separator>
-        <menu
-              label="TestNG">
-           <command
-                 commandId="org.testng.eclipse.convertAction"
-                 icon="icons/full/main16/testng.gif"
-                 label="Convert to TestNG"
-                 style="push">
-           </command>
+
+        <menu label="TestNG">
+          <visibleWhen>
+              <iterate>
+                 <adapt type="org.eclipse.jdt.core.IJavaElement">
+                   <instanceof value="org.eclipse.jdt.core.IJavaElement" />
+                 </adapt>
+              </iterate>
+          </visibleWhen>
+          <command
+              commandId="org.testng.eclipse.convertAction"
+              icon="icons/full/main16/testng.gif"
+              label="Convert to TestNG"
+              style="push">
+          </command>
         </menu>
+
      </menuContribution>
   </extension>
  </plugin>

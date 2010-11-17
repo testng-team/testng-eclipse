@@ -1,11 +1,13 @@
 package org.testng.eclipse.util;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
@@ -71,6 +73,18 @@ public class Utils {
     return Arrays.asList(types);
   }
 
+  /**
+   * Known limitation of this method: if the selection is happening in the Navigator,
+   * the selected tree item will contain a path that I'm not bothering turning into
+   * Java elements: instead, I just return the entire project. Therefore, right clicking
+   * on a file in the Navigator and selecting "Convert to TestNG" will cause the refactoring
+   * to apply to the entire project.
+   *
+   * TODO: handle the Navigator as well as the Package Explorer.
+   *
+   * @param page
+   * @return
+   */
   private static ProjectPackage getSelectedProjectOrPackage(IWorkbenchPage page) {
     ProjectPackage result = new ProjectPackage();
     ISelection selection = page.getSelection();
@@ -81,7 +95,12 @@ public class Utils {
       for (TreePath path : paths) {
         int count = path.getSegmentCount();
         if (count > 0) {
-          result.project = (IJavaProject) path.getFirstSegment();
+          Object project = path.getFirstSegment();
+          if (project instanceof IJavaProject) {
+            result.project = (IJavaProject) project;
+          } else if (project instanceof IProject) {
+            result.project = JavaCore.create((IProject) project);
+          }
         }
         if (count > 1 && path.getSegment(1) instanceof IPackageFragmentRoot) {
           result.packageFragmentRoot = (IPackageFragmentRoot) path.getSegment(1);
