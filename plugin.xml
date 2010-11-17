@@ -251,7 +251,7 @@
             name="Convert to TestNG"
             description="Convert the selection to TestNG"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
-            id="org.testng.eclipse.refactoring.convert"
+            id="org.testng.eclipse.convertAction"
             defaultHandler="org.testng.eclipse.refactoring.ConvertFromJUnitAction"
             >
       </command>
@@ -334,12 +334,12 @@
             id="org.testng.eclipse.convert">
       </contribution>
    </extension>
+<!--
    <extension
          point="org.eclipse.ui.actionSets">
       <actionSet
             id="org.testng.eclipse.actionSet"
             label="TestNG actionSet">
-<!--
          <menu
                id="org.testng.eclipse.menu1"
                label="TestNG actionSet menu"
@@ -348,16 +348,27 @@
                   name="org.testng.eclipse.separator1">
             </separator>
          </menu>
--->
-         <action
-               class="org.testng.eclipse.refactoring.ConvertFromJUnitAction"
-               definitionId="org.testng.eclipse.refactoring.convert"
-               id="org.testng.eclipse.actionConvert"
-               label="Convert to TestNG"
-               menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
-               style="push">
-         </action>
       </actionSet>
    </extension>
+-->
 
+  <extension point="org.eclipse.ui.menus">
+     <menuContribution
+           allPopups="false"
+           locationURI="popup:org.eclipse.ui.popup.any">
+        <separator
+              name="testng-eclipse.separator2"
+              visible="true">
+        </separator>
+        <menu
+              label="TestNG">
+           <command
+                 commandId="org.testng.eclipse.convertAction"
+                 icon="icons/full/main16/testng.gif"
+                 label="Convert to TestNG"
+                 style="push">
+           </command>
+        </menu>
+     </menuContribution>
+  </extension>
  </plugin>
