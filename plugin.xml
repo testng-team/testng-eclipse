@@ -3,7 +3,7 @@
 <plugin
    id="org.testng.eclipse"
    name="TestNG"
-   version="5.14.3.20101117_1303"
+   version="5.14.3.20101117_1323"
    provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
    <runtime>
@@ -35,7 +35,7 @@
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
       <import plugin="org.eclipse.search"/>
       <import plugin="org.eclipse.ltk.core.refactoring"/>
-      <import plugin="org.eclipse.ltk.ui.refactoring" version="3.5.0"/>
+      <import plugin="org.eclipse.ltk.ui.refactoring" version="3.4.101"/>
    </requires>
    
  
