@@ -11,12 +11,9 @@ import org.eclipse.ui.IWorkbenchWindow;
 
 public class ConvertFromJUnitRefactoring extends Refactoring {
   private RefactoringStatus m_status = new RefactoringStatus();
-  private IWorkbenchWindow m_window;
   private IWorkbenchPage m_page;
 
-  public ConvertFromJUnitRefactoring(IWorkbenchWindow window, IWorkbenchPage page,
-      RefactoringStatus status) {
-    m_window = window;
+  public ConvertFromJUnitRefactoring(IWorkbenchPage page, RefactoringStatus status) {
     m_page = page;
   }
 
@@ -41,7 +38,7 @@ public class ConvertFromJUnitRefactoring extends Refactoring {
   public Change createChange(IProgressMonitor pm) throws CoreException,
       OperationCanceledException
   {
-    return new ConvertFromJUnitCompositeChange(pm, m_window, m_page);
+    return new ConvertFromJUnitCompositeChange(pm, m_page);
   }
 
 }

@@ -18,7 +18,7 @@ public class ConvertFromJUnitRefactoringDescriptor extends RefactoringDescriptor
   public Refactoring createRefactoring(RefactoringStatus status)
       throws CoreException
   {
-    return new ConvertFromJUnitRefactoring(null /* window */, null /* page */, status);
+    return new ConvertFromJUnitRefactoring(null /* page */, status);
   }
 
 }

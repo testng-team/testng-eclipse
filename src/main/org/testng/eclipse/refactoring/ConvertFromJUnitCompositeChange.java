@@ -31,16 +31,13 @@ import java.util.Map;
 public class ConvertFromJUnitCompositeChange extends CompositeChange {
 
   private IProgressMonitor m_pm;
-  private IWorkbenchWindow m_window;
   private IWorkbenchPage m_page;
 
   private Map<IClasspathEntry, List<IType>> m_classes = Maps.newHashMap();
 
-  public ConvertFromJUnitCompositeChange(IProgressMonitor pm,
-      IWorkbenchWindow window, IWorkbenchPage page) {
+  public ConvertFromJUnitCompositeChange(IProgressMonitor pm, IWorkbenchPage page) {
     super("Composite change");
     m_pm = pm;
-    m_window = window;
     m_page = page;
     markAsSynthetic();
     computeChanges();

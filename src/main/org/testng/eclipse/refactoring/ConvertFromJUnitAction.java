@@ -3,50 +3,46 @@ package org.testng.eclipse.refactoring;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.expressions.EvaluationContext;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
 
-public class ConvertFromJUnitAction extends AbstractHandler
-    implements IWorkbenchWindowActionDelegate { // extends AbstractHandler {
+public class ConvertFromJUnitAction extends AbstractHandler {
 
-  private IWorkbenchWindow m_window;
   private ISelection m_selection;
-
-  public void run(IAction action) {
-    System.out.println("Run");
-    run();
-  }
 
   public void dispose() {
   }
 
-  public void init(IWorkbenchWindow window) {
-    ISelectionService ss = window.getSelectionService();
-    m_window = window;
-  }
-
   public Object execute(ExecutionEvent event) throws ExecutionException {
-    run();
+    Event ev = (Event) event.getTrigger();
+    run(ev.display.getActiveShell());
     return null;
   }
   
-  private void run() {
+  private void run(Shell shell) {
+    if (shell == null) {
+      // We won't have an active shell if the user right-clicked on an item without
+      // selecting it first
+      shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+    }
 
 //    RefactoringProcessor processor = new RenamePropertyProcessor( info );
     IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-    ConvertFromJUnitRefactoring ref = new ConvertFromJUnitRefactoring(m_window, page,
-        null /* status */);
+    ConvertFromJUnitRefactoring ref = new ConvertFromJUnitRefactoring(page, null /* status */);
     ConvertFromJUnitWizard wizard = new ConvertFromJUnitWizard(ref, 0);
     RefactoringWizardOpenOperation op = new RefactoringWizardOpenOperation(wizard);
     try { 
       String titleForFailedChecks = ""; //$NON-NLS-1$ 
-      op.run(PlatformUI.getWorkbench().getDisplay().getActiveShell(), titleForFailedChecks ); 
+      op.run(shell, titleForFailedChecks);
     } catch( InterruptedException irex ) { 
       // operation was cancelled 
     }
