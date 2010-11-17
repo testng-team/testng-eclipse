@@ -4,6 +4,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.debug.ui.threadgroups.JavaDebugTargetProxy;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -48,9 +49,12 @@ public class ConvertFromJUnitCompositeChange extends CompositeChange {
   private void computeChanges() {
     TestNGPlugin.asyncExec(new Runnable() {
       public void run() {
+        IJavaProject javaProject = JDTUtil.getJavaProjectContext();
+        if (javaProject == null) return;
+
         List<IType> types = Utils.findSelectedTypes(m_page);
         for (IType type : types) {
-          for (IClasspathEntry entry : Utils.getSourceFolders(JDTUtil.getJavaProjectContext())) {
+          for (IClasspathEntry entry : Utils.getSourceFolders(javaProject)) {
             String source = entry.getPath().toOSString();
             if (type.getResource().getFullPath().toOSString().startsWith(source)) {
               List<IType> l = m_classes.get(entry);

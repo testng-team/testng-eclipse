@@ -83,13 +83,13 @@ public class Utils {
         if (count > 0) {
           result.project = (IJavaProject) path.getFirstSegment();
         }
-        if (count > 1) {
+        if (count > 1 && path.getSegment(1) instanceof IPackageFragmentRoot) {
           result.packageFragmentRoot = (IPackageFragmentRoot) path.getSegment(1);
         }
-        if (count > 2) {
+        if (count > 2 && path.getSegment(2) instanceof IPackageFragment) {
           result.packageFragment = (IPackageFragment) path.getSegment(2);
         }
-        if (count > 3) {
+        if (count > 3 && path.getSegment(3) instanceof ICompilationUnit) {
           result.compilationUnit = (ICompilationUnit) path.getSegment(3);
         }
       }
