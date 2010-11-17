@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -33,7 +34,7 @@ public class AnnotationRewriter implements IRewriteProvider
       ) 
   {
     final ASTRewrite result = ASTRewrite.create(astRoot.getAST());
-    
+
     //
     // Remove all the JUnit imports
     //
@@ -52,8 +53,6 @@ public class AnnotationRewriter implements IRewriteProvider
     maybeAddImport(ast, result, astRoot, visitor.hasTestMethods(), "org.testng.annotations.Test");
     maybeAddImport(ast, result, astRoot, !visitor.getAfterMethods().isEmpty(),
         "org.testng.annotations.AfterMethod");
-    maybeAddImport(ast, result, astRoot, visitor.getSuite() != null,
-        "org.testng.annotations.Factory");
 
     //
     // Remove "extends TestCase"
@@ -71,7 +70,14 @@ public class AnnotationRewriter implements IRewriteProvider
         "@Before" /* annotation to remove */);
     maybeAddAnnotations(ast, visitor, result, visitor.getAfterMethods(), "AfterMethod",
         "@After" /* annotation to remove */);
-    maybeAddAnnotation(ast, visitor, result, visitor.getSuite(), "Factory", null);
+
+    //
+    // Remove the suite() method, if any
+    //
+    MethodDeclaration suiteMethod = visitor.getSuite();
+    if (suiteMethod != null) {
+      result.remove(suiteMethod, null);
+    }
 
     //
     // Replace "Assert" with "AssertJUnit"
