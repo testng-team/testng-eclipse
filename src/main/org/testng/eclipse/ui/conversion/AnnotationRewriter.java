@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +28,15 @@ import java.util.Set;
  */
 public class AnnotationRewriter implements IRewriteProvider
 {
+  private static final Set<String> IMPORTS_TO_REMOVE = new HashSet<String>() {{
+    add("junit.framework.Assert");
+    add("junit.framework.Test");
+    add("junit.framework.TestCase");
+    add("junit.framework.TestSuite");
+    add("org.junit.After");
+    add("org.junit.Before");
+    add("org.junit.Test");
+  }};
   public ASTRewrite createRewriter(CompilationUnit astRoot,
       AST ast,
       JUnitVisitor visitor
@@ -35,11 +45,14 @@ public class AnnotationRewriter implements IRewriteProvider
     final ASTRewrite result = ASTRewrite.create(astRoot.getAST());
 
     //
-    // Remove all the JUnit imports
+    // Remove some JUnit imports.
     //
     List<ImportDeclaration> oldImports = visitor.getJUnitImports();
     for (int i = 0; i < oldImports.size(); i++) {
-      result.remove((ImportDeclaration) oldImports.get(i), null);
+      Name importName = oldImports.get(i).getName();
+      if (IMPORTS_TO_REMOVE.contains(importName.getFullyQualifiedName())) {
+        result.remove((ImportDeclaration) oldImports.get(i), null);
+      }
     }
     
     //
