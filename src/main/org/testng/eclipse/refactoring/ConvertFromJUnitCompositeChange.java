@@ -1,24 +1,25 @@
 package org.testng.eclipse.refactoring;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.internal.debug.ui.threadgroups.JavaDebugTargetProxy;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.collections.Maps;
+import org.testng.eclipse.collections.Sets;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.Utils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A composite change that gathers all the changes needs to convert the current
@@ -33,7 +34,13 @@ public class ConvertFromJUnitCompositeChange extends CompositeChange {
   private IProgressMonitor m_pm;
   private IWorkbenchPage m_page;
 
-  private Map<IClasspathEntry, List<IType>> m_classes = Maps.newHashMap();
+  /**
+   * Map of <source folder, Set<IResource>>.
+   * Note: using a set here since the same resource can appear several times for a different
+   * IType (if the class has nested classes) and we only want to perform the refactoring
+   * once per file.
+   */
+  private Map<String, Set<IResource>> m_classes = Maps.newHashMap();
 
   public ConvertFromJUnitCompositeChange(IProgressMonitor pm, IWorkbenchPage page) {
     super("Composite change");
@@ -52,20 +59,21 @@ public class ConvertFromJUnitCompositeChange extends CompositeChange {
         List<IType> types = Utils.findSelectedTypes(m_page);
         for (IType type : types) {
           for (IClasspathEntry entry : Utils.getSourceFolders(javaProject)) {
-            String source = entry.getPath().toOSString();
-            if (type.getResource().getFullPath().toOSString().startsWith(source)) {
-              List<IType> l = m_classes.get(entry);
+            String sourceFolder = entry.getPath().toOSString();
+            IResource resource = type.getResource();
+            if (resource.getFullPath().toOSString().contains(sourceFolder)) {
+              Set<IResource> l = m_classes.get(sourceFolder);
               if (l == null) {
-                l = Lists.newArrayList();
-                m_classes.put(entry, l);
+                l = Sets.newHashSet();
+                m_classes.put(sourceFolder, l);
               }
-              l.add(type);
+              l.add(resource);
             }
           }
         }
 
         // Now create one composite change per source folder
-        for (Map.Entry<IClasspathEntry, List<IType>> entry : m_classes.entrySet()) {
+        for (Map.Entry<String, Set<IResource>> entry : m_classes.entrySet()) {
           add(new SourceFolderChange(entry.getKey(), entry.getValue()));
         }
         
@@ -75,7 +83,7 @@ public class ConvertFromJUnitCompositeChange extends CompositeChange {
 
   @Override
   public String getName() {
-    return "src/test/java";
+    return "<should never be seen>";
   }
 
   @Override

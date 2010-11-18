@@ -1,9 +1,9 @@
 package org.testng.eclipse.refactoring;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -16,7 +16,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.testng.eclipse.ui.conversion.AnnotationRewriter;
 import org.testng.eclipse.ui.conversion.JUnitVisitor;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * A composite change that applies to a source folder.
@@ -25,22 +25,21 @@ import java.util.List;
  */
 public class SourceFolderChange extends CompositeChange {
 
-  public SourceFolderChange(IClasspathEntry source, List<IType> types) {
-    super(source.getPath().toOSString());
-    for (IType type : types) {
-      add(createChange(type));
+  public SourceFolderChange(String path, Collection<IResource> resources) {
+    super(path);
+    for (IResource resource : resources) {
+      add(createChange(resource));
     }
     // Unchecking all non test folders. I wish I could also collaps them in the
     // tree but I haven't found how to do this yet.
-    setEnabled(source.getPath().toOSString().contains("test/"));
+    setEnabled(path.contains("test/"));
   }
 
-  private Change createChange(IType type) {
+  private Change createChange(IResource resource) {
     TextFileChange result = null;
-    ICompilationUnit cu = type.getCompilationUnit();
     // creation of DOM/AST from a ICompilationUnit
     ASTParser parser = ASTParser.newParser(AST.JLS3);
-    parser.setSource(cu);
+    parser.setSource((ICompilationUnit) JavaCore.create(resource));
     CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);
     JUnitVisitor visitor = new JUnitVisitor();
     astRoot.accept(visitor);
@@ -50,7 +49,7 @@ public class SourceFolderChange extends CompositeChange {
     ASTRewrite rewriter = new AnnotationRewriter().createRewriter(astRoot, ast, visitor);
     try {
       TextEdit edit = rewriter.rewriteAST();
-      result = new TextFileChange(cu.getElementName(), (IFile) cu.getResource());
+      result = new TextFileChange(resource.getName(), (IFile) resource);
       result.setEdit(edit);
     } catch (JavaModelException e) {
       e.printStackTrace();
