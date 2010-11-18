@@ -30,6 +30,7 @@ do
   fi
 done
 
+echo "Class OK:"
 file org/testng/eclipse/TestNGPlugin.class
 
 cd $UPDATE_SITE
