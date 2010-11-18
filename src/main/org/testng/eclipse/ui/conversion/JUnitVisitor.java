@@ -187,9 +187,11 @@ public class JUnitVisitor extends ASTVisitor {
     List<Class> types = Lists.newArrayList();
     for (Expression e : arguments) {
       ITypeBinding binding = e.resolveTypeBinding();
-      Class c = bindingToClass(binding);
       // Early abort if a binding fails
-      if (binding == null) return true;
+      if (binding == null) {
+        return true;
+      }
+      Class c = bindingToClass(binding);
 
       types.add(c);
     }
@@ -212,26 +214,15 @@ public class JUnitVisitor extends ASTVisitor {
   }
 
   /**
-   * If the key is found on the ITypeBinding, then it's probably of the type equal to its value. 
-   */
-  private static Map<String, Class> METHOD_TO_CLASS= new HashMap<String, Class>() {{
-    put("indexOf", String.class);
-  }};
-
-  /**
-   * Use heuristics to try to find the right class for this binding. This method
-   * can fail in so many ways that I don't want to talk about it.
+   * Use heuristics to try to find the right class for this binding.
    */
   private Class bindingToClass(ITypeBinding binding) {
     Class result = getBinaryClassName(binding.getBinaryName());
     if (result == null) {
-      // Binary name fail, use the methods on this type to try to identify its class.
-      IMethodBinding[] methods = binding.getDeclaredMethods();
-      for (IMethodBinding method : methods) {
-        result = METHOD_TO_CLASS.get(method.getName());
-        if (result != null) {
-          return result;
-        }
+      try {
+        result = Class.forName(binding.getQualifiedName());
+      } catch (ClassNotFoundException e) {
+        // ignore
       }
     }
 
