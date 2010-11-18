@@ -57,6 +57,7 @@ public class ConvertFromJUnitCompositeChange extends CompositeChange {
         if (javaProject == null) return;
 
         List<IType> types = Utils.findSelectedTypes(m_page);
+        m_pm.beginTask("Finding test classes", types.size());
         for (IType type : types) {
           for (IClasspathEntry entry : Utils.getSourceFolders(javaProject)) {
             String sourceFolder = entry.getPath().toOSString();
@@ -68,6 +69,7 @@ public class ConvertFromJUnitCompositeChange extends CompositeChange {
                 m_classes.put(sourceFolder, l);
               }
               l.add(resource);
+              m_pm.worked(1);
             }
           }
         }
@@ -76,7 +78,8 @@ public class ConvertFromJUnitCompositeChange extends CompositeChange {
         for (Map.Entry<String, Set<IResource>> entry : m_classes.entrySet()) {
           add(new SourceFolderChange(entry.getKey(), entry.getValue()));
         }
-        
+
+        m_pm.done();
       }
     });
   }
