@@ -186,6 +186,8 @@ public class JUnitVisitor extends ASTVisitor {
     List<Class> types = Lists.newArrayList();
     for (Expression e : arguments) {
       ITypeBinding binding = e.resolveTypeBinding();
+      // Early abort if a binding fails
+      if (binding == null) return true;
       Class c = getBinaryClassName(binding.getBinaryName());
       if (c == null) c = Object.class;
       types.add(c);

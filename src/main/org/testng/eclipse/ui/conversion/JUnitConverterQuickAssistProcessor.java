@@ -3,6 +3,7 @@ package org.testng.eclipse.ui.conversion;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -22,6 +23,7 @@ public class JUnitConverterQuickAssistProcessor implements
     boolean result = false;
     
     IImportDeclaration[] imports = context.getCompilationUnit().getImports();
+    // See if we have any JUnit import
     for (int i = 0; i < imports.length; i++) {
       IImportDeclaration id = imports[i];
       String name = id.getElementName();
@@ -30,7 +32,17 @@ public class JUnitConverterQuickAssistProcessor implements
         break;
       }
     }
-    
+
+    // Nothing in the imports, try to make a guess based on the class name and superclass
+    if (!result) {
+      IType[] types = context.getCompilationUnit().getTypes();
+      for (IType type : types) {
+        if (type.getFullyQualifiedName().contains("Test")) {
+          result = true;
+          break;
+        }
+      }
+    }
 //    ppp("HAS ASSISTS:" + result);
     return result;
   }
@@ -49,6 +61,7 @@ public class JUnitConverterQuickAssistProcessor implements
       // creation of DOM/AST from a ICompilationUnit
       ASTParser parser = ASTParser.newParser(AST.JLS3);
       parser.setSource(cu);
+      parser.setResolveBindings(true);
       CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);
       AST ast = context.getASTRoot().getAST();
       JUnitVisitor visitor = new JUnitVisitor();
