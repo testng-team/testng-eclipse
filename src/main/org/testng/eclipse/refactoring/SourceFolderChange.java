@@ -39,6 +39,11 @@ public class SourceFolderChange extends CompositeChange {
     TextFileChange result = null;
     // creation of DOM/AST from a ICompilationUnit
     ASTParser parser = ASTParser.newParser(AST.JLS3);
+    // We need the binding to be able to retrieve the types of the expressions in
+    // the visitor (this is used to determine whether the assert() and fail() method
+    // invocations can be found on the AssertJUnit class or not. If not, we don't
+    // rewrite them since they are probably defined on the super class.
+    parser.setResolveBindings(true);
     parser.setSource((ICompilationUnit) JavaCore.create(resource));
     CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);
     JUnitVisitor visitor = new JUnitVisitor();

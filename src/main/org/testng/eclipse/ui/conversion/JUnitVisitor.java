@@ -1,9 +1,11 @@
 package org.testng.eclipse.ui.conversion;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -12,10 +14,12 @@ import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.testng.AssertJUnit;
 import org.testng.collections.Lists;
 import org.testng.eclipse.collections.Maps;
 import org.testng.internal.annotations.Sets;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,11 +32,25 @@ import junit.framework.Assert;
  * - "extends TestCase" declaration
  * - Methods that start with test
  * - setUp and tearDown
+ * - ...
  * 
  * Created on Aug 8, 2005
- * @author cbeust
+ * @author Cedric Beust <cedric@beust.com>
  */
 public class JUnitVisitor extends ASTVisitor {
+  private static Map<String, Class> BINARY_CLASS_NAMES = new HashMap<String, Class>() {{
+    put("B", byte.class);
+    put("C", char.class);
+    put("D", double.class);
+    put("F", float.class);
+    put("I", int.class);
+    put("J", long.class);
+    put("L", Class.class);
+    put("S", short.class);
+    put("Z", boolean.class);
+    put("[", Object[].class);
+  }};
+
   private List<MethodDeclaration> m_testMethods = Lists.newArrayList();
   private List<MethodDeclaration> m_beforeMethods = Lists.newArrayList();
   private List<MethodDeclaration> m_afterMethods = Lists.newArrayList();
@@ -133,7 +151,7 @@ public class JUnitVisitor extends ASTVisitor {
     Type superClass = td.getSuperclassType();
     if (superClass instanceof SimpleType) {
       SimpleType st = (SimpleType) superClass;
-      if (st.getName().getFullyQualifiedName().indexOf("TestCase") != -1) {
+      if (st.getName().getFullyQualifiedName().equals("TestCase")) {
         m_testCase = st;
       }
     }
@@ -146,14 +164,48 @@ public class JUnitVisitor extends ASTVisitor {
   public boolean visit(MethodInvocation node) {
     Expression exp = node.getExpression();
     String method = node.getName().toString();
+
     if ((exp != null && "Assert".equals(exp.toString())) || method.startsWith("assert")) {
       // Method prefixed with "Assert."
-      m_asserts.add(node);
+      if (belongsToAssertJUnit(node)) m_asserts.add(node);
     } else if ("fail".equals(method)) {
       // assert or fail not prefixed with "Assert."
-      m_fails.add(node);
+      if (belongsToAssertJUnit(node)) m_fails.add(node);
     }
     return super.visit(node);
+  }
+
+  private Class getBinaryClassName(String binaryName) {
+    return BINARY_CLASS_NAMES.get(binaryName);
+  }
+  /**
+   * @return true if this method is defined on the AssertJUnit class.
+   */
+  private boolean belongsToAssertJUnit(MethodInvocation method) {
+    List<Expression> arguments = method.arguments();
+    List<Class> types = Lists.newArrayList();
+    for (Expression e : arguments) {
+      ITypeBinding binding = e.resolveTypeBinding();
+      Class c = getBinaryClassName(binding.getBinaryName());
+      if (c == null) c = Object.class;
+      types.add(c);
+    }
+    boolean result = false;
+
+    // Try to find a method with the exact signature. This can fail for a few reasons
+    // (such as not being able to resolve the binary name), in which case I should try
+    // to fall back on a simple name search
+    try {
+      Object m = AssertJUnit.class.getMethod(method.getName().getFullyQualifiedName(),
+          types.toArray(new Class[types.size()]));
+      result = true;
+    } catch (SecurityException e1) {
+//      e1.printStackTrace();
+    } catch (NoSuchMethodException e1) {
+//      e1.printStackTrace();
+    }
+
+    return result;
   }
 
   public Set<MethodInvocation> getAsserts() {
