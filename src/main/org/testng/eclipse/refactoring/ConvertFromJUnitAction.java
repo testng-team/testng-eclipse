@@ -29,6 +29,11 @@ public class ConvertFromJUnitAction extends AbstractHandler {
       shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
     }
 
+    if (shell == null) {
+      System.out.println("Can't get a shell, is the Eclipse window active?");
+      return;
+    }
+
 //    RefactoringProcessor processor = new RenamePropertyProcessor( info );
     IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
     ConvertFromJUnitRefactoring ref = new ConvertFromJUnitRefactoring(page, null /* status */);
