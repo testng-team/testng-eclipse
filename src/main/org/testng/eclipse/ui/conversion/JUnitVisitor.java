@@ -5,6 +5,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MemberValuePair;
@@ -38,19 +39,6 @@ import junit.framework.Assert;
  * @author Cedric Beust <cedric@beust.com>
  */
 public class JUnitVisitor extends ASTVisitor {
-  private static Map<String, Class> BINARY_CLASS_NAMES = new HashMap<String, Class>() {{
-    put("B", byte.class);
-    put("C", char.class);
-    put("D", double.class);
-    put("F", float.class);
-    put("I", int.class);
-    put("J", long.class);
-    put("L", Class.class);
-    put("S", short.class);
-    put("Z", boolean.class);
-    put("[", Object[].class);
-  }};
-
   private List<MethodDeclaration> m_testMethods = Lists.newArrayList();
   private List<MethodDeclaration> m_beforeMethods = Lists.newArrayList();
   private List<MethodDeclaration> m_afterMethods = Lists.newArrayList();
@@ -175,6 +163,19 @@ public class JUnitVisitor extends ASTVisitor {
     return super.visit(node);
   }
 
+  private static Map<String, Class> BINARY_CLASS_NAMES = new HashMap<String, Class>() {{
+    put("B", byte.class);
+    put("C", char.class);
+    put("D", double.class);
+    put("F", float.class);
+    put("I", int.class);
+    put("J", long.class);
+    put("L", Class.class);
+    put("S", short.class);
+    put("Z", boolean.class);
+    put("[", Object[].class);
+  }};
+
   private Class getBinaryClassName(String binaryName) {
     return BINARY_CLASS_NAMES.get(binaryName);
   }
@@ -186,10 +187,10 @@ public class JUnitVisitor extends ASTVisitor {
     List<Class> types = Lists.newArrayList();
     for (Expression e : arguments) {
       ITypeBinding binding = e.resolveTypeBinding();
+      Class c = bindingToClass(binding);
       // Early abort if a binding fails
       if (binding == null) return true;
-      Class c = getBinaryClassName(binding.getBinaryName());
-      if (c == null) c = Object.class;
+
       types.add(c);
     }
     boolean result = false;
@@ -205,6 +206,33 @@ public class JUnitVisitor extends ASTVisitor {
 //      e1.printStackTrace();
     } catch (NoSuchMethodException e1) {
 //      e1.printStackTrace();
+    }
+
+    return result;
+  }
+
+  /**
+   * If the key is found on the ITypeBinding, then it's probably of the type equal to its value. 
+   */
+  private static Map<String, Class> METHOD_TO_CLASS= new HashMap<String, Class>() {{
+    put("indexOf", String.class);
+  }};
+
+  /**
+   * Use heuristics to try to find the right class for this binding. This method
+   * can fail in so many ways that I don't want to talk about it.
+   */
+  private Class bindingToClass(ITypeBinding binding) {
+    Class result = getBinaryClassName(binding.getBinaryName());
+    if (result == null) {
+      // Binary name fail, use the methods on this type to try to identify its class.
+      IMethodBinding[] methods = binding.getDeclaredMethods();
+      for (IMethodBinding method : methods) {
+        result = METHOD_TO_CLASS.get(method.getName());
+        if (result != null) {
+          return result;
+        }
+      }
     }
 
     return result;

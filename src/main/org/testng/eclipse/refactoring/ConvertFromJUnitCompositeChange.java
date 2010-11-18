@@ -86,7 +86,7 @@ public class ConvertFromJUnitCompositeChange extends CompositeChange {
 
   @Override
   public String getName() {
-    return "<should never be seen>";
+    return "Convert to TestNG";
   }
 
   @Override
