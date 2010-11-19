@@ -197,6 +197,11 @@ public class JUnitVisitor extends ASTVisitor {
     }
     boolean result = false;
 
+    adjustForOverloading(types);
+
+    // We need to correct types[1] and types[2] so they match here, in order to
+    // emulate type conversions (for example, (int, long) should become (long, long)
+
     // Try to find a method with the exact signature. This can fail for a few reasons
     // (such as not being able to resolve the binary name), in which case I should try
     // to fall back on a simple name search
@@ -211,6 +216,22 @@ public class JUnitVisitor extends ASTVisitor {
     }
 
     return result;
+  }
+
+  /**
+   * Modify the list of parameter types to try to match how the compiler will
+   * resolve the type conversion. For example, an invocation of assert(..., int, long)
+   * will probably end up calling assert(..., long, long).
+   */
+  private void adjustForOverloading(List<Class> types) {
+    if (types.size() > 2) {
+      Class t2 = types.get(1);
+      Class t3 = types.get(2);
+      if ((t2 == long.class && t3 == int.class) || (t3 == long.class && t2 == int.class)) {
+        types.set(1, long.class);
+        types.set(2, long.class);
+      }
+    }
   }
 
   /**

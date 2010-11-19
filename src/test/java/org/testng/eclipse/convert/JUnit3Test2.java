@@ -1,11 +1,14 @@
 package org.testng.eclipse.convert;
 
-public class JUnit3Test2 extends MyTestCase {
+import org.testng.annotations.Test;
+import org.testng.AssertJUnit;
 
+public class JUnit3Test2 extends MyTestCase {
+  @Test()
   public void test1() {
-    assertEquals(true, true);
+    AssertJUnit.assertEquals(true, true);
     assertMyStuff(null);
-    assertEquals("This is", "123","123");
+    AssertJUnit.assertEquals("This is", "123","123");
     System.out.println("Worked");
   }
 
