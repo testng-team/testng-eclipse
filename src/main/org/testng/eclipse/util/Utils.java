@@ -17,13 +17,15 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.launch.components.Filters.ITypeFilter;
 import org.testng.eclipse.refactoring.FindTestsRunnableContext;
+import org.testng.eclipse.util.Utils.JavaElement;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class Utils {
-  public static class ProjectPackage {
+  public static class JavaElement {
     public IJavaProject project;
     public IPackageFragmentRoot packageFragmentRoot;
     public IPackageFragment packageFragment;
@@ -34,43 +36,49 @@ public class Utils {
    * @return all the ITypes included in the current selection.
    */
   public static List<IType> findSelectedTypes(IWorkbenchPage page) {
-    IType[] types = null;
-    ProjectPackage pp = Utils.getSelectedProjectOrPackage(page);
-    if (pp.compilationUnit != null) {
-      try {
-        types = ((ICompilationUnit) pp.compilationUnit).getAllTypes();
-      } catch (JavaModelException e) {
-        e.printStackTrace();
-      }
-    } else {
-      IJavaProject project = pp.project;
-      IPackageFragmentRoot pfr = pp.packageFragmentRoot;
-      IPackageFragment pf = pp.packageFragment;
-      try {
-        ITypeFilter filter = new ITypeFilter() {
-          public boolean accept(IType type) {
-            return true;
-          }
-        };
+    List<IType> result = Lists.newArrayList();
+    List<JavaElement> elements = Utils.getSelectedJavaElements(page);
 
-        IRunnableContext context = new FindTestsRunnableContext();
-        if (pf != null) {
-          types = TestSearchEngine.findTests(context, new Object[] { pf }, filter);
-        } else if (pfr != null) {
-          types = TestSearchEngine.findTests(context, new Object[] { pfr }, filter);
-        } else if (project != null) {
-          types = TestSearchEngine.findTests(context, new Object[] { project }, filter);
+    for (JavaElement pp : elements) {
+      if (pp.compilationUnit != null) {
+        try {
+          result.addAll(Arrays.asList(pp.compilationUnit.getAllTypes()));
+        } catch (JavaModelException e) {
+          e.printStackTrace();
         }
-      }
-      catch(InvocationTargetException ex) {
-        ex.printStackTrace();
-      }
-      catch(InterruptedException ex) {
-        // ignore
+      } else {
+        IJavaProject project = pp.project;
+        IPackageFragmentRoot pfr = pp.packageFragmentRoot;
+        IPackageFragment pf = pp.packageFragment;
+        try {
+          ITypeFilter filter = new ITypeFilter() {
+            public boolean accept(IType type) {
+              return true;
+            }
+          };
+
+          IRunnableContext context = new FindTestsRunnableContext();
+          if (pf != null) {
+            result.addAll(Arrays.asList(
+                TestSearchEngine.findTests(context, new Object[] { pf }, filter)));
+          } else if (pfr != null) {
+            result.addAll(Arrays.asList(
+                TestSearchEngine.findTests(context, new Object[] { pfr }, filter)));
+          } else if (project != null) {
+            result.addAll(Arrays.asList(
+                TestSearchEngine.findTests(context, new Object[] { project }, filter)));
+          }
+        }
+        catch(InvocationTargetException ex) {
+          ex.printStackTrace();
+        }
+        catch(InterruptedException ex) {
+          // ignore
+        }
       }
     }
 
-    return Arrays.asList(types);
+    return result;
   }
 
   /**
@@ -85,32 +93,27 @@ public class Utils {
    * @param page
    * @return
    */
-  private static ProjectPackage getSelectedProjectOrPackage(IWorkbenchPage page) {
-    ProjectPackage result = new ProjectPackage();
+  private static List<JavaElement> getSelectedJavaElements(IWorkbenchPage page) {
+    List<JavaElement> result = Lists.newArrayList();
     ISelection selection = page.getSelection();
 
     if (selection instanceof TreeSelection) {
       TreeSelection sel = (TreeSelection) selection;
-      TreePath[] paths = sel.getPaths();
-      for (TreePath path : paths) {
-        int count = path.getSegmentCount();
-        if (count > 0) {
-          Object project = path.getFirstSegment();
-          if (project instanceof IJavaProject) {
-            result.project = (IJavaProject) project;
-          } else if (project instanceof IProject) {
-            result.project = JavaCore.create((IProject) project);
-          }
+      for (Iterator it = sel.iterator(); it.hasNext();) {
+        Object element = it.next();
+        JavaElement pp = new JavaElement();
+        if (element instanceof ICompilationUnit) {
+          pp.compilationUnit = (ICompilationUnit) element;
+        } else if (element instanceof IPackageFragment) {
+          pp.packageFragment = (IPackageFragment) element;
+        } else if (element instanceof IPackageFragmentRoot) {
+          pp.packageFragmentRoot = (IPackageFragmentRoot) element;
+        } else if (element instanceof IJavaProject) {
+          pp.project = (IJavaProject) element;
+        } else if (element instanceof IProject) {
+          pp.project = JavaCore.create((IProject) element);
         }
-        if (count > 1 && path.getSegment(1) instanceof IPackageFragmentRoot) {
-          result.packageFragmentRoot = (IPackageFragmentRoot) path.getSegment(1);
-        }
-        if (count > 2 && path.getSegment(2) instanceof IPackageFragment) {
-          result.packageFragment = (IPackageFragment) path.getSegment(2);
-        }
-        if (count > 3 && path.getSegment(3) instanceof ICompilationUnit) {
-          result.compilationUnit = (ICompilationUnit) path.getSegment(3);
-        }
+        result.add(pp);
       }
     }
 
