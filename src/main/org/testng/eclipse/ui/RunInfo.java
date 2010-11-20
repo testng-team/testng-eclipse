@@ -35,6 +35,8 @@ public class RunInfo {
   private String m_testDescription;
   private String m_jvmArgs;
   private long m_time;
+  private int m_invocationCount;
+  private int m_currentInvocationCount;
 
   public RunInfo(String suiteName) {
     m_id = suiteName;
@@ -65,7 +67,9 @@ public class RunInfo {
                  String[] paramTypes,
                  long time,
                  String stackTrace,
-                 int status) {
+                 int status,
+                 int invocationCount,
+                 int currentInvocationCount) {
     m_id = suiteName + "." + testName + "." + className + "."
         + methodName + toString(params, paramTypes);
     if (testDesc != null) m_idWithDesc = m_id + "." + testDesc;
@@ -81,6 +85,8 @@ public class RunInfo {
     m_stackTrace = stackTrace;
     m_type = RESULT_TYPE;
     m_status = status;
+    m_invocationCount = invocationCount;
+    m_currentInvocationCount = currentInvocationCount;
   }
 
   public long getTime() {
@@ -209,8 +215,9 @@ public class RunInfo {
     StringBuffer buf= new StringBuffer(m_className);
     buf.append(getTestDescription())
       .append(".").append(m_methodName).append(getParametersDisplay())
+      .append(getInvocationCountDisplay())
     ;
-    
+
     return buf.toString();
   }
 
@@ -307,6 +314,23 @@ public class RunInfo {
 
   public String getClassId() {
     return getTestId() + "." + m_className;
+  }
+
+  public int getInvocationCount() {
+    return m_invocationCount;
+  }
+
+  public int getCurrentInvocationCount() {
+    return m_currentInvocationCount;
+  }
+
+  public String getInvocationCountDisplay() {
+    int ic = getInvocationCount();
+    if (ic > 1) {
+      return " " + getCurrentInvocationCount() + "/" + ic;
+    } else {
+      return "";
+    }
   }
 
   /*public static void main(String[] args) {

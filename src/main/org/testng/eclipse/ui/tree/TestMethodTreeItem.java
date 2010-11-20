@@ -23,7 +23,8 @@ public class TestMethodTreeItem extends BaseTreeItem implements ITreeItem {
   }
 
   public void update(RunInfo runInfo) {
-    String label = runInfo.getMethodName() + runInfo.getParametersDisplay();
+    String label = runInfo.getMethodName() + runInfo.getParametersDisplay()
+        + runInfo.getInvocationCountDisplay();
     String description = TestNGPlugin.isEmtpy(runInfo.getTestDescription())
         ? ""
         : " [" + runInfo.getTestDescription() + "]";
