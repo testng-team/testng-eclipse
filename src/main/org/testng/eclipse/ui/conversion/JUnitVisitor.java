@@ -20,6 +20,7 @@ import org.testng.collections.Lists;
 import org.testng.eclipse.collections.Maps;
 import org.testng.internal.annotations.Sets;
 
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import junit.framework.Assert;
  */
 public class JUnitVisitor extends ASTVisitor {
   private List<MethodDeclaration> m_testMethods = Lists.newArrayList();
+  private List<MethodDeclaration> m_disabledTestMethods = Lists.newArrayList();
   private List<MethodDeclaration> m_beforeMethods = Lists.newArrayList();
   private List<MethodDeclaration> m_afterMethods = Lists.newArrayList();
   private MethodDeclaration m_suite = null;
@@ -68,8 +70,15 @@ public class JUnitVisitor extends ASTVisitor {
 
   public boolean visit(MethodDeclaration md) {
     String methodName = md.getName().getFullyQualifiedName();
-    if (methodName.indexOf("test") != -1 && ! hasAnnotation(md, "Test")) {
-      m_testMethods.add(md);
+    if (! hasAnnotation(md, "Test")) {
+      // Public methods that start with "test" are tests.
+      // Methods that start with "_test" or private test methods that start with "test" are diabled
+      boolean isPrivate = (md.getModifiers() & Modifier.PRIVATE) != 0;
+      if (methodName.startsWith("test") && ! isPrivate) {
+        m_testMethods.add(md);
+      } else if (methodName.startsWith("_test") || (methodName.startsWith("test") && isPrivate)) {
+        m_disabledTestMethods.add(md);
+      }
     }
     else if (hasAnnotation(md, "Test")) {
       m_hasTestMethods = true;  // to make sure we import org.testng.annotations.Test
@@ -277,6 +286,10 @@ public class JUnitVisitor extends ASTVisitor {
 
   public List<MethodDeclaration> getTestMethods() {
     return m_testMethods;
+  }
+
+  public List<MethodDeclaration> getDisabledTestMethods() {
+    return m_disabledTestMethods;
   }
 
   public boolean hasTestMethods() {

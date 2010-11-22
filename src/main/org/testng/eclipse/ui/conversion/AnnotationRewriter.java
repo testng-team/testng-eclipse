@@ -14,10 +14,12 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.testng.eclipse.collections.Maps;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -77,7 +79,9 @@ public class AnnotationRewriter implements IRewriteProvider
     //
     // Addd the annotations as needed
     //
-    maybeAddAnnotations(ast, visitor, result, visitor.getTestMethods(), "Test", null);
+    maybeAddAnnotations(ast, visitor, result, visitor.getTestMethods(), "Test", null, null);
+    maybeAddAnnotations(ast, visitor, result, visitor.getDisabledTestMethods(), "Test", null,
+        createDisabledAttribute(ast));
     maybeAddAnnotations(ast, visitor, result, visitor.getBeforeMethods(), "BeforeMethod",
         "@Before" /* annotation to remove */);
     maybeAddAnnotations(ast, visitor, result, visitor.getAfterMethods(), "AfterMethod",
@@ -124,6 +128,12 @@ public class AnnotationRewriter implements IRewriteProvider
     return result;
   }
 
+  private Map<String, Boolean> createDisabledAttribute(AST ast) {
+    Map<String, Boolean> result = Maps.newHashMap();
+    result.put("enabled", false);
+    return result;
+  }
+
   private void maybeAddImport(AST ast, ASTRewrite rewriter, CompilationUnit astRoot, boolean add,
       String imp) {
     if (add) {
@@ -141,27 +151,43 @@ public class AnnotationRewriter implements IRewriteProvider
    * Add the given annotation if the method is non null
    */
   private void maybeAddAnnotation(AST ast, JUnitVisitor visitor, ASTRewrite rewriter,
-      MethodDeclaration method, String annotation, String annotationToRemove)
+      MethodDeclaration method, String annotation, String annotationToRemove,
+      Map<String, Boolean> attributes)
   {
     if (method != null) {
-      addAnnotation(ast, visitor, rewriter, method, createAnnotation(ast, annotation),
+      addAnnotation(ast, visitor, rewriter, method, createAnnotation(ast, annotation, attributes),
           annotationToRemove);
     }
   }
 
-  private NormalAnnotation createAnnotation(AST ast, String name) {
+  private NormalAnnotation createAnnotation(AST ast, String name,
+      Map<String, Boolean> attributes) {
     NormalAnnotation result = ast.newNormalAnnotation();
     result.setTypeName(ast.newName(name));
+    if (attributes != null) {
+      for (Entry<String, Boolean> a : attributes.entrySet()) {
+        MemberValuePair mvp = ast.newMemberValuePair();
+        mvp.setName(ast.newSimpleName(a.getKey()));
+        mvp.setValue(ast.newBooleanLiteral(a.getValue()));
+        result.values().add(mvp);
+      }
+    }
     return result;
   }
   /**
    * Add the given annotation if the method is non null
    */
   private void maybeAddAnnotations(AST ast, JUnitVisitor visitor, ASTRewrite rewriter,
-      List<MethodDeclaration> methods, String annotation, String annotationToRemove)
-  {
+      List<MethodDeclaration> methods, String annotation, String annotationToRemove) {
+    maybeAddAnnotations(ast, visitor, rewriter, methods, annotation, annotationToRemove, null);
+  }
+
+  private void maybeAddAnnotations(AST ast, JUnitVisitor visitor,
+      ASTRewrite rewriter, List<MethodDeclaration> methods, String annotation,
+      String annotationToRemove, Map<String, Boolean> attributes) {
     for (MethodDeclaration method : methods) {
-      maybeAddAnnotation(ast, visitor, rewriter, method, annotation, annotationToRemove);
+      maybeAddAnnotation(ast, visitor, rewriter, method, annotation, annotationToRemove,
+          attributes);
     }
   }
 
