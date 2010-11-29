@@ -70,7 +70,17 @@ public class JUnitVisitor extends ASTVisitor {
 
   public boolean visit(MethodDeclaration md) {
     String methodName = md.getName().getFullyQualifiedName();
-    if (! hasAnnotation(md, "Test")) {
+
+    if (methodName.equals("setUp") || hasAnnotation(md, "Before")) {
+      m_beforeMethods.add(md);
+    }
+    else if (methodName.equals("tearDown") || hasAnnotation(md, "After")) {
+      m_afterMethods.add(md);
+    }
+    else if (methodName.equals("suite")) {
+      m_suite = md;
+    }
+    else if (! hasAnnotation(md, "Test")) {
       // Public methods that start with "test" are tests.
       // Methods that start with "_test" or private test methods that start with "test" are diabled
       boolean isPrivate = (md.getModifiers() & Modifier.PRIVATE) != 0;
@@ -91,15 +101,7 @@ public class JUnitVisitor extends ASTVisitor {
         m_testsWithExpected.put(mvp, "timeOut");
       }
     }
-    else if (methodName.equals("setUp") || hasAnnotation(md, "Before")) {
-      m_beforeMethods.add(md);
-    }
-    else if (methodName.equals("tearDown") || hasAnnotation(md, "After")) {
-      m_afterMethods.add(md);
-    }
-    else if (methodName.equals("suite")) {
-      m_suite = md;
-    }
+
     
     return super.visit(md);
   }
