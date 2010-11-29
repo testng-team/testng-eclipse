@@ -1,15 +1,36 @@
 package org.testng.eclipse.util;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 
 
 /**
@@ -74,4 +95,48 @@ public class SWTUtil {
 		
 		return activeWorkbenchWindow.getActivePage();
 	}
+
+  /**
+   * Create a container with a GridData layout and columns.
+   */
+  public static Composite createGridContainer(Composite parent, int columns) {
+    Composite result = new Composite(parent, SWT.NULL);
+    GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+    result.setLayoutData(gd);
+    GridLayout layout = new GridLayout();
+    layout.numColumns = columns;
+    result.setLayout(layout);
+
+    return result;
+  }
+
+  /**
+   * @return a Text field that contains a path. The file system can be browsed by pressing
+   * the "Browse" button.
+   */
+  public static Text createPathBrowserText(final Composite container, String text,
+      ModifyListener listener) {
+    Label label = new Label(container, SWT.NULL);
+    label.setText(text);
+    final Text result = new Text(container, SWT.BORDER | SWT.SINGLE);
+    GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+    result.setLayoutData(gd);
+    if (listener != null) result.addModifyListener(listener);
+    Button button = new Button(container, SWT.PUSH);
+    button.setText("Browse...");
+    button.addSelectionListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        ContainerSelectionDialog dialog = new ContainerSelectionDialog(container.getShell(),
+            ResourcesPlugin.getWorkspace().getRoot(), false, "Select new file container");
+        if (dialog.open() == ContainerSelectionDialog.OK) {
+          Object[] res = dialog.getResult();
+          if (res.length == 1) {
+            result.setText(((Path) res[0]).toString());
+          }
+        }
+      }
+    });
+    return result;
+  }
+
 }

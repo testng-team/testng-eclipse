@@ -1,20 +1,10 @@
 package org.testng.eclipse.wizards;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.IDialogPage;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -28,11 +18,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 import org.testng.eclipse.util.ResourceUtil;
+import org.testng.eclipse.util.SWTUtil;
 import org.testng.eclipse.util.Utils;
+import org.testng.eclipse.util.Utils.JavaElement;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -78,29 +70,18 @@ public class NewTestNGClassWizardPage extends WizardPage {
   }
 
   private void createTop(Composite parent) {
-    Composite container = createGridContainer(parent, 3);
+    Composite container = SWTUtil.createGridContainer(parent, 3);
 
     //
     // Source folder
     //
     {
-      Label label = new Label(container, SWT.NULL);
-      label.setText("&Source folder:");
-      m_sourceFolderText = new Text(container, SWT.BORDER | SWT.SINGLE);
-      GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-      m_sourceFolderText.setLayoutData(gd);
-      m_sourceFolderText.addModifyListener(new ModifyListener() {
-        public void modifyText(ModifyEvent e) {
-          dialogChanged();
-        }
-      });
-      Button button = new Button(container, SWT.PUSH);
-      button.setText("Browse...");
-      button.addSelectionListener(new SelectionAdapter() {
-        public void widgetSelected(SelectionEvent e) {
-          handleBrowse();
-        }
-      });
+      m_sourceFolderText = SWTUtil.createPathBrowserText(container, "&Source folder:",
+          new ModifyListener() {
+            public void modifyText(ModifyEvent e) {
+              dialogChanged();
+            }
+          });
     }
 
     //
@@ -172,7 +153,7 @@ public class NewTestNGClassWizardPage extends WizardPage {
     // XML suite file
     //
     {
-      Composite container = createGridContainer(parent, 2);
+      Composite container = SWTUtil.createGridContainer(parent, 2);
 
       //
       // Label
@@ -190,85 +171,24 @@ public class NewTestNGClassWizardPage extends WizardPage {
     }
   }
 
-  private Composite createGridContainer(Composite parent, int columns) {
-    Composite result = new Composite(parent, SWT.NULL);
-    GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-    result.setLayoutData(gd);
-    GridLayout layout = new GridLayout();
-    layout.numColumns = columns;
-    result.setLayout(layout);
-
-    return result;
-  }
-
   /**
    * Tests if the current workbench selection is a suitable container to use.
    */
   private void initialize() {
-    if (m_selection != null && m_selection.isEmpty() == false
-        && m_selection instanceof IStructuredSelection) {
-      IStructuredSelection ssel = (IStructuredSelection) m_selection;
-      if (ssel.size() > 1)
-        return;
-      Object obj = ssel.getFirstElement();
-      if (obj instanceof IResource) {
-        IContainer container;
-        if (obj instanceof IContainer) {
-          container = (IContainer) obj;
-        } else {
-          container = ((IResource) obj).getParent();
-        }
-        m_sourceFolderText.setText(container.getFullPath().toString());
-      } else if (obj instanceof ICompilationUnit) {
-        // A Java class, go up the resource tree until we find its package
-        ICompilationUnit cu = (ICompilationUnit) obj;
-        IJavaElement parent = cu.getParent();
-        while (! (parent instanceof IPackageFragment)) {
-          parent = parent.getParent();
-        }
-        if (parent != null) {
-          initialize((IPackageFragment) parent);
-        }
-      } else if (obj instanceof IPackageFragment) {
-        initialize((IPackageFragment) obj);
+    List<JavaElement> elements = Utils.getSelectedJavaElements();
+    if (elements.size() > 0) {
+      JavaElement sel = elements.get(0);
+      if (sel.sourceFolder != null) {
+        m_sourceFolderText.setText(sel.sourceFolder);
+      }
+      if (sel.getPackageName() != null) {
+        m_packageNameText.setText(sel.getPackageName());
       }
     }
     m_classNameText.setText("NewTest");
   }
 
-  /**
-   * Initialize the wizard with an IPackageFragment.
-   */
-  private void initialize(IPackageFragment pf) {
-    m_packageNameText.setText(pf.getElementName());
-    IResource resource = (IResource) pf.getAdapter(IResource.class);
-    IProject p = (IProject) resource.getProject();
-    IJavaProject jp = JavaCore.create(p);
-    for (IClasspathEntry entry : Utils.getSourceFolders(jp)) {
-      String source = entry.getPath().toOSString();
-      if (resource.getFullPath().toString().startsWith(source)) {
-        m_sourceFolderText.setText(source);
-        break;
-      }
-    }
-  }
-
   private void handleBrowsePackages() {
-  }
-
-  /**
-   * Uses the standard container selection dialog to choose the new value for
-   * the container field.
-   */
-  private void handleBrowse() {
-    ContainerSelectionDialog dialog = new ContainerSelectionDialog(getShell(), ResourcesPlugin
-        .getWorkspace().getRoot(), false, "Select new file container");
-    if (dialog.open() == ContainerSelectionDialog.OK) {
-      Object[] result = dialog.getResult();
-      if (result.length == 1) {
-        m_sourceFolderText.setText(((Path) result[0]).toString());
-      }
-    }
   }
 
   /**

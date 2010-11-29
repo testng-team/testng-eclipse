@@ -2,6 +2,7 @@ package org.testng.eclipse.util;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -15,6 +16,7 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.launch.components.Filters.ITypeFilter;
 import org.testng.eclipse.refactoring.FindTestsRunnableContext;
@@ -30,6 +32,28 @@ public class Utils {
     public IPackageFragmentRoot packageFragmentRoot;
     public IPackageFragment packageFragment;
     public ICompilationUnit compilationUnit;
+    public String sourceFolder;
+
+    public String getPath() {
+      return compilationUnit != null
+          ? ((IResource) compilationUnit.getAdapter(IResource.class)).getFullPath().toOSString()
+          : null;
+    }
+
+    public String getPackageName() {
+      String result = null;
+      if (packageFragment != null) {
+        result = packageFragment.getElementName();
+      } else if (compilationUnit != null) {
+        try {
+          result = compilationUnit.getPackageDeclarations()[0].getElementName();
+        } catch (JavaModelException e) {
+          // ignore
+        }
+      }
+
+      return result;
+    }
   }
 
   /**
@@ -93,7 +117,12 @@ public class Utils {
    * @param page
    * @return
    */
-  private static List<JavaElement> getSelectedJavaElements(IWorkbenchPage page) {
+  public static List<JavaElement> getSelectedJavaElements() {
+    return getSelectedJavaElements(
+        PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage());
+  }
+
+  public static List<JavaElement> getSelectedJavaElements(IWorkbenchPage page) {
     List<JavaElement> result = Lists.newArrayList();
     ISelection selection = page.getSelection();
 
@@ -120,6 +149,23 @@ public class Utils {
         } else if (element instanceof IProject) {
           pp.project = JavaCore.create((IProject) element);
         }
+
+        if (pp.project == null && pp.compilationUnit != null) {
+          pp.project = pp.compilationUnit.getJavaProject();
+        }
+
+        // If we have a project, initialize the source folder too
+        if (pp.project != null && pp.compilationUnit != null) {
+          IResource resource = (IResource) pp.compilationUnit.getAdapter(IResource.class);
+          for (IClasspathEntry entry : Utils.getSourceFolders(pp.project)) {
+            String source = entry.getPath().toOSString();
+            if (resource.getFullPath().toString().startsWith(source)) {
+              pp.sourceFolder = source;
+              break;
+            }
+          }
+        }
+
         result.add(pp);
       }
     }
