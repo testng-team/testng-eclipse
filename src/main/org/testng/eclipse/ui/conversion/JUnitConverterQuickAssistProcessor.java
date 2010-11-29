@@ -19,32 +19,29 @@ import java.util.List;
 public class JUnitConverterQuickAssistProcessor implements
     IQuickAssistProcessor {
 
+  /**
+   * This method needs to return fast since the QuickAssist pop up is waiting on it.
+   */
   public boolean hasAssists(IInvocationContext context) throws CoreException {
-    boolean result = false;
-    
     IImportDeclaration[] imports = context.getCompilationUnit().getImports();
     // See if we have any JUnit import
     for (int i = 0; i < imports.length; i++) {
       IImportDeclaration id = imports[i];
       String name = id.getElementName();
       if (name.indexOf("junit") != -1) {
-        result = true;
-        break;
+        return true;
       }
     }
 
     // Nothing in the imports, try to make a guess based on the class name and superclass
-    if (!result) {
-      IType[] types = context.getCompilationUnit().getTypes();
-      for (IType type : types) {
-        if (type.getFullyQualifiedName().contains("Test")) {
-          result = true;
-          break;
-        }
+    IType[] types = context.getCompilationUnit().getTypes();
+    for (IType type : types) {
+      if (type.getFullyQualifiedName().contains("Test")) {
+        return true;
       }
     }
 //    ppp("HAS ASSISTS:" + result);
-    return result;
+    return false;
   }
 
   public IJavaCompletionProposal[] getAssists(IInvocationContext context,
