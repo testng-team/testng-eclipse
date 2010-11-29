@@ -9,6 +9,10 @@ import junit.framework.TestSuite;
 public class JUnit3Test1 extends TestCase {
   private QueueTracker _queueTracker;
 
+  public void setUp() {
+    // should become @BeforeMethod
+  }
+
   public void _test3Underscore() {
     fail("Should be a disabled test");
   }
