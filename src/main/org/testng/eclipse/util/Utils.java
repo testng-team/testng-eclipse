@@ -1,8 +1,10 @@
 package org.testng.eclipse.util;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -11,13 +13,11 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.ui.IWorkbenchPage;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.launch.components.Filters.ITypeFilter;
 import org.testng.eclipse.refactoring.FindTestsRunnableContext;
-import org.testng.eclipse.util.Utils.JavaElement;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -101,8 +101,15 @@ public class Utils {
       TreeSelection sel = (TreeSelection) selection;
       for (Iterator it = sel.iterator(); it.hasNext();) {
         Object element = it.next();
+
         JavaElement pp = new JavaElement();
-        if (element instanceof ICompilationUnit) {
+        if (element instanceof IFile) {
+          IJavaElement je = JavaCore.create((IFile) element);
+          if (je instanceof ICompilationUnit) {
+            pp.compilationUnit = (ICompilationUnit) je;
+          }
+        }
+        else if (element instanceof ICompilationUnit) {
           pp.compilationUnit = (ICompilationUnit) element;
         } else if (element instanceof IPackageFragment) {
           pp.packageFragment = (IPackageFragment) element;
