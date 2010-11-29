@@ -11,6 +11,7 @@ public class ConvertFromJUnitWizard extends RefactoringWizard {
 
   @Override
   protected void addUserInputPages() {
+    addPage(new TestNGXmlPage());
   }
 
 }

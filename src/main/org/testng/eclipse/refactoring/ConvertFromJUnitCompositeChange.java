@@ -11,7 +11,6 @@ import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ui.IWorkbenchPage;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.collections.Sets;
 import org.testng.eclipse.util.JDTUtil;
@@ -24,10 +23,9 @@ import java.util.Set;
 /**
  * A composite change that gathers all the changes needs to convert the current
  * selection (project or package) from JUnit to TestNG. This composite change
- * creates one change per class to convert.
+ * creates one SourceFolderChange per source folder found.
  *
  * @author Cedric Beust <cedric@beust.com>
- *
  */
 public class ConvertFromJUnitCompositeChange extends CompositeChange {
 
