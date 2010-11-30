@@ -193,18 +193,8 @@ public class TestNGXmlPage extends UserInputWizardPage {
     }
   }
 
-  /**
-   * @return whether the selected elements are all classeds.
-   */
-  private boolean selectionContainsOnlyClasses() {
-    for (JavaElement je : m_selectedElements) {
-      if (je.compilationUnit == null) return false;
-    }
-    return true;
-  }
-
   private Text addTextLabel(Composite parent, String text) {
-    Text result = SWTUtil.createLabelText(parent, "Suite name:", null);
+    Text result = SWTUtil.createLabelText(parent, text, null);
     GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
     gd.horizontalSpan = 2;
     result.setLayoutData(gd);
