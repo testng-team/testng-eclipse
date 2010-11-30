@@ -1,5 +1,9 @@
 package org.testng.eclipse.refactoring;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 import org.eclipse.swt.SWT;
@@ -11,7 +15,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.testng.eclipse.collections.Sets;
-import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.SWTUtil;
 import org.testng.eclipse.util.Utils;
 import org.testng.eclipse.util.Utils.JavaElement;
@@ -20,6 +23,8 @@ import org.testng.xml.XmlPackage;
 import org.testng.xml.XmlSuite;
 import org.testng.xml.XmlTest;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -57,6 +62,7 @@ public class TestNGXmlPage extends UserInputWizardPage {
   private List<JavaElement> m_selectedElements;
   private Set<XmlClass> m_classes = Sets.newHashSet();
   private Set<XmlPackage> m_packages = Sets.newHashSet();
+  private Text m_xmlFile;
 
   protected TestNGXmlPage() {
     super(NAME);
@@ -97,10 +103,10 @@ public class TestNGXmlPage extends UserInputWizardPage {
     //
     // Path
     //
-    Text xmlFile = SWTUtil.createPathBrowserText(parent, "Location:", null);
+    m_xmlFile = SWTUtil.createPathBrowserText(parent, "Location:", null);
     List<JavaElement> elements = Utils.getSelectedJavaElements();
     if (elements.size() > 0) {
-      xmlFile.setText(elements.get(0).getPath() + "/testng.xml");
+      m_xmlFile.setText(elements.get(0).getProject().getPath() + "/testng.xml");
     }
 
     //
@@ -200,5 +206,29 @@ public class TestNGXmlPage extends UserInputWizardPage {
     result.setLayoutData(gd);
 
     return result;
+  }
+
+  /**
+   * @return whether the user wants us to generate a testng.xml file.
+   */
+  public boolean generateXmlFile() {
+    return true;
+  }
+
+  public void saveXmlFile() {
+    IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(m_xmlFile.getText()));
+    ByteArrayInputStream is = new ByteArrayInputStream(m_xmlSuite.toXml().getBytes());
+    try {
+      file.create(is, true /* force */, null /* progress monitor */);
+    } catch (CoreException e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        is.close();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
   }
 }
