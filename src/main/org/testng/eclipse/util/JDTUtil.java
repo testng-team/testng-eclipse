@@ -35,6 +35,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.ui.RunInfo;
+import org.testng.eclipse.util.Utils.JavaElement;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -610,28 +611,5 @@ public class JDTUtil {
 
       return values;
     }
-  }
-
-  /**
-   * @return all the types found in the given package.
-   */
-  public static List<IType> findTypesInPackage(IJavaProject project,
-      String packageName) {
-    List<IType> result = Lists.newArrayList();
-
-    try {
-      for (IPackageFragment pf : project.getPackageFragments()) {
-        if (pf.getElementName().equals(packageName)) {
-          for (ICompilationUnit cu : pf.getCompilationUnits()) {
-            result.addAll(Arrays.asList(cu.getTypes()));
-          }
-        }
-      }
-    } catch (JavaModelException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-
-    return result;
   }
 }

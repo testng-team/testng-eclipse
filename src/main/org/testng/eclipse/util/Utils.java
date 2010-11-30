@@ -93,8 +93,11 @@ public class Utils {
    * @return all the ITypes included in the current selection.
    */
   public static List<IType> findSelectedTypes(IWorkbenchPage page) {
+    return findTypes(Utils.getSelectedJavaElements(page));
+  }
+  
+  public static List<IType> findTypes(List<JavaElement> elements) {
     List<IType> result = Lists.newArrayList();
-    List<JavaElement> elements = Utils.getSelectedJavaElements(page);
 
     for (JavaElement pp : elements) {
       if (pp.compilationUnit != null) {

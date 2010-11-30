@@ -85,6 +85,8 @@ public class TestNGXmlPage extends UserInputWizardPage {
   }
 
   private void updateUi() {
+    m_xmlSuite.setName(m_suiteText.getText());
+    m_xmlSuite.getTests().get(0).setName(m_testText.getText());
     updateXmlSuite(m_xmlSuite);
     m_previewText.setText(m_xmlSuite.toXml());
   }
@@ -132,7 +134,7 @@ public class TestNGXmlPage extends UserInputWizardPage {
       previewLabelText.setLayoutData(gd);
     }
     
-    m_previewText = new Text(parent, SWT.BORDER);
+    m_previewText = new Text(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
     GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
     gd.horizontalSpan = 3;
     m_previewText.setLayoutData(gd);
@@ -144,23 +146,22 @@ public class TestNGXmlPage extends UserInputWizardPage {
     m_selectedElements = Utils.getSelectedJavaElements();
 
     // Initialize m_classes
+    Set<String> packageSet = Sets.newHashSet();
+    List<IType> types = Utils.findTypes(m_selectedElements);
     for (JavaElement element : m_selectedElements) {
-      List<IType> types = JDTUtil.findTypesInPackage(element.getProject(), element.getPackageName());
       if (element.getClassName() != null) {
         XmlClass c = new XmlClass(element.getPackageName() + "." + element.getClassName());
         m_classes.add(c);
+        packageSet.add(element.getPackageName());
       } else {
         for (IType type : types) {
           m_classes.add(new XmlClass(type.getFullyQualifiedName()));
+          packageSet.add(type.getPackageFragment().getElementName());
         }
       }
     }
 
     // Initialize m_packages
-    Set<String> packageSet = Sets.newHashSet();
-    for (JavaElement element : m_selectedElements) {
-      packageSet.add(element.getPackageName());
-    }
     for (String p : packageSet) {
       XmlPackage pkg = new XmlPackage();
       pkg.setName(p);
