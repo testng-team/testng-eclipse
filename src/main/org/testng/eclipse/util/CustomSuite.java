@@ -217,7 +217,7 @@ abstract public class CustomSuite extends LaunchSuite {
     }
   }
 
-  private XMLStringBuffer getSuiteBuffer() {
+  public XMLStringBuffer getSuiteBuffer() {
     if(null == m_suiteBuffer) {
       m_suiteBuffer= createContentBuffer();
     }

@@ -116,12 +116,7 @@ public class SWTUtil {
    */
   public static Text createPathBrowserText(final Composite container, String text,
       ModifyListener listener) {
-    Label label = new Label(container, SWT.NULL);
-    label.setText(text);
-    final Text result = new Text(container, SWT.BORDER | SWT.SINGLE);
-    GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-    result.setLayoutData(gd);
-    if (listener != null) result.addModifyListener(listener);
+    final Text result = createLabelText(container, text, listener);
     Button button = new Button(container, SWT.PUSH);
     button.setText("Browse...");
     button.addSelectionListener(new SelectionAdapter() {
@@ -139,4 +134,17 @@ public class SWTUtil {
     return result;
   }
 
+  /**
+   * @return a Label+Text.
+   */
+  public static Text createLabelText(Composite container, String text, ModifyListener listener) {
+    Label label = new Label(container, SWT.NULL);
+    label.setText(text);
+    final Text result = new Text(container, SWT.BORDER | SWT.SINGLE);
+    GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+    result.setLayoutData(gd);
+    if (listener != null) result.addModifyListener(listener);
+
+    return result;
+  }
 }

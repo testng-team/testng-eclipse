@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -33,11 +34,11 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Lists;
-import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.ui.RunInfo;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -609,5 +610,28 @@ public class JDTUtil {
 
       return values;
     }
+  }
+
+  /**
+   * @return all the types found in the given package.
+   */
+  public static List<IType> findTypesInPackage(IJavaProject project,
+      String packageName) {
+    List<IType> result = Lists.newArrayList();
+
+    try {
+      for (IPackageFragment pf : project.getPackageFragments()) {
+        if (pf.getElementName().equals(packageName)) {
+          for (ICompilationUnit cu : pf.getCompilationUnits()) {
+            result.addAll(Arrays.asList(cu.getTypes()));
+          }
+        }
+      }
+    } catch (JavaModelException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    return result;
   }
 }

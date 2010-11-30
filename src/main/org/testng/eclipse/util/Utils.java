@@ -28,16 +28,36 @@ import java.util.List;
 
 public class Utils {
   public static class JavaElement {
-    public IJavaProject project;
+    public IJavaProject m_project;
     public IPackageFragmentRoot packageFragmentRoot;
     public IPackageFragment packageFragment;
     public ICompilationUnit compilationUnit;
     public String sourceFolder;
 
     public String getPath() {
-      return compilationUnit != null
-          ? ((IResource) compilationUnit.getAdapter(IResource.class)).getFullPath().toOSString()
-          : null;
+      String result = null;
+      if (compilationUnit != null) {
+        result = resourceToPath(compilationUnit);
+      } else if (packageFragmentRoot != null) {
+        result = resourceToPath(packageFragmentRoot);
+      } else if (packageFragment != null) {
+        result = resourceToPath(packageFragment);
+      } else {
+        result = resourceToPath(getProject());
+      }
+      return result;
+    }
+
+    public IJavaProject getProject() {
+      if (m_project != null) return m_project;
+      else if (packageFragmentRoot != null) return packageFragmentRoot.getJavaProject();
+      else if (packageFragment != null) return packageFragment.getJavaProject();
+      else if (compilationUnit != null) return compilationUnit.getJavaProject();
+      else throw new AssertionError("Couldn't find a project");
+    }
+
+    private String resourceToPath(IJavaElement element) {
+      return ((IResource) element.getAdapter(IResource.class)).getFullPath().toOSString();
     }
 
     public String getPackageName() {
@@ -54,6 +74,19 @@ public class Utils {
 
       return result;
     }
+
+    public String getClassName() {
+      String result = null;
+      if (compilationUnit != null) {
+        result = compilationUnit.getElementName();
+        if (result.endsWith(".java")) {
+          result = result.substring(0, result.length() - ".java".length());
+        }
+      }
+      return result;
+    }
+
+
   }
 
   /**
@@ -71,7 +104,6 @@ public class Utils {
           e.printStackTrace();
         }
       } else {
-        IJavaProject project = pp.project;
         IPackageFragmentRoot pfr = pp.packageFragmentRoot;
         IPackageFragment pf = pp.packageFragment;
         try {
@@ -88,9 +120,9 @@ public class Utils {
           } else if (pfr != null) {
             result.addAll(Arrays.asList(
                 TestSearchEngine.findTests(context, new Object[] { pfr }, filter)));
-          } else if (project != null) {
+          } else {
             result.addAll(Arrays.asList(
-                TestSearchEngine.findTests(context, new Object[] { project }, filter)));
+                TestSearchEngine.findTests(context, new Object[] { pp.getProject() }, filter)));
           }
         }
         catch(InvocationTargetException ex) {
@@ -145,19 +177,15 @@ public class Utils {
         } else if (element instanceof IPackageFragmentRoot) {
           pp.packageFragmentRoot = (IPackageFragmentRoot) element;
         } else if (element instanceof IJavaProject) {
-          pp.project = (IJavaProject) element;
+          pp.m_project = (IJavaProject) element;
         } else if (element instanceof IProject) {
-          pp.project = JavaCore.create((IProject) element);
-        }
-
-        if (pp.project == null && pp.compilationUnit != null) {
-          pp.project = pp.compilationUnit.getJavaProject();
+          pp.m_project = JavaCore.create((IProject) element);
         }
 
         // If we have a project, initialize the source folder too
-        if (pp.project != null && pp.compilationUnit != null) {
+        if (pp.compilationUnit != null) {
           IResource resource = (IResource) pp.compilationUnit.getAdapter(IResource.class);
-          for (IClasspathEntry entry : Utils.getSourceFolders(pp.project)) {
+          for (IClasspathEntry entry : Utils.getSourceFolders(pp.getProject())) {
             String source = entry.getPath().toOSString();
             if (resource.getFullPath().toString().startsWith(source)) {
               pp.sourceFolder = source;
