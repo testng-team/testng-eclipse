@@ -9,9 +9,14 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.testng.eclipse.collections.Sets;
@@ -63,6 +68,7 @@ public class TestNGXmlPage extends UserInputWizardPage {
   private Set<XmlClass> m_classes = Sets.newHashSet();
   private Set<XmlPackage> m_packages = Sets.newHashSet();
   private Text m_xmlFile;
+  private Button m_generateBox;
 
   protected TestNGXmlPage() {
     super(NAME);
@@ -107,8 +113,37 @@ public class TestNGXmlPage extends UserInputWizardPage {
     m_previewText.setText(m_xmlSuite.toXml());
   }
 
-  private void createUi(Composite p) {
-    Composite parent = SWTUtil.createGridContainer(p, 3);
+  private void createUi(Composite wizardParent) {
+    Composite control = new Composite(wizardParent, SWT.NONE);
+    SWTUtil.createGridLayout(control, 1);
+    control.setLayout(new GridLayout());
+    control.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+    m_generateBox = new Button(control, SWT.CHECK);
+    m_generateBox.setText("Generate testng.xml");
+    m_generateBox.setSelection(true);
+
+    final Group group = new Group(control, SWT.NONE);
+    {
+      group.setLayout(new GridLayout());
+      GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+      group.setLayoutData(gd);
+      group.setEnabled(true);
+    }
+
+    m_generateBox.addSelectionListener(new SelectionListener() {
+
+      public void widgetSelected(SelectionEvent e) {
+        group.setEnabled(((Button) e.getSource()).getSelection());
+      }
+
+      public void widgetDefaultSelected(SelectionEvent e) {
+      }
+
+    });
+
+    Composite parent = SWTUtil.createGridContainer(group, 3);
+    parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
     //
     // Path
@@ -149,13 +184,15 @@ public class TestNGXmlPage extends UserInputWizardPage {
       gd.horizontalSpan = 3;
       previewLabelText.setLayoutData(gd);
     }
-    
-    m_previewText = new Text(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-    GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-    gd.horizontalSpan = 3;
-    m_previewText.setLayoutData(gd);
 
-    setControl(parent);
+    {
+      m_previewText = new Text(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+      GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+      gd.horizontalSpan = 3;
+      m_previewText.setLayoutData(gd);
+    }
+
+    setControl(control);
   }
 
   private void createModel() {
@@ -166,7 +203,8 @@ public class TestNGXmlPage extends UserInputWizardPage {
     List<IType> types = Utils.findTypes(m_selectedElements);
     for (JavaElement element : m_selectedElements) {
       if (element.getClassName() != null) {
-        XmlClass c = new XmlClass(element.getPackageName() + "." + element.getClassName());
+        XmlClass c = new XmlClass(element.getPackageName() + "." + element.getClassName(),
+            false /* don't resolve */);
         p("Adding class " + c);
         m_classes.add(c);
         packageSet.add(element.getPackageName());
@@ -227,7 +265,7 @@ public class TestNGXmlPage extends UserInputWizardPage {
    * @return whether the user wants us to generate a testng.xml file.
    */
   public boolean generateXmlFile() {
-    return true;
+    return m_generateBox.getSelection();
   }
 
   public void saveXmlFile() {
