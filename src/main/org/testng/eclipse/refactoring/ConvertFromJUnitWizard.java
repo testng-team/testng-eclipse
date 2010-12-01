@@ -23,6 +23,6 @@ public class ConvertFromJUnitWizard extends RefactoringWizard {
       m_xmlPage.saveXmlFile();
     }
 
-    return true;
+    return super.performFinish();
   }
 }
