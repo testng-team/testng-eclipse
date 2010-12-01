@@ -101,13 +101,17 @@ public class SWTUtil {
    */
   public static Composite createGridContainer(Composite parent, int columns) {
     Composite result = new Composite(parent, SWT.NULL);
-    GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-    result.setLayoutData(gd);
+    createGridLayout(result, columns);
+    return result;
+  }
+  
+  public static void createGridLayout(Composite result, int columns) {
     GridLayout layout = new GridLayout();
     layout.numColumns = columns;
     result.setLayout(layout);
 
-    return result;
+    GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+    result.setLayoutData(gd);
   }
 
   /**
