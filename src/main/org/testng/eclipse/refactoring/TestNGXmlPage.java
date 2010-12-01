@@ -70,10 +70,20 @@ public class TestNGXmlPage extends UserInputWizardPage {
   }
 
   public void createControl(Composite p) {
+    p("createUI");
     createUi(p);
+    p("createModel");
     createModel();
+    p("updateUI");
     updateUi();
+    p("addListeners");
     addListeners();
+  }
+
+  private void p(String string) {
+    if (false) {
+      System.out.println("[TestNGXmlPage] " + string);
+    }
   }
 
   private void addListeners() {
@@ -157,11 +167,13 @@ public class TestNGXmlPage extends UserInputWizardPage {
     for (JavaElement element : m_selectedElements) {
       if (element.getClassName() != null) {
         XmlClass c = new XmlClass(element.getPackageName() + "." + element.getClassName());
+        p("Adding class " + c);
         m_classes.add(c);
         packageSet.add(element.getPackageName());
       } else {
         for (IType type : types) {
-          m_classes.add(new XmlClass(type.getFullyQualifiedName()));
+          p("Adding type " + type);
+          m_classes.add(new XmlClass(type.getFullyQualifiedName(), false /* don't resolve */));
           packageSet.add(type.getPackageFragment().getElementName());
         }
       }
@@ -171,6 +183,7 @@ public class TestNGXmlPage extends UserInputWizardPage {
     for (String p : packageSet) {
       XmlPackage pkg = new XmlPackage();
       pkg.setName(p);
+      p("Adding package " + p);
       m_packages.add(pkg);
     }
 
@@ -189,6 +202,7 @@ public class TestNGXmlPage extends UserInputWizardPage {
   }
   
   private void updateXmlSuite(XmlSuite suite) {
+    p("Updating XML suite");
     XmlTest test = suite.getTests().get(0);
     test.getXmlClasses().clear();
     test.getXmlPackages().clear();
@@ -197,6 +211,7 @@ public class TestNGXmlPage extends UserInputWizardPage {
     } else {
       test.getXmlPackages().addAll(m_packages);
     }
+    p("Done updating XML suite");
   }
 
   private Text addTextLabel(Composite parent, String text) {
