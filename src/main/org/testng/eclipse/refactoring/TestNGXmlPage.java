@@ -269,7 +269,9 @@ public class TestNGXmlPage extends UserInputWizardPage {
   }
 
   public void saveXmlFile() {
-    IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(m_xmlFile.getText()));
+    String path = m_xmlFile.getText();
+    if (! path.endsWith(".xml")) path = path + (path.endsWith("/") ? "testng.xml" : "/testng.xml");
+    IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(path));
     ByteArrayInputStream is = new ByteArrayInputStream(m_xmlSuite.toXml().getBytes());
     try {
       file.create(is, true /* force */, null /* progress monitor */);
