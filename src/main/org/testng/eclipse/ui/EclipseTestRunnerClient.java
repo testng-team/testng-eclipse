@@ -14,6 +14,8 @@ import org.testng.remote.strprotocol.SuiteMessage;
 import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
 
+import java.net.SocketTimeoutException;
+
 
 public class EclipseTestRunnerClient extends AbstractRemoteTestRunnerClient {
 
@@ -29,8 +31,12 @@ public class EclipseTestRunnerClient extends AbstractRemoteTestRunnerClient {
   {
     // Always use the string protocol here for backward compatibility
     m_marshaller = new StringMessageSender("localhost", port);
-    m_marshaller.initReceiver();
-    startListening(suiteListener, testListener, m_marshaller);
+    try {
+      m_marshaller.initReceiver();
+      startListening(suiteListener, testListener, m_marshaller);
+    } catch (SocketTimeoutException e) {
+      e.printStackTrace();
+    }
   }
 
   @Override

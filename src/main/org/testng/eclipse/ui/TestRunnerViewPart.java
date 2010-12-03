@@ -22,11 +22,13 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.debug.ui.StatusInfo;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
@@ -82,6 +84,7 @@ import org.testng.remote.strprotocol.SuiteMessage;
 import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -391,12 +394,25 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     IMessageSender messageMarshaller = LaunchUtil.useStringProtocol(launch.getLaunchConfiguration())
         ? new StringMessageSender("localhost", port)
         : new SerializedMessageSender("localhost", port);
-    messageMarshaller.initReceiver();
-    fTestRunnerClient.startListening(this, this, messageMarshaller);
+    try {
+      messageMarshaller.initReceiver();
+      fTestRunnerClient.startListening(this, this, messageMarshaller);
 
-    m_rerunAction.setEnabled(true);
-    m_rerunFailedAction.setEnabled(false);
-    m_openReportAction.setEnabled(true);
+      m_rerunAction.setEnabled(true);
+      m_rerunFailedAction.setEnabled(false);
+      m_openReportAction.setEnabled(true);
+    }
+    catch(SocketTimeoutException ex) {
+      boolean useProjectJar =
+          TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(project.getProject().getName());
+      String suggestion = useProjectJar
+         ? "Uncheck the 'Use Project testng.jar' option from your Project properties and try again."
+         : "Make sure you don't have an older version of testng.jar on your class path.";
+      new ErrorDialog(m_counterComposite.getShell(), "Couldn't launch TestNG",
+          "Couldn't contact the RemoteTestNG client. " + suggestion,
+          new StatusInfo(IStatus.ERROR, "Timeout while trying to contact RemoteTestNG."),
+          IStatus.ERROR).open();
+    }
 //    getViewSite().getActionBars().updateActionBars();
   }
 
