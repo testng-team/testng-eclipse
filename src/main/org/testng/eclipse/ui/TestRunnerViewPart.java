@@ -83,7 +83,12 @@ import org.testng.remote.strprotocol.StringMessageSender;
 import org.testng.remote.strprotocol.SuiteMessage;
 import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
+import org.testng.reporters.XMLReporterListener;
+import org.testng.xml.ResultXMLParser;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -416,6 +421,35 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //    getViewSite().getActionBars().updateActionBars();
   }
 
+  private void monitorTestResults() {
+    final String path = "/Users/cbeust/java/testng/test-output/testng-results.xml";
+    Runnable r = new Runnable() {
+      public void run() {
+        File f = new File(path);
+        long timeStamp = f.lastModified();
+        while (true) {
+          long t = f.lastModified();
+          if (t != timeStamp) {
+            timeStamp = t;
+            ResultXMLParser parser =
+                new ResultXMLParser(TestRunnerViewPart.this, TestRunnerViewPart.this);
+            try {
+              parser.parse(path, new FileInputStream(f));
+            } catch (FileNotFoundException e) {
+              e.printStackTrace();
+            }
+            try {
+              Thread.sleep(5000);
+            } catch (InterruptedException e) {
+              e.printStackTrace();
+            }
+          }
+        }
+      }
+    };
+    new Thread(r).start();
+  }
+
   protected void aboutToLaunch(final String message) {
     String msg = ResourceUtil.getFormattedString("TestRunnerViewPart.message.launching", message); //$NON-NLS-1$
     firePropertyChange(IWorkbenchPart.PROP_TITLE);
@@ -649,6 +683,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   @Override
   public void createPartControl(Composite parent) {
     ppp("createPartControl");
+    monitorTestResults();
     m_parentComposite = parent;
 //    addResizeListener(parent);
 
