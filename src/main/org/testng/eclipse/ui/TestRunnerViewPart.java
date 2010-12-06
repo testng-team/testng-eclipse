@@ -21,6 +21,7 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.debug.ui.StatusInfo;
 import org.eclipse.jface.action.Action;
@@ -31,6 +32,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -52,6 +54,7 @@ import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
@@ -422,7 +425,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private void monitorTestResults() {
-    final String path = "/Users/cbeust/java/testng/test-output/testng-results.xml";
+    final String path = "/Users/cbeust/java/testng/target/test-output/testng-results.xml";
     Runnable r = new Runnable() {
       public void run() {
         File f = new File(path);
@@ -447,11 +450,31 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         }
       }
     };
-    new Thread(r).start();
+    new Thread(r, "testng-results.xml watcher").start();
+  }
+
+  /**
+   * Used if we are reading our results from testng-results.xml. In this case, we don't have
+   * a project name, so we pick whatever project the current selection of the package explorer
+   * is and hope for the best.
+   */
+  private void initProject() {
+    ISelectionService service =
+      TestNGPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getSelectionService();
+    IStructuredSelection structured =
+      (IStructuredSelection) service.getSelection("org.eclipse.jdt.ui.PackageExplorer");
+    if (structured != null) {
+      Object element = structured.getFirstElement();
+      if (element instanceof IJavaElement) {
+        m_workingProject = ((IJavaElement) element).getJavaProject();
+      }
+    }
   }
 
   protected void aboutToLaunch(final String message) {
-    String msg = ResourceUtil.getFormattedString("TestRunnerViewPart.message.launching", message); //$NON-NLS-1$
+    String msg =
+      ResourceUtil.getFormattedString("TestRunnerViewPart.message.launching", message); //$NON-NLS-1$
+    setPartName(msg);
     firePropertyChange(IWorkbenchPart.PROP_TITLE);
   }
 
@@ -907,7 +930,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //  }
 
   public IJavaProject getLaunchedProject() {
+    if (m_workingProject == null) initProject();
     return m_workingProject;
+  }
+
+  public void setLaunchedProject(IJavaProject project) {
+    m_workingProject = project;
   }
 
   public ILaunch getLastLaunch() {
