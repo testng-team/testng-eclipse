@@ -32,7 +32,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -51,12 +50,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorActionBarContributor;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
@@ -70,6 +71,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
 import org.testng.ITestResult;
+import org.testng.TestNGException;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.ui.summary.SummaryTab;
@@ -87,11 +89,7 @@ import org.testng.remote.strprotocol.StringMessageSender;
 import org.testng.remote.strprotocol.SuiteMessage;
 import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
-import org.testng.xml.ResultXMLParser;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -434,7 +432,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       if (m_watchThread != null) m_watchThread.stopWatching();
       m_watchThread = new WatchResult(path, this, this);
     } else {
-      m_watchThread.stopWatching();
+      if (m_watchThread != null) m_watchThread.stopWatching();
     }
   }
 
@@ -444,16 +442,39 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
    * is and hope for the best.
    */
   private void initProject() {
-    ISelectionService service =
-      TestNGPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getSelectionService();
-    IStructuredSelection structured =
-      (IStructuredSelection) service.getSelection("org.eclipse.jdt.ui.PackageExplorer");
-    if (structured != null) {
-      Object element = structured.getFirstElement();
-      if (element instanceof IJavaElement) {
-        m_workingProject = ((IJavaElement) element).getJavaProject();
+    IWorkbench iworkbench = PlatformUI.getWorkbench();
+    if (iworkbench != null) {
+      IWorkbenchWindow iworkbenchwindow = iworkbench.getActiveWorkbenchWindow();
+      if (iworkbenchwindow != null) {
+        IWorkbenchPage iworkbenchpage = iworkbenchwindow.getActivePage();
+        if (iworkbenchpage != null) {
+          IEditorPart ieditorpart = iworkbenchpage.getActiveEditor();
+          IEditorInput input = ieditorpart.getEditorInput();
+          if (input != null && input instanceof IFileEditorInput) {
+            IResource resource = ((IFileEditorInput) input).getFile();
+            IJavaElement element = (IJavaElement) resource.getAdapter(IJavaElement.class);
+            if (element != null) {
+              m_workingProject = element.getJavaProject();
+            }
+          }
+        }
       }
     }
+
+    if (m_workingProject == null) {
+      throw new TestNGException("Couldn't find a Java Project, please open a Java file " +
+      		"in the editor");
+    }
+    //    ISelectionService service =
+//      TestNGPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getSelectionService();
+//    IStructuredSelection structured =
+//      (IStructuredSelection) service.getSelection("org.eclipse.jdt.ui.PackageExplorer");
+//    if (structured != null) {
+//      Object element = structured.getFirstElement();
+//      if (element instanceof IJavaElement) {
+//        m_workingProject = ((IJavaElement) element).getJavaProject();
+//      }
+//    }
   }
 
   protected void aboutToLaunch(final String message) {
