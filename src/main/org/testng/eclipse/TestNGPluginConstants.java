@@ -16,6 +16,8 @@ public abstract class TestNGPluginConstants {
 //  public static final String S_REPORTERS = ".reporters";
   public static final String S_DISABLEDLISTENERS = ".disabledListeners";
 //  public static final String S_PARALLEL = ".parallel";
+  public static final String S_WATCH_RESULTS = ".watchResults";
+  public static final String S_WATCH_RESULT_DIRECTORY = ".watchResultDirectory";
   
   public static final String S_DEPRECATED_OUTPUT = "generalOutput";
   public static final String S_DEPRECATED_ABSOLUTEPATH = "generalOutputRelative";

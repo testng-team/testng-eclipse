@@ -19,15 +19,13 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.PropertyPage;
@@ -38,14 +36,15 @@ import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.ui.util.Utils.Widgets;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
+import org.testng.reporters.XMLReporter;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
  * Project specific properties.
  *
- * @author cbeust
- *
+ * @author Cedric Beust <cedric@beust.com>
  */
 public class TestNGPropertyPage extends PropertyPage {
   private static final IStatus ERROR = new StatusInfo(IStatus.ERROR, "");
@@ -55,6 +54,8 @@ public class TestNGPropertyPage extends PropertyPage {
   private Text m_xmlTemplateFile;
   private IProject m_workingProject;
   private Button m_projectJar;
+  private Text m_watchResultText;
+  private Button m_watchResultRadio;
 
   public void createControl(Composite parent) {
     setDescription("Project TestNG settings");
@@ -66,8 +67,14 @@ public class TestNGPropertyPage extends PropertyPage {
    */
   protected Control createContents(Composite parent) {
     Composite parentComposite = new Composite(parent, SWT.NONE);
+    parentComposite.setLayout(new GridLayout(1, true));
+    parentComposite.setLayoutData(Utils.createGridData());
 
+    //
+    // Output directory
+    //
     {
+      Group g = new Group(parentComposite, SWT.SHADOW_ETCHED_IN);
       SelectionAdapter buttonListener = new SelectionAdapter() {
         public void widgetSelected(SelectionEvent evt) {
           DirectoryDialog dlg= new DirectoryDialog(m_outputdir.getShell());
@@ -77,39 +84,54 @@ public class TestNGPropertyPage extends PropertyPage {
           m_absolutePath.setSelection(true);
         }
       };
-      Widgets w = Utils.createTextBrowseControl(parentComposite, null,
+      Widgets w = Utils.createTextBrowseControl(g, null,
           "TestNGPropertyPage.outputDir", buttonListener, null, null, true);
       m_outputdir = w.text;
 
-//
-//      // Output dir 
-//      Label pathLabel = new Label(p, SWT.NONE);
-//      pathLabel.setText(PATH_TITLE);
-//      m_outputdir = new Text(p, SWT.SINGLE | SWT.BORDER);
-//      m_outputdir.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
-//      
-//      // Browse for output dir button
-//      Button browseFS= new Button(p, SWT.PUSH);
-//      browseFS.setText("Browse"); //$NON-NLS-1$
-//      SWTUtil.setButtonGridData(browseFS);
-//      browseFS.addSelectionListener(new SelectionAdapter() {
-//        public void widgetSelected(SelectionEvent evt) {
-//          DirectoryDialog dlg= new DirectoryDialog(m_outputdir.getShell());
-//          dlg.setMessage("Select TestNG output directory");
-//          String selectedDir= dlg.open();
-//          m_outputdir.setText(selectedDir != null ? selectedDir : "");
-//          m_absolutePath.setSelection(true);
-//        }
-//      });
+      m_absolutePath = new Button(g, SWT.CHECK);
+      m_absolutePath.setText("Absolute output path");
+      m_absolutePath.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
     }
-    
-    m_absolutePath = new Button(parentComposite, SWT.CHECK);
-    m_absolutePath.setText("Absolute output path");
-    m_absolutePath.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 4, 1));    
 
+    //
+    // Watch testng-results.xml
+    //
+    {
+//      Group g = new Group(parentComposite, SWT.SHADOW_ETCHED_IN);
+//      m_watchResults = new Button(g, SWT.CHECK);
+//      m_watchResults.setText("Watch testng-results.xml");
+
+      SelectionAdapter listener = new SelectionAdapter() {
+        public void widgetSelected(SelectionEvent evt) {
+          DirectoryDialog dlg= new DirectoryDialog(m_xmlTemplateFile.getShell());
+          dlg.setMessage("Select Template XML file");
+          String selectedDir = dlg.open();
+          if (new File(selectedDir).isDirectory()) {
+            selectedDir = selectedDir + File.separator + XMLReporter.FILE_NAME;
+          }
+          m_watchResultText.setText(selectedDir != null ? selectedDir : "");
+        }
+      };
+
+      Widgets w = Utils.createTextBrowseControl(parentComposite,
+          "TestNGPropertyPage.watchResultXml",
+          "TestNGPropertyPage.resultXmlDirectory",
+          listener, null, null,
+          true);
+      m_watchResultText = w.text;
+      m_watchResultRadio = w.radio;
+    }
+
+    //
+    // Disable default listeners
+    //
     m_disabledDefaultListeners = new Button(parentComposite, SWT.CHECK);
     m_disabledDefaultListeners.setText("Disable default listeners");
     m_disabledDefaultListeners.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 4, 1));
+
+    //
+    // XML template file
+    //
 
     {
       SelectionAdapter buttonListener = new SelectionAdapter() {
@@ -191,11 +213,14 @@ public class TestNGPropertyPage extends PropertyPage {
 
     // Populate the owner text field with the default value
     PreferenceStoreUtil storage= TestNGPlugin.getPluginPreferenceStore();
-    m_outputdir.setText(storage.getOutputDir(m_workingProject.getName(), true));
-    m_absolutePath.setSelection(storage.isOutputAbsolutePath(m_workingProject.getName(), true));
-    m_disabledDefaultListeners.setSelection(storage.hasDisabledListeners(m_workingProject.getName(), true));
-    m_xmlTemplateFile.setText(storage.getXmlTemplateFile(m_workingProject.getName(), true));
-    m_projectJar.setSelection(storage.getUseProjectJar(m_workingProject.getName()));
+    String projectName = m_workingProject.getName();
+    m_outputdir.setText(storage.getOutputDir(projectName, true));
+    m_absolutePath.setSelection(storage.isOutputAbsolutePath(projectName, true));
+    m_disabledDefaultListeners.setSelection(storage.hasDisabledListeners(projectName, true));
+    m_xmlTemplateFile.setText(storage.getXmlTemplateFile(projectName, true));
+    m_projectJar.setSelection(storage.getUseProjectJar(projectName));
+    m_watchResultRadio.setSelection(storage.getWatchResults(projectName));
+    m_watchResultText.setText(storage.getWatchResultDirectory(projectName));
   }
 
   protected void performDefaults() {
@@ -205,10 +230,13 @@ public class TestNGPropertyPage extends PropertyPage {
 
   public boolean performOk() {
     PreferenceStoreUtil storage= TestNGPlugin.getPluginPreferenceStore();
-    storage.storeOutputDir(m_workingProject.getName(), m_outputdir.getText(), m_absolutePath.getSelection());
-    storage.storeDisabledListeners(m_workingProject.getName(), m_disabledDefaultListeners.getSelection());
-    storage.storeXmlTemplateFile(m_workingProject.getName(), m_xmlTemplateFile.getText());
-    storage.storeUseProjectJar(m_workingProject.getName(), m_projectJar.getSelection());
+    String projectName = m_workingProject.getName();
+    storage.storeOutputDir(projectName, m_outputdir.getText(), m_absolutePath.getSelection());
+    storage.storeDisabledListeners(projectName, m_disabledDefaultListeners.getSelection());
+    storage.storeXmlTemplateFile(projectName, m_xmlTemplateFile.getText());
+    storage.storeUseProjectJar(projectName, m_projectJar.getSelection());
+    storage.storeWatchResults(projectName, m_watchResultRadio.getSelection());
+    storage.storeWatchResultLocation(projectName, m_watchResultText.getText());
 
     if(super.performOk()) {
       setMessage("Project preferences are saved", INFORMATION);

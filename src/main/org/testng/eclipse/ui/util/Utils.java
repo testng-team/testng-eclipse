@@ -4,7 +4,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -39,26 +38,35 @@ public class Utils {
       final SelectionListener checkListener,
       ModifyListener textListener, boolean enabled)
   {
-    Composite p = new Composite(parentComposite, SWT.NONE);
-    {
-      parentComposite.setLayout(new GridLayout(1, false));
-      GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-      parentComposite.setLayoutData(gd);
-//      p.setBackground(new Color(p.getDisplay(), 80, 80, 80));
-      p.setLayout(new GridLayout(3, false));
-      p.setLayoutData(gd);
-    }
-
     final Widgets result = new Widgets();
+    Composite parent;
 
-    Composite parent = p;
     if (checkKey != null) {
+      parent = parentComposite;
+
+      //
+      // Group
+      //
+      {
+        final Group g = new Group(parent, SWT.SHADOW_ETCHED_OUT);
+        GridData gd = createGridData();
+        g.setLayoutData(gd);
+
+        GridLayout layout = new GridLayout();
+        g.setLayout(layout);
+        layout.numColumns = 3;
+        parent = g;
+      }
 
       //
       // Radio
       //
       result.radio = new Button(parent, SWT.CHECK);
       result.radio.setText(ResourceUtil.getString(checkKey));
+      GridData gd = new GridData();
+      gd.horizontalSpan = 3;
+      result.radio.setLayoutData(gd);
+      result.radio.setSelection(true);
       result.radio.addSelectionListener(new SelectionListener() {
         public void widgetDefaultSelected(SelectionEvent e) {
           if (checkListener != null) {
@@ -74,20 +82,20 @@ public class Utils {
         }
 
       });
-
-      //
-      // Group
-      //
+    } else {
+      // No radio, use the supplied parent
+      Composite p = new Composite(parentComposite, SWT.NONE);
       {
-        final Group g = new Group(parent, SWT.SHADOW_ETCHED_OUT);
-        GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-        g.setLayoutData(gd);
-        
-        GridLayout layout = new GridLayout();
-        g.setLayout(layout);
-        layout.numColumns = 3;
-        parent = g;
+        parentComposite.setLayout(new GridLayout(1, false));
+        GridData gd = createGridData();
+        parentComposite.setLayoutData(gd);
+//        p.setBackground(new Color(p.getDisplay(), 80, 80, 80));
+        p.setLayout(new GridLayout(3, false));
+        p.setLayoutData(gd);
       }
+
+      parent = p;
+
     }
 
     //
@@ -116,6 +124,10 @@ public class Utils {
 
     enableControls(result, enabled);
     return result;
+  }
+
+  public static GridData createGridData() {
+    return new GridData(SWT.FILL, SWT.TOP, true, true);
   }
 
   private static void enableControls(Widgets result, boolean enabled) {

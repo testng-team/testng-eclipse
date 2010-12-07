@@ -71,6 +71,7 @@ import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
 import org.testng.ITestResult;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.ui.summary.SummaryTab;
 import org.testng.eclipse.util.CustomSuite;
 import org.testng.eclipse.util.JDTUtil;
@@ -86,7 +87,6 @@ import org.testng.remote.strprotocol.StringMessageSender;
 import org.testng.remote.strprotocol.SuiteMessage;
 import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
-import org.testng.reporters.XMLReporterListener;
 import org.testng.xml.ResultXMLParser;
 
 import java.io.File;
@@ -245,7 +245,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   // that implements ITest, this will be the returned value of getTestName().
   private Set testDescriptions;
   private Text m_searchText;
-  
+
+  /** The thread that watches the testng-results.xml file */
+  private WatchResult m_watchThread;
 
   @Override
   public void init(IViewSite site, IMemento memento) throws PartInitException {
@@ -424,33 +426,16 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //    getViewSite().getActionBars().updateActionBars();
   }
 
-  private void monitorTestResults() {
-    final String path = "/Users/cbeust/java/testng/target/test-output/testng-results.xml";
-    Runnable r = new Runnable() {
-      public void run() {
-        File f = new File(path);
-        long timeStamp = f.lastModified();
-        while (true) {
-          long t = f.lastModified();
-          if (t != timeStamp) {
-            timeStamp = t;
-            ResultXMLParser parser =
-                new ResultXMLParser(TestRunnerViewPart.this, TestRunnerViewPart.this);
-            try {
-              parser.parse(path, new FileInputStream(f));
-            } catch (FileNotFoundException e) {
-              e.printStackTrace();
-            }
-            try {
-              Thread.sleep(5000);
-            } catch (InterruptedException e) {
-              e.printStackTrace();
-            }
-          }
-        }
-      }
-    };
-    new Thread(r, "testng-results.xml watcher").start();
+  /**
+   * Start or stop the watch thread.
+   */
+  private void updateResultThread(boolean enabled, String path) {
+    if (enabled) {
+      if (m_watchThread != null) m_watchThread.stopWatching();
+      m_watchThread = new WatchResult(path, this, this);
+    } else {
+      m_watchThread.stopWatching();
+    }
   }
 
   /**
@@ -703,10 +688,18 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
+  private boolean getWatchResults() {
+    return TestNGPlugin.getPluginPreferenceStore().getWatchResults(getProjectName());
+  }
+
+  private String getWatchResultDirectory() {
+    return TestNGPlugin.getPluginPreferenceStore().getWatchResultDirectory(getProjectName());
+  }
+
   @Override
   public void createPartControl(Composite parent) {
     ppp("createPartControl");
-    monitorTestResults();
+    updateResultThread(getWatchResults(), getWatchResultDirectory());
     m_parentComposite = parent;
 //    addResizeListener(parent);
 
@@ -1063,7 +1056,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private static void ppp(final Object message) {
-    if (false) {
+    if (true) {
       System.out.println("[TestRunnerViewPart] " + message);
     }
   }
@@ -1080,6 +1073,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
    * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
    */
   public void propertyChange(PropertyChangeEvent event) {
+    String name = event.getProperty();
+    String statusChanged = getProjectName() + TestNGPluginConstants.S_WATCH_RESULTS;
+    String directoryChanged = getProjectName() + TestNGPluginConstants.S_WATCH_RESULT_DIRECTORY;
+    if (statusChanged.equals(name) || directoryChanged.equals(name)) {
+      updateResultThread(getWatchResults(), getWatchResultDirectory());
+    }
   }
 
   private void postTestResult(final RunInfo runInfo, final int progressStep) {
@@ -1472,4 +1471,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_summaryTab.setExcludedMethodsModel(suiteMessage);
   }
 
+  private String getProjectName() {
+    return getLaunchedProject().getProject().getName();
+  }
 }

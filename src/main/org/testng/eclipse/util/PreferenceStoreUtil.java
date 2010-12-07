@@ -10,9 +10,10 @@ import org.testng.eclipse.TestNGPluginConstants;
 import java.io.File;
 import java.util.Random;
 
-
 /**
- * Utility methods to store and retrive data in the preference store.
+ * Utility methods to store and retrieve data in the preference store.
+ *
+ * @author Cedric Beust <cedric@beust.com>
  */
 public class PreferenceStoreUtil {
   private IPreferenceStore m_storage;
@@ -128,5 +129,21 @@ public class PreferenceStoreUtil {
 
   public boolean getUseProjectJar(String projectName) {
     return m_storage.getBoolean(projectName + TestNGPluginConstants.S_USEPROJECTJAR);
+  }
+
+  public boolean getWatchResults(String projectName) {
+    return m_storage.getBoolean(projectName + TestNGPluginConstants.S_WATCH_RESULTS);
+  }
+
+  public String getWatchResultDirectory(String projectName) {
+    return m_storage.getString(projectName + TestNGPluginConstants.S_WATCH_RESULT_DIRECTORY);
+  }
+
+  public void storeWatchResults(String projectName, boolean selection) {
+    m_storage.setValue(projectName + TestNGPluginConstants.S_WATCH_RESULTS, selection);
+  }
+
+  public void storeWatchResultLocation(String projectName, String text) {
+    m_storage.setValue(projectName + TestNGPluginConstants.S_WATCH_RESULT_DIRECTORY, text);
   }
 }
