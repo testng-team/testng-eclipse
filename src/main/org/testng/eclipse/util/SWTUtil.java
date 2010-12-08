@@ -140,4 +140,8 @@ public class SWTUtil {
 
     return result;
   }
+
+  public static GridData createGridData() {
+    return new GridData(SWT.FILL, SWT.TOP, true, false);
+  }
 }

@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.util.ResourceUtil;
+import org.testng.eclipse.util.SWTUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,6 +25,22 @@ import java.util.Set;
 
 public class Utils {
   
+  private static Composite createParent(Composite parent, boolean group) {
+    Composite result;
+    if (group) {
+      result = new Group(parent, SWT.SHADOW_ETCHED_OUT);
+    } else {
+      result = new Composite(parent, SWT.NONE);
+    }
+
+    GridLayout layout = new GridLayout();
+    layout.numColumns = 3;
+    result.setLayout(layout);
+    result.setLayoutData(SWTUtil.createGridData());
+
+    return result;
+  }
+
   /**
    * Create a line of widgets, made of:
    * - A label
@@ -32,32 +49,16 @@ public class Utils {
    * If checkKey is not null, the Control will be surrounded by a Group and enabled
    * by a check box.
    */
-  public static Widgets createTextBrowseControl(Composite parentComposite,
+  public static Widgets createTextBrowseControl(Composite suppliedParent,
       String checkKey, String labelKey, 
       SelectionListener buttonListener,
       final SelectionListener checkListener,
       ModifyListener textListener, boolean enabled)
   {
     final Widgets result = new Widgets();
-    Composite parent;
+    Composite parent = createParent(suppliedParent, checkKey != null);
 
     if (checkKey != null) {
-      parent = parentComposite;
-
-      //
-      // Group
-      //
-      {
-        final Group g = new Group(parent, SWT.SHADOW_ETCHED_OUT);
-        GridData gd = createGridData();
-        g.setLayoutData(gd);
-
-        GridLayout layout = new GridLayout();
-        g.setLayout(layout);
-        layout.numColumns = 3;
-        parent = g;
-      }
-
       //
       // Radio
       //
@@ -82,20 +83,6 @@ public class Utils {
         }
 
       });
-    } else {
-      // No radio, use the supplied parent
-      Composite p = new Composite(parentComposite, SWT.NONE);
-      {
-        parentComposite.setLayout(new GridLayout(1, false));
-        GridData gd = createGridData();
-        parentComposite.setLayoutData(gd);
-//        p.setBackground(new Color(p.getDisplay(), 80, 80, 80));
-        p.setLayout(new GridLayout(3, false));
-        p.setLayoutData(gd);
-      }
-
-      parent = p;
-
     }
 
     //
@@ -124,10 +111,6 @@ public class Utils {
 
     enableControls(result, enabled);
     return result;
-  }
-
-  public static GridData createGridData() {
-    return new GridData(SWT.FILL, SWT.TOP, true, true);
   }
 
   private static void enableControls(Widgets result, boolean enabled) {
