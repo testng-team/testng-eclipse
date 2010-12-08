@@ -34,7 +34,7 @@ public class WatchResult {
             timeStamp = t;
             ResultXMLParser parser = new ResultXMLParser(suiteListener, testListener);
             try {
-              parser.parse(path, new FileInputStream(f));
+              parser.parse(path, new FileInputStream(f), false /* don't load classes */);
             } catch (FileNotFoundException e) {
               e.printStackTrace();
             }
