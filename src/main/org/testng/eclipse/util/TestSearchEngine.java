@@ -361,6 +361,26 @@ public class TestSearchEngine {
   }
 
   /**
+   * Find all the resources named fileName.
+   */
+  public static void findFile(IContainer container, String fileName, Set<String> outResult) {
+    IResource[] resources;
+    try {
+      resources = container.members();
+      for (IResource r : resources) {
+        if (r.getFullPath().toOSString().endsWith(fileName)) {
+          outResult.add(r.getFullPath().toOSString());
+        } else if (r instanceof IContainer) {
+          findFile((IContainer) r, fileName, outResult);
+        }
+      }
+    } catch (CoreException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
+  /**
    * Collect all the types under the parameter element, which is expected to be either
    * an IJavaProject, an IPackageFragmentRoot or a IPackageFragment.
    */

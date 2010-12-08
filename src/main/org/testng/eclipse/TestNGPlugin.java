@@ -18,6 +18,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -208,13 +209,14 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
                                 IJavaProject launchedProject,
                                 String subName,
                                 int port) {
-    TestRunnerViewPart testRunnerViewPart = showTestRunnerViewPartInActivePage(findTestRunnerViewPartInActivePage());
-    if(testRunnerViewPart != null) {
-      testRunnerViewPart.startTestRunListening(launchedProject, subName, port, launch);
+    IViewPart viewPart = showTestRunnerViewPartInActivePage(findTestRunnerViewPartInActivePage());
+    // The returned view part could be an ErrorViewPart or null if something went wrong in the init
+    if (viewPart instanceof TestRunnerViewPart) {
+      ((TestRunnerViewPart) viewPart).startTestRunListening(launchedProject, subName, port, launch);
     }
   }
 
-  private TestRunnerViewPart showTestRunnerViewPartInActivePage(TestRunnerViewPart testRunner) {
+  private IViewPart showTestRunnerViewPartInActivePage(TestRunnerViewPart testRunner) {
     IWorkbenchPart activePart = null;
     IWorkbenchPage page = null;
     try {
@@ -234,7 +236,7 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
       activePart = page.getActivePart();
 
       //  show the result view if it isn't shown yet
-      return (TestRunnerViewPart) page.showView(TestRunnerViewPart.NAME);
+      return page.showView(TestRunnerViewPart.NAME);
     }
     catch(PartInitException pie) {
       log(pie);

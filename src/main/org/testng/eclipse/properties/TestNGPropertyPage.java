@@ -19,7 +19,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -27,22 +26,24 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceSorter;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.collections.Sets;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.ui.util.Utils.Widgets;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.SWTUtil;
+import org.testng.eclipse.util.TestSearchEngine;
 import org.testng.reporters.XMLReporter;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Project specific properties.
@@ -192,7 +193,13 @@ public class TestNGPropertyPage extends PropertyPage {
     m_xmlTemplateFile.setText(storage.getXmlTemplateFile(projectName, true));
     m_projectJar.setSelection(storage.getUseProjectJar(projectName));
     m_watchResultRadio.setSelection(storage.getWatchResults(projectName));
-    m_watchResultText.setText(storage.getWatchResultDirectory(projectName));
+    String dir = storage.getWatchResultDirectory(projectName);
+    if (dir == null) {
+      Set<String> results = Sets.newHashSet();
+      TestSearchEngine.findFile(m_workingProject, XMLReporter.FILE_NAME, results);
+      if (results.size() > 0) dir = results.iterator().next();
+    }
+    m_watchResultText.setText(dir);
   }
 
   protected void performDefaults() {
