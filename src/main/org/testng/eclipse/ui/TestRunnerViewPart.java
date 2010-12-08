@@ -392,7 +392,11 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_LastLaunch = launch;
     m_workingProject = project;
     m_hasFailures= false;
-    
+
+    // Now that we have a project name, read the watch result preference and
+    // update our monitoring thread.
+    updateResultThread(getWatchResults(), getWatchResultDirectory());
+
     aboutToLaunch(subName);
     
 //    if(null != fTestRunnerClient) {
@@ -462,8 +466,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
 
     if (m_workingProject == null) {
-      throw new TestNGException("Couldn't find a Java Project, please open a Java file " +
-      		"in the editor");
+      TestNGPlugin.log("Couldn't find a Java Project, directory monitoring disabled until" +
+      		" you launch a TestNG configuration");
     }
     //    ISelectionService service =
 //      TestNGPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getSelectionService();
@@ -714,13 +718,18 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private String getWatchResultDirectory() {
-    return TestNGPlugin.getPluginPreferenceStore().getWatchResultDirectory(getProjectName());
+    String projectName = getProjectName();
+    return projectName != null
+        ? TestNGPlugin.getPluginPreferenceStore().getWatchResultDirectory(projectName)
+        : null;
   }
 
   @Override
   public void createPartControl(Composite parent) {
     ppp("createPartControl");
-    updateResultThread(getWatchResults(), getWatchResultDirectory());
+    if (getWatchResultDirectory() != null) {
+      updateResultThread(getWatchResults(), getWatchResultDirectory());
+    }
     m_parentComposite = parent;
 //    addResizeListener(parent);
 
@@ -1493,6 +1502,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private String getProjectName() {
-    return getLaunchedProject().getProject().getName();
+    IJavaProject project = getLaunchedProject();
+    return project != null ? project.getProject().getName() : null;
   }
 }
