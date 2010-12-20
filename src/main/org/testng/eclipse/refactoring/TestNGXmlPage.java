@@ -69,6 +69,8 @@ public class TestNGXmlPage extends UserInputWizardPage {
   private Set<XmlPackage> m_packages = Sets.newHashSet();
   private Text m_xmlFile;
   private Button m_generateBox;
+  private Combo m_parallelCombo;
+  private Text m_threadCountText;
 
   protected TestNGXmlPage() {
     super(NAME);
@@ -95,7 +97,9 @@ public class TestNGXmlPage extends UserInputWizardPage {
   private void addListeners() {
     m_suiteText.addModifyListener(MODIFY_LISTENER);
     m_testText.addModifyListener(MODIFY_LISTENER);
-    m_selectionCombo.addModifyListener(MODIFY_LISTENER);      
+    m_selectionCombo.addModifyListener(MODIFY_LISTENER);
+    m_parallelCombo.addModifyListener(MODIFY_LISTENER);
+    m_threadCountText.addModifyListener(MODIFY_LISTENER);
   }
 
   private String getDefaultSuiteName() {
@@ -109,6 +113,14 @@ public class TestNGXmlPage extends UserInputWizardPage {
   private void updateUi() {
     m_xmlSuite.setName(m_suiteText.getText());
     m_xmlSuite.getTests().get(0).setName(m_testText.getText());
+    m_xmlSuite.setParallel(m_parallelCombo.getItem(m_parallelCombo.getSelectionIndex()));
+    Integer threadCount = null;
+    try {
+      threadCount = Integer.parseInt(m_threadCountText.getText());
+      m_xmlSuite.setThreadCount(threadCount);
+    } catch(NumberFormatException ex) {
+      m_xmlSuite.setThreadCount(XmlSuite.DEFAULT_THREAD_COUNT);
+    }
     updateXmlSuite(m_xmlSuite);
     m_previewText.setText(m_xmlSuite.toXml());
   }
@@ -146,7 +158,7 @@ public class TestNGXmlPage extends UserInputWizardPage {
     parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
     //
-    // Path
+    // Location
     //
     m_xmlFile = SWTUtil.createPathBrowserText(parent, "Location:", null);
     List<JavaElement> elements = Utils.getSelectedJavaElements();
@@ -162,16 +174,49 @@ public class TestNGXmlPage extends UserInputWizardPage {
     m_testText = addTextLabel(parent, "Test name:");
     m_testText.setText(getDefaultTestName());
 
+    Composite horizontal = new Composite(parent, SWT.NONE);
+    GridLayout layout = new GridLayout(6, true);
+    horizontal.setLayout(layout);
+    {
+      GridData gd = new GridData();
+      gd.horizontalSpan = 3;
+      horizontal.setLayoutData(gd);
+    }
+
     //
     // Selection combo
     //
     {
-      Label l = new Label(parent, SWT.NONE);
+      Label l = new Label(horizontal, SWT.NONE);
       l.setText("Class selection:");
-      m_selectionCombo = new Combo(parent, SWT.READ_ONLY);
+      m_selectionCombo = new Combo(horizontal, SWT.READ_ONLY);
       m_selectionCombo.add(Selection.CLASSES.toString());
       m_selectionCombo.add(Selection.PACKAGES.toString());
       m_selectionCombo.select(0);
+    }
+
+
+    //
+    // Parallel mode
+    //
+    {
+      Label l = new Label(horizontal, SWT.NONE);
+      l.setText("Parallel mode:");
+      m_parallelCombo = new Combo(horizontal, SWT.READ_ONLY);
+      m_parallelCombo.add(XmlSuite.PARALLEL_NONE);
+      m_parallelCombo.add(XmlSuite.PARALLEL_METHODS);
+      m_parallelCombo.add(XmlSuite.PARALLEL_CLASSES);
+      m_parallelCombo.add(XmlSuite.PARALLEL_TESTS);
+      m_parallelCombo.select(0);
+    }
+
+    //
+    // Thread count
+    //
+    {
+      Label l = new Label(horizontal, SWT.NONE);
+      l.setText("Thread count:");
+      m_threadCountText = new Text(horizontal, SWT.BORDER);
     }
 
     //
