@@ -195,6 +195,8 @@ public class TestNGPropertyPage extends PropertyPage {
     m_watchResultRadio.setSelection(storage.getWatchResults(projectName));
     String dir = storage.getWatchResultDirectory(projectName);
     if (dir == null) {
+      // Try to find a default value for the path to testng-results.xml: look for
+      // all the files by that name in the project and use the first one.
       Set<String> results = Sets.newHashSet();
       TestSearchEngine.findFile(m_workingProject, XMLReporter.FILE_NAME, results);
       if (results.size() > 0) dir = results.iterator().next();
