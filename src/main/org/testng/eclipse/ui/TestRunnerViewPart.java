@@ -453,12 +453,14 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         IWorkbenchPage iworkbenchpage = iworkbenchwindow.getActivePage();
         if (iworkbenchpage != null) {
           IEditorPart ieditorpart = iworkbenchpage.getActiveEditor();
-          IEditorInput input = ieditorpart.getEditorInput();
-          if (input != null && input instanceof IFileEditorInput) {
-            IResource resource = ((IFileEditorInput) input).getFile();
-            IJavaElement element = (IJavaElement) resource.getAdapter(IJavaElement.class);
-            if (element != null) {
-              m_workingProject = element.getJavaProject();
+          if (ieditorpart != null) {
+            IEditorInput input = ieditorpart.getEditorInput();
+            if (input != null && input instanceof IFileEditorInput) {
+              IResource resource = ((IFileEditorInput) input).getFile();
+              IJavaElement element = (IJavaElement) resource.getAdapter(IJavaElement.class);
+              if (element != null) {
+                m_workingProject = element.getJavaProject();
+              }
             }
           }
         }
