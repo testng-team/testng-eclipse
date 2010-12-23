@@ -336,7 +336,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
 
     switch (runType) {
     case CLASS:
-      return "test class";
+      return "class " + configuration.getName();
     case GROUP:
       return "groups";
     case SUITE:
