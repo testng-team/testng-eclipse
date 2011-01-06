@@ -27,6 +27,8 @@ public class Images {
   public static final String IMG_COMPARE_HOVER = "compareHover";
   public static final String IMG_COMPARE = "compare";
 
+  public static final String IMG_STOP = "stop";
+
   static {
     Display display = Display.getCurrent();
     if(display == null) {
@@ -53,6 +55,8 @@ public class Images {
     m_imageRegistry.put(IMG_COMPARE_DISABLED,TestNGPlugin.getImageDescriptor("dlcl16/compare.gif"));
     m_imageRegistry.put(IMG_COMPARE_HOVER, TestNGPlugin.getImageDescriptor("elcl16/compare.gif"));
     m_imageRegistry.put(IMG_COMPARE, TestNGPlugin.getImageDescriptor("elcl16/compare.gif"));
+
+    m_imageRegistry.put(IMG_STOP, TestNGPlugin.getImageDescriptor("obj16/terminatedlaunch_obj.png"));
   }
 
   public static Image getTestNGImage() {

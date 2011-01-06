@@ -39,15 +39,19 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
@@ -71,7 +75,6 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
 import org.testng.ITestResult;
-import org.testng.TestNGException;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.ui.summary.SummaryTab;
@@ -879,6 +882,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     fOKColor= new Color(display, 95, 191, 95);
 
     {
+      //
+      // Progress bar
+      //
       m_counterComposite = new Composite(parent, SWT.NONE);
       m_counterComposite.setLayoutData(
           new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
@@ -889,9 +895,28 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       fProgressBar = new JUnitProgressBar(m_counterComposite);
       fProgressBar.setLayoutData(
           new GridData(GridData.GRAB_HORIZONTAL| GridData.HORIZONTAL_ALIGN_FILL));
+
+      //
+      // Stop button (a toolbar, actually)
+      //
+      ToolBar toolBar = new ToolBar(m_counterComposite, SWT.FLAT);
+      ToolItem stopButton = new ToolItem(toolBar, SWT.PUSH);
+      stopButton.setImage(Images.getImage(Images.IMG_STOP));
+      stopButton.setToolTipText("Stop the current test run");
+      stopButton.addSelectionListener(new SelectionListener() {
+        public void widgetSelected(SelectionEvent e) {
+          stopTest();
+        }
+
+        public void widgetDefaultSelected(SelectionEvent e) {
+        }
+      });
     }
 
     {
+      //
+      // Search
+      //
       Composite line2 = new Composite(parent, SWT.NONE);
       line2.setLayoutData(
           new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
@@ -914,9 +939,10 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
       });
 
+      //
+      // Counter panel
+      //
       m_counterPanel = new CounterPanel(line2);
-//      m_counterPanel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
-//                                               | GridData.HORIZONTAL_ALIGN_FILL));
     }
   }
 
@@ -993,10 +1019,10 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   private void setCounterColumns(GridLayout layout) {
     if(fCurrentOrientation == VIEW_ORIENTATION_HORIZONTAL) {
-      layout.numColumns = 2;
+      layout.numColumns = 3;
     }
     else {
-      layout.numColumns = 1;
+      layout.numColumns = 2;
     }
   }
   

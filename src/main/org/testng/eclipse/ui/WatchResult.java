@@ -36,7 +36,7 @@ public class WatchResult {
             try {
               parser.parse(path, new FileInputStream(f), false /* don't load classes */);
             } catch (FileNotFoundException e) {
-              e.printStackTrace();
+              // Ignore
             }
           }
 
