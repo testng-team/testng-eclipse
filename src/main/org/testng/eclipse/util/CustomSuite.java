@@ -198,7 +198,7 @@ abstract public class CustomSuite extends LaunchSuite {
               Properties p = new Properties();
               p.put("name", cls);
               p.put("priority", ms.getPriority());
-              suiteBuffer.push("selector-class", p);
+              suiteBuffer.addEmptyElement("selector-class", p);
               suiteBuffer.pop("method-selector");
             }
             // TODO: <script> tag of method-selector
