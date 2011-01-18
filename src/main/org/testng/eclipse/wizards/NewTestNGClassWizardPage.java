@@ -31,7 +31,6 @@ import java.util.Map;
  * Generate a new TestNG class and optionally, the corresponding XML suite file.
  */
 public class NewTestNGClassWizardPage extends WizardPage {
-  private ISelection m_selection;
   private Text m_sourceFolderText;
   private Text m_packageNameText;
   private Text m_classNameText;
@@ -45,11 +44,10 @@ public class NewTestNGClassWizardPage extends WizardPage {
     "BeforeSuite", "AfterSuite", ""
   };
 
-  public NewTestNGClassWizardPage(ISelection selection) {
+  public NewTestNGClassWizardPage() {
     super("TestNG class");
     setTitle("TestNG class");
     setDescription("This wizard creates a new TestNG class.");
-    m_selection = selection;
   }
 
   /**

@@ -63,7 +63,7 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 
 	@Override
   public void addPages() {
-		m_page = new NewTestNGClassWizardPage(m_selection);
+		m_page = new NewTestNGClassWizardPage();
 		addPage(m_page);
 	}
 
