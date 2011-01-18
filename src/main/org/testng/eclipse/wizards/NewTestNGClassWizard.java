@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -24,6 +25,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.testng.eclipse.ui.util.Utils;
+import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SuiteGenerator;
 
 import java.io.ByteArrayInputStream;
@@ -74,7 +76,7 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 		String className = m_page.getClassName();
 		String packageName = m_page.getPackageName();
     try {
-      doFinish(containerName, packageName, className, m_page.getXmlFile(),
+      return doFinish(containerName, packageName, className, m_page.getXmlFile(),
           new NullProgressMonitor());
     } catch (CoreException e) {
       e.printStackTrace();
@@ -106,21 +108,33 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	 * The worker method. It will find the container, create the
 	 * file(s) if missing or just replace its contents, and open
 	 * the editor on the newly created file.
+	 *
+	 * @return true if the operation succeeded, false otherwise.
 	 */
-	private void doFinish(String containerName, String packageName, String className,
+	private boolean doFinish(String containerName, String packageName, String className,
 	    String xmlPath, IProgressMonitor monitor) throws CoreException {
+	  boolean result = true;
+
 	  //
 	  // Create XML file at the root directory, if applicable
 	  //
 	  if (!Utils.isEmpty(xmlPath)) {
-	    openFile(createFile(containerName, "", xmlPath, createXmlContentStream(), monitor), monitor);
+	    IFile file = createFile(containerName, "", xmlPath, createXmlContentStream(), monitor);
+	    if (file != null) openFile(file, monitor);
+	    else result = false;
 	  }
 
 	  //
 	  // Create Java file
 	  //
-	  openFile(createFile(containerName, packageName, className + ".java",
-	      createJavaContentStream(className), monitor), monitor);
+	  if (result) {
+  	  IFile file = createFile(containerName, packageName, className + ".java",
+          createJavaContentStream(className), monitor);
+  	  if (file != null) openFile(file, monitor);
+  	  else result = false;
+	  }
+
+	  return result;
 	}
 
   private void openFile(final IFile javaFile, IProgressMonitor monitor) {
@@ -154,7 +168,15 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
     final IFile result = container.getFile(new Path(fullPath));
     try {
       if (result.exists()) {
-        result.setContents(contentStream, true, true, monitor);
+        boolean overwrite = MessageDialog.openConfirm(getShell(),
+            ResourceUtil.getString("NewTestNGClassWizard.alreadyExists.title"), //$NON-NLS-1$
+            ResourceUtil.getFormattedString("NewTestNGClassWizard.alreadyExists.message",
+                fullPath)); //$NON-NLS-1$
+        if (overwrite) {
+          result.setContents(contentStream, true, true, monitor);
+        } else {
+          return null;
+        }
       } else {
         createResourceRecursively(result, monitor);
         result.setContents(contentStream, IFile.FORCE | IFile.KEEP_HISTORY, monitor);
