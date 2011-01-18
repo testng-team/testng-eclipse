@@ -182,7 +182,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
    */
   protected boolean fAutoScroll = true;
 
-  protected JUnitProgressBar fProgressBar;
+  protected ProgressBar fProgressBar;
 
   private Color fOKColor;
   private Color fFailureColor;
@@ -892,7 +892,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       m_counterComposite.setLayout(layout);
       setCounterColumns(layout);
 
-      fProgressBar = new JUnitProgressBar(m_counterComposite);
+      fProgressBar = new ProgressBar(m_counterComposite);
       fProgressBar.setLayoutData(
           new GridData(GridData.GRAB_HORIZONTAL| GridData.HORIZONTAL_ALIGN_FILL));
 

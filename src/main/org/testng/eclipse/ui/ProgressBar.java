@@ -33,21 +33,21 @@ import org.testng.ITestResult;
 /**
  * A progress bar with a red/green indication for success or failure.
  */
-public class JUnitProgressBar extends Canvas {
+public class ProgressBar extends Canvas {
   private static final int DEFAULT_WIDTH = 160;
   private static final int DEFAULT_HEIGHT = 16;
 
-  private int fCurrentTickCount = 0;
-  private int fMaxTickCount = 0;
-  private int fColorBarWidth = 0;
-  private Color fOKColor;
-  private Color fFailureColor;
-  private Color fStoppedColor;
-  private Color fSkippedColor;
+  private int m_currentTickCount = 0;
+  private int m_maxTickCount = 0;
+  private int m_colorBarWidth = 0;
+  private Color m_oKColor;
+  private Color m_failureColor;
+  private Color m_stoppedColor;
+  private Color m_skippedColor;
   private Color m_messageColor;
   // Defined in ITestResult
-  private int fError;
-  private boolean fStopped = false;
+  private int m_error;
+  private boolean m_stopped = false;
 
   private int m_totalTestsCounter;
   private int m_testCounter;
@@ -56,12 +56,12 @@ public class JUnitProgressBar extends Canvas {
   private String m_currentMessage = "Tests: 0/0  Methods: 0/0";
   private String m_timeMessage= "";
 
-  public JUnitProgressBar(Composite parent) {
+  public ProgressBar(Composite parent) {
     super(parent, SWT.NONE);
 
     addControlListener(new ControlAdapter() {
       public void controlResized(ControlEvent e) {
-        fColorBarWidth = scale(fCurrentTickCount);
+        m_colorBarWidth = scale(m_currentTickCount);
         redraw();
       }
     });
@@ -72,37 +72,37 @@ public class JUnitProgressBar extends Canvas {
     });
     addDisposeListener(new DisposeListener() {
       public void widgetDisposed(DisposeEvent e) {
-        fFailureColor.dispose();
-        fOKColor.dispose();
-        fStoppedColor.dispose();
+        m_failureColor.dispose();
+        m_oKColor.dispose();
+        m_stoppedColor.dispose();
       }
     });
 
     Display display = parent.getDisplay();
-    fFailureColor = new Color(display, 159, 63, 63);
-    fOKColor = new Color(display, 95, 191, 95);
-    fSkippedColor = new Color(display, 255, 193, 37);
-    fStoppedColor = new Color(display, 120, 120, 120);
+    m_failureColor = new Color(display, 159, 63, 63);
+    m_oKColor = new Color(display, 95, 191, 95);
+    m_skippedColor = new Color(display, 255, 193, 37);
+    m_stoppedColor = new Color(display, 120, 120, 120);
     m_messageColor = display.getSystemColor(SWT.COLOR_BLACK);
   }
 
   public void setMaximum(int max, int totalMethods) {
 //    ppp("setMaximum:[" + fMaxTickCount + "," + fColorBarWidth + "," + max + "," + totalMethods + "]");
-    fMaxTickCount = max;
+    m_maxTickCount = max;
 
-    fColorBarWidth = scale(fCurrentTickCount);
+    m_colorBarWidth = scale(m_currentTickCount);
 //    ppp("setMaximum:rescaled:" + fColorBarWidth);
 
     m_totalMethodsCounter = totalMethods;
-    paintStep(1, fColorBarWidth);
+    paintStep(1, m_colorBarWidth);
   }
 
   public void reset(int testcounter) {
-    fError = ITestResult.FAILURE;
-    fStopped = false;
-    fCurrentTickCount = 0;
-    fColorBarWidth = 0;
-    fMaxTickCount = 0;
+    m_error = ITestResult.FAILURE;
+    m_stopped = false;
+    m_currentTickCount = 0;
+    m_colorBarWidth = 0;
+    m_maxTickCount = 0;
     m_totalTestsCounter = testcounter;
     m_testCounter = 0;
     m_totalMethodsCounter = 0;
@@ -138,31 +138,31 @@ public class JUnitProgressBar extends Canvas {
   }
 
   private void setStatusColor(GC gc) {
-    if (fStopped) {
-      gc.setBackground(fStoppedColor);
+    if (m_stopped) {
+      gc.setBackground(m_stoppedColor);
     }
-    else if (fError == ITestResult.FAILURE || fError == ITestResult.SUCCESS_PERCENTAGE_FAILURE) {
-      gc.setBackground(fFailureColor);
+    else if (m_error == ITestResult.FAILURE || m_error == ITestResult.SUCCESS_PERCENTAGE_FAILURE) {
+      gc.setBackground(m_failureColor);
     }
-    else if (fError == ITestResult.SKIP) {
-      gc.setBackground(fSkippedColor);
+    else if (m_error == ITestResult.SKIP) {
+      gc.setBackground(m_skippedColor);
     }
     else {
-      gc.setBackground(fOKColor);
+      gc.setBackground(m_oKColor);
     }
   }
 
   public void stopped() {
-    fStopped = true;
+    m_stopped = true;
     redraw();
   }
 
   private int scale(int value) {
-    if (fMaxTickCount > 0) {
+    if (m_maxTickCount > 0) {
       Rectangle r = getClientArea();
 //      ppp("scale:[" + r + "][" + value + "][" + fMaxTickCount + "]");
       if (r.width != 0) {
-        return Math.max(0, value * (r.width - 2) / fMaxTickCount);
+        return Math.max(0, value * (r.width - 2) / m_maxTickCount);
       }
     }
 
@@ -194,8 +194,8 @@ public class JUnitProgressBar extends Canvas {
                   disp.getSystemColor(SWT.COLOR_WIDGET_HIGHLIGHT_SHADOW));
 
     setStatusColor(gc);
-    fColorBarWidth = Math.min(rect.width - 2, fColorBarWidth);
-    gc.fillRectangle(1, 1, fColorBarWidth, rect.height - 2);
+    m_colorBarWidth = Math.min(rect.width - 2, m_colorBarWidth);
+    gc.fillRectangle(1, 1, m_colorBarWidth, rect.height - 2);
 
     gc.setFont(JFaceResources.getDefaultFont());
     FontMetrics fontMetrics = gc.getFontMetrics();
@@ -223,19 +223,19 @@ public class JUnitProgressBar extends Canvas {
   }
 
   public void step(int failures) {
-    fCurrentTickCount++;
+    m_currentTickCount++;
     m_methodsCounter++;
-    int x = fColorBarWidth;
+    int x = m_colorBarWidth;
 
-    fColorBarWidth = scale(fCurrentTickCount);
-    if (fError == ITestResult.SUCCESS && (failures > 0)) {
-      fError = ITestResult.FAILURE;
+    m_colorBarWidth = scale(m_currentTickCount);
+    if (m_error == ITestResult.SUCCESS && (failures > 0)) {
+      m_error = ITestResult.FAILURE;
       x = 1;
     }
-    if (fCurrentTickCount == fMaxTickCount) {
-      fColorBarWidth = getClientArea().width - 1;
+    if (m_currentTickCount == m_maxTickCount) {
+      m_colorBarWidth = getClientArea().width - 1;
     }
-    paintStep(x, fColorBarWidth);
+    paintStep(x, m_colorBarWidth);
   }
 
   public void stepTests() {
@@ -245,7 +245,7 @@ public class JUnitProgressBar extends Canvas {
   }
 
   public void refresh(int status, String msg) {
-    fError = status;
+    m_error = status;
     m_timeMessage= msg;
     redraw();
   }
