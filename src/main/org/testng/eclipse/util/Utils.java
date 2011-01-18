@@ -10,11 +10,15 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.collections.Lists;
@@ -162,42 +166,63 @@ public class Utils {
     ISelection selection = page.getSelection();
 
     if (selection instanceof TreeSelection) {
+      //
+      // If we have a selection, extract the Java information from it
+      //
       TreeSelection sel = (TreeSelection) selection;
       for (Iterator it = sel.iterator(); it.hasNext();) {
-        Object element = it.next();
-
-        JavaElement pp = new JavaElement();
-        if (element instanceof IFile) {
-          IJavaElement je = JavaCore.create((IFile) element);
-          if (je instanceof ICompilationUnit) {
-            pp.compilationUnit = (ICompilationUnit) je;
+        result.add(convertToJavaElement(it.next()));
+      }
+    } else {
+      //
+      // No selection, extract the Java information from the current editor, if applicable
+      //
+      IEditorReference[] editors = page.getEditorReferences();
+//        workbench.getActiveWorkbenchWindow().getActivePage().getEditorReferences();
+      for (IEditorReference ref : editors) {
+        IEditorPart editor = ref.getEditor(false);
+        if (editor != null) {
+          ITypeRoot root = JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
+          if (root != null && root.getElementType() == IJavaElement.COMPILATION_UNIT) {
+            result.add(convertToJavaElement(root));
           }
         }
-        else if (element instanceof ICompilationUnit) {
-          pp.compilationUnit = (ICompilationUnit) element;
-        } else if (element instanceof IPackageFragment) {
-          pp.packageFragment = (IPackageFragment) element;
-        } else if (element instanceof IPackageFragmentRoot) {
-          pp.packageFragmentRoot = (IPackageFragmentRoot) element;
-        } else if (element instanceof IJavaProject) {
-          pp.m_project = (IJavaProject) element;
-        } else if (element instanceof IProject) {
-          pp.m_project = JavaCore.create((IProject) element);
-        }
+      }
 
-        // If we have a project, initialize the source folder too
-        if (pp.compilationUnit != null) {
-          IResource resource = (IResource) pp.compilationUnit.getAdapter(IResource.class);
-          for (IClasspathEntry entry : Utils.getSourceFolders(pp.getProject())) {
-            String source = entry.getPath().toOSString();
-            if (resource.getFullPath().toString().startsWith(source)) {
-              pp.sourceFolder = source;
-              break;
-            }
-          }
-        }
+    }
 
-        result.add(pp);
+    return result;
+  }
+
+  private static JavaElement convertToJavaElement(Object element) {
+    JavaElement result = new JavaElement();
+    if (element instanceof IFile) {
+      IJavaElement je = JavaCore.create((IFile) element);
+      if (je instanceof ICompilationUnit) {
+        result.compilationUnit = (ICompilationUnit) je;
+      }
+    }
+    else if (element instanceof ICompilationUnit) {
+      result.compilationUnit = (ICompilationUnit) element;
+    } else if (element instanceof IPackageFragment) {
+      result.packageFragment = (IPackageFragment) element;
+    } else if (element instanceof IPackageFragmentRoot) {
+      result.packageFragmentRoot = (IPackageFragmentRoot) element;
+    } else if (element instanceof IJavaProject) {
+      result.m_project = (IJavaProject) element;
+    } else if (element instanceof IProject) {
+      result.m_project = JavaCore.create((IProject) element);
+    }
+
+    // If we have a project, initialize the source folder too
+    if (result.compilationUnit != null) {
+      IResource resource = (IResource) result.compilationUnit.getAdapter(IResource.class);
+      for (IClasspathEntry entry : Utils.getSourceFolders(result.getProject())) {
+        String source = entry.getPath().toOSString();
+        if (resource.getFullPath().toString().startsWith(source)) {
+          result.sourceFolder = source;
+          break;
+        }
       }
     }
 

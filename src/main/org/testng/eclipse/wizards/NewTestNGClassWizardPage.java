@@ -184,8 +184,10 @@ public class NewTestNGClassWizardPage extends WizardPage {
       if (sel.getPackageName() != null) {
         m_packageNameText.setText(sel.getPackageName());
       }
+      String className = org.testng.eclipse.ui.util.Utils.isEmpty(sel.getClassName())
+          ? "NewTest" : sel.getClassName() + "Test";
+      m_classNameText.setText(className);
     }
-    m_classNameText.setText("NewTest");
   }
 
   private void handleBrowsePackages() {

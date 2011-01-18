@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -46,6 +47,7 @@ import java.io.InputStream;
 public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	private NewTestNGClassWizardPage m_page;
 	private ISelection m_selection;
+  private ICompilationUnit m_compilationUnit;
 
 	/**
 	 * Constructor for NewTestNGClassWizard.
@@ -280,6 +282,6 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	 * @see IWorkbenchWizard#init(IWorkbench, IStructuredSelection)
 	 */
   public void init(IWorkbench workbench, IStructuredSelection selection) {
-		this.m_selection = selection;
+		m_selection = selection;
 	}
 }
