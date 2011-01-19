@@ -4,7 +4,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.IDialogPage;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -37,6 +36,7 @@ public class NewTestNGClassWizardPage extends WizardPage {
   private Text m_xmlFilePath;
 
   private Map<String, Button> m_annotations = new HashMap<String, Button>();
+  private List<JavaElement> m_elements;
   public static final String[] ANNOTATIONS = new String[] {
     "BeforeMethod", "AfterMethod", "DataProvider",
     "BeforeClass", "AfterClass", "",
@@ -45,9 +45,9 @@ public class NewTestNGClassWizardPage extends WizardPage {
   };
 
   public NewTestNGClassWizardPage() {
-    super("TestNG class");
-    setTitle("TestNG class");
-    setDescription("This wizard creates a new TestNG class.");
+    super(ResourceUtil.getString("NewTestNGClassWizardPage.title"));
+    setTitle(ResourceUtil.getString("NewTestNGClassWizardPage.title"));
+    setDescription(ResourceUtil.getString("NewTestNGClassWizardPage.description"));
   }
 
   /**
@@ -173,9 +173,9 @@ public class NewTestNGClassWizardPage extends WizardPage {
    * Tests if the current workbench selection is a suitable container to use.
    */
   private void initialize() {
-    List<JavaElement> elements = Utils.getSelectedJavaElements();
-    if (elements.size() > 0) {
-      JavaElement sel = elements.get(0);
+    m_elements = Utils.getSelectedJavaElements();
+    if (m_elements.size() > 0) {
+      JavaElement sel = m_elements.get(0);
       if (sel.sourceFolder != null) {
         m_sourceFolderText.setText(sel.sourceFolder);
       }
@@ -186,6 +186,10 @@ public class NewTestNGClassWizardPage extends WizardPage {
           ? "NewTest" : sel.getClassName() + "Test";
       m_classNameText.setText(className);
     }
+  }
+
+  public List<JavaElement> getJavaElements() {
+    return m_elements;
   }
 
   private void handleBrowsePackages() {

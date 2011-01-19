@@ -13,9 +13,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
@@ -28,11 +26,14 @@ import org.eclipse.ui.ide.IDE;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SuiteGenerator;
+import org.testng.eclipse.util.Utils.JavaElement;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This is a sample new wizard. Its role is to create a new file 
@@ -46,8 +47,7 @@ import java.io.InputStream;
  */
 public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	private NewTestNGClassWizardPage m_page;
-	private ISelection m_selection;
-  private ICompilationUnit m_compilationUnit;
+  private TestNGMethodWizardPage m_methodPage;
 
 	/**
 	 * Constructor for NewTestNGClassWizard.
@@ -58,11 +58,15 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	}
 	
 	/**
-	 * Adding the page to the wizard.
+	 * Adding the pages to the wizard.
 	 */
-
 	@Override
   public void addPages() {
+    List<JavaElement> elements = org.testng.eclipse.util.Utils.getSelectedJavaElements();
+		if (elements.size() > 0) {
+		  m_methodPage = new TestNGMethodWizardPage(elements);
+		  addPage(m_methodPage);
+		}
 		m_page = new NewTestNGClassWizardPage();
 		addPage(m_page);
 	}
@@ -77,8 +81,10 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 		String containerName = m_page.getSourceFolder();
 		String className = m_page.getClassName();
 		String packageName = m_page.getPackageName();
+		List<String> methods = m_methodPage != null
+		    ? m_methodPage.getSelectedMethods() : Collections.<String>emptyList();
     try {
-      return doFinish(containerName, packageName, className, m_page.getXmlFile(),
+      return doFinish(containerName, packageName, className, m_page.getXmlFile(), methods,
           new NullProgressMonitor());
     } catch (CoreException e) {
       e.printStackTrace();
@@ -114,7 +120,7 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	 * @return true if the operation succeeded, false otherwise.
 	 */
 	private boolean doFinish(String containerName, String packageName, String className,
-	    String xmlPath, IProgressMonitor monitor) throws CoreException {
+	    String xmlPath, List<String> methods, IProgressMonitor monitor) throws CoreException {
 	  boolean result = true;
 
 	  //
@@ -131,7 +137,7 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	  //
 	  if (result) {
   	  IFile file = createFile(containerName, packageName, className + ".java",
-          createJavaContentStream(className), monitor);
+          createJavaContentStream(className, methods), monitor);
   	  if (file != null) openFile(file, monitor);
   	  else result = false;
 	  }
@@ -212,24 +218,29 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 
 	/**
 	 * Create the content for the Java file.
+	 * @param testMethods 
 	 */
-	private InputStream createJavaContentStream(String className) {
+	private InputStream createJavaContentStream(String className, List<String> testMethods) {
 	  StringBuilder imports = new StringBuilder("import org.testng.annotations.Test;\n");
 	  StringBuilder methods = new StringBuilder();
 	  String dataProvider = "";
 	  String signature = "()";
+
+	  //
+	  // Configuration methods
+	  //
 	  for (String a : NewTestNGClassWizardPage.ANNOTATIONS) {
 	    if (!"".equals(a) && m_page.containsAnnotation(a)) {
 	      imports.append("import org.testng.annotations." + a + ";\n");
 	      if ("DataProvider".equals(a)) {
 	        dataProvider = "(dataProvider = \"dp\")";
-	        methods.append("  @DataProvider\n"
+	        methods.append("\n  @DataProvider\n"
 	            + "  public Object[][] dp() {\n"
 	            + "    return new Object[][] {\n"
 	            + "      new Object[] { 1, \"a\" },\n"
               + "      new Object[] { 2, \"b\" },\n"
               + "    };\n"
-              + "  }\n\n"
+              + "  }\n"
               );
               ;
             signature = "(Integer n, String s)";
@@ -241,18 +252,35 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	      }
 	    }
 	  }
-	  String contents =
+
+	  //
+	  // Test methods
+	  //
+    for (String m : testMethods) {
+      methods.append("\n"
+          + "  @Test\n"
+          + "  public void " + m + "() {\n"
+          + "    throw new RuntimeException(\"Test not implemented\");\n"
+          + "  }\n");
+    }
+
+    String contents =
 	      "package " + m_page.getPackage() + ";\n\n"
 	      + imports
 	      + "\n"
 	      + "public class " + className + " {\n"
-	      + "  @Test" + dataProvider + "\n"
-	      + "  public void f" + signature + " {\n"
-	      + "  }\n\n"
-	      + methods
-	      + "}\n"
 	      ;
-		return new ByteArrayInputStream(contents.getBytes());
+
+    if (testMethods.size() == 0 || !Utils.isEmpty(dataProvider)) {
+      contents +=
+          "  @Test" + dataProvider + "\n"
+  	      + "  public void f" + signature + " {\n"
+  	      + "  }\n";
+    }
+
+    contents += methods + "}\n";
+
+	  return new ByteArrayInputStream(contents.getBytes());
 	}
 
   /**
@@ -282,6 +310,6 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	 * @see IWorkbenchWizard#init(IWorkbench, IStructuredSelection)
 	 */
   public void init(IWorkbench workbench, IStructuredSelection selection) {
-		m_selection = selection;
 	}
+
 }
