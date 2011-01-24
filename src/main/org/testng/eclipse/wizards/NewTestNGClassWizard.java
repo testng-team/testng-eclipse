@@ -1,6 +1,5 @@
 package org.testng.eclipse.wizards;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -13,6 +12,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -48,6 +48,7 @@ import java.util.List;
 public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	private NewTestNGClassWizardPage m_page;
   private TestNGMethodWizardPage m_methodPage;
+  private IJavaProject m_project;
 
 	/**
 	 * Constructor for NewTestNGClassWizard.
@@ -66,6 +67,7 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 		if (elements.size() > 0) {
 		  m_methodPage = new TestNGMethodWizardPage(elements);
 		  addPage(m_methodPage);
+		  m_project = elements.get(0).getProject();
 		}
 		m_page = new NewTestNGClassWizardPage();
 		addPage(m_page);
@@ -164,16 +166,12 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	    InputStream contentStream, IProgressMonitor monitor) throws CoreException {
     monitor.beginTask("Creating " + fileName, 2);
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-    IResource resource = root.findMember(new Path(containerName));
-    if (!resource.exists() || !(resource instanceof IContainer)) {
-      throwCoreException("Container \"" + containerName + "\" does not exist.");
-    }
-    IContainer container = (IContainer) resource;
     String fullPath = fileName;
     if (packageName != null && ! "".equals(packageName)) {
       fullPath = packageName.replace(".", File.separator) + File.separatorChar + fileName;
     }
-    final IFile result = container.getFile(new Path(fullPath));
+    Path absolutePath = new Path(containerName + File.separatorChar + fullPath);
+    final IFile result = root.getFile(absolutePath);
     try {
       if (result.exists()) {
         boolean overwrite = MessageDialog.openConfirm(getShell(),

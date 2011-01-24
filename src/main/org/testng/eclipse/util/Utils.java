@@ -219,10 +219,20 @@ public class Utils {
       IResource resource = (IResource) result.compilationUnit.getAdapter(IResource.class);
       for (IClasspathEntry entry : Utils.getSourceFolders(result.getProject())) {
         String source = entry.getPath().toOSString();
-        if (resource.getFullPath().toString().startsWith(source)) {
+        if (source.endsWith("src/test/java")) {
+          result.sourceFolder = source;
+          break;
+        } else if (source.contains("test")) {
           result.sourceFolder = source;
           break;
         }
+        else if (resource.getFullPath().toString().startsWith(source)) {
+          result.sourceFolder = source;
+          break;
+        }
+      }
+      if (result.sourceFolder.endsWith("src/main/java")) {
+        result.sourceFolder = result.sourceFolder.replace("main", "test");
       }
     }
 

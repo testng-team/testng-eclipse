@@ -203,16 +203,11 @@ public class NewTestNGClassWizardPage extends WizardPage {
         new Path(getSourceFolder()));
     String className = getClassName();
 
-    if (container == null || (container.getType() &
-        (IResource.ROOT | IResource.PROJECT | IResource.FOLDER)) == 0) {
-      updateStatus("The source directory must exist");
-      return;
-    }
     if (getPackageName().length() == 0) {
       updateStatus("The package must be specified");
       return;
     }
-    if (!container.isAccessible()) {
+    if (container != null && !container.isAccessible()) {
       updateStatus("Project must be writable");
       return;
     }
