@@ -38,7 +38,7 @@
       <import plugin="org.eclipse.ltk.core.refactoring"/>
       <import plugin="org.eclipse.ltk.ui.refactoring"/>
   </requires>
-   
+
   <extension-point id="internal_testRunTabs" name="%testRunTabs.name" schema="schema/internal-testRunTabs.exsd"/>
   <extension-point id="reporterListenerContributorSchema" name="%reporterListenerContributor.name" schema="schema/reporterListenerContributorSchema.exsd"/>
   <extension-point id="testListenerContributorSchema" name="%testListenerContributor.name" schema="schema/testListenerContributorSchema.exsd"/>
@@ -261,6 +261,14 @@
             defaultHandler="org.testng.eclipse.refactoring.ConvertFromJUnitAction"
             >
       </command>
+      <command
+            name="Create TestNG class"
+            description="Create a TestNG class to test this class"
+            categoryId="org.eclipse.jdt.ui.category.refactoring"
+            id="org.testng.eclipse.createClassAction"
+            defaultHandler="org.testng.eclipse.refactoring.CreateClassAction"
+            >
+      </command>
   </extension>
 
   <extension
@@ -381,8 +389,14 @@
           </visibleWhen>
           <command
               commandId="org.testng.eclipse.convertAction"
-              icon="icons/full/main16/testng.gif"
+              icon="icons/full/main16/testng-convert.gif"
               label="Convert to TestNG"
+              style="push">
+          </command>
+          <command
+              commandId="org.testng.eclipse.createClassAction"
+              icon="icons/full/main16/testng-create.gif"
+              label="Create TestNG class"
               style="push">
           </command>
         </menu>
