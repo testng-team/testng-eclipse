@@ -3,7 +3,7 @@
 <plugin
    id="org.testng.eclipse"
    name="TestNG"
-   version="5.14.6.20110124_1332"
+   version="5.14.6.20110125_1620"
    provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
   <runtime>
@@ -388,15 +388,15 @@
               </iterate>
           </visibleWhen>
           <command
-              commandId="org.testng.eclipse.convertAction"
-              icon="icons/full/main16/testng-convert.gif"
-              label="Convert to TestNG"
-              style="push">
-          </command>
-          <command
               commandId="org.testng.eclipse.createClassAction"
               icon="icons/full/main16/testng-create.gif"
               label="Create TestNG class"
+              style="push">
+          </command>
+          <command
+              commandId="org.testng.eclipse.convertAction"
+              icon="icons/full/main16/testng-convert.gif"
+              label="Convert to TestNG"
               style="push">
           </command>
         </menu>
