@@ -1,11 +1,8 @@
 package org.testng.eclipse.util;
 
 
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.eclipse.jface.preference.IPreferenceStore;
+import org.testng.TestNGException;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.collections.Maps;
 import org.testng.internal.Utils;
@@ -16,6 +13,8 @@ import org.testng.xml.Parser;
 import org.testng.xml.XmlMethodSelector;
 import org.testng.xml.XmlSuite;
 import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -82,8 +81,9 @@ abstract public class CustomSuite extends LaunchSuite {
     m_parameters= parameters;
 
     m_logLevel= logLevel;
-    
+
   }
+
   abstract protected String getTestName();
 
   protected String getSuiteName() {
@@ -95,8 +95,9 @@ abstract public class CustomSuite extends LaunchSuite {
   }
 
   protected XMLStringBuffer createContentBuffer() {
-    IPreferenceStore storage = TestNGPlugin.getDefault().getPreferenceStore();
-    String xmlFile = storage.getString(TestNGPluginConstants.S_XML_TEMPLATE_FILE);
+    PreferenceStoreUtil storage =
+        new PreferenceStoreUtil(TestNGPlugin.getDefault().getPreferenceStore());
+    String xmlFile = storage.getXmlTemplateFile(m_projectName, true /* project only */);
     boolean hasEclipseXmlFile = !Utils.isStringEmpty(xmlFile);
     XMLStringBuffer suiteBuffer = new XMLStringBuffer(""); //$NON-NLS-1$
     suiteBuffer.setDocType("suite SYSTEM \"" + Parser.TESTNG_DTD_URL + "\"");
@@ -147,7 +148,9 @@ abstract public class CustomSuite extends LaunchSuite {
    */
   private void createXmlFileFromTemplate(XMLStringBuffer suiteBuffer, String fileName) {
     try {
-      Collection<XmlSuite> suites = new Parser(fileName).parse();
+      Parser parser = new Parser(fileName);
+      parser.setLoadClasses(false); // we don't want to load the classes from the template file
+      Collection<XmlSuite> suites = parser.parse();
       if (suites.size() > 0) {
         XmlSuite s = suites.iterator().next();
 
@@ -207,13 +210,13 @@ abstract public class CustomSuite extends LaunchSuite {
         }
       }
     } catch (FileNotFoundException e) {
-      e.printStackTrace();
+      throw new TestNGException(e);
     } catch (ParserConfigurationException e) {
-      e.printStackTrace();
+      throw new TestNGException(e);
     } catch (SAXException e) {
-      e.printStackTrace();
+      throw new TestNGException(e);
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new TestNGException(e);
     }
   }
 

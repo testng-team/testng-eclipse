@@ -51,7 +51,7 @@ public class PreferenceStoreUtil {
   }
   
   public String getXmlTemplateFile(String projectName, boolean projectOnly) {
-    if(projectOnly == true) {
+    if (projectOnly) {
       return m_storage.getString(projectName + TestNGPluginConstants.S_XML_TEMPLATE_FILE);
     } else {      
       return "";
