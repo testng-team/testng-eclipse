@@ -1,5 +1,7 @@
 package org.testng.eclipse.launch;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -40,7 +42,8 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
   public void launch(ISelection selection, String mode) {
     if(selection instanceof StructuredSelection) {
       List<IType> types = Lists.newArrayList();
-      IJavaProject project = null;
+      IJavaProject javaProject = null;
+      IProject project = null;
 
       for (Object obj : ((StructuredSelection) selection).toArray()) { 
         IJavaElement element= null;
@@ -55,9 +58,21 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
           element= (IJavaElement) obj;
         }
         else if(obj instanceof IAdaptable) {
-          element= (IJavaElement) ((IAdaptable) obj).getAdapter(IJavaElement.class);
+          element = (IJavaElement) ((IAdaptable) obj).getAdapter(IJavaElement.class);
+          if (element == null) {
+            IResource r = (IResource) ((IAdaptable) obj).getAdapter(IResource.class);
+            if (r != null) {
+              project = r.getProject();
+            }
+          }
         }
-        project = element.getJavaProject();
+        if (element != null) {
+          javaProject = element.getJavaProject();
+        } else {
+          if (project instanceof IJavaProject) {
+            javaProject = (IJavaProject) project;
+          }
+        }
 
         try {
           maybeAddJavaElement(element, types);
@@ -68,7 +83,7 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
       }
       
       if (! types.isEmpty()) {
-        LaunchUtil.launchTypesConfiguration(project, types, mode);
+        LaunchUtil.launchTypesConfiguration(javaProject, types, mode);
       }
     }
   }
