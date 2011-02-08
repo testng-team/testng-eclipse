@@ -2,6 +2,7 @@ package org.testng.eclipse.util;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.testng.collections.Maps;
 import org.testng.eclipse.TestNGPlugin;
 
 import java.io.BufferedReader;
@@ -29,18 +30,25 @@ public class SuiteFileValidator {
   private static final Pattern SUITE_REGEXP = Pattern.compile("<suite.*");
   private static final Pattern TAG_REGEXP = Pattern.compile("<[^>?!]+>");
   
-  private static Map/*<IFile,Boolean>*/ s_cache= new HashMap();
+  private static Map<IFile,Boolean> s_cache = Maps.newHashMap();
   
   public static boolean isSuiteDefinition(IFile file) throws CoreException {
-    Boolean result= (Boolean) s_cache.get(file);
-    if(null != result) {
-      return true;
+    if (s_cache.containsKey(file)) return true;
+
+    boolean result = false;
+
+    if (file.getName().endsWith("yaml")) {
+      result = true;
     }
-    boolean res= isSuiteDefinition(file.getContents());
-    if(res) {
+
+    if (! result) {
+      result = isSuiteDefinition(file.getContents());
+    }
+
+    if (result) {
       s_cache.put(file, Boolean.TRUE);
     }
-    return res;
+    return result;
   }
   
   /**

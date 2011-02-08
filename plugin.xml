@@ -89,6 +89,9 @@
          <fileExtension
                extension="xml"
                default="false"/>
+         <fileExtension
+               extension="yaml"
+               default="false"/>
       </launchConfigurationType>
   </extension>
 
@@ -128,7 +131,6 @@
          <contextualLaunch>
             <enablement>
                <with variable="selection">
-<!--
                   <iterate>
                     <or>
                       <test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/>
@@ -137,7 +139,6 @@
                     </or>
                     <test property="org.testng.eclipse.isTest"/>
                   </iterate>
--->
                </with>
             </enablement>
          </contextualLaunch>
@@ -166,11 +167,11 @@
                   <count
                         value="1">
                   </count>
-                                        <iterate>
-                                                <test property="org.eclipse.debug.ui.matchesPattern" value="*.xml"/>
-                                                <instanceof value="org.eclipse.core.resources.IFile"/>
-                                                <test property="org.testng.eclipse.isSuite"/>
-                                        </iterate>
+                  <iterate>
+                    <test property="org.eclipse.debug.ui.matchesPattern" value="*.xml|*.yaml"/>
+                    <instanceof value="org.eclipse.core.resources.IFile"/>
+                    <test property="org.testng.eclipse.isSuite"/>
+                  </iterate>
                </with>
             </enablement>
          </contextualLaunch>
