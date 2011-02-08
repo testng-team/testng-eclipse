@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -70,7 +71,8 @@ public class Utils {
         result = packageFragment.getElementName();
       } else if (compilationUnit != null) {
         try {
-          result = compilationUnit.getPackageDeclarations()[0].getElementName();
+          IPackageDeclaration[] pkg = compilationUnit.getPackageDeclarations();
+          result = pkg.length > 0 ? pkg[0].getElementName() : null;
         } catch (JavaModelException e) {
           // ignore
         }
@@ -217,6 +219,10 @@ public class Utils {
     // If we have a project, initialize the source folder too
     if (result.compilationUnit != null) {
       IResource resource = (IResource) result.compilationUnit.getAdapter(IResource.class);
+      // By default, the target directory is the same as the class file
+      result.sourceFolder = result.compilationUnit.getPath().removeLastSegments(1).toOSString();
+
+      // Try to find a better target directory for the test class we're about to create
       for (IClasspathEntry entry : Utils.getSourceFolders(result.getProject())) {
         String source = entry.getPath().toOSString();
         if (source.endsWith("src/test/java")) {
