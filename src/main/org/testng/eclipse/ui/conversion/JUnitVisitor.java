@@ -5,7 +5,6 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MemberValuePair;
@@ -13,6 +12,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.testng.AssertJUnit;
@@ -60,12 +60,23 @@ public class JUnitVisitor extends ASTVisitor {
   // show up in m_testMethods).
   private boolean m_hasTestMethods = false;
 
+  // Nodes that need to be removed by the refactoring
+  private List<ASTNode> m_nodesToRemove = Lists.newArrayList();
+
   public boolean visit(ImportDeclaration id) {
     String name = id.getName().getFullyQualifiedName();
     if (name.indexOf("junit") != -1) {
       m_junitImports.add(id);
     }
     return super.visit(id);
+  }
+
+  public boolean visit(SuperMethodInvocation smi) {
+    String name = smi.getName().toString();
+    if ("setUp".equals(name) || "tearDown".equals(name)) {
+      m_nodesToRemove.add(smi.getParent());
+    }
+    return super.visit(smi);
   }
 
   public boolean visit(MethodDeclaration md) {
@@ -174,6 +185,8 @@ public class JUnitVisitor extends ASTVisitor {
     return super.visit(node);
   }
 
+  // Class internal names, according to
+  // http://download.oracle.com/javase/1.4.2/docs/api/java/lang/Class.html#getName()
   private static Map<String, Class> BINARY_CLASS_NAMES = new HashMap<String, Class>() {{
     put("B", byte.class);
     put("C", char.class);
@@ -258,6 +271,7 @@ public class JUnitVisitor extends ASTVisitor {
       }
     }
 
+    if (result == null) result = Object.class;
     return result;
   }
 
@@ -327,5 +341,9 @@ public class JUnitVisitor extends ASTVisitor {
    */
   public Map<MemberValuePair, String> getTestsWithExpected() {
     return m_testsWithExpected;
+  }
+
+  public List<ASTNode> getNodesToRemove() {
+    return m_nodesToRemove;
   }
 }

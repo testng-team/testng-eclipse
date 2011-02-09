@@ -9,8 +9,15 @@ import junit.framework.TestSuite;
 public class JUnit3Test1 extends TestCase {
   private QueueTracker _queueTracker;
 
-  public void setUp() {
-    // should become @BeforeMethod
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
+    assertNull(null);
+  }
+
+  @Override
+  public void tearDown() throws Exception {
+    super.tearDown();
   }
 
   public void _test3Underscore() {
@@ -38,6 +45,8 @@ public class JUnit3Test1 extends TestCase {
   public void test1() {
 		Assert.assertEquals(true, true);
 		System.out.println("Worked");
+		assertNull(null);
+		assertNotNull(new Object());
 	}
 
 	public void test2() {

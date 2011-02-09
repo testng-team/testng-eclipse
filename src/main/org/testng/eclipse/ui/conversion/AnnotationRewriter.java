@@ -1,6 +1,7 @@
 package org.testng.eclipse.ui.conversion;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -93,6 +94,13 @@ public class AnnotationRewriter implements IRewriteProvider
     MethodDeclaration suiteMethod = visitor.getSuite();
     if (suiteMethod != null) {
       result.remove(suiteMethod, null);
+    }
+
+    //
+    // Remove all the nodes that need to be removed
+    //
+    for (ASTNode n : visitor.getNodesToRemove()) {
+      result.remove(n, null);
     }
 
     //
@@ -201,9 +209,12 @@ public class AnnotationRewriter implements IRewriteProvider
       List modifiers = md.modifiers();
       for (int k = 0; k < modifiers.size(); k++) {
         Object old = modifiers.get(k);
-        if (old instanceof Annotation && old.toString().equals(annotationToRemove)) {
-          lr.remove((Annotation) old, null);
-          break;
+        if (old instanceof Annotation) {
+          String oldAnnotation = old.toString();
+          if (oldAnnotation.equals(annotationToRemove) || "@Override".equals(oldAnnotation)) {
+            lr.remove((Annotation) old, null);
+            break;
+          }
         }
       }
     }
