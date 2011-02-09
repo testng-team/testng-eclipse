@@ -138,7 +138,7 @@ public class SuiteBuilder {
   }
   
   private static XMLStringBuffer getSuiteBuffer(String name) {
-    XMLStringBuffer xmlBuf = new XMLStringBuffer(""); //$NON-NLS-1$
+    XMLStringBuffer xmlBuf = new XMLStringBuffer(); //$NON-NLS-1$
     xmlBuf.setDocType("suite SYSTEM " + Parser.TESTNG_DTD_URL);
     Properties attrs = new Properties();
     attrs.setProperty("name", name);

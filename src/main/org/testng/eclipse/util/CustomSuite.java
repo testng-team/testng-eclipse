@@ -99,7 +99,7 @@ abstract public class CustomSuite extends LaunchSuite {
         new PreferenceStoreUtil(TestNGPlugin.getDefault().getPreferenceStore());
     String xmlFile = storage.getXmlTemplateFile(m_projectName, true /* project only */);
     boolean hasEclipseXmlFile = !Utils.isStringEmpty(xmlFile);
-    XMLStringBuffer suiteBuffer = new XMLStringBuffer(""); //$NON-NLS-1$
+    XMLStringBuffer suiteBuffer = new XMLStringBuffer(); //$NON-NLS-1$
     suiteBuffer.setDocType("suite SYSTEM \"" + Parser.TESTNG_DTD_URL + "\"");
 
     if (hasEclipseXmlFile) {

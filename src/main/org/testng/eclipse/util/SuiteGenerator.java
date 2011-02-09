@@ -37,7 +37,7 @@ public class SuiteGenerator {
   }
 
   public static String createSingleClassSuite(String className) {
-    XMLStringBuffer xsb = new XMLStringBuffer("");
+    XMLStringBuffer xsb = new XMLStringBuffer();
     Properties p = new Properties();
     p.put("name", "Suite");
     p.put("parallel", "false");
