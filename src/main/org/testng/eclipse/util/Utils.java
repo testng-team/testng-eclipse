@@ -39,6 +39,9 @@ public class Utils {
     public ICompilationUnit compilationUnit;
     public String sourceFolder;
 
+    public JavaElement() {
+    }
+
     public String getPath() {
       String result = null;
       if (compilationUnit != null) {
@@ -90,6 +93,18 @@ public class Utils {
         }
       }
       return result;
+    }
+
+    public IResource getResource() {
+      if (compilationUnit != null) {
+        return (IResource) compilationUnit.getAdapter(IResource.class);
+      } else if (packageFragment != null) {
+        return (IResource) packageFragment.getAdapter(IResource.class);
+      } else if (m_project != null) {
+        return (IResource) m_project.getAdapter(IResource.class);
+      } else {
+        return null;
+      }
     }
 
 
@@ -217,10 +232,10 @@ public class Utils {
     }
 
     // If we have a project, initialize the source folder too
-    if (result.compilationUnit != null) {
-      IResource resource = (IResource) result.compilationUnit.getAdapter(IResource.class);
+    IResource resource = result.getResource();
+    if (resource != null) {
       // By default, the target directory is the same as the class file
-      result.sourceFolder = result.compilationUnit.getPath().removeLastSegments(1).toOSString();
+      result.sourceFolder = resource.getFullPath().removeLastSegments(1).toOSString();
 
       // Try to find a better target directory for the test class we're about to create
       for (IClasspathEntry entry : Utils.getSourceFolders(result.getProject())) {

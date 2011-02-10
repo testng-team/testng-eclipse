@@ -53,14 +53,21 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 		super();
 		setNeedsProgressMonitor(true);
 	}
-	
+
+	private boolean hasAtLeastOneMethod(List<JavaElement> elements) {
+	  for (JavaElement je : elements) {
+	    if (je.compilationUnit != null) return true;
+	  }
+	  return false;
+	}
+
 	/**
 	 * Adding the pages to the wizard.
 	 */
 	@Override
   public void addPages() {
     List<JavaElement> elements = org.testng.eclipse.util.Utils.getSelectedJavaElements();
-		if (elements.size() > 0) {
+		if (hasAtLeastOneMethod(elements)) {
 		  m_methodPage = new TestNGMethodWizardPage(elements);
 		  addPage(m_methodPage);
 		}
