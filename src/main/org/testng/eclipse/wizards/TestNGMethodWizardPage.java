@@ -3,6 +3,7 @@ package org.testng.eclipse.wizards;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -18,6 +19,7 @@ import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.Utils.JavaElement;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -28,7 +30,7 @@ import java.util.List;
  */
 public class TestNGMethodWizardPage extends WizardPage {
 
-  private List<String> m_elements = Lists.newArrayList();
+  private List<IMethod> m_elements = Lists.newArrayList();
   private Table m_table;
 
   protected TestNGMethodWizardPage(List<JavaElement> elements) {
@@ -40,7 +42,7 @@ public class TestNGMethodWizardPage extends WizardPage {
         try {
           for (IType type : je.compilationUnit.getTypes()) {
             for (IMethod method : type.getMethods()) {
-              m_elements.add(method.getElementName());
+              m_elements.add(method);
             }
           }
         } catch(JavaModelException ex) {
@@ -48,7 +50,32 @@ public class TestNGMethodWizardPage extends WizardPage {
         }
       }
     }
-    Collections.sort(m_elements);
+    Collections.sort(m_elements, new Comparator<IMethod>() {
+
+      public int compare(IMethod o1, IMethod o2) {
+        return o1.getElementName().compareTo(o2.getElementName());
+      }
+
+    });
+  }
+
+  private String toSignature(IMethod method) {
+    StringBuilder result = new StringBuilder(method.getElementName());
+    String[] types = method.getParameterTypes();
+    try {
+      String[] names = method.getParameterNames();
+      result.append("(");
+      for (int i = 0; i < types.length; i++) {
+        if (i > 0) result.append(", ");
+        result.append(Signature.toString(types[i]) + " " + names[i]);
+      }
+      result.append(")");
+    }
+    catch(JavaModelException ex) {
+      // ignore
+    }
+
+    return result.toString();
   }
 
   public void createControl(Composite parent) {
@@ -62,9 +89,10 @@ public class TestNGMethodWizardPage extends WizardPage {
 
     {
       m_table = new Table(container, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-      for (String element : m_elements) {
+      for (IMethod element : m_elements) {
         TableItem item = new TableItem(m_table, SWT.NONE);
-        item.setText(element);
+        item.setText(toSignature(element));
+        item.setData(element);
       }
       GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
       gd.verticalSpan = 2;
@@ -112,11 +140,11 @@ public class TestNGMethodWizardPage extends WizardPage {
     }
   }
 
-  public List<String> getSelectedMethods() {
-    List<String> result = Lists.newArrayList();
+  public List<IMethod> getSelectedMethods() {
+    List<IMethod> result = Lists.newArrayList();
     for (TableItem ti : m_table.getItems()) {
       if (ti.getChecked()) {
-        result.add(ti.getText());
+        result.add((IMethod) ti.getData());
       }
     }
 

@@ -12,7 +12,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -23,6 +24,7 @@ import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
+import org.testng.eclipse.collections.Sets;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SuiteGenerator;
@@ -34,6 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The wizard that creates a new TestNG class. This wizard looks at the current
@@ -85,8 +88,8 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 		String containerName = m_page.getSourceFolder();
 		String className = m_page.getClassName();
 		String packageName = m_page.getPackageName();
-		List<String> methods = m_methodPage != null
-		    ? m_methodPage.getSelectedMethods() : Collections.<String>emptyList();
+		List<IMethod> methods = m_methodPage != null
+		    ? m_methodPage.getSelectedMethods() : Collections.<IMethod>emptyList();
     try {
       return doFinish(containerName, packageName, className, m_page.getXmlFile(), methods,
           new NullProgressMonitor());
@@ -124,7 +127,7 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	 * @return true if the operation succeeded, false otherwise.
 	 */
 	private boolean doFinish(String containerName, String packageName, String className,
-	    String xmlPath, List<String> methods, IProgressMonitor monitor) throws CoreException {
+	    String xmlPath, List<IMethod> methods, IProgressMonitor monitor) throws CoreException {
 	  boolean result = true;
 
 	  //
@@ -220,7 +223,7 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	 * Create the content for the Java file.
 	 * @param testMethods 
 	 */
-	private InputStream createJavaContentStream(String className, List<String> testMethods) {
+	private InputStream createJavaContentStream(String className, List<IMethod> testMethods) {
 	  StringBuilder imports = new StringBuilder("import org.testng.annotations.Test;\n");
 	  StringBuilder methods = new StringBuilder();
 	  String dataProvider = "";
@@ -256,10 +259,18 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	  //
 	  // Test methods
 	  //
-    for (String m : testMethods) {
+	  Set<String> overloadedMethods = Sets.newHashSet();
+	  Set<String> temp = Sets.newHashSet();
+	  for (IMethod m : testMethods) {
+	    String name = m.getElementName();
+      if (temp.contains(name)) overloadedMethods.add(name);
+	    temp.add(name);
+	  }
+
+    for (IMethod m : testMethods) {
       methods.append("\n"
           + "  @Test\n"
-          + "  public void " + m + "() {\n"
+          + "  public void " + createSignature(m, overloadedMethods) + " {\n"
           + "    throw new RuntimeException(\"Test not implemented\");\n"
           + "  }\n");
     }
@@ -282,6 +293,22 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 
 	  return new ByteArrayInputStream(contents.getBytes());
 	}
+
+	/**
+	 * @return a suitable signature, possible with its name mangled if it's
+	 * overloaded in the class (e.g foo() -> foo(), foo(Integer) -> fooInteger()).
+	 */
+  private String createSignature(IMethod m, Set<String> overloadedMethods) {
+    String elementName = m.getElementName();
+    StringBuilder result = new StringBuilder(elementName);
+    if (overloadedMethods.contains(elementName)) {
+      for (String type : m.getParameterTypes()) {
+        result.append(Signature.toString(type));
+      }
+    }
+    result.append("()");
+    return result.toString();
+  }
 
   /**
    * Create the content for the XML file.
