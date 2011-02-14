@@ -303,10 +303,25 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
     StringBuilder result = new StringBuilder(elementName);
     if (overloadedMethods.contains(elementName)) {
       for (String type : m.getParameterTypes()) {
-        result.append(Signature.toString(type));
+        result.append(sanitizeSignature(Signature.toString(type)));
       }
     }
     result.append("()");
+    return result.toString();
+  }
+
+  /**
+   * @return a string that can be used as a method name.
+   */
+  private String sanitizeSignature(String string) {
+    StringBuilder result = new StringBuilder();
+    for (int i = 0; i < string.length(); i++) {
+      char c = string.charAt(i);
+      if (Character.isJavaIdentifierPart(c)) {
+        result.append(c);
+      }
+    }
+
     return result.toString();
   }
 
@@ -324,12 +339,6 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	private String toMethod(String a) {
     return Character.toLowerCase(a.charAt(0)) + a.substring(1);
   }
-
-  private void throwCoreException(String message) throws CoreException {
-		IStatus status =
-			new Status(IStatus.ERROR, "org.testng.eclipse", IStatus.OK, message, null);
-		throw new CoreException(status);
-	}
 
 	/**
 	 * We will accept the selection in the workbench to see if
