@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IMemento;
+import org.testng.ITestResult;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.collections.Sets;
@@ -318,13 +319,13 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     return true;
   }
 
-  private void propagateTestResult(TreeItem ti, RunInfo trm) {
+  private void propagateTestResult(TreeItem ti, RunInfo runInfo) {
     ITreeItem treeItem = BaseTreeItem.getTreeItem(ti);
-    treeItem.addToCumulatedTime(trm.getTime());
-    treeItem.update(trm);
+    treeItem.addToCumulatedTime(runInfo.getTime());
+    treeItem.update(runInfo);
 
     if (ti.getParentItem() != null) {
-      propagateTestResult(ti.getParentItem(), trm);
+      propagateTestResult(ti.getParentItem(), runInfo);
     }
   }
 
