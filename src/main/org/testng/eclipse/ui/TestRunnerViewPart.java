@@ -157,8 +157,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
    */
   private int fCurrentOrientation;
 
-  protected CounterPanel     m_counterPanel;
-  private Composite   m_counterComposite;
+  protected CounterPanel m_counterPanel;
+  private Composite m_counterComposite;
   
   final Image m_viewIcon = TestNGPlugin.getImageDescriptor("main16/testng_noshadow.gif").createImage();//$NON-NLS-1$
 //  final Image fStackViewIcon = TestNGPlugin.getImageDescriptor("eview16/stackframe.gif").createImage(); //$NON-NLS-1$
@@ -172,7 +172,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private Action m_rerunAction;
   private Action m_rerunFailedAction;
   private Action m_openReportAction;
-  private boolean m_hasFailures;
   
   private long m_startTime;
   private long m_stopTime;
@@ -197,18 +196,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
    * It is used to get the progress feedback for running jobs in the view.
    */
   private IsRunningJob m_isRunningJob;
-  private ILock        m_runLock;
-  private boolean      m_testIsRunning = false;
-  
-  /**
-   * Queue used for processing Tree Entries
-   */
-  private List m_treeEntriesQueue = new ArrayList();
-  
-  /**
-   * Indicates an instance of TreeEntryQueueDrainer is already running, or scheduled to
-   */
-  private boolean fQueueDrainRequestOutstanding;
+  private ILock m_runLock;
   
   public static final String NAME = "org.testng.eclipse.ResultView"; //$NON-NLS-1$
   public static final String ID_EXTENSION_POINT_TESTRUN_TABS = TestNGPlugin.PLUGIN_ID + "." //$NON-NLS-1$
@@ -394,7 +382,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
                                     ILaunch launch) {
     m_LastLaunch = launch;
     m_workingProject = project;
-    m_hasFailures= false;
 
     // Now that we have a project name, read the watch result preference and
     // update our monitoring thread.
@@ -1344,7 +1331,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       fNextAction.setEnabled(hasErrors());
       fPrevAction.setEnabled(hasErrors());
       m_rerunFailedAction.setEnabled(hasErrors());
-      m_hasFailures= true;
       postShowTestResultsView();
       stopTest();
       m_stopTime= System.currentTimeMillis();
