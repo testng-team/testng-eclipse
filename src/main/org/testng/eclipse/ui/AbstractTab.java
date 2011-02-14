@@ -62,18 +62,7 @@ import java.util.regex.Pattern;
  * @author Cedric Beust <cedric@beust.com>
  */
 abstract public class AbstractTab extends TestRunTab implements IMenuListener {
-  private Image m_suiteIcon;
-  private Image m_suiteOkeIcon;
-  private Image m_suiteSkipIcon;
-  private Image m_suiteFailIcon;
-  private Image m_suiteRunIcon;
-
   private Image m_testHierarchyIcon; 
-  private Image m_testIcon;
-  private Image m_testOkeIcon;
-  private Image m_testSkipIcon;
-  private Image m_testFailIcon;
-  private Image m_testRunIcon;
   private Image m_stackViewIcon;
 
   // Persistence tags
@@ -468,18 +457,7 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   }
 
   private void initImages() {
-    m_suiteIcon = Images.getImage(IMG_SUITE);
-    m_suiteOkeIcon = Images.getImage(IMG_SUITE_OK);
-    m_suiteSkipIcon = Images.getImage(IMG_SUITE_SKIP);
-    m_suiteFailIcon = Images.getImage(IMG_SUITE_FAIL);
-    m_suiteRunIcon = Images.getImage(IMG_SUITE_RUN);
-
     m_testHierarchyIcon = Images.getImage(IMG_TEST_HIERARCHY); 
-    m_testIcon = Images.getImage(IMG_TEST);
-    m_testOkeIcon = Images.getImage(IMG_TEST_OK);
-    m_testSkipIcon = Images.getImage(IMG_TEST_SKIP);
-    m_testFailIcon = Images.getImage(IMG_TEST_FAIL);
-    m_testRunIcon = Images.getImage(IMG_TEST_RUN);
     m_stackViewIcon = TestNGPlugin.getImageDescriptor("eview16/stackframe.gif")
         .createImage(); //$NON-NLS-1$
   }
