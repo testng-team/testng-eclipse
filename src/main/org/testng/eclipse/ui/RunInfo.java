@@ -1,6 +1,7 @@
 package org.testng.eclipse.ui;
 
 
+import org.testng.ITestResult;
 import org.testng.eclipse.util.CustomSuite;
 
 import java.util.regex.Pattern;
@@ -165,7 +166,8 @@ public class RunInfo {
   public String toString() {
     StringBuffer buffer = new StringBuffer();
     buffer.append("RunInfo[");
-    buffer.append("type:" + m_type);
+    buffer.append("status:" + getStatusName());
+    buffer.append(" type:" + m_type);
     buffer.append(" id:");
     buffer.append(m_id);
     if (m_suiteName != null) {
@@ -280,7 +282,13 @@ public class RunInfo {
   public int getStatus() {
     return m_status;
   }
-  
+
+  public String getStatusName() {
+    return m_status == ITestResult.FAILURE ? "failure"
+        : (m_status == ITestResult.SUCCESS ? "success"
+            : (m_status == ITestResult.SKIP ? "skipped" : "unknown"));
+  }
+
   public String getStackTrace() {
     return m_stackTrace;
   }

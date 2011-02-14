@@ -43,7 +43,7 @@ public class SuiteTreeItem extends BaseTreeItem implements ITreeItem {
           getTime() / 1000
       })
     );
-    getTreeItem().setImage(getSuiteImage(runInfo.getStatus()));
+    maybeUpdateImage(runInfo);
   }
 
 }

@@ -25,6 +25,6 @@ public class TestTreeItem extends BaseTreeItem implements ITreeItem {
       })
     );
 
-    getTreeItem().setImage(getSuiteImage(runInfo.getStatus()));
+    maybeUpdateImage(runInfo);
   }
 }
