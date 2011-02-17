@@ -239,6 +239,10 @@ public class JUnitVisitor extends ASTVisitor {
 //      e1.printStackTrace();
     }
 
+    if (! result && arguments.size() == 2) {
+      // An assert with two parameters will match assertTrue(Object, Object)
+      result = true;
+    }
     return result;
   }
 

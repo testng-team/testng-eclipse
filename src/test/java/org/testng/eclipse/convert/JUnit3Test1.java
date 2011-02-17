@@ -1,6 +1,10 @@
 package org.testng.eclipse.convert;
 
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -36,6 +40,19 @@ public class JUnit3Test1 extends TestCase {
     assertTrue("run() should have been called", _queueTracker.isRun());
     assertEquals("CurrentQueueSize is incorrect after run()", 0,
         _queueTracker.getCurrentQueueSize());
+
+    String DATE_FORMAT = "dd.MM.yyyy HH:mm:ss SSS";
+    String DATE_STRING = "12.12.2112 12:12:12 122";
+    SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+    Date date;
+    try {
+      date = dateFormat.parse(DATE_STRING);
+      assertEquals("12.12.2112 00:00:00 000", dateFormat.format(null));
+      assertEquals(dateFormat.parse(DATE_STRING), date);
+    } catch (ParseException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
 
   public static Test suite() {
