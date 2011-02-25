@@ -9,6 +9,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.collections.Lists;
@@ -133,16 +134,29 @@ public class ConfigurationHelper {
 //    return result;
 //  }
   
+  private static String getProjectJvmArgs() {
+    IPreferenceStore store = TestNGPlugin.getDefault().getPreferenceStore();
+    String result = store.getString(TestNGPluginConstants.S_JVM_ARGS);
+    return result;
+  }
+
+  /**
+   * @return the JVM args from the configuration or, if not found, from the preferences.
+   */
   public static String getJvmArgs(ILaunchConfiguration configuration) {
-		if (configuration == null)
-			return null;
-		try {
-			return configuration.getAttribute(
-					IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "");
-		} catch (CoreException e) {
-			e.printStackTrace();
-			return ""; // TODO - better notification
-		}
+    String result = getProjectJvmArgs();
+
+    // JVM args from the previous configuration take precedence over the preference
+    if (configuration != null) {
+  		try {
+  			result = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
+  			    result);
+  		} catch (CoreException e) {
+  			e.printStackTrace();
+  		}
+    }
+
+    return result;
 	}
   
   public static ILaunchConfigurationWorkingCopy setJvmArgs(

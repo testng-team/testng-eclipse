@@ -331,6 +331,11 @@
             class="org.testng.eclipse.ui.preferences.PreferencePage"
             id="org.testng.eclipse.ui.preferences.PreferencePage"
             name="TestNG"/>
+      <page
+            class="org.testng.eclipse.ui.preferences.RunDebugPreferencePage"
+            id="org.testng.eclipse.ui.preferences.RunDebugPreferencePage"
+            category="org.testng.eclipse.ui.preferences.PreferencePage"
+            name="Run/Debug"/>
   </extension>
 
   <extension

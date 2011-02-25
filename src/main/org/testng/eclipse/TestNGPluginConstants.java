@@ -24,6 +24,7 @@ public abstract class TestNGPluginConstants {
 
   public static final String S_FAILED_TESTS = "failedTests";
   public static final String S_XML_TEMPLATE_FILE = "xmlTemplateFile";
+  public static final String S_JVM_ARGS = "jvmArgs";
 
 
   private TestNGPluginConstants() {}

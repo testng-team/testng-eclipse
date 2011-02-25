@@ -77,8 +77,28 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     for (String arg : runConfig.getProgramArguments()) {
       sb.append(arg).append(" ");
     }
-    p("Launching " + runConfig.getClassToLaunch() + " " + sb.toString());
+    TestNGPlugin.log("[TestNGLaunchConfigurationDelegate] " + debugConfig(runConfig));
     runner.run(runConfig, launch, monitor);
+  }
+
+  private static String join(String[] strings) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < strings.length; i++) {
+      if (i > 0) sb.append(" ");
+      sb.append(strings[i]);
+    }
+    return sb.toString();
+  }
+
+  private String debugConfig(VMRunnerConfiguration config) {
+    StringBuilder sb = new StringBuilder("Launching:");
+    sb.append("\n  Classpath: " + join(config.getClassPath()));
+    sb.append("\n  VMArgs:    " + join(config.getVMArguments()));
+    sb.append("\n  Class:     " + config.getClassToLaunch());
+    sb.append("\n  Args:      " + join(config.getProgramArguments()));
+    sb.append("\n");
+
+    return sb.toString();
   }
 
   private static void p(String s) {
@@ -99,7 +119,8 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     }
 
     // Program & VM args
-    StringBuilder vmArgs = new StringBuilder(getVMArguments(configuration))
+    StringBuilder vmArgs = new StringBuilder(ConfigurationHelper.getJvmArgs(configuration))
+        // getVMArguments(configuration))
         .append(" ")
         .append(TestNGLaunchConfigurationConstants.VM_ENABLEASSERTION_OPTION); // $NON-NLS-1$
     addDebugProperties(vmArgs);
@@ -254,8 +275,6 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
           .listToString(tempSuites));
     }
 
-    ppp(argv);
-    ppp(Arrays.asList(classPath));
     vmConfig.setProgramArguments(argv.toArray(new String[argv.size()]));
 
     return vmConfig;
