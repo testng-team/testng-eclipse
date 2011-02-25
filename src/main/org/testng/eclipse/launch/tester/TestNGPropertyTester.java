@@ -5,30 +5,45 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaElement;
 
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * The generic property tester used by TestNG. Supports various properties, such as
+ * isTest or isSuite.
+ *
+ * @author Cedric Beust <cedric@beust.com>
+ */
 public class TestNGPropertyTester extends PropertyTester {
+  private static final Set<String> PROPERTIES = new HashSet<String>() {{
+    add("isTest");
+    add("isSuite");
+  }};
+
   private JavaTypeExtender m_typeExtender= new JavaTypeExtender();
   private FileExtender m_fileExtender= new FileExtender();
-  
+
   public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
     boolean result = false;
     if (!(receiver instanceof IAdaptable)) {
-      throw new IllegalArgumentException("Element must be of type 'IAdaptable', is " + receiver == null ? "null" : receiver.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
+      throw new IllegalArgumentException("Element must be of type 'IAdaptable', is "
+          + receiver == null ? "null" : receiver.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
     }
-    if (!"isTest".equals(property) && !"isSuite".equals(property)) {
+    if (! PROPERTIES.contains(property)) {
       throw new IllegalArgumentException("Unknown test property '" + property +"'");
     }
 
-    if("isTest".equals(property)) {
+    if ("isTest".equals(property)) {
       result = isTestClass(receiver, property, args, expectedValue);
-    }
-    else {
+    }  else {
       result = isTestSuite(receiver, property, args, expectedValue);
     }
 
-    return true;
+    return result;
   }
 
-  private boolean isTestClass(Object receiver, String property, Object[] args, Object expectedValue) {
+  private boolean isTestClass(Object receiver, String property, Object[] args, 
+      Object expectedValue) {
     if (receiver instanceof IJavaElement) {
       return m_typeExtender.test(receiver, property, args, expectedValue);
     } 
@@ -42,7 +57,8 @@ public class TestNGPropertyTester extends PropertyTester {
     return false;
   }
   
-  private boolean isTestSuite(Object receiver, String property, Object[] args, Object expectedValue) {
+  private boolean isTestSuite(Object receiver, String property, Object[] args,
+      Object expectedValue) {
     if(receiver instanceof IFile) {
       return m_fileExtender.test(receiver, property, args, expectedValue); 
     }

@@ -3,6 +3,7 @@ package org.testng.eclipse.util;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -18,10 +19,13 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.launch.components.Filters.ITypeFilter;
 import org.testng.eclipse.refactoring.FindTestsRunnableContext;
@@ -275,5 +279,23 @@ public class Utils {
       e.printStackTrace();
     }
     return result;
+  }
+
+  /**
+   * Open the given file in the editor.
+   */
+  public static void openFile(Shell shell, final IFile javaFile, IProgressMonitor monitor) {
+    monitor.setTaskName("Opening file for editing...");
+  	shell.getDisplay().asyncExec(new Runnable() {
+      public void run() {
+  			IWorkbenchPage page =
+  				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+  			try {
+  				IDE.openEditor(page, javaFile, true);
+  			} catch (PartInitException e) {
+  			}
+  		}
+  	});
+  	monitor.worked(1);
   }
 }

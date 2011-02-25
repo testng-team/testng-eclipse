@@ -270,6 +270,13 @@
             defaultHandler="org.testng.eclipse.refactoring.CreateClassAction"
             >
       </command>
+      <command
+            name="Convert to YAML"
+            description="Convert the XML file to YAML"
+            id="org.testng.eclipse.convertToYamlAction"
+            defaultHandler="org.testng.eclipse.refactoring.ConvertToYamlAction"
+            >
+      </command>
   </extension>
 
   <extension
@@ -402,6 +409,19 @@
           </command>
         </menu>
 
+        <menu label="TestNG">
+          <visibleWhen>
+              <iterate>
+                <test property="org.testng.eclipse.isSuite"/>
+              </iterate>
+          </visibleWhen>
+
+          <command
+              commandId="org.testng.eclipse.convertToYamlAction"
+              label="Convert to YAML"
+              style="push">
+          </command>
+        </menu>
      </menuContribution>
   </extension>
  </plugin>

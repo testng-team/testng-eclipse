@@ -8,10 +8,8 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -19,11 +17,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWizard;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.ide.IDE;
 import org.testng.eclipse.collections.Sets;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.ResourceUtil;
@@ -135,7 +129,7 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	  //
 	  if (!Utils.isEmpty(xmlPath)) {
 	    IFile file = createFile(containerName, "", xmlPath, createXmlContentStream(), monitor);
-	    if (file != null) openFile(file, monitor);
+	    if (file != null) org.testng.eclipse.util.Utils.openFile(getShell(), file, monitor);
 	    else result = false;
 	  }
 
@@ -145,29 +139,14 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	  if (result) {
   	  IFile file = createFile(containerName, packageName, className + ".java",
           createJavaContentStream(className, methods), monitor);
-  	  if (file != null) openFile(file, monitor);
+  	  if (file != null) org.testng.eclipse.util.Utils.openFile(getShell(), file, monitor);
   	  else result = false;
 	  }
 
 	  return result;
 	}
 
-  private void openFile(final IFile javaFile, IProgressMonitor monitor) {
-    monitor.setTaskName("Opening file for editing...");
-		getShell().getDisplay().asyncExec(new Runnable() {
-      public void run() {
-				IWorkbenchPage page =
-					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-				try {
-					IDE.openEditor(page, javaFile, true);
-				} catch (PartInitException e) {
-				}
-			}
-		});
-		monitor.worked(1);
-  }
-	
-	private IFile createFile(String containerName, String packageName, String fileName,
+  private IFile createFile(String containerName, String packageName, String fileName,
 	    InputStream contentStream, IProgressMonitor monitor) throws CoreException {
     monitor.beginTask("Creating " + fileName, 2);
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
