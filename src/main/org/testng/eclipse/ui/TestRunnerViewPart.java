@@ -182,7 +182,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   protected boolean fAutoScroll = true;
 
   protected ProgressBar fProgressBar;
-
+  private ToolItem m_stopButton;
+  
   private Color fOKColor;
   private Color fFailureColor;
 
@@ -887,10 +888,11 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       // Stop button (a toolbar, actually)
       //
       ToolBar toolBar = new ToolBar(m_counterComposite, SWT.FLAT);
-      ToolItem stopButton = new ToolItem(toolBar, SWT.PUSH);
-      stopButton.setImage(Images.getImage(Images.IMG_STOP));
-      stopButton.setToolTipText("Stop the current test run");
-      stopButton.addSelectionListener(new SelectionListener() {
+      m_stopButton = new ToolItem(toolBar, SWT.PUSH);
+      m_stopButton.setEnabled(false);
+      m_stopButton.setImage(Images.getImage(Images.IMG_STOP));
+      m_stopButton.setToolTipText("Stop the current test run");
+      m_stopButton.addSelectionListener(new SelectionListener() {
         public void widgetSelected(SelectionEvent e) {
           stopTest();
         }
@@ -1341,6 +1343,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
           }
           refreshCounters();
 //          m_progressBar.redraw();
+          m_stopButton.setEnabled(false);
         }
       });
       
@@ -1363,6 +1366,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         updateProgressBar();
 //        m_progressBar.setMaximum(newMaxBar);
 //        System.out.println("se maresteeee");
+        m_stopButton.setEnabled(true);
       }
     });
   }
@@ -1399,6 +1403,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //        }
         
         fProgressBar.stepTests();
+        m_stopButton.setEnabled(false);
       }
     });
   }
