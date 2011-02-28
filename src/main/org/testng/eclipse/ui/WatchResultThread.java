@@ -2,6 +2,7 @@ package org.testng.eclipse.ui;
 
 import org.testng.remote.strprotocol.IRemoteSuiteListener;
 import org.testng.remote.strprotocol.IRemoteTestListener;
+import org.testng.reporters.XMLReporter;
 import org.testng.xml.ResultXMLParser;
 
 import java.io.File;
@@ -13,24 +14,26 @@ import java.io.FileNotFoundException;
  *
  * @author Cedric Beust <cedric@beust.com>
  */
-public class WatchResult {
+public class WatchResultThread {
+  private static final boolean DEBUG = false;
 
   private Runnable m_watchResultRunnable;
   private boolean m_watchResults = true;
   private Thread m_watchResultThread;
 
-  public WatchResult(final String path, final IRemoteSuiteListener suiteListener,
+  public WatchResultThread(final String path, final IRemoteSuiteListener suiteListener,
       final IRemoteTestListener testListener)
   {
     m_watchResultRunnable = new Runnable() {
       public void run() {
-        File f = new File(path);
+        File f = new File(path, XMLReporter.FILE_NAME);
         long timeStamp = f.lastModified();
         p("Watching " + path);
         while (m_watchResults) {
           long t = f.lastModified();
-          p("Comparing " + t + " and " + timeStamp + " for " + path);
+          p("Comparing " + t + " and " + timeStamp + " for " + f);
           if (t != timeStamp) {
+            p("The file changed, updating the view");
             timeStamp = t;
             ResultXMLParser parser = new ResultXMLParser(suiteListener, testListener);
             try {
@@ -54,7 +57,7 @@ public class WatchResult {
   }
 
   private static void p(String string) {
-    if (false) {
+    if (DEBUG) {
       System.out.println("[WatchResultThread] " + string);
     }
   }

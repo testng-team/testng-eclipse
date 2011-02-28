@@ -2,6 +2,7 @@ package org.testng.eclipse.ui;
 
 import org.eclipse.core.internal.resources.Workspace;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -233,7 +234,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private Text m_searchText;
 
   /** The thread that watches the testng-results.xml file */
-  private WatchResult m_watchThread;
+  private WatchResultThread m_watchThread;
 
   @Override
   public void init(IViewSite site, IMemento memento) throws PartInitException {
@@ -245,6 +246,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     if(progressService != null) {
       progressService.showBusyForFamily(TestRunnerViewPart.FAMILY_RUN);
     }
+
+    // Start the watcher thread, if applicable
+    updateResultThread();
   }
 
   private IWorkbenchSiteProgressService getProgressService() {
@@ -380,10 +384,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_LastLaunch = launch;
     m_workingProject = project;
 
-    // Now that we have a project name, read the watch result preference and
-    // update our monitoring thread.
-    updateResultThread(getWatchResults(), getWatchResultDirectory());
-
     aboutToLaunch(subName);
     
 //    if(null != fTestRunnerClient) {
@@ -418,12 +418,16 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   /**
    * Start or stop the watch thread.
    */
-  private void updateResultThread(boolean enabled, String path) {
+  private void updateResultThread() {
+    boolean enabled = getWatchResults();
+    String path = getWatchResultDirectory();
     if (enabled) {
+      TestNGPlugin.log("Monitoring results at " + path);
       if (m_watchThread != null) m_watchThread.stopWatching();
-      m_watchThread = new WatchResult(path, this, this);
+      m_watchThread = new WatchResultThread(path, this, this);
     } else {
       if (m_watchThread != null) m_watchThread.stopWatching();
+      TestNGPlugin.log("No longer monitoring results at " + path);
     }
   }
 
@@ -444,9 +448,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
             IEditorInput input = ieditorpart.getEditorInput();
             if (input != null && input instanceof IFileEditorInput) {
               IResource resource = ((IFileEditorInput) input).getFile();
-              IJavaElement element = (IJavaElement) resource.getAdapter(IJavaElement.class);
-              if (element != null) {
-                m_workingProject = element.getJavaProject();
+              IProject project = resource.getProject();
+              IJavaProject javaProject = JDTUtil.getJavaProject(project.getName());
+              if (javaProject != null) {
+                m_workingProject = javaProject;
+              } else {
+                TestNGPlugin.log("Current project " + project.getName() + " is not a Java project");
               }
             }
           }
@@ -454,11 +461,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       }
     }
 
-    if (m_workingProject == null) {
-      TestNGPlugin.log("Couldn't find a Java Project, directory monitoring disabled until" +
-      		" you launch a TestNG configuration");
-    }
-    //    ISelectionService service =
+//    ISelectionService service =
 //      TestNGPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getSelectionService();
 //    IStructuredSelection structured =
 //      (IStructuredSelection) service.getSelection("org.eclipse.jdt.ui.PackageExplorer");
@@ -702,6 +705,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
+  /**
+   * @return true if we should be monitoring testng-results.xml.
+   */
   private boolean getWatchResults() {
     return TestNGPlugin.getPluginPreferenceStore().getWatchResults(getProjectName());
   }
@@ -717,7 +723,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   public void createPartControl(Composite parent) {
     ppp("createPartControl");
     if (getWatchResultDirectory() != null) {
-      updateResultThread(getWatchResults(), getWatchResultDirectory());
+      updateResultThread();
     }
     m_parentComposite = parent;
 //    addResizeListener(parent);
@@ -1120,7 +1126,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     String statusChanged = getProjectName() + TestNGPluginConstants.S_WATCH_RESULTS;
     String directoryChanged = getProjectName() + TestNGPluginConstants.S_WATCH_RESULT_DIRECTORY;
     if (statusChanged.equals(name) || directoryChanged.equals(name)) {
-      updateResultThread(getWatchResults(), getWatchResultDirectory());
+      updateResultThread();
     }
   }
 

@@ -3,7 +3,7 @@
 <plugin
    id="org.testng.eclipse"
    name="TestNG"
-   version="5.14.10.20110217_1541"
+   version="5.14.10.20110228_1533"
    provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
   <runtime>
@@ -219,6 +219,7 @@
      
   </extension>
 
+  <!-- Project specific properties -->
   <extension
          point="org.eclipse.ui.propertyPages">
       <page
@@ -325,6 +326,7 @@
             id="org.testng.TESTNG_CONTAINER"/>
   </extension>
 
+  <!-- Workspace wide preferences -->
   <extension
          point="org.eclipse.ui.preferencePages">
       <page
