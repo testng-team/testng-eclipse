@@ -45,7 +45,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -94,10 +93,8 @@ import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
 
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -187,7 +184,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private Color fOKColor;
   private Color fFailureColor;
 
-  
   private boolean m_isDisposed = false;
   
   // JOBS
