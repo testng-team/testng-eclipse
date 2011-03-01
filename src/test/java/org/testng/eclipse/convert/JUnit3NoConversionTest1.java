@@ -3,12 +3,12 @@ package org.testng.eclipse.convert;
 import junit.framework.TestCase;
 
 /**
- * This class extends TestSuite. It should be excluded from the conversion.
- * 
+ * This class should not be converted (no test, setUp, tearDown method).
+ *
  * @author Cedric Beust <cedric@beust.com>
- * 
+ *
  */
-public class JUnit3Test4 extends TestCase {
+public class JUnit3NoConversionTest1 extends TestCase {
 
   public void f() {
   }

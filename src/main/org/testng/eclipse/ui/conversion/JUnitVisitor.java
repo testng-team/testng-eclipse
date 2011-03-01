@@ -3,6 +3,7 @@ package org.testng.eclipse.ui.conversion;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -45,7 +46,11 @@ public class JUnitVisitor extends ASTVisitor {
   private List<MethodDeclaration> m_beforeMethods = Lists.newArrayList();
   private List<MethodDeclaration> m_afterMethods = Lists.newArrayList();
   private MethodDeclaration m_suite = null;
+
+  // Parent classes
   private SimpleType m_testCase = null;
+  private boolean m_isTestSuite = false;
+
   private List<ImportDeclaration> m_junitImports = Lists.newArrayList();
   // List of all the methods that have @Test(expected) or @Test(timeout)
   private Map<MemberValuePair, String> m_testsWithExpected = Maps.newHashMap();
@@ -157,14 +162,32 @@ public class JUnitVisitor extends ASTVisitor {
     return null;
   }
 
+  /**
+   * Record whether this type declaration is a TestCase or a TestSuite.
+   */
   public boolean visit(TypeDeclaration td) {
+    // Is the class a direct subclass of TestCase?
     Type superClass = td.getSuperclassType();
     if (superClass instanceof SimpleType) {
       SimpleType st = (SimpleType) superClass;
-      if (st.getName().getFullyQualifiedName().equals("TestCase")) {
+      if ("TestCase".equals(st.getName().getFullyQualifiedName())) {
         m_testCase = st;
       }
     }
+
+    // Is the class a subclass of TestSuite?
+    if (superClass != null) {
+      ITypeBinding binding = superClass.resolveBinding();
+      while (binding != null) {
+        if ("TestSuite".equals(binding.getName())) {
+          m_isTestSuite = true;
+          break;
+        } else {
+          binding = binding.getSuperclass();
+        }
+      }
+    }
+
     return super.visit(td);
   }
 
@@ -316,7 +339,7 @@ public class JUnitVisitor extends ASTVisitor {
     return m_hasTestMethods || m_testMethods.size() > 0;
   }
 
-  public void setTestMethods(List testMethods) {
+  public void setTestMethods(List<MethodDeclaration> testMethods) {
     m_testMethods = testMethods;
   }
 
@@ -349,5 +372,21 @@ public class JUnitVisitor extends ASTVisitor {
 
   public List<ASTNode> getNodesToRemove() {
     return m_nodesToRemove;
+  }
+
+  /**
+   * @return whether this file needs to be changed in order to be converted to TestNG.
+   */
+  public boolean needsConversion() {
+    if (m_isTestSuite) {
+      return false;
+    }
+
+    if (getTestMethods().size() > 0 || getBeforeMethods().size() > 0
+        || getAfterMethods().size() > 0) {
+      return true;
+    }
+
+    return false;
   }
 }

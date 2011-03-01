@@ -44,6 +44,14 @@ public class JUnitConverterQuickAssistProcessor implements
     return false;
   }
 
+  public static CompilationUnit createCompilationUnit(ICompilationUnit cu) {
+    ASTParser parser = ASTParser.newParser(AST.JLS3);
+    parser.setSource(cu);
+    parser.setResolveBindings(true);
+
+    return (CompilationUnit) parser.createAST(null);
+  }
+
   public IJavaCompletionProposal[] getAssists(IInvocationContext context,
       IProblemLocation[] locations) 
     throws CoreException 
@@ -55,18 +63,18 @@ public class JUnitConverterQuickAssistProcessor implements
       // Prepare the AST rewriting
       //
       ICompilationUnit cu = context.getCompilationUnit();
-      // creation of DOM/AST from a ICompilationUnit
-      ASTParser parser = ASTParser.newParser(AST.JLS3);
-      parser.setSource(cu);
-      parser.setResolveBindings(true);
-      CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);
+
+      // Creatie of DOM/AST from a ICompilationUnit
+      CompilationUnit astRoot = createCompilationUnit(cu);
       AST ast = context.getASTRoot().getAST();
+
+      // Populate the JUnitVisitor with the information we'll be needing
+      // to do the rewriting
       JUnitVisitor visitor = new JUnitVisitor();
       astRoot.accept(visitor);
       
       IRewriteProvider[] providers = new IRewriteProvider[] {
           new AnnotationRewriter(),
-//          new JavaDocRewriter(),
       };
 
       for (int i = 0; i < providers.length; i++) {

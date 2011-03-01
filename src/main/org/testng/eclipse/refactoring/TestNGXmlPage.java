@@ -64,7 +64,6 @@ public class TestNGXmlPage extends UserInputWizardPage {
     }
   };
   private Combo m_selectionCombo;
-  private List<JavaElement> m_selectedElements;
   private Set<XmlClass> m_classes = Sets.newHashSet();
   private Set<XmlPackage> m_packages = Sets.newHashSet();
   private Text m_xmlFile;
@@ -241,28 +240,44 @@ public class TestNGXmlPage extends UserInputWizardPage {
   }
 
   private void createModel() {
-    m_selectedElements = Utils.getSelectedJavaElements();
-
+    //
     // Initialize m_classes
+    //
     Set<String> packageSet = Sets.newHashSet();
-    List<IType> types = Utils.findTypes(m_selectedElements);
-    for (JavaElement element : m_selectedElements) {
-      if (element.getClassName() != null) {
-        XmlClass c = new XmlClass(element.getPackageName() + "." + element.getClassName(),
-            false /* don't resolve */);
+    List<IType> types = Utils.findTypes(Utils.getSelectedJavaElements(), Utils.CONVERSION_FILTER);
+    for (IType type : types) {
+      String packageName = type.getPackageFragment().getElementName();
+      String className = type.getElementName();
+      if (className != null) {
+        XmlClass c = new XmlClass(packageName + "." + className, false /* don't resolve */);
         p("Adding class " + c);
         m_classes.add(c);
-        packageSet.add(element.getPackageName());
+        packageSet.add(packageName);
       } else {
-        for (IType type : types) {
-          p("Adding type " + type);
-          m_classes.add(new XmlClass(type.getFullyQualifiedName(), false /* don't resolve */));
-          packageSet.add(type.getPackageFragment().getElementName());
-        }
+        p("Adding type " + type);
+        m_classes.add(new XmlClass(type.getFullyQualifiedName(), false /* don't resolve */));
+        packageSet.add(packageName);
       }
     }
+//    for (JavaElement element : m_selectedElements) {
+//      if (element.getClassName() != null) {
+//        XmlClass c = new XmlClass(element.getPackageName() + "." + element.getClassName(),
+//            false /* don't resolve */);
+//        p("Adding class " + c);
+//        m_classes.add(c);
+//        packageSet.add(element.getPackageName());
+//      } else {
+//        for (IType type : types) {
+//          p("Adding type " + type);
+//          m_classes.add(new XmlClass(type.getFullyQualifiedName(), false /* don't resolve */));
+//          packageSet.add(type.getPackageFragment().getElementName());
+//        }
+//      }
+//    }
 
+    //
     // Initialize m_packages
+    //
     for (String p : packageSet) {
       XmlPackage pkg = new XmlPackage();
       pkg.setName(p);

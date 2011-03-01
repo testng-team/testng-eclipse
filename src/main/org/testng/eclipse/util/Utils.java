@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
@@ -29,6 +30,8 @@ import org.eclipse.ui.ide.IDE;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.launch.components.Filters.ITypeFilter;
 import org.testng.eclipse.refactoring.FindTestsRunnableContext;
+import org.testng.eclipse.ui.conversion.JUnitConverterQuickAssistProcessor;
+import org.testng.eclipse.ui.conversion.JUnitVisitor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -36,6 +39,23 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Utils {
+  /**
+   * A filter that will keep types that need to be converted to TestNG.
+   */
+  public static final ITypeFilter CONVERSION_FILTER = new ITypeFilter() {
+
+    public boolean accept(IType type) {
+      IResource resource = type.getResource();
+      ICompilationUnit cu = JDTUtil.getJavaElement((IFile) resource);
+      CompilationUnit astRoot = JUnitConverterQuickAssistProcessor.createCompilationUnit(cu);
+      JUnitVisitor visitor = new JUnitVisitor();
+      astRoot.accept(visitor);
+
+      return visitor.needsConversion();
+    }
+
+  };
+
   public static class JavaElement {
     public IJavaProject m_project;
     public IPackageFragmentRoot packageFragmentRoot;
@@ -117,17 +137,28 @@ public class Utils {
   /**
    * @return all the ITypes included in the current selection.
    */
-  public static List<IType> findSelectedTypes(IWorkbenchPage page) {
-    return findTypes(Utils.getSelectedJavaElements(page));
+  public static List<IType> findSelectedTypes(IWorkbenchPage page, ITypeFilter filter) {
+    return findTypes(Utils.getSelectedJavaElements(page), filter);
   }
-  
-  public static List<IType> findTypes(List<JavaElement> elements) {
+
+  public static List<IType> findTypes(List<JavaElement> elements, ITypeFilter filter) {
     List<IType> result = Lists.newArrayList();
+    if (filter == null) {
+      filter = new ITypeFilter() {
+        public boolean accept(IType type) {
+          return true;
+        }
+      };
+    };
 
     for (JavaElement pp : elements) {
       if (pp.compilationUnit != null) {
         try {
-          result.addAll(Arrays.asList(pp.compilationUnit.getAllTypes()));
+          for (IType t : pp.compilationUnit.getAllTypes()) {
+            if (filter.accept(t)) {
+              result.add(t);
+            }
+          }
         } catch (JavaModelException e) {
           e.printStackTrace();
         }
@@ -135,12 +166,6 @@ public class Utils {
         IPackageFragmentRoot pfr = pp.packageFragmentRoot;
         IPackageFragment pf = pp.packageFragment;
         try {
-          ITypeFilter filter = new ITypeFilter() {
-            public boolean accept(IType type) {
-              return true;
-            }
-          };
-
           IRunnableContext context = new FindTestsRunnableContext();
           if (pf != null) {
             result.addAll(Arrays.asList(

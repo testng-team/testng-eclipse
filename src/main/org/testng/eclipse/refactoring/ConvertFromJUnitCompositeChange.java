@@ -1,18 +1,24 @@
 package org.testng.eclipse.refactoring;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ui.IWorkbenchPage;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.collections.Sets;
+import org.testng.eclipse.launch.components.Filters.ITypeFilter;
+import org.testng.eclipse.ui.conversion.JUnitConverterQuickAssistProcessor;
+import org.testng.eclipse.ui.conversion.JUnitVisitor;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.Utils;
 
@@ -54,7 +60,7 @@ public class ConvertFromJUnitCompositeChange extends CompositeChange {
         IJavaProject javaProject = JDTUtil.getJavaProjectContext();
         if (javaProject == null) return;
 
-        List<IType> types = Utils.findSelectedTypes(m_page);
+        List<IType> types = Utils.findSelectedTypes(m_page, Utils.CONVERSION_FILTER);
         m_pm.beginTask("Finding test classes", types.size());
         for (IType type : types) {
           for (IClasspathEntry entry : Utils.getSourceFolders(javaProject)) {
