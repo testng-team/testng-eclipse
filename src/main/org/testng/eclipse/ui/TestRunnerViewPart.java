@@ -78,6 +78,7 @@ import org.testng.ITestResult;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.ui.summary.SummaryTab;
+import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.CustomSuite;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.LaunchUtil;
@@ -421,13 +422,13 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private void updateResultThread() {
     boolean enabled = getWatchResults();
     String path = getWatchResultDirectory();
+    if (m_watchThread != null) m_watchThread.stopWatching();
     if (enabled) {
       TestNGPlugin.log("Monitoring results at " + path);
-      if (m_watchThread != null) m_watchThread.stopWatching();
       m_watchThread = new WatchResultThread(path, this, this);
     } else {
-      if (m_watchThread != null) m_watchThread.stopWatching();
-      TestNGPlugin.log("No longer monitoring results at " + path);
+      if (! Utils.isEmpty(path)) TestNGPlugin.log("No longer monitoring results at " + path);
+      m_watchThread = null;
     }
   }
 
