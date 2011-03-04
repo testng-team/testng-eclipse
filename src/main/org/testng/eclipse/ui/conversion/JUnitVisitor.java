@@ -3,7 +3,6 @@ package org.testng.eclipse.ui.conversion;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -21,6 +20,7 @@ import org.testng.collections.Lists;
 import org.testng.eclipse.collections.Maps;
 import org.testng.internal.annotations.Sets;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +68,15 @@ public class JUnitVisitor extends ASTVisitor {
   // Nodes that need to be removed by the refactoring
   private List<ASTNode> m_nodesToRemove = Lists.newArrayList();
 
+  // The list of methods that are present on JUnit's Assert class
+  private static Set<String> m_assertMethods = Sets.newHashSet();
+
+  static {
+    for (Method m : Assert.class.getMethods()) {
+      m_assertMethods.add(m.getName());
+    }
+  }
+
   public boolean visit(ImportDeclaration id) {
     String name = id.getName().getFullyQualifiedName();
     if (name.indexOf("junit") != -1) {
@@ -98,7 +107,7 @@ public class JUnitVisitor extends ASTVisitor {
     }
     else if (! hasAnnotation(md, "Test")) {
       // Public methods that start with "test" are tests.
-      // Methods that start with "_test" or private test methods that start with "test" are diabled
+      // Methods that start with "_test" or private test methods that start with "test" are disabled
       boolean isPrivate = (md.getModifiers() & Modifier.PRIVATE) != 0;
       if (methodName.startsWith("test") && ! isPrivate) {
         m_testMethods.add(md);
@@ -230,6 +239,8 @@ public class JUnitVisitor extends ASTVisitor {
    * @return true if this method is defined on the AssertJUnit class.
    */
   private boolean belongsToAssertJUnit(MethodInvocation method) {
+    if (! m_assertMethods.contains(method.getName().toString())) return false;
+
     List<Expression> arguments = method.arguments();
     List<Class> types = Lists.newArrayList();
     for (Expression e : arguments) {
@@ -336,7 +347,7 @@ public class JUnitVisitor extends ASTVisitor {
   }
 
   public boolean hasTestMethods() {
-    return m_hasTestMethods || m_testMethods.size() > 0;
+    return m_hasTestMethods || m_testMethods.size() > 0 || m_disabledTestMethods.size() > 0;
   }
 
   public void setTestMethods(List<MethodDeclaration> testMethods) {
@@ -382,8 +393,8 @@ public class JUnitVisitor extends ASTVisitor {
       return false;
     }
 
-    if (getTestMethods().size() > 0 || getBeforeMethods().size() > 0
-        || getAfterMethods().size() > 0) {
+    if (getTestMethods().size() > 0 || getDisabledTestMethods().size() > 0 ||
+        getBeforeMethods().size() > 0 || getAfterMethods().size() > 0) {
       return true;
     }
 
