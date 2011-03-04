@@ -3,7 +3,7 @@
 <plugin
    id="org.testng.eclipse"
    name="TestNG"
-   version="5.14.10.20110301_1345"
+   version="5.14.10.20110304_1036"
    provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
   <runtime>
@@ -210,11 +210,11 @@
       -->
      
       <propertyTester
-            properties="isTest,isSuite"
+            properties="isSuite"
             namespace="org.testng.eclipse"
-            type="org.eclipse.core.runtime.IAdaptable"
+            type="java.lang.Object"
             class="org.testng.eclipse.launch.tester.TestNGPropertyTester"
-            id="org.testng.eclipse.launch.tester.JUnitPropertyTester">
+            id="org.testng.eclipse.launch.tester.TestNGPropertyTester">
       </propertyTester>
      
   </extension>
@@ -416,11 +416,11 @@
           </command>
         </menu>
 
-        <menu label="TestNG">
+       <menu label="TestNG">
           <visibleWhen>
-              <iterate>
+            <iterator operator="and">
                 <test property="org.testng.eclipse.isSuite"/>
-              </iterate>
+            </iterator>
           </visibleWhen>
 
           <command
@@ -429,6 +429,6 @@
               style="push">
           </command>
         </menu>
-     </menuContribution>
+      </menuContribution>
   </extension>
  </plugin>
