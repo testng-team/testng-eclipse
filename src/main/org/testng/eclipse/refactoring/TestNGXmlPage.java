@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.collections.Sets;
 import org.testng.eclipse.util.SWTUtil;
 import org.testng.eclipse.util.Utils;
@@ -29,7 +30,6 @@ import org.testng.xml.XmlSuite;
 import org.testng.xml.XmlTest;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -334,16 +334,11 @@ public class TestNGXmlPage extends UserInputWizardPage {
     IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(path));
     ByteArrayInputStream is = new ByteArrayInputStream(m_xmlSuite.toXml().getBytes());
     try {
-      file.create(is, true /* force */, null /* progress monitor */);
+      org.testng.eclipse.ui.util.Utils.createFileWithDialog(
+          PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+              file, is);
     } catch (CoreException e) {
       e.printStackTrace();
-    } finally {
-      try {
-        is.close();
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
     }
   }
 }

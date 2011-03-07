@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
@@ -156,47 +157,10 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
     }
     Path absolutePath = new Path(containerName + File.separatorChar + fullPath);
     final IFile result = root.getFile(absolutePath);
-    try {
-      if (result.exists()) {
-        boolean overwrite = MessageDialog.openConfirm(getShell(),
-            ResourceUtil.getString("NewTestNGClassWizard.alreadyExists.title"), //$NON-NLS-1$
-            ResourceUtil.getFormattedString("NewTestNGClassWizard.alreadyExists.message",
-                fullPath)); //$NON-NLS-1$
-        if (overwrite) {
-          result.setContents(contentStream, true, true, monitor);
-        } else {
-          return null;
-        }
-      } else {
-        createResourceRecursively(result, monitor);
-        result.setContents(contentStream, IFile.FORCE | IFile.KEEP_HISTORY, monitor);
-//        result.create(contentStream, true, monitor);
-      }
-      contentStream.close();
-    } catch (IOException e) {
-    }
-    monitor.worked(1);
+    Utils.createFileWithDialog(getShell(), result, contentStream);
 
     return result;
 	}
-
-  protected void createResourceRecursively(IResource resource, IProgressMonitor monitor)
-      throws CoreException {
-    if (resource == null || resource.exists()) return;
-    if (!resource.getParent().exists()) createResourceRecursively(resource.getParent(), monitor);
-    switch (resource.getType()) {
-    case IResource.FILE:
-      ((IFile) resource).create(new ByteArrayInputStream(new byte[0]), true, monitor);
-      break;
-    case IResource.FOLDER:
-      ((IFolder) resource).create(IResource.NONE, true, monitor);
-      break;
-    case IResource.PROJECT:
-      ((IProject) resource).create(monitor);
-      ((IProject) resource).open(monitor);
-      break;
-    }
-  }
 
 	/**
 	 * Create the content for the Java file.

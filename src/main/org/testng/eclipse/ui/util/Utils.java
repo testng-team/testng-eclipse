@@ -1,5 +1,13 @@
 package org.testng.eclipse.ui.util;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
@@ -10,12 +18,16 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SWTUtil;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -275,4 +287,61 @@ public class Utils {
     
     return new ArrayList(uniques);
   }
+
+  /**
+   * Create a file with the given content. Show up a confirmation dialog if the file already
+   * exists.
+   *
+   * @return true if the file was written successfully.
+   */
+  public static boolean createFileWithDialog(Shell shell, IFile file,
+      InputStream stream) throws CoreException {
+    boolean success = false;
+    NullProgressMonitor monitor = new NullProgressMonitor();
+    try {
+      if (file.exists()) {
+        boolean overwrite = MessageDialog.openConfirm(shell, ResourceUtil
+            .getString("NewTestNGClassWizard.alreadyExists.title"), //$NON-NLS-1$
+            ResourceUtil.getFormattedString(
+                "NewTestNGClassWizard.alreadyExists.message", file
+                    .getFullPath().toString())); //$NON-NLS-1$
+        if (overwrite) {
+          file.setContents(stream, true, true, monitor);
+          success = true;
+        }
+      } else {
+        createResourceRecursively(file, monitor);
+        file.setContents(stream, IFile.FORCE | IFile.KEEP_HISTORY, monitor);
+        success = true;
+        // result.create(contentStream, true, monitor);
+      }
+      stream.close();
+    } catch (IOException e) {
+    }
+
+    return success;
+  }
+
+  protected static void createResourceRecursively(IResource resource,
+      IProgressMonitor monitor) throws CoreException {
+    if (resource == null || resource.exists())
+      return;
+    if (!resource.getParent().exists())
+      createResourceRecursively(resource.getParent(), monitor);
+    switch (resource.getType()) {
+    case IResource.FILE:
+      ((IFile) resource).create(new ByteArrayInputStream(new byte[0]), true,
+          monitor);
+      break;
+    case IResource.FOLDER:
+      ((IFolder) resource).create(IResource.NONE, true, monitor);
+      break;
+    case IResource.PROJECT:
+      ((IProject) resource).create(monitor);
+      ((IProject) resource).open(monitor);
+      break;
+    }
+  }
+
+
 }
