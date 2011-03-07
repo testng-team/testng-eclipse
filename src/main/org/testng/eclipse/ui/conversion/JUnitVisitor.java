@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -67,6 +68,7 @@ public class JUnitVisitor extends ASTVisitor {
 
   // Nodes that need to be removed by the refactoring
   private List<ASTNode> m_nodesToRemove = Lists.newArrayList();
+  private SuperConstructorInvocation m_superConstructorInvocation;
 
   // The list of methods that are present on JUnit's Assert class
   private static Set<String> m_assertMethods = Sets.newHashSet();
@@ -91,6 +93,26 @@ public class JUnitVisitor extends ASTVisitor {
       m_nodesToRemove.add(smi.getParent());
     }
     return super.visit(smi);
+  }
+
+  /**
+   * Remember if we find a constructor that calls super(String).
+   */
+  public boolean visit(SuperConstructorInvocation sci) {
+    List args = sci.arguments();
+    if (args.size() == 1) {
+      Expression arg = (Expression) args.get(0);
+      ITypeBinding binding = arg.resolveTypeBinding();
+      if (binding != null && String.class.getName().equals(binding.getBinaryName())) {
+        m_superConstructorInvocation = sci;
+      }
+    }
+
+    return super.visit(sci);
+  }
+
+  public SuperConstructorInvocation getSuperConstructorInvocation() {
+    return m_superConstructorInvocation;
   }
 
   public boolean visit(MethodDeclaration md) {
@@ -273,8 +295,8 @@ public class JUnitVisitor extends ASTVisitor {
 //      e1.printStackTrace();
     }
 
-    if (! result && arguments.size() == 2) {
-      // An assert with two parameters will match assertTrue(Object, Object)
+    if (! result && (arguments.size() == 2 || arguments.size() == 3)) {
+      // An assert with two or three parameters will match assertTrue(Object, Object)
       result = true;
     }
     return result;

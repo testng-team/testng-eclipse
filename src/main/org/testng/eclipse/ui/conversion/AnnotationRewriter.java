@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.testng.eclipse.collections.Maps;
@@ -131,6 +132,14 @@ public class AnnotationRewriter implements IRewriteProvider
     //
     for (Map.Entry<MemberValuePair, String> pair : visitor.getTestsWithExpected().entrySet()) {
       result.replace(pair.getKey().getName(), ast.newSimpleName(pair.getValue()), null);
+    }
+
+    //
+    // Remove super invocation in the constructor
+    //
+    SuperConstructorInvocation sci = visitor.getSuperConstructorInvocation();
+    if (sci != null) {
+      result.remove(sci, null);
     }
 
     return result;

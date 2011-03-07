@@ -16,6 +16,7 @@ public class JUnit3Test1 extends TestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
+    assertEquals("ErrorRate is incorrect", 0.0, 1.0);
     assertNull(null);
   }
 
