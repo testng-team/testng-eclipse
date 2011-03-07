@@ -33,11 +33,15 @@ public class SuiteFileValidator {
   private static Map<IFile,Boolean> s_cache = Maps.newHashMap();
   
   public static boolean isSuiteDefinition(IFile file) throws CoreException {
+    return isSuiteDefinition(file, false /* both xml and yaml */);
+  }
+
+  public static boolean isSuiteDefinition(IFile file, boolean xmlOnly) throws CoreException {
     if (s_cache.containsKey(file)) return true;
 
     boolean result = false;
 
-    if (file.getName().endsWith("yaml")) {
+    if (! xmlOnly && file.getName().endsWith("yaml")) {
       result = true;
     }
 

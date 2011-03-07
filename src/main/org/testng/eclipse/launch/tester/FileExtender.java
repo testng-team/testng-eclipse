@@ -13,16 +13,17 @@ import org.testng.eclipse.util.SuiteFileValidator;
  * 
  * @author <a href='mailto:the_mindstorm@evolva.ro'>Alexandru Popescu</a>
  */
-public class FileExtender extends PropertyTester {
+public class FileExtender {
 //  private static final String PROPERTY_IS_Test= "isSuite"; //$NON-NLS-1$
 
-  public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
+  public boolean test(Object receiver, String property, Object[] args, Object expectedValue,
+      boolean xmlOnly) {
     if(!(receiver instanceof IFile)) {
       return false;
     }
     TestNGPlugin.log("Validating suite file:" + receiver);
     try {
-      return SuiteFileValidator.isSuiteDefinition((IFile) receiver);
+      return SuiteFileValidator.isSuiteDefinition((IFile) receiver, xmlOnly);
     }
     catch(CoreException ce) {
       TestNGPlugin.log(ce);

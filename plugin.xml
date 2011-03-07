@@ -43,6 +43,18 @@
   <extension-point id="reporterListenerContributorSchema" name="%reporterListenerContributor.name" schema="schema/reporterListenerContributorSchema.exsd"/>
   <extension-point id="testListenerContributorSchema" name="%testListenerContributor.name" schema="schema/testListenerContributorSchema.exsd"/>
 
+  <extension
+      point="org.eclipse.core.expressions.propertyTesters">
+
+    <propertyTester
+          id="org.testng.eclipse.launch.tester.TestNGPropertyTester"
+          type="org.eclipse.core.runtime.IAdaptable"
+          namespace="org.testng.eclipse"
+          properties="isTest,isSuite"
+          class="org.testng.eclipse.launch.tester.TestNGPropertyTester">
+    </propertyTester>
+  </extension>
+
   <extension point="org.eclipse.ui.popupMenus">
     <viewerContribution
         id="testng.editor.popup"
@@ -76,22 +88,10 @@
       <launchConfigurationType
             delegate="org.testng.eclipse.launch.TestNGLaunchConfigurationDelegate"
             id="org.testng.eclipse.launchconfig"
-            modes="run, debug"
-            name="%Launch.label"
+            modes="run,debug"
+            name="Launch.label"
             sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
             sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
-         <fileExtension
-               extension="java"
-               default="false"/>
-         <fileExtension
-               extension="class"
-               default="false"/>
-         <fileExtension
-               extension="xml"
-               default="false"/>
-         <fileExtension
-               extension="yaml"
-               default="false"/>
       </launchConfigurationType>
   </extension>
 
@@ -188,35 +188,6 @@
                id="org.eclipse.debug.ui.DebugPerspective">
          </perspective>
       </shortcut>
-  </extension>
-
-  <extension
-         point="org.eclipse.core.expressions.propertyTesters">
-      <!--
-      <propertyTester
-            properties="isTest"
-            namespace="org.testng.eclipse"
-            type="org.eclipse.core.resources.IFile"
-            class="org.testng.eclipse.launch.tester.FileExtender"
-            id="org.testng.eclipse.ITypeExtender">
-      </propertyTester>
-      <propertyTester
-            properties="isTest"
-            namespace="org.testng.eclipse"
-            type="org.eclipse.jdt.core.IJavaElement"
-            class="org.testng.eclipse.launch.tester.JavaTypeExtender"
-            id="org.testng.eclipse.ITypeExtender">
-      </propertyTester>
-      -->
-     
-      <propertyTester
-            properties="isSuite"
-            namespace="org.testng.eclipse"
-            type="java.lang.Object"
-            class="org.testng.eclipse.launch.tester.TestNGPropertyTester"
-            id="org.testng.eclipse.launch.tester.TestNGPropertyTester">
-      </propertyTester>
-     
   </extension>
 
   <!-- Project specific properties -->
@@ -418,9 +389,18 @@
 
        <menu label="TestNG">
           <visibleWhen>
-            <iterator operator="and">
-                <test property="org.testng.eclipse.isSuite"/>
-            </iterator>
+            <with variable="selection">
+              <iterate>
+                 <adapt type="org.eclipse.core.resources.IFile">
+                   <test property="org.eclipse.core.resources.name" value="*.xml"/>
+<!--
+                   <test property="org.testng.eclipse.isXmlSuite"/>
+                   <instanceof value="org.eclipse.core.resources.IFile" />
+                 <adapt type="org.eclipse.core.runtime.IAdaptable">
+-->
+                 </adapt>
+              </iterate>
+            </with>
           </visibleWhen>
 
           <command
@@ -429,6 +409,8 @@
               style="push">
           </command>
         </menu>
-      </menuContribution>
+
+    </menuContribution>
   </extension>
- </plugin>
+
+</plugin>
