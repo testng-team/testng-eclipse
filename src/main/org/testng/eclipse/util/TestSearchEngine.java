@@ -300,7 +300,8 @@ public class TestSearchEngine {
 		}
 	}
   private static boolean isTestNgXmlFile(IFile f) {
-    if(!"xml".equals(f.getFileExtension())) {
+    String fileExtension = f.getFileExtension();
+    if(!"xml".equals(fileExtension) && !"yaml".equals(fileExtension)) {
       return false;
     }
 
