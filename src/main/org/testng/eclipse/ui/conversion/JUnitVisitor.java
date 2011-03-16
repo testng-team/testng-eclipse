@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -52,11 +53,17 @@ public class JUnitVisitor extends ASTVisitor {
   private SimpleType m_testCase = null;
   private boolean m_isTestSuite = false;
 
+  // The JUnit imports found on this class
   private List<ImportDeclaration> m_junitImports = Lists.newArrayList();
+
+  // Static imports for assert methods
+  private Set<String> m_assertStaticImports = Sets.newHashSet();
+
   // List of all the methods that have @Test(expected) or @Test(timeout)
   private Map<MemberValuePair, String> m_testsWithExpected = Maps.newHashMap();
 
-  // The position and length of all the Assert references
+  // The position and length of all the Assert references that are not statically
+  // imported
   private Set<MethodInvocation> m_asserts = Sets.newHashSet();
 
   // The position and length of all the fail() calls
@@ -81,8 +88,13 @@ public class JUnitVisitor extends ASTVisitor {
   }
 
   public boolean visit(ImportDeclaration id) {
-    String name = id.getName().getFullyQualifiedName();
+    Name simpleName = id.getName();
+    String name = simpleName.getFullyQualifiedName();
     if (name.indexOf("junit") != -1) {
+      int ind = simpleName.toString().indexOf("assert");
+      if (id.isStatic() && ind > 0) {
+        m_assertStaticImports.add(simpleName.toString().substring(ind));
+      }
       m_junitImports.add(id);
     }
     return super.visit(id);
@@ -236,7 +248,10 @@ public class JUnitVisitor extends ASTVisitor {
 
     if ((exp != null && "Assert".equals(exp.toString())) || method.startsWith("assert")) {
       // Method prefixed with "Assert."
-      if (belongsToAssertJUnit(node)) m_asserts.add(node);
+      if (belongsToAssertJUnit(node) &&
+          ! m_assertStaticImports.contains(node.getName().toString())) {
+        m_asserts.add(node);
+      }
     } else if ("fail".equals(method)) {
       // assert or fail not prefixed with "Assert."
       if (belongsToAssertJUnit(node)) m_fails.add(node);
@@ -387,6 +402,10 @@ public class JUnitVisitor extends ASTVisitor {
 
   public List<ImportDeclaration> getJUnitImports() {
     return m_junitImports;
+  }
+
+  public Set<String> getStaticImports() {
+    return m_assertStaticImports;
   }
 
   public boolean hasAsserts() {

@@ -41,6 +41,10 @@ public class AnnotationRewriter implements IRewriteProvider
     add("org.junit.Before");
     add("org.junit.Test");
   }};
+  private static final Set<String> STATIC_IMPORTS_TO_REMOVE = new HashSet<String>() {{
+    add("org.junit.Assert");
+  }};
+
   public ASTRewrite createRewriter(CompilationUnit astRoot,
       AST ast,
       JUnitVisitor visitor
@@ -54,8 +58,14 @@ public class AnnotationRewriter implements IRewriteProvider
     List<ImportDeclaration> oldImports = visitor.getJUnitImports();
     for (int i = 0; i < oldImports.size(); i++) {
       Name importName = oldImports.get(i).getName();
-      if (IMPORTS_TO_REMOVE.contains(importName.getFullyQualifiedName())) {
+      String fqn = importName.getFullyQualifiedName();
+      if (IMPORTS_TO_REMOVE.contains(fqn)) {
         result.remove((ImportDeclaration) oldImports.get(i), null);
+      }
+      for (String s : STATIC_IMPORTS_TO_REMOVE) {
+        if (fqn.contains(s)) {
+          result.remove((ImportDeclaration) oldImports.get(i), null);
+        }
       }
     }
     
@@ -69,6 +79,14 @@ public class AnnotationRewriter implements IRewriteProvider
     maybeAddImport(ast, result, astRoot, visitor.hasTestMethods(), "org.testng.annotations.Test");
     maybeAddImport(ast, result, astRoot, !visitor.getAfterMethods().isEmpty(),
         "org.testng.annotations.AfterMethod");
+
+    //
+    // Add static imports
+    //
+    Set<String> staticImports = visitor.getStaticImports();
+    for (String si : staticImports) {
+      addImport(ast, result, astRoot, "org.testng.AssertJUnit." + si, true /* static import */);
+    }
 
     //
     // Remove "extends TestCase"
@@ -105,16 +123,18 @@ public class AnnotationRewriter implements IRewriteProvider
     }
 
     //
-    // Replace "Assert" with "AssertJUnit"
+    // Replace "Assert" with "AssertJUnit", unless the method is already imported statically.
     //
     Set<MethodInvocation> asserts = visitor.getAsserts();
     for (MethodInvocation m : asserts) {
-      Expression exp = m.getExpression();
-      Name name = ast.newName("AssertJUnit");
-      if (exp != null) {
-        result.replace(exp, name, null);
-      } else {
-        result.set(m, MethodInvocation.EXPRESSION_PROPERTY, name, null);
+      if (! staticImports.contains(m.getName().toString())) {
+        Expression exp = m.getExpression();
+        Name name = ast.newName("AssertJUnit");
+        if (exp != null) {
+          result.replace(exp, name, null);
+        } else {
+          result.set(m, MethodInvocation.EXPRESSION_PROPERTY, name, null);
+        }
       }
     }
 
@@ -157,9 +177,16 @@ public class AnnotationRewriter implements IRewriteProvider
       addImport(ast, rewriter, astRoot, imp);
     }
   }
+
   private void addImport(AST ast, ASTRewrite rewriter, CompilationUnit astRoot, String imp) {
+    addImport(ast, rewriter, astRoot, imp, false /* non static import */);
+  }
+
+  private void addImport(AST ast, ASTRewrite rewriter, CompilationUnit astRoot, String imp,
+      boolean isStatic) {
     ListRewrite lr = rewriter.getListRewrite(astRoot, CompilationUnit.IMPORTS_PROPERTY);
     ImportDeclaration id = ast.newImportDeclaration();
+    id.setStatic(isStatic);
     id.setName(ast.newName(imp));
     lr.insertFirst(id, null);
   }
