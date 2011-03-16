@@ -69,6 +69,7 @@ public class JUnitVisitor extends ASTVisitor {
   // Nodes that need to be removed by the refactoring
   private List<ASTNode> m_nodesToRemove = Lists.newArrayList();
   private SuperConstructorInvocation m_superConstructorInvocation;
+  private String m_className;
 
   // The list of methods that are present on JUnit's Assert class
   private static Set<String> m_assertMethods = Sets.newHashSet();
@@ -99,12 +100,15 @@ public class JUnitVisitor extends ASTVisitor {
    * Remember if we find a constructor that calls super(String).
    */
   public boolean visit(SuperConstructorInvocation sci) {
-    List args = sci.arguments();
-    if (args.size() == 1) {
-      Expression arg = (Expression) args.get(0);
-      ITypeBinding binding = arg.resolveTypeBinding();
-      if (binding != null && String.class.getName().equals(binding.getBinaryName())) {
-        m_superConstructorInvocation = sci;
+    // Only remove the call to super if the class extends TestCase directly
+    if (m_testCase != null) {
+      List args = sci.arguments();
+      if (args.size() == 1) {
+        Expression arg = (Expression) args.get(0);
+        ITypeBinding binding = arg.resolveTypeBinding();
+        if (binding != null && String.class.getName().equals(binding.getBinaryName())) {
+          m_superConstructorInvocation = sci;
+        }
       }
     }
 
@@ -197,6 +201,7 @@ public class JUnitVisitor extends ASTVisitor {
    * Record whether this type declaration is a TestCase or a TestSuite.
    */
   public boolean visit(TypeDeclaration td) {
+    m_className = td.getName().toString();
     // Is the class a direct subclass of TestCase?
     Type superClass = td.getSuperclassType();
     if (superClass instanceof SimpleType) {
@@ -403,6 +408,10 @@ public class JUnitVisitor extends ASTVisitor {
     return m_testsWithExpected;
   }
 
+  public String toString() {
+    return "[JUnitVisitor for class " + m_className + "]";
+  }
+
   public List<ASTNode> getNodesToRemove() {
     return m_nodesToRemove;
   }
@@ -415,7 +424,7 @@ public class JUnitVisitor extends ASTVisitor {
       return false;
     }
 
-    if (getTestMethods().size() > 0 || getDisabledTestMethods().size() > 0 ||
+    if (m_hasTestMethods || getTestMethods().size() > 0 || getDisabledTestMethods().size() > 0 ||
         getBeforeMethods().size() > 0 || getAfterMethods().size() > 0) {
       return true;
     }
