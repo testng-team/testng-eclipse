@@ -204,20 +204,31 @@ public class AnnotationRewriter implements IRewriteProvider
     }
   }
 
-  private NormalAnnotation createAnnotation(AST ast, String name,
-      Map<String, Boolean> attributes) {
-    NormalAnnotation result = ast.newNormalAnnotation();
+  /**
+   * @return a NormalAnnotation if the annotation to create has attributes or a
+   * MarkerAnnotation otherwise.
+   */
+  private Annotation createAnnotation(AST ast, String name, Map<String, Boolean> attributes) {
+    Annotation result = null;
+    NormalAnnotation normalAnnotation = null;
+    if (attributes != null && attributes.size() > 0) {
+      normalAnnotation = ast.newNormalAnnotation();
+      result = normalAnnotation;
+    } else {
+      result = ast.newMarkerAnnotation();
+    }
     result.setTypeName(ast.newName(name));
     if (attributes != null) {
       for (Entry<String, Boolean> a : attributes.entrySet()) {
         MemberValuePair mvp = ast.newMemberValuePair();
         mvp.setName(ast.newSimpleName(a.getKey()));
         mvp.setValue(ast.newBooleanLiteral(a.getValue()));
-        result.values().add(mvp);
+        normalAnnotation.values().add(mvp);
       }
     }
     return result;
   }
+
   /**
    * Add the given annotation if the method is non null
    */
@@ -235,8 +246,8 @@ public class AnnotationRewriter implements IRewriteProvider
     }
   }
 
-  private void addAnnotation(AST ast, JUnitVisitor visitor, ASTRewrite rewriter, MethodDeclaration md, 
-      NormalAnnotation a, String annotationToRemove)
+  private void addAnnotation(AST ast, JUnitVisitor visitor, ASTRewrite rewriter,
+      MethodDeclaration md, Annotation a, String annotationToRemove)
   {
     ListRewrite lr = rewriter.getListRewrite(md, MethodDeclaration.MODIFIERS2_PROPERTY);
 
