@@ -3,17 +3,25 @@ package org.testng.eclipse.ui.conversion;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
+import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.testng.eclipse.collections.Maps;
@@ -40,6 +48,8 @@ public class AnnotationRewriter implements IRewriteProvider
     add("org.junit.After");
     add("org.junit.Before");
     add("org.junit.Test");
+    add("org.junit.runner.RunWith");
+    add("org.junit.runners.Parameterized");
   }};
   private static final Set<String> STATIC_IMPORTS_TO_REMOVE = new HashSet<String>() {{
     add("org.junit.Assert");
@@ -162,7 +172,83 @@ public class AnnotationRewriter implements IRewriteProvider
       result.remove(sci, null);
     }
 
+    //
+    // Convert @RunWith(Parameterized.class)
+    //
+    SingleMemberAnnotation runWith = visitor.getRunWithParameterized();
+    if (runWith != null) {
+      // Remove @RunWith
+      result.remove(runWith, null);
+
+      // Add imports
+      addImport(ast, result, astRoot, "org.testng.ConversionUtils.wrapDataProvider",
+          true /* static import */);
+      addImport(ast, result, astRoot, "org.testng.annotations.Factory", false /* not static */);
+
+      // Add the factory method
+      MethodDeclaration parameterMethod = visitor.getParametersMethod();
+      ListRewrite lr = result.getListRewrite(visitor.getType(),
+          TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+      MethodDeclaration md = ast.newMethodDeclaration();
+      md.setName(ast.newSimpleName("factory" + capitalize(parameterMethod.getName().toString())));
+
+      // Add the "Factory" annotation
+      MarkerAnnotation factory = ast.newMarkerAnnotation();
+      factory.setTypeName(ast.newName("Factory"));
+      md.modifiers().add(factory);
+
+      // Make the method public
+      md.modifiers().addAll(ast.newModifiers(Modifier.PUBLIC));
+      ArrayType returnType = ast.newArrayType(ast.newSimpleType(ast.newName("Object")));
+      md.setReturnType2(returnType);
+
+      // Create the method invocation "ConversionUtils.wrapDataProvider(data())"
+      MethodInvocation mi = ast.newMethodInvocation();
+      mi.setName(ast.newSimpleName("wrapDataProvider"));
+
+      // Add parameters to wrapDataProvider()
+      // 1) the current class
+      MethodInvocation getClass = ast.newMethodInvocation();
+      getClass.setName(ast.newSimpleName("getClass"));
+      mi.arguments().add(getClass);
+
+      // 2) the call to the @Parameters method
+      MethodInvocation pmi = ast.newMethodInvocation();
+      pmi.setName(ast.newSimpleName(parameterMethod.getName().getFullyQualifiedName()));
+      mi.arguments().add(pmi);
+
+      // Create the return statement
+      ReturnStatement returnStatement = ast.newReturnStatement();
+      returnStatement.setExpression(mi);
+
+      Block block = ast.newBlock();
+      block.statements().add(returnStatement);
+      md.setBody(block);
+
+      lr.insertFirst(md, null);
+    }
+
+    //
+    // Add a default constructor if needed
+    //
+    if (! visitor.hasDefaultConstructor()) {
+      ListRewrite lr = result.getListRewrite(visitor.getType(),
+          TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+      MethodDeclaration md = ast.newMethodDeclaration();
+      md.modifiers().addAll(ast.newModifiers(Modifier.PUBLIC));
+      md.setName(ast.newSimpleName(visitor.getType().getName().toString()));
+      md.setConstructor(true);
+      Block block = ast.newBlock();
+      md.setBody(block);
+
+      lr.insertFirst(md, null);
+    }
+
     return result;
+  }
+
+  private String capitalize(String s) {
+    return s.substring(0, 1).toUpperCase() + s.substring(1);
   }
 
   private Map<String, Boolean> createDisabledAttribute(AST ast) {

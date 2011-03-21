@@ -3,6 +3,7 @@ package org.testng.eclipse.ui.conversion;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -13,6 +14,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
@@ -77,6 +79,10 @@ public class JUnitVisitor extends ASTVisitor {
   private List<ASTNode> m_nodesToRemove = Lists.newArrayList();
   private SuperConstructorInvocation m_superConstructorInvocation;
   private String m_className;
+  private SingleMemberAnnotation m_runWithParameterized;
+  private MethodDeclaration m_parametersMethod;
+  private TypeDeclaration m_type;
+  private boolean m_hasDefaultConstructor = false;
 
   // The list of methods that are present on JUnit's Assert class
   private static Set<String> m_assertMethods = Sets.newHashSet();
@@ -142,6 +148,14 @@ public class JUnitVisitor extends ASTVisitor {
     }
     else if (methodName.equals("suite")) {
       m_suite = md;
+    } else if (methodName.equals(m_type.getName().toString())) {
+      // A constructor
+      if (md.parameters().size() == 0) {
+        m_hasDefaultConstructor = true;
+      }
+    }
+    else if (hasAnnotation(md, "Parameters")) {
+      m_parametersMethod = md;
     }
     else if (! hasAnnotation(md, "Test")) {
       // Public methods that start with "test" are tests.
@@ -164,7 +178,6 @@ public class JUnitVisitor extends ASTVisitor {
         m_testsWithExpected.put(mvp, "timeOut");
       }
     }
-
     
     return super.visit(md);
   }
@@ -214,7 +227,25 @@ public class JUnitVisitor extends ASTVisitor {
    */
   public boolean visit(TypeDeclaration td) {
     m_className = td.getName().toString();
+    m_type = td;
+
+    //
+    // Is this class annotated with @RunWith(Parameterized.class)?
+    //
+    List<IExtendedModifier> modifiers = td.modifiers();
+    for (IExtendedModifier m : modifiers) {
+      if (m.isAnnotation() && m instanceof SingleMemberAnnotation) {
+        SingleMemberAnnotation a = (SingleMemberAnnotation) m;
+        if ("RunWith".equals(a.getTypeName().toString()) &&
+            "Parameterized.class".equals(a.getValue().toString())) {
+          m_runWithParameterized = a;
+        }
+      }
+    }
+
+    //
     // Is the class a direct subclass of TestCase?
+    //
     Type superClass = td.getSuperclassType();
     if (superClass instanceof SimpleType) {
       SimpleType st = (SimpleType) superClass;
@@ -237,6 +268,19 @@ public class JUnitVisitor extends ASTVisitor {
     }
 
     return super.visit(td);
+  }
+
+  public SingleMemberAnnotation getRunWithParameterized() {
+    return m_runWithParameterized;
+  }
+
+  public MethodDeclaration getParametersMethod() {
+    return m_parametersMethod;
+  }
+
+  public boolean visit(NormalAnnotation annotation) {
+    System.out.println("Annotation");
+    return super.visit(annotation);
   }
 
   /**
@@ -449,5 +493,13 @@ public class JUnitVisitor extends ASTVisitor {
     }
 
     return false;
+  }
+
+  public TypeDeclaration getType() {
+    return m_type;
+  }
+
+  public boolean hasDefaultConstructor() {
+    return m_hasDefaultConstructor;
   }
 }
