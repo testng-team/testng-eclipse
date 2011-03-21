@@ -14,9 +14,6 @@ public class JUnit4ParameterizedTest {
   
   private int number;
 
-  // Should be created by the refactoring
-//  public JUnit4ParameterizedTest() {}
-
   public JUnit4ParameterizedTest(int number) {
      this.number = number;
   }
