@@ -1,10 +1,12 @@
 package org.testng.eclipse.convert;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class JUnit4Test1 {
 
@@ -16,12 +18,17 @@ public class JUnit4Test1 {
 
   @Before
   public void before() {
-    
   }
 
   @After
   public void after() {
-    
   }
 
+  @BeforeClass
+  public void bc() {
+  }
+
+  @AfterClass
+  public void ac() {
+  }
 }

@@ -3,7 +3,6 @@ package org.testng.eclipse.ui.conversion;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
-import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -27,6 +26,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.testng.eclipse.collections.Maps;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +47,9 @@ public class AnnotationRewriter implements IRewriteProvider
     add("junit.framework.TestCase");
     add("junit.framework.TestSuite");
     add("org.junit.After");
+    add("org.junit.AfterClass");
     add("org.junit.Before");
+    add("org.junit.BeforeClass");
     add("org.junit.Test");
     add("org.junit.runner.RunWith");
     add("org.junit.runners.Parameterized");
@@ -85,11 +87,15 @@ public class AnnotationRewriter implements IRewriteProvider
     //
     maybeAddImport(ast, result, astRoot, visitor.hasAsserts(), "org.testng.AssertJUnit");
     maybeAddImport(ast, result, astRoot, visitor.hasFail(), "org.testng.Assert");
+    maybeAddImport(ast, result, astRoot, !visitor.getBeforeClasses().isEmpty(),
+    "org.testng.annotations.BeforeClass");
     maybeAddImport(ast, result, astRoot, !visitor.getBeforeMethods().isEmpty(),
         "org.testng.annotations.BeforeMethod");
     maybeAddImport(ast, result, astRoot, visitor.hasTestMethods(), "org.testng.annotations.Test");
     maybeAddImport(ast, result, astRoot, !visitor.getAfterMethods().isEmpty(),
         "org.testng.annotations.AfterMethod");
+    maybeAddImport(ast, result, astRoot, !visitor.getAfterClasses().isEmpty(),
+    "org.testng.annotations.AfterClass");
 
     //
     // Add static imports
@@ -304,12 +310,12 @@ public class AnnotationRewriter implements IRewriteProvider
    * Add the given annotation if the method is non null
    */
   private void maybeAddAnnotations(AST ast, JUnitVisitor visitor, ASTRewrite rewriter,
-      List<MethodDeclaration> methods, String annotation, String annotationToRemove) {
+      Collection<MethodDeclaration> methods, String annotation, String annotationToRemove) {
     maybeAddAnnotations(ast, visitor, rewriter, methods, annotation, annotationToRemove, null);
   }
 
   private void maybeAddAnnotations(AST ast, JUnitVisitor visitor,
-      ASTRewrite rewriter, List<MethodDeclaration> methods, String annotation,
+      ASTRewrite rewriter, Collection<MethodDeclaration> methods, String annotation,
       String annotationToRemove, Map<String, Boolean> attributes) {
     for (MethodDeclaration method : methods) {
       maybeAddAnnotation(ast, visitor, rewriter, method, annotation, annotationToRemove,

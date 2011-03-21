@@ -25,6 +25,7 @@ import org.testng.internal.annotations.Sets;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,8 @@ public class JUnitVisitor extends ASTVisitor {
   private List<MethodDeclaration> m_disabledTestMethods = Lists.newArrayList();
   private List<MethodDeclaration> m_beforeMethods = Lists.newArrayList();
   private List<MethodDeclaration> m_afterMethods = Lists.newArrayList();
+  private List<MethodDeclaration> m_beforeClasses = Lists.newArrayList();
+  private List<MethodDeclaration> m_afterClasses = Lists.newArrayList();
   private MethodDeclaration m_suite = null;
 
   // Parent classes
@@ -155,6 +158,10 @@ public class JUnitVisitor extends ASTVisitor {
     }
     else if (hasAnnotation(md, "Parameters")) {
       m_parametersMethod = md;
+    } else if (hasAnnotation(md, "BeforeClass")) {
+      m_beforeClasses.add(md);
+    } else if (hasAnnotation(md, "AfterClass")) {
+      m_afterClasses.add(md);
     }
     else if (! hasAnnotation(md, "Test")) {
       // Public methods that start with "test" are tests.
@@ -275,11 +282,6 @@ public class JUnitVisitor extends ASTVisitor {
 
   public MethodDeclaration getParametersMethod() {
     return m_parametersMethod;
-  }
-
-  public boolean visit(NormalAnnotation annotation) {
-    System.out.println("Annotation");
-    return super.visit(annotation);
   }
 
   /**
@@ -407,8 +409,20 @@ public class JUnitVisitor extends ASTVisitor {
     Assert.assertTrue(true);
   }
 
-  public List<MethodDeclaration> getBeforeMethods() {
+  public Collection<MethodDeclaration> getBeforeMethods() {
     return m_beforeMethods;
+  }
+
+  public Collection<MethodDeclaration> getAfterMethods() {
+    return m_afterMethods;
+  }
+
+  public Collection<MethodDeclaration> getBeforeClasses() {
+    return m_beforeClasses;
+  }
+
+  public Collection<MethodDeclaration> getAfterClasses() {
+    return m_afterClasses;
   }
 
   public MethodDeclaration getSuite() {
@@ -419,15 +433,11 @@ public class JUnitVisitor extends ASTVisitor {
     m_suite = suite;
   }
 
-  public List<MethodDeclaration> getAfterMethods() {
-    return m_afterMethods;
-  }
-
-  public List<MethodDeclaration> getTestMethods() {
+  public Collection<MethodDeclaration> getTestMethods() {
     return m_testMethods;
   }
 
-  public List<MethodDeclaration> getDisabledTestMethods() {
+  public Collection<MethodDeclaration> getDisabledTestMethods() {
     return m_disabledTestMethods;
   }
 
