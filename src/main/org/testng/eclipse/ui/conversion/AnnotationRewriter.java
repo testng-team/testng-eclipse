@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.testng.eclipse.collections.Maps;
@@ -198,19 +199,19 @@ public class AnnotationRewriter implements IRewriteProvider
       md.modifiers().add(factory);
 
       // Make the method public
-      md.modifiers().addAll(ast.newModifiers(Modifier.PUBLIC));
+      md.modifiers().addAll(ast.newModifiers(Modifier.PUBLIC | Modifier.STATIC));
       ArrayType returnType = ast.newArrayType(ast.newSimpleType(ast.newName("Object")));
       md.setReturnType2(returnType);
 
-      // Create the method invocation "ConversionUtils.wrapDataProvider(data())"
+      // Create the method invocation "ConversionUtils.wrapDataProvider(Foo.class, data())"
       MethodInvocation mi = ast.newMethodInvocation();
       mi.setName(ast.newSimpleName("wrapDataProvider"));
 
       // Add parameters to wrapDataProvider()
       // 1) the current class
-      MethodInvocation getClass = ast.newMethodInvocation();
-      getClass.setName(ast.newSimpleName("getClass"));
-      mi.arguments().add(getClass);
+      TypeLiteral tl = ast.newTypeLiteral();
+      tl.setType(ast.newSimpleType(ast.newSimpleName(visitor.getType().getName().toString())));
+      mi.arguments().add(tl);
 
       // 2) the call to the @Parameters method
       MethodInvocation pmi = ast.newMethodInvocation();
@@ -223,22 +224,6 @@ public class AnnotationRewriter implements IRewriteProvider
 
       Block block = ast.newBlock();
       block.statements().add(returnStatement);
-      md.setBody(block);
-
-      lr.insertFirst(md, null);
-    }
-
-    //
-    // Add a default constructor if needed
-    //
-    if (! visitor.hasDefaultConstructor()) {
-      ListRewrite lr = result.getListRewrite(visitor.getType(),
-          TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
-      MethodDeclaration md = ast.newMethodDeclaration();
-      md.modifiers().addAll(ast.newModifiers(Modifier.PUBLIC));
-      md.setName(ast.newSimpleName(visitor.getType().getName().toString()));
-      md.setConstructor(true);
-      Block block = ast.newBlock();
       md.setBody(block);
 
       lr.insertFirst(md, null);
