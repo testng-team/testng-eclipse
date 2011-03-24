@@ -167,7 +167,7 @@ public class RunInfo {
     StringBuffer buffer = new StringBuffer();
     buffer.append("RunInfo[");
     buffer.append("status:" + getStatusName());
-    buffer.append(" type:" + m_type);
+    buffer.append(" type:" + typeToString(m_type));
     buffer.append(" id:");
     buffer.append(m_id);
     if (m_suiteName != null) {
@@ -207,6 +207,13 @@ public class RunInfo {
     buffer.append("]");
     
     return buffer.toString();
+  }
+
+  private String typeToString(int type) {
+    if (type == SUITE_TYPE) return "Suite";
+    else if (type == TEST_TYPE) return "Test";
+    else if (type == RESULT_TYPE) return "Result";
+    else return "<unknown>";
   }
 
   /**
