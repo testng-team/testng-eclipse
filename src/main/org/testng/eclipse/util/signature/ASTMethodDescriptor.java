@@ -2,6 +2,7 @@ package org.testng.eclipse.util.signature;
 
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -24,7 +25,7 @@ public class ASTMethodDescriptor implements IMethodDescriptor {
 
   public String getReturnTypeSignature() {
     Type returnType = m_method.getReturnType2();
-    if(null == returnType) {
+    if (null == returnType && m_method.getAST().apiLevel() < AST.JLS3) {
       returnType = m_method.getReturnType();
     }
     
