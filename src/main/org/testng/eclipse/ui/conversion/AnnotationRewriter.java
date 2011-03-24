@@ -50,6 +50,7 @@ public class AnnotationRewriter implements IRewriteProvider
     add("org.junit.AfterClass");
     add("org.junit.Before");
     add("org.junit.BeforeClass");
+    add("org.junit.Ignore");
     add("org.junit.Test");
     add("org.junit.runner.RunWith");
     add("org.junit.runners.Parameterized");
@@ -137,6 +138,24 @@ public class AnnotationRewriter implements IRewriteProvider
     //
     for (ASTNode n : visitor.getNodesToRemove()) {
       result.remove(n, null);
+    }
+
+    //
+    // Replace @Ignore with @Test(enabled = false)
+    //
+    for (Map.Entry<MethodDeclaration, Annotation> e : visitor.getIgnoredMethods().entrySet()) {
+      MethodDeclaration md = e.getKey();
+      Annotation ignored = e.getValue();
+      // Add the @Test(enabled = false)
+      NormalAnnotation test = ast.newNormalAnnotation();
+      test.setTypeName(ast.newName("Test"));
+      MemberValuePair mvp = ast.newMemberValuePair();
+      mvp.setName(ast.newSimpleName("enabled"));
+      mvp.setValue(ast.newBooleanLiteral(false));
+      test.values().add(mvp);
+      result.remove(ignored, null);
+      ListRewrite lr = result.getListRewrite(md, MethodDeclaration.MODIFIERS2_PROPERTY);
+      lr.insertFirst(test, null);
     }
 
     //

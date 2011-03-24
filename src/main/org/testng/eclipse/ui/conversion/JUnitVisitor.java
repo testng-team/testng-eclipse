@@ -85,6 +85,7 @@ public class JUnitVisitor extends ASTVisitor {
   private MethodDeclaration m_parametersMethod;
   private TypeDeclaration m_type;
   private boolean m_hasDefaultConstructor = false;
+  private Map<MethodDeclaration, Annotation> m_ignoredMethods = Maps.newHashMap();
 
   // The list of methods that are present on JUnit's Assert class
   private static Set<String> m_assertMethods = Sets.newHashSet();
@@ -146,26 +147,24 @@ public class JUnitVisitor extends ASTVisitor {
 
     if (methodName.equals("setUp") || hasAnnotation(md, "Before")) {
       m_beforeMethods.add(md);
-    }
-    else if (methodName.equals("tearDown") || hasAnnotation(md, "After")) {
+    } else if (methodName.equals("tearDown") || hasAnnotation(md, "After")) {
       m_afterMethods.add(md);
-    }
-    else if (methodName.equals("suite")) {
+    } else if (methodName.equals("suite")) {
       m_suite = md;
     } else if (methodName.equals(m_type.getName().toString())) {
       // A constructor
       if (md.parameters().size() == 0) {
         m_hasDefaultConstructor = true;
       }
-    }
-    else if (hasAnnotation(md, "Parameters")) {
+    } else if (hasAnnotation(md, "Parameters")) {
       m_parametersMethod = md;
     } else if (hasAnnotation(md, "BeforeClass")) {
       m_beforeClasses.add(md);
     } else if (hasAnnotation(md, "AfterClass")) {
       m_afterClasses.add(md);
-    }
-    else if (! hasAnnotation(md, "Test")) {
+    } else if (hasAnnotation(md, "Ignore")) {
+      m_ignoredMethods.put(md, getAnnotation(md, "Ignore"));
+    } else if (! hasAnnotation(md, "Test")) {
       // Public methods that start with "test" are tests.
       // Methods that start with "_test" or private test methods that start with "test" are disabled
       boolean isPrivate = (md.getModifiers() & Modifier.PRIVATE) != 0;
@@ -174,8 +173,7 @@ public class JUnitVisitor extends ASTVisitor {
       } else if (methodName.startsWith("_test") || (methodName.startsWith("test") && isPrivate)) {
         m_disabledTestMethods.add(md);
       }
-    }
-    else if (hasAnnotation(md, "Test")) {
+    }  else if (hasAnnotation(md, "Test")) {
       m_hasTestMethods = true;  // to make sure we import org.testng.annotations.Test
       MemberValuePair mvp = getAttribute(md, "expected");
       if (mvp != null) {
@@ -190,22 +188,26 @@ public class JUnitVisitor extends ASTVisitor {
     return super.visit(md);
   }
 
-  /**
-   * @return true if the given method is annotated with the annotation
-   */
-  private boolean hasAnnotation(MethodDeclaration md, String annotation) {
+  private Annotation getAnnotation(MethodDeclaration md, String annotation) {
     @SuppressWarnings("unchecked")
     List<IExtendedModifier> modifiers = md.modifiers();
     for (IExtendedModifier m : modifiers) {
       if (m.isAnnotation()) {
         Annotation a = (Annotation) m;
         if (annotation.equals(a.getTypeName().toString())) {
-          return true;
+          return a;
         }
       }
     }
 
-    return false;
+    return null;
+  }
+
+  /**
+   * @return true if the given method is annotated with the annotation
+   */
+  private boolean hasAnnotation(MethodDeclaration md, String annotation) {
+    return getAnnotation(md, annotation) != null;
   }
 
   /**
@@ -512,5 +514,9 @@ public class JUnitVisitor extends ASTVisitor {
 
   public boolean hasDefaultConstructor() {
     return m_hasDefaultConstructor;
+  }
+
+  public Map<MethodDeclaration, Annotation> getIgnoredMethods() {
+    return m_ignoredMethods;
   }
 }
