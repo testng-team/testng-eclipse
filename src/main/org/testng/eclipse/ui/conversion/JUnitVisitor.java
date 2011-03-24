@@ -90,9 +90,11 @@ public class JUnitVisitor extends ASTVisitor {
   private static Set<String> m_assertMethods = Sets.newHashSet();
 
   static {
-    for (Method m : Assert.class.getMethods()) {
+    for (Method m : Assert.class.getDeclaredMethods()) {
       m_assertMethods.add(m.getName());
     }
+    // Also add a few methods from the JUnit4 Assert class
+    m_assertMethods.add("assertArrayEquals");
   }
 
   public boolean visit(ImportDeclaration id) {
