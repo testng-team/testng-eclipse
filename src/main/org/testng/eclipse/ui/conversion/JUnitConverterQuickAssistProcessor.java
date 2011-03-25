@@ -5,7 +5,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -16,8 +15,10 @@ import org.testng.eclipse.collections.Lists;
 
 import java.util.List;
 
-public class JUnitConverterQuickAssistProcessor implements
-    IQuickAssistProcessor {
+public class JUnitConverterQuickAssistProcessor
+  extends BaseQuickAssistProcessor
+  implements IQuickAssistProcessor
+{
 
   /**
    * This method needs to return fast since the QuickAssist pop up is waiting on it.
@@ -44,14 +45,6 @@ public class JUnitConverterQuickAssistProcessor implements
     return false;
   }
 
-  public static CompilationUnit createCompilationUnit(ICompilationUnit cu) {
-    ASTParser parser = ASTParser.newParser(AST.JLS3);
-    parser.setSource(cu);
-    parser.setResolveBindings(true);
-
-    return (CompilationUnit) parser.createAST(null);
-  }
-
   public IJavaCompletionProposal[] getAssists(IInvocationContext context,
       IProblemLocation[] locations) 
     throws CoreException 
@@ -68,17 +61,12 @@ public class JUnitConverterQuickAssistProcessor implements
       CompilationUnit astRoot = createCompilationUnit(cu);
       AST ast = context.getASTRoot().getAST();
 
-      // Populate the JUnitVisitor with the information we'll be needing
-      // to do the rewriting
-      JUnitVisitor visitor = new JUnitVisitor();
-      astRoot.accept(visitor);
-      
       IRewriteProvider[] providers = new IRewriteProvider[] {
           new AnnotationRewriter(),
       };
 
       for (int i = 0; i < providers.length; i++) {
-        ASTRewrite rewriter = providers[i].createRewriter(astRoot, ast, visitor);
+        ASTRewrite rewriter = providers[i].createRewriter(astRoot, ast);
         vResult.add(new JUnitRewriteCorrectionProposal(
             providers[i].getName(), cu, rewriter, 1));
       }

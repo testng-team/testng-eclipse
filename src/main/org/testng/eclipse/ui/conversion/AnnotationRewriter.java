@@ -59,12 +59,11 @@ public class AnnotationRewriter implements IRewriteProvider
     add("org.junit.Assert");
   }};
 
-  public ASTRewrite createRewriter(CompilationUnit astRoot,
-      AST ast,
-      JUnitVisitor visitor
-      ) 
-  {
+  public ASTRewrite createRewriter(CompilationUnit astRoot, AST ast) {
     final ASTRewrite result = ASTRewrite.create(astRoot.getAST());
+    JUnitVisitor visitor = new JUnitVisitor();
+    astRoot.accept(visitor);
+
 
     //
     // Remove some JUnit imports.

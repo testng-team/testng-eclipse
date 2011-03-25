@@ -44,7 +44,7 @@ import junit.framework.Assert;
  * Created on Aug 8, 2005
  * @author Cedric Beust <cedric@beust.com>
  */
-public class JUnitVisitor extends ASTVisitor {
+public class JUnitVisitor extends Visitor {
   private List<MethodDeclaration> m_testMethods = Lists.newArrayList();
   private List<MethodDeclaration> m_disabledTestMethods = Lists.newArrayList();
   private List<MethodDeclaration> m_beforeMethods = Lists.newArrayList();
@@ -186,28 +186,6 @@ public class JUnitVisitor extends ASTVisitor {
     }
     
     return super.visit(md);
-  }
-
-  private Annotation getAnnotation(MethodDeclaration md, String annotation) {
-    @SuppressWarnings("unchecked")
-    List<IExtendedModifier> modifiers = md.modifiers();
-    for (IExtendedModifier m : modifiers) {
-      if (m.isAnnotation()) {
-        Annotation a = (Annotation) m;
-        if (annotation.equals(a.getTypeName().toString())) {
-          return a;
-        }
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * @return true if the given method is annotated with the annotation
-   */
-  private boolean hasAnnotation(MethodDeclaration md, String annotation) {
-    return getAnnotation(md, annotation) != null;
   }
 
   /**

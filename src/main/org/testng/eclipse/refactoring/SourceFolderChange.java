@@ -46,12 +46,10 @@ public class SourceFolderChange extends CompositeChange {
     parser.setResolveBindings(true);
     parser.setSource((ICompilationUnit) JavaCore.create(resource));
     CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);
-    JUnitVisitor visitor = new JUnitVisitor();
-    astRoot.accept(visitor);
 
 //    AST ast = context.getASTRoot().getAST();
     AST ast = astRoot.getAST();
-    ASTRewrite rewriter = new AnnotationRewriter().createRewriter(astRoot, ast, visitor);
+    ASTRewrite rewriter = new AnnotationRewriter().createRewriter(astRoot, ast);
     try {
       TextEdit edit = rewriter.rewriteAST();
       result = new TextFileChange(resource.getName(), (IFile) resource);

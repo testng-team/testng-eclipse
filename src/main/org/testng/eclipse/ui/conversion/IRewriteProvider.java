@@ -12,10 +12,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
  */
 public interface IRewriteProvider {
   
-  public ASTRewrite createRewriter(CompilationUnit astRoot,
-      AST ast,
-      JUnitVisitor visitor
-      );
+  public ASTRewrite createRewriter(CompilationUnit astRoot, AST ast);
   
   public String getName();
 

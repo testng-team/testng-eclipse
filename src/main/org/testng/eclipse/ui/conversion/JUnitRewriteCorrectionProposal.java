@@ -41,9 +41,11 @@ public class JUnitRewriteCorrectionProposal implements IJavaCompletionProposal
 {
   private ASTRewrite m_rewriter;
   private ICompilationUnit m_cu;
+  private String m_name;
 
   public JUnitRewriteCorrectionProposal(String name, ICompilationUnit cu,
       ASTRewrite rewriter, int i) {
+    m_name = name;
     m_rewriter = rewriter;
     m_cu = cu;
   }
@@ -269,7 +271,7 @@ public class JUnitRewriteCorrectionProposal implements IJavaCompletionProposal
   }
 
   public String getDisplayString() {
-    return "Convert to TestNG";
+    return m_name;
   }
 
   public Image getImage() {

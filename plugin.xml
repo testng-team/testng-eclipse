@@ -3,7 +3,7 @@
 <plugin
    id="org.testng.eclipse"
    name="TestNG"
-   version="6.0.0.20110324_1253"
+   version="6.0.1.20110325_1005"
    provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
   <runtime>
@@ -280,6 +280,11 @@
                    name="org.testng.eclipse.ui.conversion.JUnitConverterQuickAssistProcessor"
                    class="org.testng.eclipse.ui.conversion.JUnitConverterQuickAssistProcessor">
           </quickAssistProcessor>
+          <quickAssistProcessor
+                class="org.testng.eclipse.refactoring.TestNGQuickAssistProcessor"
+                id="org.testng.eclipse.refactoring.TestNGQuickAssistProcessor"
+                name="org.testng.eclipse.refactoring.TestNGQuickAssistProcessor">
+          </quickAssistProcessor>
   </extension>
 
   <extension
@@ -336,6 +341,10 @@
       <contribution
             class="org.testng.eclipse.refactoring.ConvertFromJUnitRefactoringContribution"
             id="org.testng.eclipse.convert">
+      </contribution>
+      <contribution
+            class="org.testng.eclipse.refactoring.TestNGRefactoringContribution"
+            id="org.testng.eclipse.refactoring.testng">
       </contribution>
   </extension>
 <!--
