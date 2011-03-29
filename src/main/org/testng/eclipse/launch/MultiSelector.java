@@ -2,32 +2,19 @@ package org.testng.eclipse.launch;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
-import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
-import org.testng.eclipse.launch.TestngTestSelector.ButtonHandler;
 import org.testng.eclipse.launch.components.CheckBoxTable;
-import org.testng.eclipse.launch.components.Filters;
-import org.testng.eclipse.launch.components.ITestContent;
-import org.testng.eclipse.ui.util.ConfigurationHelper;
-import org.testng.eclipse.ui.util.TypeParser;
-import org.testng.eclipse.ui.util.Utils;
-import org.testng.eclipse.util.JDTUtil;
-import org.testng.eclipse.util.TestSearchEngine;
+import org.testng.eclipse.util.StringUtils;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Abstract base class for launch configurations that allow the user to select one or more
@@ -84,15 +71,15 @@ abstract public class MultiSelector extends TestngTestSelector {
       Arrays.sort(uniqueValues);
       final CheckBoxTable cbt = new CheckBoxTable(getCallback().getShell(), uniqueValues, titleId);
       String content = getText();
-      if(!Utils.isEmpty(content)) {
-        List<String> s = Utils.stringToList(content);
+      if(! StringUtils.isEmptyString(content)) {
+        List<String> s = StringUtils.stringToList(content);
         String[] existingValues = s.toArray(new String[s.size()]);
         cbt.checkElements(existingValues);
       }
       if(SelectionStatusDialog.CANCEL != cbt.open()) {
         String[] selectedValues = cbt.getSelectedElements();
         m_valueMap = onSelect(selectedValues);
-        setText(Utils.listToString(Arrays.asList(selectedValues)));
+        setText(StringUtils.listToString(Arrays.asList(selectedValues)));
   
       }
   

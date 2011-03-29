@@ -7,7 +7,7 @@ import org.testng.collections.Maps;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
-import org.testng.eclipse.ui.util.Utils;
+import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.TestSearchEngine;
 
 import java.lang.reflect.InvocationTargetException;
@@ -52,7 +52,7 @@ public class SuiteSelector2 extends MultiSelector {
   @Override
   public void initializeFrom(ILaunchConfiguration configuration) {
     List<String> names = ConfigurationHelper.getSuites(configuration);
-    setText(Utils.listToString(names));
+    setText(StringUtils.listToString(names));
   }
 
   @Override

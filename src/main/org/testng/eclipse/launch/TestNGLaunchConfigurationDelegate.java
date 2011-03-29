@@ -24,11 +24,11 @@ import org.testng.ITestNGListener;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
-import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.LaunchUtil;
 import org.testng.eclipse.util.ListenerContributorUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.ResourceUtil;
+import org.testng.eclipse.util.StringUtils;
 import org.testng.remote.RemoteArgs;
 import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
@@ -37,7 +37,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -271,8 +270,8 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
         argv.add(suite);
       }
 
-      launch.setAttribute(TestNGLaunchConfigurationConstants.TEMP_SUITE_LIST, Utils
-          .listToString(tempSuites));
+      launch.setAttribute(TestNGLaunchConfigurationConstants.TEMP_SUITE_LIST, 
+          StringUtils.listToString(tempSuites));
     }
 
     vmConfig.setProgramArguments(argv.toArray(new String[argv.size()]));

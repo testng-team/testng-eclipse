@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SWTUtil;
+import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.Utils;
 import org.testng.eclipse.util.Utils.JavaElement;
 
@@ -182,7 +183,7 @@ public class NewTestNGClassWizardPage extends WizardPage {
       if (sel.getPackageName() != null) {
         m_packageNameText.setText(sel.getPackageName());
       }
-      String className = org.testng.eclipse.ui.util.Utils.isEmpty(sel.getClassName())
+      String className = StringUtils.isEmptyString(sel.getClassName())
           ? "NewTest" : sel.getClassName() + "Test";
       m_classNameText.setText(className);
     }

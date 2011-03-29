@@ -17,7 +17,7 @@ import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.RunInfo;
-import org.testng.eclipse.util.JDTUtil;
+import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.SuiteGenerator;
 import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
@@ -553,7 +553,7 @@ public class ConfigurationHelper {
     configuration.setAttribute(TestNGLaunchConfigurationConstants.GROUP_CLASS_LIST,
                                Utils.uniqueMergeList(launchInfo.m_groupMap.values()));
     configuration.setAttribute(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
-                               Utils.stringToNullList(launchInfo.m_suiteName));
+                               StringUtils.stringToNullList(launchInfo.m_suiteName));
     configuration.setAttribute(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
                                toClassMethodsMap(classMethods));
 //    configuration.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,

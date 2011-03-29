@@ -22,7 +22,6 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.DebugUITools;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.debug.ui.StatusInfo;
 import org.eclipse.jface.action.Action;
@@ -78,12 +77,12 @@ import org.testng.ITestResult;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.ui.summary.SummaryTab;
-import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.CustomSuite;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.LaunchUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.ResourceUtil;
+import org.testng.eclipse.util.StringUtils;
 import org.testng.remote.strprotocol.GenericMessage;
 import org.testng.remote.strprotocol.IMessageSender;
 import org.testng.remote.strprotocol.IRemoteSuiteListener;
@@ -427,7 +426,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       TestNGPlugin.log("Monitoring results at " + path);
       m_watchThread = new WatchResultThread(path, this, this);
     } else {
-      if (! Utils.isEmpty(path)) TestNGPlugin.log("No longer monitoring results at " + path);
+      if (! StringUtils.isEmptyString(path)) TestNGPlugin.log("No longer monitoring results at " + path);
       m_watchThread = null;
     }
   }

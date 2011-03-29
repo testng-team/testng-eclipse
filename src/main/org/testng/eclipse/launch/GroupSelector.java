@@ -5,9 +5,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
@@ -15,14 +13,13 @@ import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.launch.components.ITestContent;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.TypeParser;
-import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.JDTUtil;
+import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.TestSearchEngine;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -98,7 +95,7 @@ public class GroupSelector extends MultiSelector {
   @Override
   public void initializeFrom(ILaunchConfiguration configuration) {
     List<String> groupNames = ConfigurationHelper.getGroups(configuration);
-    setText(Utils.listToString(groupNames));
+    setText(StringUtils.listToString(groupNames));
     m_groupMap.clear();
     List<String> groupClassNames = ConfigurationHelper.getGroupClasses(configuration);
     groupNames = ConfigurationHelper.getGroups(configuration);

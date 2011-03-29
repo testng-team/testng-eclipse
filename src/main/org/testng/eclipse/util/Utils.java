@@ -324,8 +324,4 @@ public class Utils {
   	monitor.worked(1);
   }
 
-  public static boolean isEmptyString(String content) {
-    return null == content || content.trim().length() == 0;
-  }
-
 }

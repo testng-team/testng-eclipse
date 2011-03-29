@@ -8,8 +8,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
-import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.ResourceUtil;
+import org.testng.eclipse.util.StringUtils;
 
 import java.util.List;
 
@@ -57,6 +57,6 @@ public class SuiteSelector extends TestngTestSelector {
   @Override
   public void initializeFrom(ILaunchConfiguration configuration) {
     List<String> suites = ConfigurationHelper.getSuites(configuration);
-    setText(Utils.listToString(suites));
+    setText(StringUtils.listToString(suites));
   }
 }
