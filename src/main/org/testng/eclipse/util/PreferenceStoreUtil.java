@@ -51,11 +51,12 @@ public class PreferenceStoreUtil {
   }
   
   public String getXmlTemplateFile(String projectName, boolean projectOnly) {
-    if (projectOnly) {
-      return m_storage.getString(projectName + TestNGPluginConstants.S_XML_TEMPLATE_FILE);
-    } else {      
-      return "";
+    String result = m_storage.getString(projectName + TestNGPluginConstants.S_XML_TEMPLATE_FILE);
+    if (Utils.isEmptyString(result) && ! projectOnly) {
+      result = m_storage.getString(TestNGPluginConstants.S_XML_TEMPLATE_FILE);
     }
+
+    return result;
   }
 
   public IPath getOutputDirectoryPath(IJavaProject project) {
