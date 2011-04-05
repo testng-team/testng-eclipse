@@ -1,16 +1,6 @@
 package org.testng.eclipse.ui;
 
-import static org.testng.eclipse.ui.Images.IMG_SUITE;
-import static org.testng.eclipse.ui.Images.IMG_SUITE_FAIL;
-import static org.testng.eclipse.ui.Images.IMG_SUITE_OK;
-import static org.testng.eclipse.ui.Images.IMG_SUITE_RUN;
-import static org.testng.eclipse.ui.Images.IMG_SUITE_SKIP;
-import static org.testng.eclipse.ui.Images.IMG_TEST;
-import static org.testng.eclipse.ui.Images.IMG_TEST_FAIL;
 import static org.testng.eclipse.ui.Images.IMG_TEST_HIERARCHY;
-import static org.testng.eclipse.ui.Images.IMG_TEST_OK;
-import static org.testng.eclipse.ui.Images.IMG_TEST_RUN;
-import static org.testng.eclipse.ui.Images.IMG_TEST_SKIP;
 
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.Action;
@@ -37,7 +27,6 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IMemento;
-import org.testng.ITestResult;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.collections.Sets;
