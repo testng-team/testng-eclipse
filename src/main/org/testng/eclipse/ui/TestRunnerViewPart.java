@@ -1361,22 +1361,18 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   public void onReportEvents(ReportMessage message) {
-    TreeInfo ti = new TreeInfo();
-    Map<String, Collection<ITestNGMethod>> passed = message.getPassed();
-    for (Map.Entry<String, Collection<ITestNGMethod>> e : passed.entrySet()) {
-      Collection<ITestNGMethod> methods = e.getValue();
-      for (ITestNGMethod m : methods) {
-        XmlTest xmlTest = m.getXmlTest();
-        String suiteName = xmlTest.getSuite().getName();
-        String testName = xmlTest.getName();
-        ti.getOrCreateMethod(suiteName, testName, m.getTestClassName(), m.getMethodName());
-      }
-
-      System.out.println("[TRVP] Tree:\n" + ti);
+    for (TestResultMessage trm : message.getPassed()) {
+      onTestSuccess(trm);
     }
-    for (TestRunTab tab : m_tabsList) {
-      tab.setTree(ti);
-    }
+//      String suiteName = trm.getSuiteName();
+//      String testName = trm.getTestClass();
+//      ti.getOrCreateMethod(suiteName, testName, trm.getTestClass(), trm.getMethod());
+//
+//      System.out.println("[TRVP] Tree:\n" + ti);
+//    }
+//    for (TestRunTab tab : m_tabsList) {
+//      tab.setTree(ti);
+//    }
 
   }
 

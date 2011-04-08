@@ -68,7 +68,6 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   private Tree m_tree;
   private TestRunnerViewPart m_testRunnerPart;
   private SashForm m_sashForm;
-  private Composite m_parentComposite;
 
   @Override
   public String getSelectedTestId() {
@@ -139,8 +138,6 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     initImages();
     initMenu();
     addListeners();
-
-    m_parentComposite = result;
 
     return result;
   }
@@ -489,6 +486,34 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     m_sashForm.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
   }
 
+//  public void setTree(final TreeInfo ti) {
+//    postSyncRunnable(new Runnable() {
+//      public void run() {
+//        for (Entry<String, Node<String>> es : ti.getSuites().entrySet()) {
+//          TreeItem tri = new TreeItem(m_tree, SWT.NONE);
+//          tri.setText(es.getKey());
+//          Node<String> suite = es.getValue();
+//
+//          for (Node<String> test : suite.getChildren()) {
+//            TreeItem testTri = new TreeItem(tri, SWT.NONE);
+//            testTri.setText(test.getName());
+//
+//            for (Node<String> cls : test.getChildren()) {
+//              TreeItem classTri = new TreeItem(testTri, SWT.NONE);
+//              classTri.setText(cls.getName());
+//
+//              for (Node<String> method : cls.getChildren()) {
+//                TreeItem methodTri = new TreeItem(classTri, SWT.NONE);
+//                methodTri.setText(method.getName());
+//                postTestResult(createRunInfo(trm, null, ITestResult.SUCCESS), 0 /*no error*/);
+//              }
+//            }
+//          }
+//        }
+//      }
+//    });
+//  }
+
 //  private void addResizeListener(Composite parent) {
 //    parent.addControlListener(new ControlListener() {
 //      public void controlMoved(ControlEvent e) {
@@ -499,33 +524,5 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
 //      }
 //    });
 //  }
-
-  public void setTree(final TreeInfo ti) {
-    postSyncRunnable(new Runnable() {
-      public void run() {
-        for (Entry<String, Node<String>> es : ti.getSuites().entrySet()) {
-          TreeItem tri = new TreeItem(m_tree, SWT.NONE);
-          tri.setText(es.getKey());
-          Node<String> suite = es.getValue();
-          
-          for (Node<String> test : suite.getChildren()) {
-            TreeItem testTri = new TreeItem(tri, SWT.NONE);
-            testTri.setText(test.getName());
-
-            for (Node<String> cls : test.getChildren()) {
-              TreeItem classTri = new TreeItem(testTri, SWT.NONE);
-              classTri.setText(cls.getName());
-
-              for (Node<String> method : cls.getChildren()) {
-                TreeItem methodTri = new TreeItem(classTri, SWT.NONE);
-                methodTri.setText(method.getName());
-              }
-            }
-          }
-        }
-        
-      }
-    });
-  }
 
 }
