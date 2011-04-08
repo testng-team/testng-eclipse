@@ -224,10 +224,11 @@ public class ProgressBar extends Canvas {
 
   public void step(int failures) {
     m_currentTickCount++;
-    m_methodsCounter++;
+    m_testCounter++;
     int x = m_colorBarWidth;
 
     m_colorBarWidth = scale(m_currentTickCount);
+    System.out.println("Color bar width:" + m_colorBarWidth);
     if (m_error == ITestResult.SUCCESS && (failures > 0)) {
       m_error = ITestResult.FAILURE;
       x = 1;

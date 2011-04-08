@@ -9,6 +9,7 @@ import org.testng.remote.strprotocol.IMessageSender;
 import org.testng.remote.strprotocol.IRemoteSuiteListener;
 import org.testng.remote.strprotocol.IRemoteTestListener;
 import org.testng.remote.strprotocol.MessageHelper;
+import org.testng.remote.strprotocol.ProgressMessage;
 import org.testng.remote.strprotocol.ReportMessage;
 import org.testng.remote.strprotocol.StringMessageSender;
 import org.testng.remote.strprotocol.SuiteMessage;
@@ -148,6 +149,18 @@ public class EclipseTestRunnerClient extends AbstractRemoteTestRunnerClient {
       Platform.run(new ListenerSafeRunnable() {
         public void run() {
           listener.onReportEvents(message);
+        }
+      });
+    }
+  }
+
+  @Override
+  protected void notifyProgress(final ProgressMessage message) {
+    for(int i = 0; i < m_suiteListeners.length; i++) {
+      final IRemoteSuiteListener listener = m_suiteListeners[i];
+      Platform.run(new ListenerSafeRunnable() {
+        public void run() {
+          listener.onProgressEvents(message);
         }
       });
     }

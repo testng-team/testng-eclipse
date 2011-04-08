@@ -89,6 +89,7 @@ import org.testng.remote.strprotocol.GenericMessage;
 import org.testng.remote.strprotocol.IMessageSender;
 import org.testng.remote.strprotocol.IRemoteSuiteListener;
 import org.testng.remote.strprotocol.IRemoteTestListener;
+import org.testng.remote.strprotocol.ProgressMessage;
 import org.testng.remote.strprotocol.ReportMessage;
 import org.testng.remote.strprotocol.SerializedMessageSender;
 import org.testng.remote.strprotocol.StringMessageSender;
@@ -1140,16 +1141,11 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private void postTestResult(final RunInfo runInfo, final int progressStep) {
     postSyncRunnable(new Runnable() {
       public void run() {
-        if(isDisposed()) {
-          return;
-        }
-//        for(int i = 0; i < m_tabsList.size(); i++) {
-//          ((TestRunTab) m_tabsList.elementAt(i)).newTreeEntry(runInfo);
+//        if(isDisposed()) {
+//          return;
 //        }
-
-        fProgressBar.step(progressStep);
-//        updateProgressBar(m_progressBar.getSelection() + 1, (progressStep == 0));
-
+//        fProgressBar.step(progressStep);
+//
         for (TestRunTab tab : m_tabsList) {
           tab.updateTestResult(runInfo);
         }
@@ -1376,6 +1372,21 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   }
 
+  int m_progress = 0;
+
+  public void onProgressEvents(final ProgressMessage message) {
+    m_progress += message.getTestCount();
+    System.out.println("Progress:" + m_progress + "/" + message.getTotalTestCount());
+    postSyncRunnable(new Runnable() {
+
+      public void run() {
+        fProgressBar.setMaximum(message.getTotalTestCount(), 0);
+        fProgressBar.step(0);
+      }
+
+    });
+  }
+
   public void onStart(TestMessage tm) {
     RunInfo ri= new RunInfo(tm.getSuiteName(), tm.getTestName());
     ri.m_methodCount= tm.getTestMethodCount();
@@ -1398,12 +1409,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private void updateProgressBar() {
-    postSyncRunnable(new Runnable() {
-      public void run() {
-        int newMaxBar = (m_methodTotalCount * m_testsTotalCount) / (m_testCount + 1);
-        fProgressBar.setMaximum(newMaxBar, m_methodTotalCount);
-      }
-    });
+//    postSyncRunnable(new Runnable() {
+//      public void run() {
+//        int newMaxBar = (m_methodTotalCount * m_testsTotalCount) / (m_testCount + 1);
+//        fProgressBar.setMaximum(newMaxBar, m_methodTotalCount);
+//      }
+//    });
   }
 
   public void onFinish(TestMessage tm) {
@@ -1428,7 +1439,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //          ((TestRunTab) m_tabsList.elementAt(i)).updateEntry(entryId);
 //        }
         
-        fProgressBar.stepTests();
+        fProgressBar.step(0);
         m_stopButton.setEnabled(false);
       }
     });
