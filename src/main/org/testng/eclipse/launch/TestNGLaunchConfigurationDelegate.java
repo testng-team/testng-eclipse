@@ -193,6 +193,8 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       argv.add(CommandLineArgs.PORT);
     } else {
       p("Using the serialized protocol");
+      argv.add(RemoteArgs.PROTOCOL_VERSION);
+      argv.add("2");
       argv.add(RemoteArgs.PORT);
     }
     argv.add(Integer.toString(port));

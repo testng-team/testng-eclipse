@@ -40,6 +40,7 @@ import org.testng.eclipse.util.ResourceUtil;
 
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -498,5 +499,33 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
 //      }
 //    });
 //  }
+
+  public void setTree(final TreeInfo ti) {
+    postSyncRunnable(new Runnable() {
+      public void run() {
+        for (Entry<String, Node<String>> es : ti.getSuites().entrySet()) {
+          TreeItem tri = new TreeItem(m_tree, SWT.NONE);
+          tri.setText(es.getKey());
+          Node<String> suite = es.getValue();
+          
+          for (Node<String> test : suite.getChildren()) {
+            TreeItem testTri = new TreeItem(tri, SWT.NONE);
+            testTri.setText(test.getName());
+
+            for (Node<String> cls : test.getChildren()) {
+              TreeItem classTri = new TreeItem(testTri, SWT.NONE);
+              classTri.setText(cls.getName());
+
+              for (Node<String> method : cls.getChildren()) {
+                TreeItem methodTri = new TreeItem(classTri, SWT.NONE);
+                methodTri.setText(method.getName());
+              }
+            }
+          }
+        }
+        
+      }
+    });
+  }
 
 }

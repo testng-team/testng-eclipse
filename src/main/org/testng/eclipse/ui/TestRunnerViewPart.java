@@ -73,7 +73,9 @@ import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
+import org.testng.ITestNGMethod;
 import org.testng.ITestResult;
+import org.testng.collections.Lists;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.ui.summary.SummaryTab;
@@ -87,15 +89,20 @@ import org.testng.remote.strprotocol.GenericMessage;
 import org.testng.remote.strprotocol.IMessageSender;
 import org.testng.remote.strprotocol.IRemoteSuiteListener;
 import org.testng.remote.strprotocol.IRemoteTestListener;
+import org.testng.remote.strprotocol.ReportMessage;
 import org.testng.remote.strprotocol.SerializedMessageSender;
 import org.testng.remote.strprotocol.StringMessageSender;
 import org.testng.remote.strprotocol.SuiteMessage;
 import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
+import org.testng.xml.XmlTest;
 
 import java.net.SocketTimeoutException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -1338,6 +1345,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       postShowTestResultsView();
       stopTest();
       m_stopTime= System.currentTimeMillis();
+      ppp("Total time: " + ((m_stopTime - m_startTime) / 1000) + " sec");
       postSyncRunnable(new Runnable() {
         public void run() {
           if(isDisposed()) {
@@ -1350,6 +1358,26 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       });
       
     }
+  }
+
+  public void onReportEvents(ReportMessage message) {
+    TreeInfo ti = new TreeInfo();
+    Map<String, Collection<ITestNGMethod>> passed = message.getPassed();
+    for (Map.Entry<String, Collection<ITestNGMethod>> e : passed.entrySet()) {
+      Collection<ITestNGMethod> methods = e.getValue();
+      for (ITestNGMethod m : methods) {
+        XmlTest xmlTest = m.getXmlTest();
+        String suiteName = xmlTest.getSuite().getName();
+        String testName = xmlTest.getName();
+        ti.getOrCreateMethod(suiteName, testName, m.getTestClassName(), m.getMethodName());
+      }
+
+      System.out.println("[TRVP] Tree:\n" + ti);
+    }
+    for (TestRunTab tab : m_tabsList) {
+      tab.setTree(ti);
+    }
+
   }
 
   public void onStart(TestMessage tm) {
@@ -1526,4 +1554,5 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     IJavaProject project = getLaunchedProject();
     return project != null ? project.getProject().getName() : null;
   }
+
 }

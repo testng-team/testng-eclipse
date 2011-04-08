@@ -101,4 +101,7 @@ public abstract class TestRunTab {
 
   public void setOrientation(boolean horizontal) {
   }
+
+  public void setTree(TreeInfo ti) {
+  }
 }
