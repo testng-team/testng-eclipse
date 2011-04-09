@@ -50,7 +50,7 @@
           id="org.testng.eclipse.launch.tester.TestNGPropertyTester"
           type="org.eclipse.core.runtime.IAdaptable"
           namespace="org.testng.eclipse"
-          properties="isTest,isSuite"
+          properties="isTest,isSuite,isXmlSuite"
           class="org.testng.eclipse.launch.tester.TestNGPropertyTester">
     </propertyTester>
   </extension>
@@ -402,11 +402,8 @@
               <iterate>
                  <adapt type="org.eclipse.core.resources.IFile">
                    <test property="org.eclipse.core.resources.name" value="*.xml"/>
-<!--
                    <test property="org.testng.eclipse.isXmlSuite"/>
                    <instanceof value="org.eclipse.core.resources.IFile" />
-                 <adapt type="org.eclipse.core.runtime.IAdaptable">
--->
                  </adapt>
               </iterate>
             </with>
