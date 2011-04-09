@@ -401,7 +401,7 @@
             <with variable="selection">
               <iterate>
                  <adapt type="org.eclipse.core.resources.IFile">
-                   <test property="org.eclipse.core.resources.name" value="*.xml"/>
+                   <test property="org.eclipse.core.resources.name" value="testng.xml"/>
                    <test property="org.testng.eclipse.isXmlSuite"/>
                    <instanceof value="org.eclipse.core.resources.IFile" />
                  </adapt>
