@@ -67,16 +67,21 @@ abstract public class BaseTreeItem implements ITreeItem {
     }
   }
 
+  private static int getStatus(TreeItem treeItem) {
+    return ((ITreeItem) treeItem.getData()).getRunInfo().getStatus();
+  }
 
   /**
-   * Once a node is in failure, it needs to remain in failure, so only update it if
-   * 1) it hasn't received an image yet and 2) it's being updated to something else
-   * than a success.
+   * Only update a node status if
+   * 1) it hasn't received an image yet or
+   * 2) it's being updated from success -> failure|skip or from skip -> failure.
    */
   protected void maybeUpdateImage(RunInfo runInfo) {
     int status = runInfo.getStatus();
     TreeItem treeItem = getTreeItem();
-    if (treeItem.getImage() == null || status != ITestResult.SUCCESS) {
+    if (treeItem.getImage() == null
+        || status == ITestResult.FAILURE
+        || (status == ITestResult.SKIP && getStatus(treeItem) == ITestResult.SUCCESS)) {
       treeItem.setImage(getSuiteImage(status));
     }
   }
