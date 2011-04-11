@@ -76,6 +76,7 @@ import org.eclipse.ui.progress.UIJob;
 import org.testng.ITestResult;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
+import org.testng.eclipse.launch.TestNGLaunchConfigurationDelegate;
 import org.testng.eclipse.ui.summary.SummaryTab;
 import org.testng.eclipse.util.CustomSuite;
 import org.testng.eclipse.util.JDTUtil;
@@ -1144,11 +1145,13 @@ public class TestRunnerViewPart extends ViewPart implements
   private void postTestResult(final RunInfo runInfo, final int progressStep) {
     postSyncRunnable(new Runnable() {
       public void run() {
-        // if(isDisposed()) {
-        // return;
-        // }
-        // fProgressBar.step(progressStep);
-        //
+        if (isDisposed()) {
+          return;
+        }
+        if (TestNGLaunchConfigurationDelegate.USE_NEW_PROTOCOL) {
+          fProgressBar.step(progressStep);
+        }
+
         for (TestRunTab tab : m_tabsList) {
           tab.updateTestResult(runInfo);
         }
@@ -1429,13 +1432,13 @@ public class TestRunnerViewPart extends ViewPart implements
   }
 
   private void updateProgressBar() {
-    // postSyncRunnable(new Runnable() {
-    // public void run() {
-    // int newMaxBar = (m_methodTotalCount * m_testsTotalCount) / (m_testCount +
-    // 1);
-    // fProgressBar.setMaximum(newMaxBar, m_methodTotalCount);
-    // }
-    // });
+    postSyncRunnable(new Runnable() {
+      public void run() {
+        int newMaxBar = (m_methodTotalCount * m_testsTotalCount)
+            / (m_testCount + 1);
+        fProgressBar.setMaximum(newMaxBar, m_methodTotalCount);
+      }
+    });
   }
 
   public void onFinish(TestMessage tm) {
@@ -1462,7 +1465,7 @@ public class TestRunnerViewPart extends ViewPart implements
         // ((TestRunTab) m_tabsList.elementAt(i)).updateEntry(entryId);
         // }
 
-        fProgressBar.step(0);
+        fProgressBar.stepTests();
         m_stopButton.setEnabled(false);
       }
     });

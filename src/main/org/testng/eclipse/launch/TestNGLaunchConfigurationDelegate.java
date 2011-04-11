@@ -43,6 +43,8 @@ import java.util.Vector;
 
 public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigurationDelegate {
 
+  public static final boolean USE_NEW_PROTOCOL = false;
+
   /**
    * Launch RemoteTestNG (except if we're in debug mode).
    */
@@ -193,8 +195,10 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       argv.add(CommandLineArgs.PORT);
     } else {
       p("Using the serialized protocol");
-      argv.add(RemoteArgs.PROTOCOL_VERSION);
-      argv.add("2");
+      if (USE_NEW_PROTOCOL) {
+        argv.add(RemoteArgs.PROTOCOL_VERSION);
+        argv.add("2");
+      }
       argv.add(RemoteArgs.PORT);
     }
     argv.add(Integer.toString(port));
