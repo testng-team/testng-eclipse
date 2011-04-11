@@ -73,9 +73,7 @@ import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
-import org.testng.ITestNGMethod;
 import org.testng.ITestResult;
-import org.testng.collections.Lists;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.ui.summary.SummaryTab;
@@ -96,14 +94,10 @@ import org.testng.remote.strprotocol.StringMessageSender;
 import org.testng.remote.strprotocol.SuiteMessage;
 import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
-import org.testng.xml.XmlTest;
 
 import java.net.SocketTimeoutException;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -1357,19 +1351,15 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   public void onReportEvents(ReportMessage message) {
+    for (TestResultMessage trm : message.getFailed()) {
+      onTestFailure(trm);
+    }
+    for (TestResultMessage trm : message.getSkipped()) {
+      onTestSkipped(trm);
+    }
     for (TestResultMessage trm : message.getPassed()) {
       onTestSuccess(trm);
     }
-//      String suiteName = trm.getSuiteName();
-//      String testName = trm.getTestClass();
-//      ti.getOrCreateMethod(suiteName, testName, trm.getTestClass(), trm.getMethod());
-//
-//      System.out.println("[TRVP] Tree:\n" + ti);
-//    }
-//    for (TestRunTab tab : m_tabsList) {
-//      tab.setTree(ti);
-//    }
-
   }
 
   int m_progress = 0;
