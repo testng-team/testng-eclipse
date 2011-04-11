@@ -88,7 +88,7 @@ public class ProgressBar extends Canvas {
 
   public void setMaximum(int max, int totalMethods) {
 //    ppp("setMaximum:[" + fMaxTickCount + "," + fColorBarWidth + "," + max + "," + totalMethods + "]");
-    m_maxTickCount = max;
+    if (max != -1) m_maxTickCount = max;
 
     m_colorBarWidth = scale(m_currentTickCount);
 //    ppp("setMaximum:rescaled:" + fColorBarWidth);
@@ -115,8 +115,10 @@ public class ProgressBar extends Canvas {
   }
 
   private String getCurrentMessage() {
-    return "Tests: " + m_testCounter + "/" + m_totalTestsCounter + "  Methods: " + m_methodsCounter
-      + "/" + m_totalMethodsCounter + m_timeMessage;
+    return "Tests: " + m_testCounter + "/" + m_totalTestsCounter
+        + "  Methods: " + m_totalMethodsCounter
+      // + "/" + m_totalMethodsCounter
+      + m_timeMessage;
   }
 
   private void paintStep(int startX, int endX) {
@@ -224,11 +226,10 @@ public class ProgressBar extends Canvas {
 
   public void step(int failures) {
     m_currentTickCount++;
-    m_testCounter++;
+    incrementTestCount();
     int x = m_colorBarWidth;
 
     m_colorBarWidth = scale(m_currentTickCount);
-    System.out.println("Color bar width:" + m_colorBarWidth);
     if (m_error == ITestResult.SUCCESS && (failures > 0)) {
       m_error = ITestResult.FAILURE;
       x = 1;
@@ -239,8 +240,12 @@ public class ProgressBar extends Canvas {
     paintStep(x, m_colorBarWidth);
   }
 
+  private void incrementTestCount() {
+    if (m_testCounter < m_totalTestsCounter) m_testCounter++;
+  }
+
   public void stepTests() {
-    m_testCounter++;
+    incrementTestCount();
     m_currentMessage = getCurrentMessage();
     redraw();
   }
