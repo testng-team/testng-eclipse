@@ -1362,7 +1362,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
-  int m_progress = 0;
+  private int m_progress = 0;
 
   public void onProgressEvents(final ProgressMessage message) {
     m_progress += message.getTestCount();

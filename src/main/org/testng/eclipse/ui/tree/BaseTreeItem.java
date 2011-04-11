@@ -68,7 +68,8 @@ abstract public class BaseTreeItem implements ITreeItem {
   }
 
   private static int getStatus(TreeItem treeItem) {
-    return ((ITreeItem) treeItem.getData()).getRunInfo().getStatus();
+    ITreeItem data = (ITreeItem) treeItem.getData();
+    return data != null ? data.getRunInfo().getStatus() : -1;
   }
 
   /**
