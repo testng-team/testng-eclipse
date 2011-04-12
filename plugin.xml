@@ -3,7 +3,7 @@
 <plugin
    id="org.testng.eclipse"
    name="TestNG"
-   version="6.0.1.20110412_1154"
+   version="6.0.1.20110412_1416"
    provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
   <runtime>
@@ -89,7 +89,7 @@
             delegate="org.testng.eclipse.launch.TestNGLaunchConfigurationDelegate"
             id="org.testng.eclipse.launchconfig"
             modes="run,debug"
-            name="Launch.label"
+            name="TestNG"
             sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
             sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
       </launchConfigurationType>
