@@ -1136,7 +1136,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private void postTestResult(final RunInfo runInfo, final int progressStep) {
-//    m_results.add(runInfo);
+    m_results.add(runInfo);
     postSyncRunnable(new Runnable() {
       public void run() {
         if(isDisposed()) {
@@ -1145,9 +1145,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
         fProgressBar.step(progressStep);
         fProgressBar.setTestName(runInfo.getTestName());
-        for (TestRunTab tab : m_tabsList) {
-          tab.updateTestResult(runInfo);
-        }
+//        for (TestRunTab tab : m_tabsList) {
+//          tab.updateTestResult(runInfo);
+//        }
 
       }
     });
