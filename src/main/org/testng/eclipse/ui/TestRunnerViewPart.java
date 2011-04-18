@@ -240,6 +240,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   private List<RunInfo> m_results;
 
+  private FailureTab m_failureTab;
+
   @Override
   public void init(IViewSite site, IMemento memento) throws PartInitException {
     ppp("Init, memento:" + memento);
@@ -631,6 +633,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         TestRunTab testRunTab = (TestRunTab) configs[i].createExecutableExtension("class"); //$NON-NLS-1$
         createTabControl(testRunTab, tabFolder, this);
         m_tabsList.addElement(testRunTab);
+        if (testRunTab instanceof FailureTab) {
+          m_failureTab = (FailureTab) testRunTab;
+        }
         if (testRunTab instanceof SummaryTab) {
           m_summaryTab = (SummaryTab) testRunTab;
         }
@@ -1136,21 +1141,35 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private void postTestResult(final RunInfo runInfo, final int progressStep) {
-    m_results.add(runInfo);
-    postSyncRunnable(new Runnable() {
-      public void run() {
-        if(isDisposed()) {
-          return;
+    if (runInfo.getStatus() == ITestResult.FAILURE) {
+      postSyncRunnable(new Runnable() {
+        public void run() {
+          for (TestRunTab tab : m_tabsList) {
+            tab.updateTestResult(runInfo);
+          }
         }
+      });
+    } else {
+      m_results.add(runInfo);
+    }
 
-        fProgressBar.step(progressStep);
-        fProgressBar.setTestName(runInfo.getTestName());
-//        for (TestRunTab tab : m_tabsList) {
-//          tab.updateTestResult(runInfo);
-//        }
+//    long start = System.currentTimeMillis();
 
-      }
-    });
+//    new Thread(new Runnable() {
+//      public void run() {
+        postSyncRunnable(new Runnable() {
+          public void run() {
+            if(isDisposed()) {
+              return;
+            }
+
+            fProgressBar.step(progressStep);
+            fProgressBar.setTestName(runInfo.getTestName());
+          }
+        });
+//      }
+//    }).start();
+//    System.out.println("Time to post:" + (System.currentTimeMillis() - start));
   }
 
   private void showResultsInTree() {
@@ -1346,7 +1365,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //      }
 //    });
 
-    showResultsInTree();
     fProgressBar.setTestName(null);
 
     if(m_suitesTotalCount == m_suiteCount) {
@@ -1368,6 +1386,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       });
       
     }
+
+    showResultsInTree();
   }
 
   public void onStart(TestMessage tm) {
