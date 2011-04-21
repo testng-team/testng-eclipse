@@ -244,7 +244,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   @Override
   public void init(IViewSite site, IMemento memento) throws PartInitException {
-    ppp("Init, memento:" + memento);
     super.init(site, memento);
     m_stateMemento = memento;
 
@@ -616,7 +615,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   private void loadTestRunTabs(CTabFolder tabFolder) {
 
-    IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_TESTRUN_TABS);
+    IExtensionPoint extensionPoint =
+        Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_TESTRUN_TABS);
     if(extensionPoint == null) {
       return;
     }
@@ -731,7 +731,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   @Override
   public void createPartControl(Composite parent) {
-    ppp("createPartControl");
     if (getWatchResultDirectory() != null) {
       updateResultThread();
     }
@@ -1141,50 +1140,53 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private void postTestResult(final RunInfo runInfo, final int progressStep) {
+    m_results.add(runInfo);
     if (runInfo.getStatus() == ITestResult.FAILURE) {
+      //
+      // Show failures in real time
+      //
       postSyncRunnable(new Runnable() {
         public void run() {
           for (TestRunTab tab : m_tabsList) {
-            tab.updateTestResult(runInfo);
+            tab.updateTestResult(runInfo, true /* expand */);
           }
         }
       });
-    } else {
-      m_results.add(runInfo);
     }
 
 //    long start = System.currentTimeMillis();
 
-//    new Thread(new Runnable() {
-//      public void run() {
-        postSyncRunnable(new Runnable() {
-          public void run() {
-            if(isDisposed()) {
-              return;
-            }
+    postSyncRunnable(new Runnable() {
+      public void run() {
+        if(isDisposed()) {
+          return;
+        }
 
-            fProgressBar.step(progressStep);
-            fProgressBar.setTestName(runInfo.getTestName());
-          }
-        });
-//      }
-//    }).start();
+        fProgressBar.step(progressStep);
+        fProgressBar.setTestName(runInfo.getTestName());
+        // Update the summary tab in real time but not the other tabs
+        m_summaryTab.updateTestResult(runInfo, true /* expand */);
+//        for (TestRunTab tab : m_tabsList) {
+//          tab.updateTestResult(runInfo);
+//        }
+
+      }
+    });
 //    System.out.println("Time to post:" + (System.currentTimeMillis() - start));
   }
 
   private void showResultsInTree() {
     postSyncRunnable(new Runnable() {
       public void run() {
-        for (RunInfo runInfo : m_results) {
-          for (TestRunTab tab : m_tabsList) {
-            tab.updateTestResult(runInfo);
-          }
+        long start = System.currentTimeMillis();
+        for (TestRunTab tab : m_tabsList) {
+          tab.updateTestResult(m_results);
         }
+        System.out.println("Done updating tree:" + (System.currentTimeMillis() - start) + "ms");
       }
     });
   }
 
-  ///~ [CURRENT WORK] ~///
   private IPartListener2 fPartListener = new IPartListener2() {
     public void partActivated(IWorkbenchPartReference ref) {
     }

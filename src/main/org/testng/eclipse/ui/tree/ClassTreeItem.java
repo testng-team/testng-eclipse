@@ -8,6 +8,7 @@ public class ClassTreeItem extends BaseTreeItem implements ITreeItem {
 
   public ClassTreeItem(TreeItem parent, RunInfo runInfo) {
     super(parent, runInfo);
+    update(runInfo);
   }
 
   public void update(RunInfo runInfo) {

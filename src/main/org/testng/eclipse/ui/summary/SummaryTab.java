@@ -382,7 +382,7 @@ public class SummaryTab extends TestRunTab  {
   }
 
   @Override
-  public void updateTestResult(RunInfo runInfo) {
+  public void updateTestResult(RunInfo runInfo, boolean expand) {
     //
     // Update tests
     //

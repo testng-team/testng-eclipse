@@ -36,6 +36,7 @@ abstract public class BaseTreeItem implements ITreeItem {
 
   public void addToCumulatedTime(float f) {
     m_time += f;
+    update(getRunInfo());
   }
 
   protected float getTime() {
