@@ -58,6 +58,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbench;
@@ -241,6 +242,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private List<RunInfo> m_results;
 
   private FailureTab m_failureTab;
+
+  private Action m_clearTreeAction;
 
   @Override
   public void init(IViewSite site, IMemento memento) throws PartInitException {
@@ -820,8 +823,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_rerunAction= new RerunAction();
     m_rerunFailedAction= new RerunFailedAction();
     m_openReportAction= new OpenReportAction();
-    
-    
+
+    m_clearTreeAction = new ClearResultsAction(m_tabsList);
     fNextAction.setEnabled(false);
     fPrevAction.setEnabled(false);
     m_rerunAction.setEnabled(false);
@@ -831,6 +834,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     actionBars.setGlobalActionHandler(ActionFactory.NEXT.getId(), fNextAction);
     actionBars.setGlobalActionHandler(ActionFactory.PREVIOUS.getId(), fPrevAction);
 
+    toolBar.add(m_clearTreeAction);
+    toolBar.add(new Separator());
     toolBar.add(fNextAction);
     toolBar.add(fPrevAction);
     toolBar.add(new Separator());
