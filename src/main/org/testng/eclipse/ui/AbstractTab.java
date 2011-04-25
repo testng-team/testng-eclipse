@@ -310,9 +310,11 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
 
   @Override
   public void updateSearchFilter(String text) {
+    if (text.equals(m_searchFilter)) return;
+
+    m_searchFilter = text;
     reset();
     m_treeItemMap.clear();
-    m_searchFilter = text;
     for (final RunInfo runInfo : m_runInfos) {
       if (matchesSearchFilter(runInfo)) {
         updateTestResult(runInfo, true /* expand */);

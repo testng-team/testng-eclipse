@@ -58,7 +58,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbench;
@@ -208,6 +207,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   // Persistence tags.
   static final String TAG_PAGE = "page"; //$NON-NLS-1$
   static final String TAG_ORIENTATION = "orientation"; //$NON-NLS-1$
+
+  // If the tree has more than this number of results, then typing a key in the
+  // search filter should only update it if the text size is above
+  // MAX_TEXT_SIZE_THRESHOLD.
+  private static final int MAX_RESULTS_THRESHOLD = 1000;
+  private static final int MAX_TEXT_SIZE_THRESHOLD = 3;
 
   //~ counters
   protected int m_suitesTotalCount;
@@ -937,8 +942,17 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         }
 
         public void keyReleased(KeyEvent e) {
+          // Update the tree based on the search filter only if we don't have too many
+          // results, otherwise, wait for at least n characters to be typed.
+          String filter = "";
+          if (m_results.size() < MAX_RESULTS_THRESHOLD ||
+              m_results.size() >= MAX_RESULTS_THRESHOLD
+              && m_searchText.getText().length() >= MAX_TEXT_SIZE_THRESHOLD) {
+            filter = m_searchText.getText();
+          }
+
           for (TestRunTab tab : m_tabsList) {
-            tab.updateSearchFilter(m_searchText.getText());
+            tab.updateSearchFilter(filter);
           }
         }
 
