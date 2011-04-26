@@ -6,12 +6,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -95,11 +92,12 @@ import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
 
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 /**
  * A ViewPart that shows the results of a test run.
@@ -133,9 +131,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   // view components
   private Composite   m_parentComposite;
   private CTabFolder m_tabFolder;
-  
-  /** The collection of TestRunTab. */
-  protected Vector<TestRunTab> m_tabsList = new Vector<TestRunTab>();
 
   /** The currently active run tab. */
   private TestRunTab m_activeRunTab;
@@ -225,11 +220,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   protected volatile int m_failedCount;
   protected volatile int m_skippedCount;
   protected volatile int m_successPercentageFailed;
-
-  /**
-   * The summary tab.
-   */
-  private SummaryTab m_summaryTab;
   
   /**
    * The client side of the remote test runner
@@ -245,8 +235,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private WatchResultThread m_watchThread;
 
   private List<RunInfo> m_results;
-
-  private FailureTab m_failureTab;
 
   private Action m_clearTreeAction;
 
@@ -278,10 +266,10 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     if(page != null) {
       int p = page.intValue();
       m_tabFolder.setSelection(p);
-      m_activeRunTab = m_tabsList.get(p);
+      m_activeRunTab = ALL_TABS.get(p);
     }
 
-    for (TestRunTab trt : m_tabsList) {
+    for (TestRunTab trt : ALL_TABS) {
       trt.restoreState(memento);
     }
 
@@ -314,7 +302,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private void setOrientation(int orientation) {
 
     boolean horizontal = orientation == VIEW_ORIENTATION_HORIZONTAL;
-    for (TestRunTab trt : m_tabsList) {
+    for (TestRunTab trt : ALL_TABS) {
       trt.setOrientation(horizontal);
     }
 
@@ -609,7 +597,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
     loadTestRunTabs(tabFolder);
     tabFolder.setSelection(0);
-    m_activeRunTab = m_tabsList.firstElement();
+    m_activeRunTab = ALL_TABS.get(0);
 
     tabFolder.addSelectionListener(new SelectionAdapter() {
         @Override
@@ -621,39 +609,29 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     return tabFolder;
   }
 
+  private static TestRunTab m_failureTab = new FailureTab();
+  private static SummaryTab m_summaryTab = new SummaryTab();
+  private static final TestRunTab[] LISTENING_TABS = new TestRunTab[] {
+    m_summaryTab
+  };
+
+  private static final TestRunTab[] REPORTING_TABS = new TestRunTab[] {
+    new SuccessTab(),
+    m_failureTab
+  };
+
+  @SuppressWarnings("serial")
+  private static final List<TestRunTab> ALL_TABS = new ArrayList<TestRunTab>() {{
+    addAll(Arrays.asList(REPORTING_TABS));
+    addAll(Arrays.asList(LISTENING_TABS));
+  }};
+
   private void loadTestRunTabs(CTabFolder tabFolder) {
-
-    IExtensionPoint extensionPoint =
-        Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_TESTRUN_TABS);
-    if(extensionPoint == null) {
-      return;
+    for (TestRunTab t : REPORTING_TABS) {
+      createTabControl(t, tabFolder, this);
     }
-
-    IConfigurationElement[] configs = extensionPoint.getConfigurationElements();
-    MultiStatus status = new MultiStatus(TestNGPlugin.PLUGIN_ID,
-                                         IStatus.OK,
-                                         "Could not load some testRunTabs extension points", //$NON-NLS-1$
-                                         null); 
-
-    for(int i = 0; i < configs.length; i++) {
-      try {
-
-        TestRunTab testRunTab = (TestRunTab) configs[i].createExecutableExtension("class"); //$NON-NLS-1$
-        createTabControl(testRunTab, tabFolder, this);
-        m_tabsList.addElement(testRunTab);
-        if (testRunTab instanceof FailureTab) {
-          m_failureTab = (FailureTab) testRunTab;
-        }
-        if (testRunTab instanceof SummaryTab) {
-          m_summaryTab = (SummaryTab) testRunTab;
-        }
-      }
-      catch(CoreException e) {
-        status.add(e.getStatus());
-      }
-    }
-    if(!status.isOK()) {
-      TestNGPlugin.log(status);
+    for (TestRunTab t : LISTENING_TABS) {
+      createTabControl(t, tabFolder, this);
     }
   }
 
@@ -672,7 +650,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private void testTabChanged(SelectionEvent event) {
     String selectedTestId = m_activeRunTab.getSelectedTestId();
 
-    for (TestRunTab tab : m_tabsList) {
+    for (TestRunTab tab : ALL_TABS) {
       tab.setSelectedTest(selectedTestId);
 
       String name = ResourceUtil.getString(tab.getNameKey());
@@ -709,7 +687,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         fProgressBar.reset(testCount);
         clearStatus();
         
-        for (TestRunTab tab : m_tabsList) {
+        for (TestRunTab tab : ALL_TABS) {
           tab.aboutToStart();
         }
       }
@@ -808,7 +786,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     memento.putInteger(TAG_PAGE, activePage);
     memento.putInteger(TAG_ORIENTATION, fOrientation);
 
-    for (TestRunTab tab : m_tabsList) {
+    for (TestRunTab tab : ALL_TABS) {
       tab.saveState(memento);
     }
   }
@@ -829,7 +807,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_rerunFailedAction= new RerunFailedAction();
     m_openReportAction= new OpenReportAction();
 
-    m_clearTreeAction = new ClearResultsAction(m_tabsList);
+    m_clearTreeAction = new ClearResultsAction(ALL_TABS);
     fNextAction.setEnabled(false);
     fPrevAction.setEnabled(false);
     m_rerunAction.setEnabled(false);
@@ -951,7 +929,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
             filter = m_searchText.getText();
           }
 
-          for (TestRunTab tab : m_tabsList) {
+          for (TestRunTab tab : ALL_TABS) {
             tab.updateSearchFilter(filter);
           }
         }
@@ -1166,7 +1144,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       //
       postSyncRunnable(new Runnable() {
         public void run() {
-          for (TestRunTab tab : m_tabsList) {
+          for (TestRunTab tab : ALL_TABS) {
             tab.updateTestResult(runInfo, true /* expand */);
           }
         }
@@ -1185,7 +1163,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         fProgressBar.setTestName(runInfo.getTestName());
         // Update the summary tab in real time but not the other tabs
         m_summaryTab.updateTestResult(runInfo, true /* expand */);
-//        for (TestRunTab tab : m_tabsList) {
+//        for (TestRunTab tab : ALL_TABS) {
 //          tab.updateTestResult(runInfo);
 //        }
 
@@ -1198,7 +1176,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     postSyncRunnable(new Runnable() {
       public void run() {
         long start = System.currentTimeMillis();
-        for (TestRunTab tab : m_tabsList) {
+        for (TestRunTab tab : ALL_TABS) {
           tab.updateTestResult(m_results);
         }
         System.out.println("Done updating tree:" + (System.currentTimeMillis() - start) + "ms");
@@ -1380,8 +1358,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //        if(isDisposed()) {
 //          return;
 //        }
-//        for(int i = 0; i < m_tabsList.size(); i++) {
-//          ((TestRunTab) m_tabsList.elementAt(i)).updateEntry(entryId);
+//        for(int i = 0; i < ALL_TABS.size(); i++) {
+//          ((TestRunTab) ALL_TABS.elementAt(i)).updateEntry(entryId);
 //        }
 //      }
 //    });
@@ -1457,8 +1435,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         if(isDisposed()) {
           return;
         }
-//        for(int i = 0; i < m_tabsList.size(); i++) {
-//          ((TestRunTab) m_tabsList.elementAt(i)).updateEntry(entryId);
+//        for(int i = 0; i < ALL_TABS.size(); i++) {
+//          ((TestRunTab) ALL_TABS.elementAt(i)).updateEntry(entryId);
 //        }
         
         fProgressBar.stepTests();
