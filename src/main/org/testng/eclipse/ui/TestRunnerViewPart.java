@@ -500,6 +500,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
+  private void postAsyncRunnable(Runnable r) {
+    if(!isDisposed()) {
+      getDisplay().asyncExec(r);
+    }
+  }
+
   private void refreshCounters() {
     m_counterPanel.setMethodCount(m_methodCount);
     m_counterPanel.setPassedCount(m_passedCount);
@@ -611,10 +617,17 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   private static TestRunTab m_failureTab = new FailureTab();
   private static SummaryTab m_summaryTab = new SummaryTab();
+
+  /**
+   * The list of tabs that need to be updated at each new result.
+   */
   private static final TestRunTab[] LISTENING_TABS = new TestRunTab[] {
     m_summaryTab
   };
 
+  /**
+   * The list of tabs that need to be updated after the suite has run.
+   */
   private static final TestRunTab[] REPORTING_TABS = new TestRunTab[] {
     new SuccessTab(),
     m_failureTab
@@ -1350,6 +1363,18 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     // Do this again in onFinish() in case the set of excluded methods changed since
     // onStart()
     m_summaryTab.setExcludedMethodsModel(suiteMessage);
+
+    // If a threshold is now in place, let the user know that they now need
+    // to type more than one character in the search field in order for
+    // the filtering to occur.
+    postAsyncRunnable(new Runnable() {
+      public void run() {
+        m_searchText.setToolTipText(m_results.size() > MAX_RESULTS_THRESHOLD
+            ? ResourceUtil.getFormattedString("TestRunnerViewPart.typeCharacters.tooltip",
+                MAX_TEXT_SIZE_THRESHOLD)
+            : "");
+      }
+    });
 
     m_suiteCount++;
     
