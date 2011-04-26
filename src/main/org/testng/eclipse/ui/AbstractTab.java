@@ -348,6 +348,7 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   @Override
   public void aboutToStart() {
     reset();
+    m_runInfos.clear();
     m_tree.removeAll();
     m_treeItemMap = new Hashtable<String, ITreeItem>();
     m_failureTraceComponent.clear();
