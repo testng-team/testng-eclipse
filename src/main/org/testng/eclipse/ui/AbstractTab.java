@@ -320,6 +320,7 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
         updateTestResult(runInfo, true /* expand */);
       }
     }
+
   }
 
   private boolean matchesSearchFilter(RunInfo runInfo) {
@@ -337,50 +338,12 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     return true;
   }
 
-  private void propagateTestResult(TreeItem ti, RunInfo runInfo) {
-    ITreeItem treeItem = BaseTreeItem.getTreeItem(ti);
-    treeItem.addToCumulatedTime(runInfo.getTime());
-    treeItem.update(runInfo);
-
-    if (ti.getParentItem() != null) {
-      propagateTestResult(ti.getParentItem(), runInfo);
-    }
-  }
-
   private void p(String string) {
     if (false) {
       System.out.println("[AbstractTab] " + string);
     }
   }
 
-  /**
-   * @return the parent tree item for this ResultInfo, possibly creating all the
-   * other parents if they don't exist yet.
-   */
-  private ITreeItem maybeCreateParents(RunInfo runInfo) {
-    String suiteId = runInfo.getSuiteName();
-    ITreeItem suiteTreeItem = m_treeItemMap.get(suiteId);
-    if (suiteTreeItem == null) {
-      suiteTreeItem = new SuiteTreeItem(m_tree, runInfo);
-      registerTreeItem(suiteId, suiteTreeItem);
-    }
-
-    String testId = runInfo.getTestId();
-    ITreeItem testTreeItem = m_treeItemMap.get(testId);
-    if (testTreeItem == null) {
-      testTreeItem = new TestTreeItem(suiteTreeItem.getTreeItem(), runInfo);
-      registerTreeItem(testId, testTreeItem);
-    }
-
-    String classId = runInfo.getClassId();
-    ITreeItem classTreeItem = m_treeItemMap.get(classId);
-    if (classTreeItem == null) {
-      classTreeItem = new ClassTreeItem(testTreeItem.getTreeItem(), runInfo);
-      registerTreeItem(classId, classTreeItem);
-    }
-
-    return classTreeItem;
-  }
 
   @Override
   public void aboutToStart() {
