@@ -5,17 +5,13 @@ import org.eclipse.debug.internal.ui.preferences.BooleanFieldEditor2;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.StringButtonFieldEditor;
+import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.testng.eclipse.TestNGPlugin;
@@ -31,6 +27,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
   private BooleanFieldEditor2 m_absolutePath;
   private BooleanFieldEditor2 m_disabledDefaultListeners;
   private FileFieldEditor m_xmlTemplateFile;
+  private StringFieldEditor m_excludedStackTraces;
   
   public PreferencePage() {
     super(GRID);
@@ -78,10 +75,16 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
     m_xmlTemplateFile.setEmptyStringAllowed(true);
     m_xmlTemplateFile.fillIntoGrid(parentComposite, 3);
 
+    // Excluded stack traces
+    m_excludedStackTraces = new StringFieldEditor(TestNGPluginConstants.S_EXCLUDED_STACK_TRACES,
+        "Excluded stack traces", parentComposite);
+    m_excludedStackTraces.fillIntoGrid(parentComposite, 3);
+
     addField(m_outputdir);
     addField(m_absolutePath);
     addField(m_disabledDefaultListeners);    
     addField(m_xmlTemplateFile);
+    addField(m_excludedStackTraces);
   }
 
   /* (non-Javadoc)

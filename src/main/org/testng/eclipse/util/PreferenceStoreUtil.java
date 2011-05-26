@@ -42,6 +42,10 @@ public class PreferenceStoreUtil {
     m_storage.setValue(projectName + TestNGPluginConstants.S_XML_TEMPLATE_FILE, xmlFile);
   }
 
+  public String getExcludedStackTraces(String projectName) {
+    return getString(projectName, false, TestNGPluginConstants.S_EXCLUDED_STACK_TRACES);
+  }
+
   public File getTemporaryDirectory() {
     Random r = new Random(System.currentTimeMillis());
     File result = new File(System.getProperty("java.io.tmpdir") + File.separatorChar
@@ -102,7 +106,7 @@ public class PreferenceStoreUtil {
   }
 
   private String getString(String projectName, boolean projectOnly, String prefName) {
-    String result = null;
+    String result = "";
     if (m_storage.contains(projectName + prefName)) {
       result = m_storage.getString(projectName + prefName);
     }
