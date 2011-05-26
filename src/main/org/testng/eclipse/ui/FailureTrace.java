@@ -13,8 +13,6 @@
 package org.testng.eclipse.ui;
 
 
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -35,7 +33,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 
 import java.io.BufferedReader;
@@ -49,16 +46,18 @@ import java.util.regex.Pattern;
 class FailureTrace implements IMenuListener {
   private static final String  FRAME_PREFIX = "at "; //$NON-NLS-1$
   
-  private final Image m_stackIcon = TestNGPlugin.getImageDescriptor("obj16/stkfrm_obj.gif").createImage(); //$NON-NLS-1$
-  private final Image m_exceptionIcon =TestNGPlugin.getImageDescriptor("obj16/exc_catch.gif").createImage(); //$NON-NLS-1$
-  
+  private final Image m_stackIcon = TestNGPlugin.getImageDescriptor(
+      "obj16/stkfrm_obj.gif").createImage(); //$NON-NLS-1$
+  private final Image m_exceptionIcon = TestNGPlugin.getImageDescriptor(
+      "obj16/exc_catch.gif").createImage(); //$NON-NLS-1$
+
   private final Clipboard fClipboard;
-  private Table                fTable;
-  private TestRunnerViewPart   fTestRunner;
-  private String               fInputTrace;
-  private RunInfo              fFailure;
+  private Table fTable;
+  private TestRunnerViewPart fTestRunner;
+  private String fInputTrace;
+  private RunInfo fFailure;
   private CompareResultsAction fCompareAction;
-  private String 			   fMessage;
+  private String fMessage;
 
   public FailureTrace(Composite parent,
                       TestRunnerViewPart testRunner,
