@@ -3,7 +3,7 @@
 <plugin
    id="org.testng.eclipse"
    name="TestNG"
-   version="6.0.1.20110523_1125"
+   version="6.0.1.20110526_1113"
    provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
   <runtime>
@@ -186,7 +186,7 @@
   <extension
          point="org.eclipse.ui.propertyPages">
       <page
-            class="org.testng.eclipse.properties.TestNGPropertyPage"
+            class="org.testng.eclipse.ui.preferences.ProjectPropertyPage"
             id="org.testng.eclipse.properties.propertyPage1"
             name="TestNG"
             objectClass="org.eclipse.core.resources.IProject"/>
@@ -298,7 +298,7 @@
   <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            class="org.testng.eclipse.ui.preferences.PreferencePage"
+            class="org.testng.eclipse.ui.preferences.WorkspacePreferencePage"
             id="org.testng.eclipse.ui.preferences.PreferencePage"
             name="TestNG"/>
       <page
