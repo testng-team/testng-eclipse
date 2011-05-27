@@ -1,6 +1,5 @@
 package org.testng.eclipse.launch.tester;
 
-import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.testng.eclipse.TestNGPlugin;
@@ -21,7 +20,6 @@ public class FileExtender {
     if(!(receiver instanceof IFile)) {
       return false;
     }
-    TestNGPlugin.log("Validating suite file:" + receiver);
     try {
       return SuiteFileValidator.isSuiteDefinition((IFile) receiver, xmlOnly);
     }
