@@ -4,6 +4,7 @@ import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.testng.collections.Maps;
 import org.testng.eclipse.collections.Sets;
@@ -25,6 +26,9 @@ public class TestNGVisitor extends Visitor {
   private TypeDeclaration m_type;
   private Annotation m_testClassAnnotation;
   private Set<MethodDeclaration> m_publicMethods = Sets.newHashSet();
+
+  // List of assert calls, so we can suggest static imports for them
+  private Set<String> m_assertMethods = Sets.newHashSet();
 
   @Override
   public boolean visit(MethodDeclaration md) {
@@ -61,6 +65,18 @@ public class TestNGVisitor extends Visitor {
     m_type = td;
     m_testClassAnnotation = getAnnotation(td, "Test");
     return super.visit(td);
+  }
+
+  @Override
+  public boolean visit(MethodInvocation mi) {
+    if (mi.getName().toString().startsWith("assert")) {
+      if (mi.resolveMethodBinding() == null) m_assertMethods.add(mi.getName().toString());
+    }
+    return super.visit(mi);
+  }
+
+  public Set<String> getAsserts() {
+    return m_assertMethods;
   }
 
   public Map<MethodDeclaration, Annotation> getTestMethods() {

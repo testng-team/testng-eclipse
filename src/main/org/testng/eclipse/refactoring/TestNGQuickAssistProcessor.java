@@ -3,8 +3,10 @@ package org.testng.eclipse.refactoring;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -34,7 +36,12 @@ public class TestNGQuickAssistProcessor
   public boolean hasAssists(IInvocationContext context) throws CoreException {
     init(context);
 
-    return hasPushAssists(m_visitor) || hasPullAssists(m_visitor);
+    return hasPushAssists(m_visitor) || hasPullAssists(m_visitor)
+        || hasAssertImportAssists(m_visitor);
+  }
+
+  private static boolean hasAssertImportAssists(TestNGVisitor visitor) {
+    return visitor.getAsserts().size() > 0;
   }
 
   /**
@@ -47,7 +54,7 @@ public class TestNGQuickAssistProcessor
     //
     m_compilationUnit = context.getCompilationUnit();
 
-    // Creatie of DOM/AST from a ICompilationUnit
+    // Create a DOM/AST from a ICompilationUnit
     m_astRoot = createCompilationUnit(m_compilationUnit);
     m_ast = context.getASTRoot().getAST();
 
@@ -79,6 +86,10 @@ public class TestNGQuickAssistProcessor
       List<IRewriteProvider> providers = Lists.newArrayList();
       if (hasPushAssists(m_visitor)) providers.add(new PushTestRewriter());
       if (hasPullAssists(m_visitor)) providers.add(new PullTestRewriter());
+      if (hasAssertImportAssists(m_visitor)) {
+        String node = findAssertInContext(context);
+        if (node != null) providers.add(new ImportAssertRewriter(node));
+      }
 
       for (IRewriteProvider provider : providers) {
         ASTRewrite rewriter = provider.createRewriter(m_astRoot, m_ast);
@@ -90,4 +101,20 @@ public class TestNGQuickAssistProcessor
     return (IJavaCompletionProposal[])
       vResult.toArray(new IJavaCompletionProposal[vResult.size()]);
     }
+
+  private String findAssertInContext(IInvocationContext context) {
+    ASTNode node = context.getCoveringNode();
+    while (node != null) {
+      if (node instanceof MethodInvocation) {
+        String nodeName = ((MethodInvocation) node).getName().toString();
+        if (m_visitor.getAsserts().contains(nodeName)) {
+          return nodeName;
+        }
+      }
+
+      node = node.getParent();
+    }
+
+    return null;
+  }
 }
