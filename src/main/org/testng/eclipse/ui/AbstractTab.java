@@ -268,15 +268,17 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
         suite = new SuiteTreeItem(m_tree, runInfo);
         m_suites.put(runInfo.getSuiteName(), suite);
       }
-      ITreeItem test = m_tests.get(runInfo.getTestName());
+      String pathToTest = runInfo.getSuiteName() + "#" + runInfo.getTestName();
+      ITreeItem test = m_tests.get(pathToTest);
       if (test == null) {
         test = new TestTreeItem(suite.getTreeItem(), runInfo);
-        m_tests.put(runInfo.getTestName(), test);
+        m_tests.put(pathToTest, test);
       }
-      ITreeItem cls = m_classes.get(runInfo.getClassName());
+      String pathToClass = pathToTest + "#" + runInfo.getClassName();
+      ITreeItem cls = m_classes.get(pathToClass);
       if (cls == null) {
         cls = new ClassTreeItem(test.getTreeItem(), runInfo);
-        m_classes.put(runInfo.getClassName(), cls);
+        m_classes.put(pathToClass, cls);
       }
       new TestMethodTreeItem(cls.getTreeItem(), runInfo);
       if (expand) {
