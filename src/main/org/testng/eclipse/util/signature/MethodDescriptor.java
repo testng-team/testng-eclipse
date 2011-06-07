@@ -76,7 +76,7 @@ public class MethodDescriptor implements IMethodDescriptor {
     }
 
     IMethodDescriptor castedObj = (IMethodDescriptor) o;
-    return this.getFullSignature().equals(castedObj.getFullSignature());
+    return getFullSignature().equals(castedObj.getFullSignature());
   }
   
   
