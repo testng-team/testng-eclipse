@@ -113,7 +113,8 @@ public class JUnitVisitor extends Visitor {
 
   public boolean visit(SuperMethodInvocation smi) {
     String name = smi.getName().toString();
-    if ("setUp".equals(name) || "tearDown".equals(name)) {
+    // Only remove the call to super if the class extends TestCase directly
+    if (m_testCase != null && ("setUp".equals(name) || "tearDown".equals(name))) {
       m_nodesToRemove.add(smi.getParent());
     }
     return super.visit(smi);

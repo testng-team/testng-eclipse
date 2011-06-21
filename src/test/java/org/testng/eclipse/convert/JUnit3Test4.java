@@ -8,6 +8,11 @@ public class JUnit3Test4 extends MyTestCase {
     super(name);
   }
 
+  protected void setUp() throws Exception {
+    // Should not be removed
+    super.setUp();
+  }
+
   public void _testFoo() {
   }
 }
