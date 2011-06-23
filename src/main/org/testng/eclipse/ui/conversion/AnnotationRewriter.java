@@ -1,5 +1,7 @@
 package org.testng.eclipse.ui.conversion;
 
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -24,7 +26,9 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Maps;
+import org.testng.eclipse.util.PreferenceStoreUtil.SuiteMethodTreatment;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -125,11 +129,24 @@ public class AnnotationRewriter implements IRewriteProvider
         "@After" /* annotation to remove */);
 
     //
-    // Remove the suite() method, if any
+    // suite() method: remove, comment out or leave untouched, depending on the setting
     //
+    SuiteMethodTreatment smt = TestNGPlugin.getPluginPreferenceStore().getSuiteMethodTreatement();
+
     MethodDeclaration suiteMethod = visitor.getSuite();
-    if (suiteMethod != null) {
-      result.remove(suiteMethod, null);
+    if (smt != SuiteMethodTreatment.DONT_TOUCH && suiteMethod != null) {
+      if (smt == SuiteMethodTreatment.REMOVE) {
+        // Remove suite()
+        result.remove(suiteMethod, null);
+      } else {
+        // Comment out suite()
+        TypeDeclaration type = visitor.getType();
+        ListRewrite lr = result.getListRewrite(type, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+        lr.insertBefore(result.createStringPlaceholder("/*", ASTNode.METHOD_DECLARATION),
+            suiteMethod, null);
+        lr.insertAfter(result.createStringPlaceholder("*/", ASTNode.METHOD_DECLARATION),
+            suiteMethod, null);
+      }
     }
 
     //

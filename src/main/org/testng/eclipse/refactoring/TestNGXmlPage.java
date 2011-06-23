@@ -13,6 +13,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -20,7 +21,9 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
+import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Sets;
+import org.testng.eclipse.util.PreferenceStoreUtil.SuiteMethodTreatment;
 import org.testng.eclipse.util.SWTUtil;
 import org.testng.eclipse.util.Utils;
 import org.testng.eclipse.util.Utils.JavaElement;
@@ -33,6 +36,12 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * The page in the refactoring wizard that lets the user configure the
+ * generation of the testng.xml file.
+ *
+ * @author Cedric Beust <cedric@beust.com>
+ */
 public class TestNGXmlPage extends UserInputWizardPage {
   private static final String NAME = "testng.xml generation";
   private static final String TITLE = "Generate testng.xml";
@@ -70,6 +79,10 @@ public class TestNGXmlPage extends UserInputWizardPage {
   private Button m_generateBox;
   private Combo m_parallelCombo;
   private Text m_threadCountText;
+
+  // Code generation UI
+  private Label m_codeGenerationBox;
+  private Combo m_suiteMethodCombo;
 
   protected TestNGXmlPage() {
     super(NAME);
@@ -130,6 +143,9 @@ public class TestNGXmlPage extends UserInputWizardPage {
     control.setLayout(new GridLayout());
     control.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
+    //
+    // "Generate testng.xml" box
+    //
     m_generateBox = new Button(control, SWT.CHECK);
     m_generateBox.setText("Generate testng.xml");
     m_generateBox.setSelection(true);
@@ -236,6 +252,45 @@ public class TestNGXmlPage extends UserInputWizardPage {
       m_previewText.setLayoutData(gd);
     }
 
+    //
+    // "Code generation" box
+    //
+    m_codeGenerationBox = new Label(control, SWT.CHECK);
+    m_codeGenerationBox.setText("Code generation");
+
+    final Group group2 = new Group(control, SWT.NONE);
+    {
+      RowLayout gl = new RowLayout();
+//      GridLayout gl = new GridLayout(2, true /* same size  columns */);
+      group2.setLayout(gl);
+      GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+      group2.setLayoutData(gd);
+      group2.setEnabled(true);
+    }
+
+    {
+      Label l = new Label(group2, SWT.NONE);
+      l.setText("suite() methods:");
+
+      m_suiteMethodCombo = new Combo(group2, SWT.READ_ONLY);
+      m_suiteMethodCombo.add("Remove");
+      m_suiteMethodCombo.add("Comment out");
+      m_suiteMethodCombo.add("Don't touch");
+      SuiteMethodTreatment lastValue = TestNGPlugin.getPluginPreferenceStore().getSuiteMethodTreatement();
+      m_suiteMethodCombo.select(lastValue.ordinal());
+      m_suiteMethodCombo.addSelectionListener(new SelectionListener() {
+
+        public void widgetSelected(SelectionEvent e) {
+          TestNGPlugin.getPluginPreferenceStore().storeSuiteMethodTreatement(
+              m_suiteMethodCombo.getSelectionIndex());
+        }
+
+        public void widgetDefaultSelected(SelectionEvent e) {
+        }
+
+      });
+    }
+
     setControl(control);
   }
 
@@ -340,5 +395,9 @@ public class TestNGXmlPage extends UserInputWizardPage {
     } catch (CoreException e) {
       e.printStackTrace();
     }
+  }
+
+  public void finish() {
+    saveXmlFile();
   }
 }

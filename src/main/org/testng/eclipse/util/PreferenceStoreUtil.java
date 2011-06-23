@@ -17,11 +17,11 @@ import java.util.Random;
  */
 public class PreferenceStoreUtil {
   private IPreferenceStore m_storage;
-  
+
   public PreferenceStoreUtil(IPreferenceStore storage) {
     m_storage= storage;
   }
- 
+
   /**
    * Saves the output directory information.
    */
@@ -29,7 +29,7 @@ public class PreferenceStoreUtil {
     m_storage.setValue(projectName + TestNGPluginConstants.S_OUTDIR, outdir);
     m_storage.setValue(projectName + TestNGPluginConstants.S_ABSOLUTEPATH, isAbsolute);
   }
-  
+
   public void storeDisabledListeners(String projectName, boolean selection) {
     m_storage.setValue(projectName + ".disabledListeners", selection);
   }
@@ -153,5 +153,36 @@ public class PreferenceStoreUtil {
 
   public void storeWatchResultLocation(String projectName, String text) {
     m_storage.setValue(projectName + TestNGPluginConstants.S_WATCH_RESULT_DIRECTORY, text);
+  }
+
+  public static enum SuiteMethodTreatment {
+    REMOVE("Remove"),
+    COMMENT_OUT("Comment out"),
+    DONT_TOUCH("Don't touch");
+
+    private String m_label;
+
+    private SuiteMethodTreatment(String label) {
+      m_label = label;
+    }
+
+    public String getLabel() {
+      return m_label;
+    }
+  };
+
+  public void storeSuiteMethodTreatement(int value) {
+    m_storage.setValue(TestNGPluginConstants.S_SUITE_METHOD_TREATMENT, value);
+  }
+
+  public SuiteMethodTreatment getSuiteMethodTreatement() {
+    int n = m_storage.getInt(TestNGPluginConstants.S_SUITE_METHOD_TREATMENT);
+    SuiteMethodTreatment result = SuiteMethodTreatment.REMOVE;
+    switch(n) {
+      case 1: result = SuiteMethodTreatment.COMMENT_OUT; break;
+      case 2: result = SuiteMethodTreatment.DONT_TOUCH; break;
+    }
+
+    return result;
   }
 }
