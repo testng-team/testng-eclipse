@@ -10,7 +10,7 @@ fi
 if [ $# -gt 0 ]
 then
   number=$1
-  jarName=eclipse-$number.txt
+  jarName=eclipse-$number
   jar=$UPDATE_SITE/plugins/org.testng.eclipse_$number.jar
   shift
 else
