@@ -20,7 +20,7 @@ public class ConvertFromJUnitWizard extends RefactoringWizard {
   @Override
   public boolean performFinish() {
     if (m_xmlPage.generateXmlFile()) {
-      m_xmlPage.saveXmlFile();
+      m_xmlPage.finish();
     }
 
     return super.performFinish();

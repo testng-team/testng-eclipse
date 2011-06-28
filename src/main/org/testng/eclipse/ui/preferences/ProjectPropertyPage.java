@@ -1,4 +1,4 @@
-package org.testng.eclipse.properties;
+package org.testng.eclipse.ui.preferences;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -32,25 +32,22 @@ import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceSorter;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.collections.Sets;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.ui.util.Utils.Widgets;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.SWTUtil;
-import org.testng.eclipse.util.TestSearchEngine;
 import org.testng.reporters.XMLReporter;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * Project specific properties.
  *
  * @author Cedric Beust <cedric@beust.com>
  */
-public class TestNGPropertyPage extends PropertyPage {
+public class ProjectPropertyPage extends PropertyPage {
   private static final IStatus ERROR = new StatusInfo(IStatus.ERROR, "");
   private Text m_outputdir;
   private Button m_absolutePath;

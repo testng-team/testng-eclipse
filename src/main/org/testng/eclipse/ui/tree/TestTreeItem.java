@@ -15,6 +15,7 @@ public class TestTreeItem extends BaseTreeItem implements ITreeItem {
 
   public TestTreeItem(TreeItem parent, RunInfo runInfo) {
     super(parent, runInfo);
+    update(runInfo);
   }
 
   public void update(RunInfo runInfo) {

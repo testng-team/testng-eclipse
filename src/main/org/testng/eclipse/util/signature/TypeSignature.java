@@ -68,7 +68,12 @@ public class TypeSignature {
       return "-" + dispatch(wtype.getBound());
     }
   }
-  
+
+  /**
+   * Make sure that this signature matches the string returned by IMethod#getSignature
+   * or bugs like this one will happen:
+   * http://groups.google.com/group/testng-users/browse_thread/thread/50db1c6deb2ff48e/60b80ac1999394f2?hl=en&lnk=gst&q=lisak#60b80ac1999394f2
+   */
   private static String getParameterizedSignature(ParameterizedType ptype) {
     StringBuffer buf = new StringBuffer();
     String sig = dispatch(ptype.getType());
@@ -83,10 +88,6 @@ public class TypeSignature {
     List types = ptype.typeArguments();
     for(int i = 0; i < types.size(); i++) {
       buf.append(dispatch((Type) types.get(i)));
-      
-      if(i + 1 < types.size()) {
-        buf.append(",");
-      }
     }
     
     buf.append(">;");

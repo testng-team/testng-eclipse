@@ -3,7 +3,7 @@
 <plugin
    id="org.testng.eclipse"
    name="TestNG"
-   version="6.0.1.20110417_1101"
+   version="6.0.1.20110623_1136"
    provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
   <runtime>
@@ -39,7 +39,6 @@
       <import plugin="org.eclipse.ltk.ui.refactoring"/>
   </requires>
 
-  <extension-point id="internal_testRunTabs" name="%testRunTabs.name" schema="schema/internal-testRunTabs.exsd"/>
   <extension-point id="reporterListenerContributorSchema" name="%reporterListenerContributor.name" schema="schema/reporterListenerContributorSchema.exsd"/>
   <extension-point id="testListenerContributorSchema" name="%testListenerContributor.name" schema="schema/testListenerContributorSchema.exsd"/>
 
@@ -111,13 +110,6 @@
             icon="icons/full/main16/testng_blur.gif"
             id="org.testng.eclipse.ResultView"
             name="%TestNG4Eclipse.ResultView"/>
-  </extension>
-
-  <extension
-         point="org.testng.eclipse.internal_testRunTabs">
-      <testRunTab class="org.testng.eclipse.ui.SuccessTab"/>
-      <testRunTab class="org.testng.eclipse.ui.FailureTab"/>
-      <testRunTab class="org.testng.eclipse.ui.summary.SummaryTab"/>
   </extension>
 
   <extension
@@ -194,7 +186,7 @@
   <extension
          point="org.eclipse.ui.propertyPages">
       <page
-            class="org.testng.eclipse.properties.TestNGPropertyPage"
+            class="org.testng.eclipse.ui.preferences.ProjectPropertyPage"
             id="org.testng.eclipse.properties.propertyPage1"
             name="TestNG"
             objectClass="org.eclipse.core.resources.IProject"/>
@@ -306,7 +298,7 @@
   <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            class="org.testng.eclipse.ui.preferences.PreferencePage"
+            class="org.testng.eclipse.ui.preferences.WorkspacePreferencePage"
             id="org.testng.eclipse.ui.preferences.PreferencePage"
             name="TestNG"/>
       <page

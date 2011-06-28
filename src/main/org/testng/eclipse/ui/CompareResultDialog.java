@@ -98,6 +98,22 @@ public class CompareResultDialog extends Dialog {
 
   // TESTNG-21
   private void initializeActualExpected(String trace) {
+    if (trace.indexOf("hamcrest") > 0) parseHamCrestTrace(trace);
+    else parseTestNGTrace(trace);
+  }
+
+  private void parseHamCrestTrace(String trace) {
+    String IS = "is ";
+    String WAS = "was ";
+    int ind1 = trace.indexOf(IS);
+    int ind2 = trace.indexOf("\n", ind1);
+    int ind3 = trace.indexOf(WAS, ind2);
+    int ind4 = trace.indexOf("\n", ind3);
+    fExpected = trace.substring(ind1 + IS.length(), ind2);
+    fActual = trace.substring(ind3 + WAS.length(), ind4);
+  }
+
+  private void parseTestNGTrace(String trace) {
     String firstToken= "expected:<";
     String nextTokenString= "> but was:<";
     int idxStart= trace.indexOf(firstToken);

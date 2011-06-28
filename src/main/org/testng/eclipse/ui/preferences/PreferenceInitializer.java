@@ -10,14 +10,18 @@ import org.testng.eclipse.TestNGPluginConstants;
  */
 public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
-	 */
-	public void initializeDefaultPreferences() {
-		IPreferenceStore store = TestNGPlugin.getDefault().getPreferenceStore();
-		store.setDefault(TestNGPluginConstants.S_OUTDIR, "/test-output");
-	}
+  /*
+   * (non-Javadoc)
+   *
+   * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#
+   * initializeDefaultPreferences()
+   */
+  public void initializeDefaultPreferences() {
+    IPreferenceStore store = TestNGPlugin.getDefault().getPreferenceStore();
+    store.setDefault(TestNGPluginConstants.S_OUTDIR, "/test-output");
+    store.setDefault(TestNGPluginConstants.S_EXCLUDED_STACK_TRACES,
+        "org.testng.internal org.testng.TestRunner org.testng.SuiteRunner "
+        + "org.testng.remote.RemoteTestNG org.testng.TestNG sun.reflect java.lang");
+  }
 
 }

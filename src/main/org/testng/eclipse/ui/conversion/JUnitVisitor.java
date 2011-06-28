@@ -1,7 +1,6 @@
 package org.testng.eclipse.ui.conversion;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
@@ -21,6 +20,8 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.testng.AssertJUnit;
 import org.testng.collections.Lists;
 import org.testng.eclipse.collections.Maps;
+import org.testng.eclipse.util.PreferenceStoreUtil;
+import org.testng.eclipse.util.PreferenceStoreUtil.SuiteMethodTreatment;
 import org.testng.internal.annotations.Sets;
 
 import java.lang.reflect.Method;
@@ -113,7 +114,8 @@ public class JUnitVisitor extends Visitor {
 
   public boolean visit(SuperMethodInvocation smi) {
     String name = smi.getName().toString();
-    if ("setUp".equals(name) || "tearDown".equals(name)) {
+    // Only remove the call to super if the class extends TestCase directly
+    if (m_testCase != null && ("setUp".equals(name) || "tearDown".equals(name))) {
       m_nodesToRemove.add(smi.getParent());
     }
     return super.visit(smi);
@@ -479,7 +481,7 @@ public class JUnitVisitor extends Visitor {
     }
 
     if (m_hasTestMethods || getTestMethods().size() > 0 || getDisabledTestMethods().size() > 0 ||
-        getBeforeMethods().size() > 0 || getAfterMethods().size() > 0) {
+        getBeforeMethods().size() > 0 || getAfterMethods().size() > 0 || m_suite != null) {
       return true;
     }
 

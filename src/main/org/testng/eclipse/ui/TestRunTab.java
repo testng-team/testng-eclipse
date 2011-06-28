@@ -3,8 +3,9 @@ package org.testng.eclipse.ui;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IMemento;
-import org.eclipse.ui.IViewSite;
 import org.testng.eclipse.util.ResourceUtil;
+
+import java.util.List;
 
 /**
  * A TestRunTab is shown as a tab in a tabbed folder.
@@ -53,8 +54,9 @@ public abstract class TestRunTab {
 
   /**
    * Called by the TestRunnerViewPart whenenver a new test result is received.
+   * @param expand true if the item should be expanded in the tree
    */
-  public void updateTestResult(RunInfo resultInfo) {
+  public void updateTestResult(RunInfo resultInfo, boolean expand) {
   }
 
   /**
@@ -100,5 +102,8 @@ public abstract class TestRunTab {
   }
 
   public void setOrientation(boolean horizontal) {
+  }
+
+  public void updateTestResult(List<RunInfo> results) {
   }
 }

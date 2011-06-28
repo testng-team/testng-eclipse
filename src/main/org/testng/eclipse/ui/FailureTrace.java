@@ -13,10 +13,6 @@
 package org.testng.eclipse.ui;
 
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -37,6 +33,12 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.util.PreferenceStoreUtil;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.regex.Pattern;
 
 /**
  * A pane that shows a stack trace of a failed test.
@@ -44,16 +46,18 @@ import org.testng.eclipse.TestNGPlugin;
 class FailureTrace implements IMenuListener {
   private static final String  FRAME_PREFIX = "at "; //$NON-NLS-1$
   
-  private final Image m_stackIcon = TestNGPlugin.getImageDescriptor("obj16/stkfrm_obj.gif").createImage(); //$NON-NLS-1$
-  private final Image m_exceptionIcon =TestNGPlugin.getImageDescriptor("obj16/exc_catch.gif").createImage(); //$NON-NLS-1$
-  
+  private final Image m_stackIcon = TestNGPlugin.getImageDescriptor(
+      "obj16/stkfrm_obj.gif").createImage(); //$NON-NLS-1$
+  private final Image m_exceptionIcon = TestNGPlugin.getImageDescriptor(
+      "obj16/exc_catch.gif").createImage(); //$NON-NLS-1$
+
   private final Clipboard fClipboard;
-  private Table                fTable;
-  private TestRunnerViewPart   fTestRunner;
-  private String               fInputTrace;
-  private RunInfo              fFailure;
+  private Table fTable;
+  private TestRunnerViewPart fTestRunner;
+  private String fInputTrace;
+  private RunInfo fFailure;
   private CompareResultsAction fCompareAction;
-  private String 			   fMessage;
+  private String fMessage;
 
   public FailureTrace(Composite parent,
                       TestRunnerViewPart testRunner,
@@ -70,7 +74,7 @@ class FailureTrace implements IMenuListener {
     fTestRunner = testRunner;
 
     fClipboard= new Clipboard(parent.getDisplay());
-    
+
     OpenStrategy handler = new OpenStrategy(fTable);
     handler.addOpenListener(new IOpenEventListener() {
         public void handleOpen(SelectionEvent e) {
@@ -235,12 +239,9 @@ class FailureTrace implements IMenuListener {
 
       // the stack frames of the trace
       while((line = bufferedReader.readLine()) != null) {
+        if (isExcluded(line)) continue;
+
         itemLabel = line.replace('\t', ' ');
-        if(itemLabel.startsWith(" at org.testng.Assert") 
-            || itemLabel.startsWith(" at org.testng.AssertJUnit")) {
-          continue;
-          
-        }
         tableItem = new TableItem(fTable, SWT.NONE);
 
         // heuristic for detecting a stack frame - works for JDK
@@ -260,6 +261,24 @@ class FailureTrace implements IMenuListener {
       TableItem tableItem = new TableItem(fTable, SWT.NONE);
       tableItem.setText(trace);
     }
+  }
+
+  /**
+   * @return true if this line of the stack trace should not be shown.
+   */
+  private boolean isExcluded(String line) {
+    PreferenceStoreUtil storage =
+      new PreferenceStoreUtil(TestNGPlugin.getDefault().getPreferenceStore());
+
+    String projectName = fTestRunner.getLaunchedProject().getProject().getName();
+    String excludedStackTraces = storage.getExcludedStackTraces(projectName);
+    if (excludedStackTraces.trim().length() > 0) {
+      String[] excluded = excludedStackTraces.split(" ");
+      for (String e : excluded) {
+        if (Pattern.matches(".*" + e + ".*", line)) return true;
+      }
+    }
+    return false;
   }
 
   /**

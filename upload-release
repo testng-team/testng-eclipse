@@ -1,15 +1,21 @@
 UPDATE_SITE=$HOME/java/testng-eclipse-update-site/
 
+if [ $1 == "-m" ]
+then
+  message=$2
+  shift
+  shift
+fi
 
 if [ $# -gt 0 ]
 then
   number=$1
+  jarName=eclipse-$number.txt
   jar=$UPDATE_SITE/plugins/org.testng.eclipse_$number.jar
   shift
 else
   echo "Specify the plug-in jar file"
 fi
-
 
 #number=`echo $jar | awk 'BEGIN { regex="[0-9]+.[0-9]+.[0-9]+.[0-9]"; } { if (match($0, regex)) printf("%s", substr($0, RSTART, RLENGTH))}'`
 
@@ -40,4 +46,9 @@ ssh beust.com@beust.com "(rm -rf ${target}/eclipse-$number && mkdir $dir)"
 scp -r * beust.com@beust.com:$dir
 ssh beust.com@beust.com "(cd w && rm -f eclipse && ln -s eclipse-old/eclipse-$number eclipse)"
 
+if [ ! -z "$message" ]
+then
+  echo $message >/tmp/$jarName.txt
+  scp /tmp/$jarName.txt beust.com@beust.com:${target}
+fi
 
