@@ -376,7 +376,8 @@
 
         <menu label="TestNG">
           <visibleWhen>
-              <iterate>
+              <iterate
+                    ifEmpty="false">
                  <adapt type="org.eclipse.jdt.core.IJavaElement">
                    <instanceof value="org.eclipse.jdt.core.IJavaElement" />
                  </adapt>
@@ -399,7 +400,8 @@
        <menu label="TestNG">
           <visibleWhen>
             <with variable="selection">
-              <iterate>
+              <iterate
+                    ifEmpty="false">
                  <adapt type="org.eclipse.core.resources.IFile">
                    <test property="org.eclipse.core.resources.name" value="*.xml"/>
                    <test property="org.testng.eclipse.isXmlSuite"/>
