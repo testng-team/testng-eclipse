@@ -55,6 +55,7 @@ public class ProgressBar extends Canvas {
   private int m_methodsCounter;
   private String m_currentMessage = "Tests: 0/0  Methods: 0/0";
   private String m_timeMessage= "";
+  private String m_testName;
 
   public ProgressBar(Composite parent) {
     super(parent, SWT.NONE);
@@ -116,7 +117,8 @@ public class ProgressBar extends Canvas {
 
   private String getCurrentMessage() {
     return "Tests: " + m_testCounter + "/" + m_totalTestsCounter + "  Methods: " + m_methodsCounter
-      + "/" + m_totalMethodsCounter + m_timeMessage;
+//      + (m_testName != null ? "   Current test:" + m_testName : "")
+      + m_timeMessage;
   }
 
   private void paintStep(int startX, int endX) {
@@ -235,7 +237,7 @@ public class ProgressBar extends Canvas {
     if (m_currentTickCount == m_maxTickCount) {
       m_colorBarWidth = getClientArea().width - 1;
     }
-    paintStep(x, m_colorBarWidth);
+//    paintStep(x, m_colorBarWidth);
   }
 
   public void stepTests() {
@@ -252,5 +254,9 @@ public class ProgressBar extends Canvas {
 
   private static void ppp(Object msg) {
 //    System.out.println("[JUP]: " + msg);
+  }
+
+  public void setTestName(String testName) {
+    m_testName = testName;
   }
 }

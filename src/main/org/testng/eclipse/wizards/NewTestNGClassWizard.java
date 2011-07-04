@@ -1,9 +1,6 @@
 package org.testng.eclipse.wizards;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -12,22 +9,19 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.testng.eclipse.collections.Sets;
 import org.testng.eclipse.ui.util.Utils;
-import org.testng.eclipse.util.ResourceUtil;
+import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.SuiteGenerator;
 import org.testng.eclipse.util.Utils.JavaElement;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
@@ -128,7 +122,7 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	  //
 	  // Create XML file at the root directory, if applicable
 	  //
-	  if (!Utils.isEmpty(xmlPath)) {
+	  if (!StringUtils.isEmptyString(xmlPath)) {
 	    IFile file = createFile(containerName, "", xmlPath, createXmlContentStream(), monitor);
 	    if (file != null) org.testng.eclipse.util.Utils.openFile(getShell(), file, monitor);
 	    else result = false;
@@ -225,7 +219,7 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	      + "public class " + className + " {\n"
 	      ;
 
-    if (testMethods.size() == 0 || !Utils.isEmpty(dataProvider)) {
+    if (testMethods.size() == 0 || ! StringUtils.isEmptyString(dataProvider)) {
       contents +=
           "  @Test" + dataProvider + "\n"
   	      + "  public void f" + signature + " {\n"
@@ -274,7 +268,7 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	private InputStream createXmlContentStream() {
 	  String cls = m_page.getClassName();
 	  String pkg = m_page.getPackageName();
-	  String className = Utils.isEmpty(pkg) ? cls : pkg + "." + cls;
+	  String className = StringUtils.isEmptyString(pkg) ? cls : pkg + "." + cls;
 	  return new ByteArrayInputStream(
 	      SuiteGenerator.createSingleClassSuite(className).getBytes());
 	}

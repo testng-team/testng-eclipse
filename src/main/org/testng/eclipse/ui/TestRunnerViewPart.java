@@ -22,7 +22,6 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.DebugUITools;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.debug.ui.StatusInfo;
 import org.eclipse.jface.action.Action;
@@ -77,13 +76,14 @@ import org.eclipse.ui.progress.UIJob;
 import org.testng.ITestResult;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
+import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.ui.summary.SummaryTab;
-import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.CustomSuite;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.LaunchUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.ResourceUtil;
+import org.testng.eclipse.util.StringUtils;
 import org.testng.remote.strprotocol.GenericMessage;
 import org.testng.remote.strprotocol.IMessageSender;
 import org.testng.remote.strprotocol.IRemoteSuiteListener;
@@ -97,6 +97,7 @@ import org.testng.remote.strprotocol.TestResultMessage;
 import java.net.SocketTimeoutException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -236,6 +237,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   /** The thread that watches the testng-results.xml file */
   private WatchResultThread m_watchThread;
+
+  private List<RunInfo> m_results;
 
   @Override
   public void init(IViewSite site, IMemento memento) throws PartInitException {
@@ -427,7 +430,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       TestNGPlugin.log("Monitoring results at " + path);
       m_watchThread = new WatchResultThread(path, this, this);
     } else {
-      if (! Utils.isEmpty(path)) TestNGPlugin.log("No longer monitoring results at " + path);
+      if (! StringUtils.isEmptyString(path)) TestNGPlugin.log("No longer monitoring results at " + path);
       m_watchThread = null;
     }
   }
@@ -680,6 +683,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_successPercentageFailed = 0;
     m_startTime= 0L;
     m_stopTime= 0L;
+    m_results = Lists.newArrayList();
     
     postSyncRunnable(new Runnable() {
       public void run() {
@@ -1132,20 +1136,30 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private void postTestResult(final RunInfo runInfo, final int progressStep) {
+    m_results.add(runInfo);
     postSyncRunnable(new Runnable() {
       public void run() {
         if(isDisposed()) {
           return;
         }
-//        for(int i = 0; i < m_tabsList.size(); i++) {
-//          ((TestRunTab) m_tabsList.elementAt(i)).newTreeEntry(runInfo);
-//        }
 
         fProgressBar.step(progressStep);
-//        updateProgressBar(m_progressBar.getSelection() + 1, (progressStep == 0));
+        fProgressBar.setTestName(runInfo.getTestName());
+//        for (TestRunTab tab : m_tabsList) {
+//          tab.updateTestResult(runInfo);
+//        }
 
-        for (TestRunTab tab : m_tabsList) {
-          tab.updateTestResult(runInfo);
+      }
+    });
+  }
+
+  private void showResultsInTree() {
+    postSyncRunnable(new Runnable() {
+      public void run() {
+        for (RunInfo runInfo : m_results) {
+          for (TestRunTab tab : m_tabsList) {
+            tab.updateTestResult(runInfo);
+          }
         }
       }
     });
@@ -1332,6 +1346,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //      }
 //    });
 
+    showResultsInTree();
+    fProgressBar.setTestName(null);
+
     if(m_suitesTotalCount == m_suiteCount) {
       fNextAction.setEnabled(hasErrors());
       fPrevAction.setEnabled(hasErrors());
@@ -1394,8 +1411,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
     updateProgressBar();
 
-    final String entryId = new RunInfo(tm.getSuiteName(), tm.getTestName()).getId();
-    
     postSyncRunnable(new Runnable() {
       public void run() {
         if(isDisposed()) {

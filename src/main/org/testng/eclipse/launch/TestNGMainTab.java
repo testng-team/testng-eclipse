@@ -38,10 +38,10 @@ import org.testng.eclipse.ui.Images;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.ProjectChooserDialog;
 import org.testng.eclipse.ui.util.TestSelectionDialog;
-import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SWTUtil;
+import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.TestSearchEngine;
 
 import java.lang.reflect.InvocationTargetException;
@@ -116,7 +116,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
       @Override
       public void initializeFrom(ILaunchConfiguration configuration) {
         List<String> testClassNames = ConfigurationHelper.getClasses(configuration);
-        setText(Utils.listToString(testClassNames));
+        setText(StringUtils.listToString(testClassNames));
       }
     };
     m_launchSelectors.add(m_classSelector);
@@ -133,7 +133,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
       @Override
       public void initializeFrom(ILaunchConfiguration configuration) {
         List<String> names = ConfigurationHelper.getMethods(configuration);
-        setText(Utils.listToString(names));
+        setText(StringUtils.listToString(names));
       }
     };
     m_launchSelectors.add(m_methodSelector);
@@ -153,7 +153,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
       @Override
       public void initializeFrom(ILaunchConfiguration configuration) {
         List<String> names = ConfigurationHelper.getPackages(configuration);
-        setText(Utils.listToString(names));
+        setText(StringUtils.listToString(names));
       }
     };
     m_launchSelectors.add(m_packageSelector);
@@ -236,8 +236,8 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     ConfigurationHelper.updateLaunchConfiguration(configuration,
         new ConfigurationHelper.LaunchInfo(m_projectText.getText(), 
               m_typeOfTestRun, 
-              Utils.stringToList(m_classSelector.getText().trim()), 
-              Utils.stringToList(m_packageSelector.getText().trim()), 
+              StringUtils.stringToList(m_classSelector.getText().trim()),
+              StringUtils.stringToList(m_packageSelector.getText().trim()),
               m_classMethods, 
               m_groupSelector.getValueMap(),
               m_suiteSelector.getText(),

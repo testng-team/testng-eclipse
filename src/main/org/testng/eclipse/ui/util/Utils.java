@@ -20,7 +20,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SWTUtil;
 
@@ -188,42 +187,8 @@ public class Utils {
     return org.testng.internal.Utils.split(string, sep);
   }
   
-  public static List<String> stringToList(String s) {
-    String[] a = s.split("[ ]+");
-    List<String> result = Lists.newArrayList();
-    for(int i = 0; i < a.length; i++) {
-      if(a[i].trim().length() > 0) {
-        result.add(a[i]);
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Splits a space separated string into token and returns <tt>null</tt> if the string
-   * is empty.
-   */
-  public static List<String> stringToNullList(final String s) {
-    List<String> result = stringToList(s);
-    
-    return result.isEmpty() ? null : result;
-  }
-  
   public static void ppp(String s) {
     System.out.println("[Utils] " + s);
-  }
-
-  public static String listToString(Collection<String> l) {
-    StringBuffer result = new StringBuffer();
-
-    if(null != l) {
-      for (String s : l) {
-        result.append(s).append(" ");
-      }
-    }
-
-    return result.toString().trim();
   }
 
   public static String absolutePath(final String rootPath, final String sourcePath) {
@@ -270,10 +235,6 @@ public class Utils {
   
   public static class Widgets extends WidgetPair {
     public Button radio;
-  }
-
-  public static boolean isEmpty(String content) {
-    return null == content || content.trim().length() == 0;
   }
 
   /**

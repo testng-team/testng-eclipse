@@ -51,11 +51,7 @@ public class PreferenceStoreUtil {
   }
   
   public String getXmlTemplateFile(String projectName, boolean projectOnly) {
-    if (projectOnly) {
-      return m_storage.getString(projectName + TestNGPluginConstants.S_XML_TEMPLATE_FILE);
-    } else {      
-      return "";
-    }
+    return getString(projectName, projectOnly, TestNGPluginConstants.S_XML_TEMPLATE_FILE);
   }
 
   public IPath getOutputDirectoryPath(IJavaProject project) {
@@ -74,16 +70,21 @@ public class PreferenceStoreUtil {
   }
 
   public String getOutputDir(String projectName, boolean projectOnly) {
-    if(projectOnly || m_storage.contains(projectName + TestNGPluginConstants.S_OUTDIR)) {
-      return m_storage.getString(projectName + TestNGPluginConstants.S_OUTDIR);
+    String result = getString(projectName, projectOnly, TestNGPluginConstants.S_OUTDIR);
+
+    // Convert the deprecated property into the new one
+    if (StringUtils.isEmptyString(result)) {
+      if (m_storage.contains(TestNGPluginConstants.S_DEPRECATED_OUTPUT)) {
+        m_storage.setValue(TestNGPluginConstants.S_DEPRECATED_OUTPUT, "");
+        m_storage.setValue(TestNGPluginConstants.S_OUTDIR,
+            m_storage.getString(TestNGPluginConstants.S_DEPRECATED_OUTPUT));
+      }
+
+      String outDir = m_storage.getString(TestNGPluginConstants.S_OUTDIR);
+      result = !"".equals(outDir) ? outDir : TestNG.DEFAULT_OUTPUTDIR;
     }
-    if(m_storage.contains(TestNGPluginConstants.S_DEPRECATED_OUTPUT)) {
-      m_storage.setValue(TestNGPluginConstants.S_DEPRECATED_OUTPUT, "");
-      m_storage.setValue(TestNGPluginConstants.S_OUTDIR,
-          m_storage.getString(TestNGPluginConstants.S_DEPRECATED_OUTPUT));
-    }
-    String outdir= m_storage.getString(TestNGPluginConstants.S_OUTDIR); 
-    return !"".equals(outdir) ? outdir : TestNG.DEFAULT_OUTPUTDIR;
+
+    return result;
   }
 
   public boolean isOutputAbsolutePath(String projectName, boolean projectOnly) {
@@ -101,12 +102,15 @@ public class PreferenceStoreUtil {
   }
 
   private String getString(String projectName, boolean projectOnly, String prefName) {
-    if(projectOnly || m_storage.contains(projectName + prefName)) {
-      return m_storage.getString(projectName + prefName);
+    String result = null;
+    if (m_storage.contains(projectName + prefName)) {
+      result = m_storage.getString(projectName + prefName);
     }
-    else {
-      return m_storage.getString(prefName);
+    if (StringUtils.isEmptyString(result) && ! projectOnly) {
+      result = m_storage.getString(prefName);
     }
+
+    return result;
   }
 
 //  public String getReporters(String projectName, boolean projectOnly) {

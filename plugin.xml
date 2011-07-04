@@ -3,7 +3,7 @@
 <plugin
    id="org.testng.eclipse"
    name="TestNG"
-   version="6.0.1.20110325_1005"
+   version="6.0.1.20110417_1101"
    provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
   <runtime>
@@ -50,7 +50,7 @@
           id="org.testng.eclipse.launch.tester.TestNGPropertyTester"
           type="org.eclipse.core.runtime.IAdaptable"
           namespace="org.testng.eclipse"
-          properties="isTest,isSuite"
+          properties="isTest,isSuite,isXmlSuite"
           class="org.testng.eclipse.launch.tester.TestNGPropertyTester">
     </propertyTester>
   </extension>
@@ -89,7 +89,7 @@
             delegate="org.testng.eclipse.launch.TestNGLaunchConfigurationDelegate"
             id="org.testng.eclipse.launchconfig"
             modes="run,debug"
-            name="Launch.label"
+            name="TestNG"
             sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
             sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
       </launchConfigurationType>
@@ -402,9 +402,9 @@
               <iterate>
                  <adapt type="org.eclipse.core.resources.IFile">
                    <test property="org.eclipse.core.resources.name" value="*.xml"/>
-<!--
                    <test property="org.testng.eclipse.isXmlSuite"/>
                    <instanceof value="org.eclipse.core.resources.IFile" />
+<!--
                  <adapt type="org.eclipse.core.runtime.IAdaptable">
 -->
                  </adapt>
