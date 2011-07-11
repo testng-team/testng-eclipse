@@ -35,9 +35,11 @@ import org.testng.eclipse.ui.tree.BaseTreeItem;
 import org.testng.eclipse.ui.tree.ClassTreeItem;
 import org.testng.eclipse.ui.tree.ITreeItem;
 import org.testng.eclipse.ui.tree.SuiteTreeItem;
+import org.testng.eclipse.ui.tree.TestMethodParametersTreeItem;
 import org.testng.eclipse.ui.tree.TestMethodTreeItem;
 import org.testng.eclipse.ui.tree.TestTreeItem;
 import org.testng.eclipse.util.ResourceUtil;
+import org.testng.eclipse.util.StringUtils;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -82,6 +84,8 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   private Map<String, ITreeItem> m_suites = Maps.newHashMap();
   private Map<String, ITreeItem> m_tests = Maps.newHashMap();
   private Map<String, ITreeItem> m_classes = Maps.newHashMap();
+  private Map<String, ITreeItem> m_methods = Maps.newHashMap();
+  // Don't forget to .clear() all these maps beween each run ^^
 
   @Override
   public String getSelectedTestId() {
@@ -259,6 +263,11 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     }
   }
 
+  /**
+   * This method is invoked whenever a new test result arrives. Before adding the
+   * corresponding method node, it makes sure that all its ancestors (class, test, suite)
+   * exist and create them if they don't.
+   */
   @Override
   public void updateTestResult(RunInfo runInfo, boolean expand) {
     m_runInfos.add(runInfo);
@@ -280,7 +289,17 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
         cls = new ClassTreeItem(test.getTreeItem(), runInfo);
         m_classes.put(pathToClass, cls);
       }
-      new TestMethodTreeItem(cls.getTreeItem(), runInfo);
+      String pathToMethod = pathToClass + "#" + runInfo.getMethodName();
+      ITreeItem method = m_methods.get(pathToMethod);
+      if (method == null) {
+        method = new TestMethodTreeItem(cls.getTreeItem(), runInfo);
+        m_methods.put(pathToMethod, method);
+      }
+
+      // Create a node for the parameter values, if applicable
+      if (!StringUtils.isEmptyString(runInfo.getParametersDisplay())) {
+        new TestMethodParametersTreeItem(method.getTreeItem(), runInfo);
+      }
       if (expand) {
         cls.getTreeItem().setExpanded(true);
         test.getTreeItem().setExpanded(true);
@@ -307,6 +326,7 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     m_suites.clear();
     m_tests.clear();
     m_classes.clear();
+    m_methods.clear();
     m_tree.removeAll();
   }
 
