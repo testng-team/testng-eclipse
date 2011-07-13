@@ -521,7 +521,9 @@ public class TestSearchEngine {
 	          for(int i = 0; i < types.length; i++) {
 	            if(Filters.SINGLE_TEST.accept(types[i])) {
 	            	IPackageDeclaration[] pkg = ((ICompilationUnit)ije).getPackageDeclarations();
-	            	result.add(pkg[0].getElementName()); // classes usually belong to exactly one package
+	            	if (pkg.length > 0) {
+	            	  result.add(pkg[0].getElementName());
+	            	}
 	            }
 	          }
 	        }
