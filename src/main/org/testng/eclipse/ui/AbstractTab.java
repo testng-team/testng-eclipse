@@ -266,7 +266,8 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   /**
    * This method is invoked whenever a new test result arrives. Before adding the
    * corresponding method node, it makes sure that all its ancestors (class, test, suite)
-   * exist and create them if they don't.
+   * exist and create them if they don't. Then it adds the time of the new test method
+   * to all these nodes.
    */
   @Override
   public void updateTestResult(RunInfo runInfo, boolean expand) {
@@ -301,10 +302,12 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
         new TestMethodParametersTreeItem(method.getTreeItem(), runInfo);
       }
       if (expand) {
+        method.getTreeItem().setExpanded(true);
         cls.getTreeItem().setExpanded(true);
         test.getTreeItem().setExpanded(true);
         suite.getTreeItem().setExpanded(true);
       }
+      method.addToCumulatedTime(runInfo.getTime());
       cls.addToCumulatedTime(runInfo.getTime());
       test.addToCumulatedTime(runInfo.getTime());
       suite.addToCumulatedTime(runInfo.getTime());
