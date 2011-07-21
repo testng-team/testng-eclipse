@@ -85,12 +85,15 @@ public class AnnotationVisitor extends BaseVisitor {
             @SuppressWarnings("unchecked")
             List<Expression> expressions = ai.expressions();
             for (Expression e : expressions) {
-              addGroup(e.toString());
+              Object v = e.resolveConstantExpressionValue();
+              String g = v != null ? v.toString() : e.toString();
+              addGroup(g);
             }
           }
           else if (value instanceof SimpleName) {
-            Object boundValue = value.resolveConstantExpressionValue();
-            addGroup(boundValue.toString());
+            Object v = value.resolveConstantExpressionValue();
+            String boundValue = v != null ? v.toString() : value.toString();
+            addGroup(boundValue);
           }
           else if(value instanceof StringLiteral) {
             addGroup(value.toString());
