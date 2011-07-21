@@ -80,6 +80,13 @@ public class SuiteFileValidator {
     catch (IOException e) {
       TestNGPlugin.log(e);
     }
+    finally {
+      try {
+        br.close();
+      } catch (IOException exc) {
+        // swallow exception
+      }
+    }
     
     return false;
   }
