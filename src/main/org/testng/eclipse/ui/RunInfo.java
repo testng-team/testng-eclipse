@@ -170,26 +170,26 @@ public class RunInfo {
     buffer.append(" type:" + typeToString(m_type));
     buffer.append(" id:");
     buffer.append(m_id);
-    if (m_suiteName != null) {
-      buffer.append(" suiteName:");
-      buffer.append(m_suiteName);
-    }
-    if (m_testName != null) {
-      buffer.append(" testName:");
-      buffer.append(m_testName);
-    }
-    if (m_className != null) {
-      buffer.append(" className:");
-      buffer.append(m_className);
-    }
-    if (m_methodName != null) {
-      buffer.append(" methodName:");
-      buffer.append(m_methodName);
-    }
-    if (m_methodCount != 0) {
-      buffer.append("   methodCount:");
-      buffer.append(m_methodCount);
-    }
+//    if (m_suiteName != null) {
+//      buffer.append(" suiteName:");
+//      buffer.append(m_suiteName);
+//    }
+//    if (m_testName != null) {
+//      buffer.append(" testName:");
+//      buffer.append(m_testName);
+//    }
+//    if (m_className != null) {
+//      buffer.append(" className:");
+//      buffer.append(m_className);
+//    }
+//    if (m_methodName != null) {
+//      buffer.append(" methodName:");
+//      buffer.append(m_methodName);
+//    }
+//    if (m_methodCount != 0) {
+//      buffer.append("   methodCount:");
+//      buffer.append(m_methodCount);
+//    }
     if (m_passed != 0) {
       buffer.append(" passed:");
       buffer.append(m_passed);

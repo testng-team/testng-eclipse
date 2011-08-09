@@ -15,7 +15,7 @@ public interface ITreeItem {
 
   RunInfo getRunInfo();
 
-  void addToCumulatedTime(float time);
+  void addToCumulatedTime(RunInfo runInfo);
 
   TreeItem getTreeItem();
 }

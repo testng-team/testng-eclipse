@@ -13,6 +13,7 @@ abstract public class BaseTreeItem implements ITreeItem {
   private float m_time;
   private TreeItem m_treeItem;
   private RunInfo m_runInfo;
+  private boolean m_hasImage = false;
 
   public static ITreeItem getTreeItem(TreeItem ti) {
     return (ITreeItem) ti.getData(DATA_TREE_ITEM);
@@ -34,9 +35,9 @@ abstract public class BaseTreeItem implements ITreeItem {
     m_treeItem.setData(DATA_TREE_ITEM, this);
   }
 
-  public void addToCumulatedTime(float f) {
-    m_time += f;
-    update(getRunInfo());
+  public void addToCumulatedTime(RunInfo runInfo) {
+    m_time += runInfo.getTime();
+    update(runInfo);
   }
 
   protected float getTime() {
@@ -68,17 +69,17 @@ abstract public class BaseTreeItem implements ITreeItem {
     }
   }
 
-
   /**
    * Once a node is in failure, it needs to remain in failure, so only update it if
-   * 1) it hasn't received an image yet and 2) it's being updated to something else
+   * 1) it hasn't received an image yet or 2) it's being updated to something else
    * than a success.
    */
   protected void maybeUpdateImage(RunInfo runInfo) {
     int status = runInfo.getStatus();
     TreeItem treeItem = getTreeItem();
-    if (treeItem.getImage() == null || status != ITestResult.SUCCESS) {
+    if (! m_hasImage || status != ITestResult.SUCCESS) {
       treeItem.setImage(getSuiteImage(status));
+      m_hasImage = true;
     }
   }
 }

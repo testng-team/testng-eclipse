@@ -299,7 +299,8 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
 
       // Create a node for the parameter values, if applicable
       if (!StringUtils.isEmptyString(runInfo.getParametersDisplay())) {
-        new TestMethodParametersTreeItem(method.getTreeItem(), runInfo);
+        TestMethodParametersTreeItem mwp = new TestMethodParametersTreeItem(method.getTreeItem(), runInfo);
+        mwp.addToCumulatedTime(runInfo);
       }
       if (expand) {
         method.getTreeItem().setExpanded(true);
@@ -307,10 +308,10 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
         test.getTreeItem().setExpanded(true);
         suite.getTreeItem().setExpanded(true);
       }
-      method.addToCumulatedTime(runInfo.getTime());
-      cls.addToCumulatedTime(runInfo.getTime());
-      test.addToCumulatedTime(runInfo.getTime());
-      suite.addToCumulatedTime(runInfo.getTime());
+      method.addToCumulatedTime(runInfo);
+      cls.addToCumulatedTime(runInfo);
+      test.addToCumulatedTime(runInfo);
+      suite.addToCumulatedTime(runInfo);
     }
   }
 
