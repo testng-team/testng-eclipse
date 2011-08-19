@@ -37,6 +37,7 @@
       <import plugin="org.eclipse.search"/>
       <import plugin="org.eclipse.ltk.core.refactoring"/>
       <import plugin="org.eclipse.ltk.ui.refactoring"/>
+      <import plugin="org.eclipse.core.variables"/>
   </requires>
 
   <extension-point id="reporterListenerContributorSchema" name="%reporterListenerContributor.name" schema="schema/reporterListenerContributorSchema.exsd"/>
@@ -74,7 +75,7 @@
             class="org.testng.eclipse.buildpath.TestNGHomeInitializer">
       </classpathVariableInitializer>
   </extension>
-       
+
   <extension
          point="org.eclipse.debug.ui.launchConfigurationTabGroups">
       <launchConfigurationTabGroup
@@ -191,7 +192,7 @@
             name="TestNG"
             objectClass="org.eclipse.core.resources.IProject"/>
   </extension>
-   
+
   <extension
          point="org.eclipse.ui.commands">
       <command
@@ -264,7 +265,7 @@
             commandId="org.testng.eclipse.shortcut.testngSuite.run"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
   </extension>
-   
+
   <extension
          point="org.eclipse.jdt.ui.quickAssistProcessors">
           <quickAssistProcessor
