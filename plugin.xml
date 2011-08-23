@@ -3,7 +3,7 @@
 <plugin
    id="org.testng.eclipse"
    name="TestNG"
-   version="6.1.1.20110809_1144"
+   version="6.1.1.20110823_1537"
    provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
   <runtime>
@@ -333,10 +333,6 @@
       <contribution
             class="org.testng.eclipse.refactoring.ConvertFromJUnitRefactoringContribution"
             id="org.testng.eclipse.convert">
-      </contribution>
-      <contribution
-            class="org.testng.eclipse.refactoring.TestNGRefactoringContribution"
-            id="org.testng.eclipse.refactoring.testng">
       </contribution>
   </extension>
 <!--
