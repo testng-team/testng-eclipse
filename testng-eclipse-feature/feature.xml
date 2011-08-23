@@ -2,7 +2,7 @@
 <feature
       id="org.testng.eclipse"
       label="TestNG"
-      version="5.14.2.5"
+      version="6.1.1.20110823_1537"
       provider-name="Cedric Beust">
 
    <description url="http://testng.org">
