@@ -37,6 +37,7 @@
       <import plugin="org.eclipse.search"/>
       <import plugin="org.eclipse.ltk.core.refactoring"/>
       <import plugin="org.eclipse.ltk.ui.refactoring"/>
+      <import plugin="org.eclipse.core.variables"/>
   </requires>
 
   <extension-point id="reporterListenerContributorSchema" name="%reporterListenerContributor.name" schema="schema/reporterListenerContributorSchema.exsd"/>
