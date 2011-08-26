@@ -2,6 +2,7 @@ package org.testng.eclipse.ui.util;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -151,6 +152,7 @@ public class ConfigurationHelper {
   		try {
   			result = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
   			    result);
+  			result = VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(result);
   		} catch (CoreException e) {
   			e.printStackTrace();
   		}
