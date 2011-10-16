@@ -1,13 +1,5 @@
 package org.testng.eclipse.util;
 
-import org.testng.TestNG;
-import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.launch.components.ITestContent;
-import org.testng.eclipse.ui.util.TypeParser;
-import org.testng.eclipse.util.signature.IMethodDescriptor;
-import org.testng.eclipse.util.signature.MethodDescriptor;
-import org.testng.internal.AnnotationTypeEnum;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -16,12 +8,14 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.testng.eclipse.launch.components.ITestContent;
+import org.testng.eclipse.ui.util.TypeParser;
+import org.testng.eclipse.util.signature.IMethodDescriptor;
+import org.testng.eclipse.util.signature.MethodDescriptor;
 import org.testng.reporters.XMLStringBuffer;
 import org.testng.xml.Parser;
 
