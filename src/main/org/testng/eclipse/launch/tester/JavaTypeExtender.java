@@ -18,11 +18,8 @@ public class JavaTypeExtender extends PropertyTester {
     int javaElementType = javaElement.getElementType();
     
     if(IJavaElement.JAVA_PROJECT == javaElementType
-        || IJavaElement.PACKAGE_FRAGMENT_ROOT == javaElementType) {
-      return false;
-    }
-    
-    if(IJavaElement.PACKAGE_FRAGMENT == javaElementType) {
+        || IJavaElement.PACKAGE_FRAGMENT_ROOT == javaElementType
+        || IJavaElement.PACKAGE_FRAGMENT == javaElementType) {
       return true;
     }
     
