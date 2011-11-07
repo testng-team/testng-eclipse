@@ -8,7 +8,7 @@ import java.util.List;
 public class StringUtils {
 
   public static List<String> stringToList(String s) {
-    String[] a = s.split("[ ]+");
+    String[] a = s.split("[,]+");
     List<String> result = Lists.newArrayList();
     for(int i = 0; i < a.length; i++) {
       if(a[i].trim().length() > 0) {
@@ -38,7 +38,7 @@ public class StringUtils {
   
     if(null != l) {
       for (String s : l) {
-        result.append(s).append(" ");
+        result.append(s).append(",");
       }
     }
   
