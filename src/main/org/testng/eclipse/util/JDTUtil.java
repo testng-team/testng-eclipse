@@ -600,6 +600,7 @@ public class JDTUtil {
 
     private List extractValues(Expression paramAttr) {
       List values= new ArrayList();
+ // FIXME: string literal is a valid type too
       if(paramAttr instanceof ArrayInitializer) {
         List literals= ((ArrayInitializer) paramAttr).expressions();
         List paramNames= new ArrayList(literals.size());
