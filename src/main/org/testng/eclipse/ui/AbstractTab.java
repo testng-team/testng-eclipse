@@ -2,6 +2,12 @@ package org.testng.eclipse.ui;
 
 import static org.testng.eclipse.ui.Images.IMG_TEST_HIERARCHY;
 
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -40,12 +46,6 @@ import org.testng.eclipse.ui.tree.TestMethodTreeItem;
 import org.testng.eclipse.ui.tree.TestTreeItem;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.StringUtils;
-
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * This class is responsible for the tree display in the runner view part. It
@@ -284,7 +284,7 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
         test = new TestTreeItem(suite.getTreeItem(), runInfo);
         m_tests.put(pathToTest, test);
       }
-      String pathToClass = pathToTest + "#" + runInfo.getClassName();
+      String pathToClass = pathToTest + "#" + runInfo.getInstanceName();
       ITreeItem cls = m_classes.get(pathToClass);
       if (cls == null) {
         cls = new ClassTreeItem(test.getTreeItem(), runInfo);

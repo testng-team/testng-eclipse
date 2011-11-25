@@ -1,13 +1,12 @@
 package org.testng.eclipse.ui.tree;
 
+import java.text.MessageFormat;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.TreeItem;
 import org.testng.ITestResult;
-import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.ui.Images;
 import org.testng.eclipse.ui.RunInfo;
-
-import java.text.MessageFormat;
 
 /**
  * Base class for the tree nodes that represent a method.
@@ -23,12 +22,9 @@ abstract public class BaseTestMethodTreeItem extends BaseTreeItem implements ITr
   }
 
   public void update(RunInfo runInfo) {
-    String description = TestNGPlugin.isEmtpy(runInfo.getTestDescription())
-        ? ""
-        : " [" + runInfo.getTestDescription() + "]";
     float time = getTime() / 1000;
 
-    getTreeItem().setText(MessageFormat.format(FORMATTED_MESSAGE, getLabel(), description, time));
+    getTreeItem().setText(MessageFormat.format(FORMATTED_MESSAGE, getLabel(), "", time));
     getTreeItem().setImage(getImage(runInfo.getStatus()));
   }
 

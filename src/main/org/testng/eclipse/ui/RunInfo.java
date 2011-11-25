@@ -1,10 +1,10 @@
 package org.testng.eclipse.ui;
 
 
+import java.util.regex.Pattern;
+
 import org.testng.ITestResult;
 import org.testng.eclipse.util.CustomSuite;
-
-import java.util.regex.Pattern;
 /**
  * Carries along information about a test result.
  * 
@@ -38,6 +38,7 @@ public class RunInfo {
   private long m_time;
   private int m_invocationCount;
   private int m_currentInvocationCount;
+  private String m_instanceName;
 
   public RunInfo(String suiteName) {
     m_id = suiteName;
@@ -64,6 +65,7 @@ public class RunInfo {
                  String className, 
                  String methodName,
                  String testDesc,
+                 String instanceName,
                  String[] params,
                  String[] paramTypes,
                  long time,
@@ -80,6 +82,7 @@ public class RunInfo {
     m_className = className;
     m_methodName = methodName;
     m_testDescription= testDesc != null ? (testDesc.equals(methodName) ? null : testDesc) : null;
+    m_instanceName = instanceName;
     m_parameters= params;
     m_parameterTypes= paramTypes;
     m_time = time >= 0 ? time : 0;
@@ -222,8 +225,7 @@ public class RunInfo {
    */
   public String getMethodDisplay() {
     StringBuffer buf= new StringBuffer(m_className);
-    buf.append(getTestDescription())
-      .append(".").append(m_methodName).append(getParametersDisplay())
+    buf.append(m_methodName).append(getParametersDisplay())
       .append(getInvocationCountDisplay())
     ;
 
@@ -314,8 +316,7 @@ public class RunInfo {
   public String getTreeLabel() {
     return getMethodName()
         + getParametersDisplay()
-        + " [" + getTestDescription()
-        + "] (" + ((float) getTime() / (float) 1000) + " s) "
+        + "(" + ((float) getTime() / (float) 1000) + " s) "
         ;
   }
 
@@ -346,6 +347,10 @@ public class RunInfo {
     } else {
       return "";
     }
+  }
+
+  public String getInstanceName() {
+    return m_instanceName;
   }
 
   /*public static void main(String[] args) {
