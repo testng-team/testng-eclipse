@@ -36,7 +36,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.PlatformUI;
-import org.testng.collections.Lists;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.collections.Sets;
@@ -417,24 +416,24 @@ public class TestSearchEngine {
                       Object groups = pair.getValue();
                       if (groups.getClass().isArray()) {
                         for (Object o : (Object[]) groups) {
-                          addToMultimap(result.typesByGroups, o.toString(), type);
-                          addToMultimap(result.methodsByGroups,o.toString(), method);
+                          Multimap.put(result.typesByGroups, o.toString(), type);
+                          Multimap.put(result.methodsByGroups,o.toString(), method);
                         }
                       } else {
-                        addToMultimap(result.typesByGroups, groups.toString(), type);
-                        addToMultimap(result.methodsByGroups, groups.toString(), method);
+                        Multimap.put(result.typesByGroups, groups.toString(), type);
+                        Multimap.put(result.methodsByGroups, groups.toString(), method);
                       }
                     } else if ("dependsOnGroups".equals(pair.getMemberName())) {
                       Object dependencies = pair.getValue();
                       if (dependencies.getClass().isArray()) {
                         for (Object o : (Object[]) dependencies) {
-                          addToMultimap(result.groupDependenciesByTypes, type, o.toString());
-                          addToMultimap(result.groupDependenciesByMethods, method, o.toString());
+                          Multimap.put(result.groupDependenciesByTypes, type, o.toString());
+                          Multimap.put(result.groupDependenciesByMethods, method, o.toString());
                         }
                       } else {
-                        addToMultimap(result.groupDependenciesByTypes, type,
+                        Multimap.put(result.groupDependenciesByTypes, type,
                             dependencies.toString());
-                        addToMultimap(result.groupDependenciesByMethods, method,
+                        Multimap.put(result.groupDependenciesByMethods, method,
                             dependencies.toString());
                       }
 
@@ -488,15 +487,6 @@ public class TestSearchEngine {
 //    }
 
     return result;
-  }
-
-  private static <K, V> void addToMultimap(Map<K, List<V>> result, K key, V value) {
-    List<V> l = result.get(key);
-    if (l == null) {
-      l = Lists.newArrayList();
-      result.put(key, l);
-    }
-    l.add(value);
   }
 
   /**
