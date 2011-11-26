@@ -273,8 +273,8 @@ public class LaunchUtil {
       typesSet.add(methods[i].getDeclaringType());
     }
     
-    List/*<String>*/<String> methodNames= new ArrayList<String>();
-    Map/*<String, List<String>>*/<String, List<String>> classMethods= new HashMap<String, List<String>>();
+    List<String> methodNames = Lists.newArrayList();
+    Map<String, List<String>> classMethods = Maps.newHashMap();
     for(int i= 0; i < methods.length; i++) {
       methodNames.add(methods[i].getElementName());
       

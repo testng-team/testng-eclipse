@@ -1,6 +1,16 @@
 package org.testng.eclipse.util;
 
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.beust.jcommander.internal.Maps;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -12,7 +22,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -35,17 +44,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.ui.RunInfo;
-import org.testng.eclipse.util.Utils.JavaElement;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Class offering utility method to access different Eclipse resources.
@@ -325,14 +323,14 @@ public class JDTUtil {
     if (null == paramTypes) {
       paramTypes= new String[0];
     }
-    List params= new ArrayList(paramTypes.length);
+    List<String> params= new ArrayList<String>(paramTypes.length);
     for(int i= 0; i < paramTypes.length; i++) {
       int idx= paramTypes[i].lastIndexOf('.');
       String typeName= idx == -1 ? paramTypes[i] : paramTypes[i].substring(idx + 1);
       params.add(Signature.createTypeSignature(typeName, false));
     }
     IMethod method= findMethodInTypeHierarchy(type, methodName,
-        (String[]) params.toArray(new String[paramTypes.length]));
+        params.toArray(new String[paramTypes.length]));
     if (null == method) {
       method = fuzzyFindMethodInTypeHierarchy(type, methodName, paramTypes);
     }
@@ -401,7 +399,7 @@ public class JDTUtil {
   }
 
   private static IMethod fuzzyFindMethodInTypeHierarchy(IType type, String methodName, String[] paramTypes) throws JavaModelException {
-    List fuzzyResults= new ArrayList();
+    List<IMethod> fuzzyResults= new ArrayList<IMethod>();
     IMethod[] methods = type.getMethods();
     for(int i = 0; i < methods.length; i++) {
       if(methodName.equals(methods[i].getElementName()) && methods[i].exists()) {
@@ -425,17 +423,17 @@ public class JDTUtil {
       }
     }
 
-    return (fuzzyResults.isEmpty() ? null : (IMethod) fuzzyResults.get(0) );
+    return (fuzzyResults.isEmpty() ? null : fuzzyResults.get(0) );
   }
   
-  public static List/*<MethodDefinition>*/ solveDependencies(IMethod method) {
-    Map/*<String, MethodDefinition>*/ parsedmethods= new HashMap();
-    MethodDefinition md= new MethodDefinition(method);
-    parsedmethods.put(method.getElementName(), method.getElementName());
+  public static List<MethodDefinition> solveDependencies(IMethod method) {
+    Map<String, String> parsedMethods = Maps.newHashMap();
+    MethodDefinition md = new MethodDefinition(method);
+    parsedMethods.put(method.getElementName(), method.getElementName());
     
-    List/*<MethodDefinition>*/ results= new ArrayList();
+    List<MethodDefinition> results = Lists.newArrayList();
     results.add(md);
-    results.addAll(solveDependencies(md, parsedmethods));
+    results.addAll(solveDependencies(md, parsedMethods));
     
     return results;
   }
@@ -445,10 +443,11 @@ public class JDTUtil {
    * @param method
    * @param allMethods
    */
-  private static List/*<MethodDefinition>*/ solveDependencies(MethodDefinition methodDef, Map parsedMethods) {
-    DependencyVisitor dv= parse(methodDef.getMethod());
+  private static List<MethodDefinition> solveDependencies(MethodDefinition methodDef,
+      Map<String, String> parsedMethods) {
+    DependencyVisitor dv = parse(methodDef.getMethod());
     
-    List/*<MethodDefinition>*/ results= new ArrayList();
+    List<MethodDefinition> results = Lists.newArrayList();
     List dependesonmethods= dv.getDependsOnMethods();
     
     if(!dependesonmethods.isEmpty()) {
@@ -519,7 +518,7 @@ public class JDTUtil {
   public static class MethodDefinition {
     private final IMethod m_method;
     private final Set/*<String>*/ m_dependsongroups= new HashSet();
-    private final Set/*<IMethod>*/ m_dependsonmethods= new HashSet();
+    private final Set/*<IMethod>*/<MethodDefinition> m_dependsonmethods= new HashSet<MethodDefinition>();
     
     public MethodDefinition(IMethod method) {
       m_method= method;
@@ -564,9 +563,10 @@ public class JDTUtil {
     private static final String DEPENDS_ON_METHODS= "dependsOnMethods";
     private static final String DEPENDS_ON_GROUPS= "dependsOnGroups";
     
-    List m_dependsOnMethods= new ArrayList();
-    List m_dependsOnGroups= new ArrayList();
+    List<String> m_dependsOnMethods = Lists.newArrayList();
+    List<String> m_dependsOnGroups= Lists.newArrayList();
 
+    @Override
     public boolean visit(NormalAnnotation annotation) {
       if(!TEST_ANNOTATION.equals(annotation.getTypeName().getFullyQualifiedName()) 
           && !TEST_ANNOTATION_FQN.equals(annotation.getTypeName().getFullyQualifiedName())) {
@@ -590,21 +590,21 @@ public class JDTUtil {
       return false;
     }
 
-    public List getDependsOnGroups() {
+    public List<String> getDependsOnGroups() {
       return m_dependsOnGroups;
     }
     
-    public List getDependsOnMethods() {
+    public List<String> getDependsOnMethods() {
       return m_dependsOnMethods;
     }
 
-    private List extractValues(Expression paramAttr) {
-      List values= new ArrayList();
+    private List<String> extractValues(Expression paramAttr) {
+      List<String> values = Lists.newArrayList();
       if(paramAttr instanceof ArrayInitializer) {
-        List literals= ((ArrayInitializer) paramAttr).expressions();
-        List paramNames= new ArrayList(literals.size());
+        List<StringLiteral> literals= ((ArrayInitializer) paramAttr).expressions();
+//        List paramNames= new ArrayList(literals.size());
         for(int j= 0; j < literals.size(); j++) {
-          StringLiteral str= (StringLiteral) literals.get(j);
+          StringLiteral str= literals.get(j);
           values.add(str.getLiteralValue());
         }
       }
