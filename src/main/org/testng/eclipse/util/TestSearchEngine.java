@@ -392,11 +392,12 @@ public class TestSearchEngine {
   public static class GroupInfo {
     Map<String, List<IType>> typesByGroups = Maps.newHashMap();
     Map<IType, List<String>> groupDependenciesByTypes = Maps.newHashMap();
+    Map<String, List<IMethod>> methodsByGroups = Maps.newHashMap();
+    Map<IMethod, List<String>> groupDependenciesByMethods = Maps.newHashMap();
   }
 
   public static GroupInfo findGroupInfo(final IJavaProject ijp) {
-    final Map<String, List<IType>> typesByGroups = Maps.newHashMap();
-    final Map<IType, List<String>> groupDependenciesByTypes = Maps.newHashMap();
+    final GroupInfo result = new GroupInfo();
 
     final IRunnableWithProgress runnable = new IRunnableWithProgress() {
 
@@ -416,19 +417,25 @@ public class TestSearchEngine {
                       Object groups = pair.getValue();
                       if (groups.getClass().isArray()) {
                         for (Object o : (Object[]) groups) {
-                          addToMultimap(typesByGroups, o.toString(), type);
+                          addToMultimap(result.typesByGroups, o.toString(), type);
+                          addToMultimap(result.methodsByGroups,o.toString(), method);
                         }
                       } else {
-                        addToMultimap(typesByGroups, groups.toString(), type);
+                        addToMultimap(result.typesByGroups, groups.toString(), type);
+                        addToMultimap(result.methodsByGroups, groups.toString(), method);
                       }
                     } else if ("dependsOnGroups".equals(pair.getMemberName())) {
                       Object dependencies = pair.getValue();
                       if (dependencies.getClass().isArray()) {
                         for (Object o : (Object[]) dependencies) {
-                          addToMultimap(groupDependenciesByTypes, type, o.toString());
+                          addToMultimap(result.groupDependenciesByTypes, type, o.toString());
+                          addToMultimap(result.groupDependenciesByMethods, method, o.toString());
                         }
                       } else {
-                        addToMultimap(groupDependenciesByTypes, type, dependencies.toString());
+                        addToMultimap(result.groupDependenciesByTypes, type,
+                            dependencies.toString());
+                        addToMultimap(result.groupDependenciesByMethods, method,
+                            dependencies.toString());
                       }
 
                     }
@@ -479,10 +486,6 @@ public class TestSearchEngine {
 //    } catch (InterruptedException e) {
 //      e.printStackTrace();
 //    }
-
-    GroupInfo result = new GroupInfo();
-    result.typesByGroups = typesByGroups;
-    result.groupDependenciesByTypes = groupDependenciesByTypes;
 
     return result;
   }
