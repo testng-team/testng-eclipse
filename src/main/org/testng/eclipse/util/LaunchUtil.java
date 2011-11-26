@@ -236,7 +236,7 @@ public class LaunchUtil {
           RunInfo runInfo) {
 
     GroupInfo groupInfo = TestSearchEngine.findGroupInfo(javaProject);
-    Set<IMethod> methods = findTransitiveClosure(iMethod, groupInfo);
+    Set<IMethod> methods = findMethodTransitiveClosure(iMethod, groupInfo);
     launchMethodBasedConfiguration(javaProject, methods.toArray(new IMethod[methods.size()]),
         runMode, runInfo);
   }
@@ -375,28 +375,33 @@ public class LaunchUtil {
     Set<IType> allTypes = Sets.newHashSet();
     allTypes.addAll(Arrays.asList(types));
 
+    Set<IMethod> allMethods = Sets.newHashSet();
+
     // If we depend on groups, need to add all the necessary types
     Object[] groupDependencies = findGroupDependencies(types);
     if (groupDependencies.length > 0) {
-      GroupInfo map = TestSearchEngine.findGroupInfo(ijp);
-      Set<IType> closure = findTransitiveClosure(types, map);
+      GroupInfo groupInfo = TestSearchEngine.findGroupInfo(ijp);
+      Set<IType> closure = findTypeTransitiveClosure(types, groupInfo);
       allTypes.addAll(closure);
+      Set<IMethod> methods = findMethodTransitiveClosure(types, groupInfo);
+      allMethods.addAll(methods);
     }
 
     for (IType type : allTypes) {
       typeNames.add(type.getFullyQualifiedName());
-      classMethods.put(type.getFullyQualifiedName(), EMPTY_ARRAY_PARAM);
     }
 
-//    String[] groups = new String[groupDependencies.length];
-//    for (int i = 0; i < groupDependencies.length; i++) {
-//      groups[i] = groupDependencies[i].toString();
-//    }
+    List<String> methodNames = Lists.newArrayList();
+    for (IMethod m : allMethods) {
+      methodNames.add(m.getElementName());
+      List<String> methodList= classMethods.get(m.getDeclaringType().getFullyQualifiedName());
+      if(null == methodList) {
+        methodList= new ArrayList<String>();
+        classMethods.put(m.getDeclaringType().getFullyQualifiedName(), methodList);
+      }
+      methodList.add(m.getElementName());
+    }
 
-//    if (groupDependencies.length > 0) {
-//      groupDependencyWarning(confName, null);
-//    }
-    
     ILaunchConfigurationWorkingCopy workingCopy =
         createLaunchConfiguration(ijp.getProject(), confName, null);
 
@@ -411,14 +416,37 @@ public class LaunchUtil {
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
                              solveParameters(allTypes.toArray(new IType[allTypes.size()])));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.METHOD_TEST_LIST,
-                             EMPTY_ARRAY_PARAM);
+        methodNames);
+//                             EMPTY_ARRAY_PARAM);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST,
                              EMPTY_ARRAY_PARAM);
 
     runConfig(workingCopy, mode);
   }
 
-  public static Set<IMethod> findTransitiveClosure(IMethod method, GroupInfo groupInfo) {
+  public static Set<IMethod> findMethodTransitiveClosure(IType[] types, GroupInfo groupInfo) {
+    Set<IMethod> result = Sets.newHashSet();
+    for (IType type : types) {
+      result.addAll(findMethodTransitiveClosure(type, groupInfo));
+    }
+
+    return result;
+  }
+
+  public static Set<IMethod> findMethodTransitiveClosure(IType type, GroupInfo groupInfo) {
+    Set<IMethod> result = Sets.newHashSet();
+    try {
+      for (IMethod method : type.getMethods()) {
+        result.addAll(findMethodTransitiveClosure(method, groupInfo));
+      }
+    } catch(JavaModelException ex) {
+      ex.printStackTrace();
+    }
+
+    return result;
+  }
+
+  public static Set<IMethod> findMethodTransitiveClosure(IMethod method, GroupInfo groupInfo) {
     Set<IMethod> result = Sets.newHashSet();
     Set<IMethod> currentMethods = Sets.newHashSet();
     currentMethods.add(method);
@@ -463,7 +491,7 @@ public class LaunchUtil {
     return result;
   }
 
-  private static Set<IType> findTransitiveClosure(IType[] types, GroupInfo groupInfo) {
+  private static Set<IType> findTypeTransitiveClosure(IType[] types, GroupInfo groupInfo) {
     Set<IType> result = Sets.newHashSet();
     Set<IType> currentTypes = Sets.newHashSet();
     currentTypes.addAll(Arrays.asList(types));
