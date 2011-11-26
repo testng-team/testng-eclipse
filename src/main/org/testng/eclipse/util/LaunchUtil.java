@@ -267,13 +267,8 @@ public class LaunchUtil {
     Map<String, List<String>> classMethods = Maps.newHashMap();
     for(int i= 0; i < methods.length; i++) {
       methodNames.add(methods[i].getElementName());
-      
-      List<String> methodList= classMethods.get(methods[i].getDeclaringType().getFullyQualifiedName());
-      if(null == methodList) {
-        methodList= new ArrayList<String>();
-        classMethods.put(methods[i].getDeclaringType().getFullyQualifiedName(), methodList); 
-      }
-      methodList.add(methods[i].getElementName());
+      Multimap.put(classMethods, methods[i].getDeclaringType().getFullyQualifiedName(),
+          methods[i].getElementName());
     }
     
     IType[] types= typesSet.toArray(new IType[typesSet.size()]);
@@ -394,12 +389,8 @@ public class LaunchUtil {
     List<String> methodNames = Lists.newArrayList();
     for (IMethod m : allMethods) {
       methodNames.add(m.getElementName());
-      List<String> methodList= classMethods.get(m.getDeclaringType().getFullyQualifiedName());
-      if(null == methodList) {
-        methodList= new ArrayList<String>();
-        classMethods.put(m.getDeclaringType().getFullyQualifiedName(), methodList);
-      }
-      methodList.add(m.getElementName());
+      Multimap.put(classMethods, m.getDeclaringType().getFullyQualifiedName(),
+          m.getElementName());
     }
 
     ILaunchConfigurationWorkingCopy workingCopy =
@@ -411,13 +402,10 @@ public class LaunchUtil {
                              ConfigurationHelper.toClassMethodsMap(classMethods));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
                              typeNames);
-//    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
-//                             getQuickComplianceLevel(types));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
                              solveParameters(allTypes.toArray(new IType[allTypes.size()])));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.METHOD_TEST_LIST,
         methodNames);
-//                             EMPTY_ARRAY_PARAM);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST,
                              EMPTY_ARRAY_PARAM);
 
