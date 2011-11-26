@@ -90,6 +90,8 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
           Expression paramAttr= pair.getValue();
           if(paramAttr instanceof ArrayInitializer) {
             record((MethodDeclaration) annotation.getParent(), (ArrayInitializer) paramAttr);
+          } else if (paramAttr instanceof StringLiteral) {
+            record((MethodDeclaration) annotation.getParent(), (StringLiteral) paramAttr);
           }
         }
       }
@@ -108,6 +110,8 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
       Expression paramValues= annotation.getValue();
       if(paramValues instanceof ArrayInitializer) {
         record((MethodDeclaration) annotation.getParent(), (ArrayInitializer) paramValues);
+      } else if (paramValues instanceof StringLiteral) {
+        record((MethodDeclaration) annotation.getParent(), (StringLiteral) paramValues);
       }
     }
     
@@ -116,6 +120,14 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
 
   public boolean hasParameters() {
     return !m_parameters.isEmpty();
+  }
+  
+  protected void record(MethodDeclaration method, StringLiteral value){
+    if( !"".equals(value.getLiteralValue())){
+      List paramNames = new ArrayList() ; 
+      paramNames.add(value.getLiteralValue());
+      m_parameters.put(method, paramNames);
+    }
   }
   
   /**
