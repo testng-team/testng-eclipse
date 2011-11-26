@@ -497,7 +497,7 @@ public class LaunchUtil {
             List<IType> depTypes = groupInfo.typesByGroups.get(group);
             if (depTypes != null) {
               for (IType depType : depTypes) {
-                if (! result.contains(depTypes)) {
+                if (! result.contains(depType)) {
                   result.add(depType);
                   nextTypes.add(depType);
                 }
