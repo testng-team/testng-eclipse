@@ -1,5 +1,17 @@
 package org.testng.eclipse.ui.conversion;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import junit.framework.Assert;
+
+import com.google.common.collect.Maps;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Expression;
@@ -19,20 +31,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.testng.AssertJUnit;
 import org.testng.collections.Lists;
-import org.testng.eclipse.collections.Maps;
-import org.testng.eclipse.util.PreferenceStoreUtil;
-import org.testng.eclipse.util.PreferenceStoreUtil.SuiteMethodTreatment;
 import org.testng.internal.annotations.Sets;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import junit.framework.Assert;
 
 /**
  * This visitor stores all the interesting things in a JUnit class:
@@ -99,6 +98,7 @@ public class JUnitVisitor extends Visitor {
     m_assertMethods.add("assertArrayEquals");
   }
 
+  @Override
   public boolean visit(ImportDeclaration id) {
     Name simpleName = id.getName();
     String name = simpleName.getFullyQualifiedName();
@@ -112,6 +112,7 @@ public class JUnitVisitor extends Visitor {
     return super.visit(id);
   }
 
+  @Override
   public boolean visit(SuperMethodInvocation smi) {
     String name = smi.getName().toString();
     // Only remove the call to super if the class extends TestCase directly
@@ -124,6 +125,7 @@ public class JUnitVisitor extends Visitor {
   /**
    * Remember if we find a constructor that calls super(String).
    */
+  @Override
   public boolean visit(SuperConstructorInvocation sci) {
     // Only remove the call to super if the class extends TestCase directly
     if (m_testCase != null) {
@@ -144,6 +146,7 @@ public class JUnitVisitor extends Visitor {
     return m_superConstructorInvocation;
   }
 
+  @Override
   public boolean visit(MethodDeclaration md) {
     String methodName = md.getName().getFullyQualifiedName();
 
@@ -215,6 +218,7 @@ public class JUnitVisitor extends Visitor {
   /**
    * Record whether this type declaration is a TestCase or a TestSuite.
    */
+  @Override
   public boolean visit(TypeDeclaration td) {
     m_className = td.getName().toString();
     m_type = td;
@@ -271,6 +275,7 @@ public class JUnitVisitor extends Visitor {
   /**
    * Find occurrences of "Assert.xxx", which need to be replaced with "AssertJUnit.xxx".
    */
+  @Override
   public boolean visit(MethodInvocation node) {
     Expression exp = node.getExpression();
     String method = node.getName().toString();
@@ -464,6 +469,7 @@ public class JUnitVisitor extends Visitor {
     return m_testsWithExpected;
   }
 
+  @Override
   public String toString() {
     return "[JUnitVisitor for class " + m_className + "]";
   }

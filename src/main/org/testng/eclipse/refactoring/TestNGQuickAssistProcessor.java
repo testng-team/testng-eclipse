@@ -1,5 +1,9 @@
 package org.testng.eclipse.refactoring;
 
+import java.util.List;
+
+import com.google.common.collect.Lists;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
@@ -12,12 +16,9 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
-import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.ui.conversion.BaseQuickAssistProcessor;
 import org.testng.eclipse.ui.conversion.IRewriteProvider;
 import org.testng.eclipse.ui.conversion.JUnitRewriteCorrectionProposal;
-
-import java.util.List;
 
 /**
  * The assist processor that presents all the TestNG related code assists.
@@ -98,8 +99,7 @@ public class TestNGQuickAssistProcessor
       }
     }
     
-    return (IJavaCompletionProposal[])
-      vResult.toArray(new IJavaCompletionProposal[vResult.size()]);
+    return vResult.toArray(new IJavaCompletionProposal[vResult.size()]);
     }
 
   private String findAssertInContext(IInvocationContext context) {

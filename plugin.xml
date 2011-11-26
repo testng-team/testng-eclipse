@@ -3,7 +3,7 @@
 <plugin
    id="org.testng.eclipse"
    name="TestNG"
-   version="6.3.1.20111124_2144"
+   version="6.3.1.20111126_0859"
    provider-name="Cedric Beust"
    class="org.testng.eclipse.TestNGPlugin">
   <runtime>
@@ -11,6 +11,16 @@
          <export name="*"/>
       </library>
       <library name="lib/testng.jar">
+         <export
+               name="*">
+         </export>
+      </library>
+      <library name="lib/guava-collections-r03.jar">
+         <export
+               name="*">
+         </export>
+      </library>
+      <library name="lib/guava-base-r03.jar">
          <export
                name="*">
          </export>

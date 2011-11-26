@@ -4,9 +4,12 @@ package org.testng.eclipse.util;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 import org.eclipse.core.internal.resources.File;
 import org.eclipse.core.resources.IContainer;
@@ -37,8 +40,6 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.collections.Maps;
-import org.testng.eclipse.collections.Sets;
 import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.launch.components.ITestContent;
 import org.testng.eclipse.ui.util.TypeParser;
@@ -389,10 +390,10 @@ public class TestSearchEngine {
   }
 
   public static class GroupInfo {
-    Map<String, List<IType>> typesByGroups = Maps.newHashMap();
-    Map<IType, List<String>> groupDependenciesByTypes = Maps.newHashMap();
-    Map<String, List<IMethod>> methodsByGroups = Maps.newHashMap();
-    Map<IMethod, List<String>> groupDependenciesByMethods = Maps.newHashMap();
+    Multimap<String, IType> typesByGroups = ArrayListMultimap.create();
+    Multimap<IType, String> groupDependenciesByTypes = ArrayListMultimap.create();
+    Multimap<String, IMethod> methodsByGroups = ArrayListMultimap.create();
+    Multimap<IMethod, String> groupDependenciesByMethods = ArrayListMultimap.create();
   }
 
   public static GroupInfo findGroupInfo(final IJavaProject ijp) {
@@ -416,25 +417,23 @@ public class TestSearchEngine {
                       Object groups = pair.getValue();
                       if (groups.getClass().isArray()) {
                         for (Object o : (Object[]) groups) {
-                          Multimap.put(result.typesByGroups, o.toString(), type);
-                          Multimap.put(result.methodsByGroups,o.toString(), method);
+                          result.typesByGroups.put(o.toString(), type);
+                          result.methodsByGroups.put(o.toString(), method);
                         }
                       } else {
-                        Multimap.put(result.typesByGroups, groups.toString(), type);
-                        Multimap.put(result.methodsByGroups, groups.toString(), method);
+                        result.typesByGroups.put(groups.toString(), type);
+                        result.methodsByGroups.put(groups.toString(), method);
                       }
                     } else if ("dependsOnGroups".equals(pair.getMemberName())) {
                       Object dependencies = pair.getValue();
                       if (dependencies.getClass().isArray()) {
                         for (Object o : (Object[]) dependencies) {
-                          Multimap.put(result.groupDependenciesByTypes, type, o.toString());
-                          Multimap.put(result.groupDependenciesByMethods, method, o.toString());
+                          result.groupDependenciesByTypes.put(type, o.toString());
+                          result.groupDependenciesByMethods.put(method, o.toString());
                         }
                       } else {
-                        Multimap.put(result.groupDependenciesByTypes, type,
-                            dependencies.toString());
-                        Multimap.put(result.groupDependenciesByMethods, method,
-                            dependencies.toString());
+                        result.groupDependenciesByTypes.put(type, dependencies.toString());
+                        result.groupDependenciesByMethods.put(method,dependencies.toString());
                       }
 
                     }

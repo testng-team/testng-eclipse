@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -35,8 +38,6 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IMemento;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.collections.Maps;
-import org.testng.eclipse.collections.Sets;
 import org.testng.eclipse.ui.tree.BaseTreeItem;
 import org.testng.eclipse.ui.tree.ClassTreeItem;
 import org.testng.eclipse.ui.tree.ITreeItem;

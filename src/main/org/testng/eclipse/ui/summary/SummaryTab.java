@@ -1,5 +1,14 @@
 package org.testng.eclipse.ui.summary;
 
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -25,19 +34,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
-import org.testng.eclipse.collections.Lists;
-import org.testng.eclipse.collections.Maps;
-import org.testng.eclipse.collections.Sets;
 import org.testng.eclipse.ui.OpenTestAction;
 import org.testng.eclipse.ui.RunInfo;
 import org.testng.eclipse.ui.TestRunTab;
 import org.testng.eclipse.ui.TestRunnerViewPart;
 import org.testng.remote.strprotocol.SuiteMessage;
-
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * A view that shows a summary of the test run and allows the user to sort these results

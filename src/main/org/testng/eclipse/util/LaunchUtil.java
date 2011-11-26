@@ -2,6 +2,7 @@ package org.testng.eclipse.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +10,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -39,9 +45,6 @@ import org.eclipse.search.ui.text.FileTextSearchScope;
 import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
-import org.testng.eclipse.collections.Lists;
-import org.testng.eclipse.collections.Maps;
-import org.testng.eclipse.collections.Sets;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.RunInfo;
@@ -177,18 +180,19 @@ public class LaunchUtil {
     Map<String, Object> attrs= new HashMap<String, Object>();
 
     List<String> classNames= Lists.newArrayList();
-    Map<String, List<String>> classMethods= Maps.newHashMap();
+    Multimap<String, String> classMethods = ArrayListMultimap.create();
+    classMethods.get(null);
 
     for(int i= 0; i < types.length; i++) {
       classNames.add(types[i].getFullyQualifiedName());
-      classMethods.put(types[i].getFullyQualifiedName(), EMPTY_ARRAY_PARAM);
+//      classMethods.put(types[i].getFullyQualifiedName(), EMPTY_ARRAY_PARAM);
     }
 
     attrs.put(TestNGLaunchConfigurationConstants.TYPE, LaunchType.CLASS.ordinal());
     attrs.put(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST, classNames);
 //    attrs.put(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR, annotationType);
     attrs.put(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST, 
-        ConfigurationHelper.toClassMethodsMap(classMethods));
+        ConfigurationHelper.toClassMethodsMap(classMethods.asMap()));
 
     return attrs;
   }
@@ -217,7 +221,7 @@ public class LaunchUtil {
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
         LaunchType.PACKAGE.ordinal());
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
-        ConfigurationHelper.toClassMethodsMap(new HashMap<String, List<String>>()));
+        ConfigurationHelper.toClassMethodsMap(new HashMap<String, Collection<String>>()));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
                              solveParameters(ipf));
 
@@ -264,10 +268,10 @@ public class LaunchUtil {
     }
     
     List<String> methodNames = Lists.newArrayList();
-    Map<String, List<String>> classMethods = Maps.newHashMap();
+    Multimap<String, String> classMethods = ArrayListMultimap.create();
     for(int i= 0; i < methods.length; i++) {
       methodNames.add(methods[i].getElementName());
-      Multimap.put(classMethods, methods[i].getDeclaringType().getFullyQualifiedName(),
+      classMethods.put(methods[i].getDeclaringType().getFullyQualifiedName(),
           methods[i].getElementName());
     }
     
@@ -290,7 +294,7 @@ public class LaunchUtil {
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
         LaunchType.METHOD.ordinal());
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
-                             ConfigurationHelper.toClassMethodsMap(classMethods));
+                             ConfigurationHelper.toClassMethodsMap(classMethods.asMap()));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
                              solveParameters(methods));
 //    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
@@ -365,7 +369,7 @@ public class LaunchUtil {
 
   private static void launchTypeBasedConfiguration(IJavaProject ijp, String confName, IType[] types,
       String mode) {
-    Map<String, List<String>> classMethods = Maps.newHashMap();
+    Multimap<String, String> classMethods = ArrayListMultimap.create();
     List<String> typeNames = Lists.newArrayList();
     Set<IType> allTypes = Sets.newHashSet();
     allTypes.addAll(Arrays.asList(types));
@@ -389,8 +393,7 @@ public class LaunchUtil {
     List<String> methodNames = Lists.newArrayList();
     for (IMethod m : allMethods) {
       methodNames.add(m.getElementName());
-      Multimap.put(classMethods, m.getDeclaringType().getFullyQualifiedName(),
-          m.getElementName());
+      classMethods.put(m.getDeclaringType().getFullyQualifiedName(), m.getElementName());
     }
 
     ILaunchConfigurationWorkingCopy workingCopy =
@@ -399,7 +402,7 @@ public class LaunchUtil {
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
         LaunchType.CLASS.ordinal());
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
-                             ConfigurationHelper.toClassMethodsMap(classMethods));
+                             ConfigurationHelper.toClassMethodsMap(classMethods.asMap()));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
                              typeNames);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
@@ -444,11 +447,11 @@ public class LaunchUtil {
     while (! currentMethods.isEmpty()) {
       result.add(method);
 
-      List<String> groups = groupInfo.groupDependenciesByMethods.get(method);
+      Collection<String> groups = groupInfo.groupDependenciesByMethods.get(method);
       if (groups != null) {
         if (initialGroups.isEmpty()) initialGroups.addAll(groups);
         for (String group : groups) {
-          List<IMethod> depMethods = groupInfo.methodsByGroups.get(group);
+          Collection<IMethod> depMethods = groupInfo.methodsByGroups.get(group);
           if (depMethods != null) {
             for (IMethod depMethod : depMethods) {
               if (! result.contains(depMethod)) {
@@ -490,11 +493,11 @@ public class LaunchUtil {
       for (IType type : currentTypes) {
         result.add(type);
 
-        List<String> groups = groupInfo.groupDependenciesByTypes.get(type);
+        Collection<String> groups = groupInfo.groupDependenciesByTypes.get(type);
         if (groups != null) {
           if (initialGroups.isEmpty()) initialGroups.addAll(groups);
           for (String group : groups) {
-            List<IType> depTypes = groupInfo.typesByGroups.get(group);
+            Collection<IType> depTypes = groupInfo.typesByGroups.get(group);
             if (depTypes != null) {
               for (IType depType : depTypes) {
                 if (! result.contains(depType)) {

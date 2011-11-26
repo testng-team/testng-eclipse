@@ -1,5 +1,9 @@
 package org.testng.eclipse.ui.conversion;
 
+import java.util.List;
+
+import com.google.common.collect.Lists;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -11,9 +15,6 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
-import org.testng.eclipse.collections.Lists;
-
-import java.util.List;
 
 public class JUnitConverterQuickAssistProcessor
   extends BaseQuickAssistProcessor
@@ -72,8 +73,7 @@ public class JUnitConverterQuickAssistProcessor
       }
     }
     
-    return (IJavaCompletionProposal[])
-      vResult.toArray(new IJavaCompletionProposal[vResult.size()]);
+    return vResult.toArray(new IJavaCompletionProposal[vResult.size()]);
   }
 
   private static void ppp(String s) {

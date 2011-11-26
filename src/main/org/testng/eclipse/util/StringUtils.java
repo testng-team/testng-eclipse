@@ -1,9 +1,9 @@
 package org.testng.eclipse.util;
 
-import org.testng.eclipse.collections.Lists;
-
 import java.util.Collection;
 import java.util.List;
+
+import com.google.common.collect.Lists;
 
 public class StringUtils {
 

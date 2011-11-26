@@ -1,13 +1,20 @@
 package org.testng.eclipse.launch;
 
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import com.google.common.collect.Maps;
+
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.swt.widgets.Composite;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.launch.components.ITestContent;
@@ -16,12 +23,6 @@ import org.testng.eclipse.ui.util.TypeParser;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.TestSearchEngine;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 public class GroupSelector extends MultiSelector {
 

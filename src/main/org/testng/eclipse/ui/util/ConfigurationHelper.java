@@ -1,5 +1,17 @@
 package org.testng.eclipse.ui.util;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.variables.VariablesPlugin;
@@ -13,8 +25,6 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
-import org.testng.eclipse.collections.Lists;
-import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.RunInfo;
@@ -22,15 +32,6 @@ import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.SuiteGenerator;
 import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Helper methods to store and retrieve values from a launch configuration.
@@ -492,15 +493,17 @@ public class ConfigurationHelper {
 		return resultConf;
 	}
 
-  public static Map<String, String> toClassMethodsMap(Map<String, List<String>> classMethods) {
+  public static Map<String, String> toClassMethodsMap(Map<String,
+      Collection<String>> classMethods) {
     Map<String, String> result= new HashMap<String, String>();
-    for (Map.Entry<String, List<String>> entry : classMethods.entrySet()) {
+    for (Map.Entry<String, Collection<String>> entry : classMethods.entrySet()) {
       String clsName = entry.getKey();
-      List<String> methods= entry.getValue();
-      StringBuffer strMethods= new StringBuffer();
-      for(int i= 0; i < methods.size(); i++) {
-        if(i > 0) strMethods.append(";");
-        strMethods.append(methods.get(i));
+      Collection<String> methods= entry.getValue();
+      StringBuffer strMethods = new StringBuffer();
+      int i = 0;
+      for (String method : methods) {
+        if (i++ > 0) strMethods.append(";");
+        strMethods.append(method);
       }
       
       result.put(clsName, strMethods.toString());
@@ -513,7 +516,7 @@ public class ConfigurationHelper {
    * @param configuration
    */
   public static void updateLaunchConfiguration(ILaunchConfigurationWorkingCopy configuration, LaunchInfo launchInfo) {
-    Map<String, List<String>> classMethods = Maps.newHashMap();
+    Map<String, Collection<String>> classMethods = Maps.newHashMap();
     if (launchInfo.m_groupMap != null) {
       Collection<List<String>> classes= launchInfo.m_groupMap.values();
       if(null != classes) {
