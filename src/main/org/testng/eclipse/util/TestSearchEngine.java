@@ -17,10 +17,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -36,8 +33,10 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.components.Filters;
@@ -259,7 +258,7 @@ public class TestSearchEngine {
       }
     }
     finally {
-      pm.done();
+//      pm.done();
     }
   }
   
@@ -405,10 +404,15 @@ public class TestSearchEngine {
           throws InvocationTargetException, InterruptedException {
         final Set<IType> allTypes = Sets.newHashSet();
         try {
+          monitor.beginTask("Launching", 2000);
+          monitor.subTask("Calculating the groups to run");
           collectTypes(ijp, monitor, allTypes, Filters.SINGLE_TEST, "Parsing tests");
+          monitor.subTask("Collecting group information");
+          monitor.worked(1);
           for (IType type : allTypes) {
             for (IMethod method : type.getMethods()) {
               for (IAnnotation annotation : method.getAnnotations()) {
+                monitor.worked(1);
                 IMemberValuePair[] pairs = annotation.getMemberValuePairs();
                 if ("Test".equals(annotation.getElementName()) && pairs.length > 0) {
                   for (IMemberValuePair pair : pairs) {
@@ -449,41 +453,16 @@ public class TestSearchEngine {
 
     };
 
-    Job job = new Job("TestNG: calculating dependencies") {
-      @Override
-      protected IStatus run(IProgressMonitor monitor) {
-        try {
-          runnable.run(monitor);
-          return Status.OK_STATUS;
-        } catch (InvocationTargetException e) {
-          e.printStackTrace();
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-        return Status.CANCEL_STATUS;
-      }
-    };
-    job.schedule();
+    Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+    ProgressMonitorDialog dialog = new ProgressMonitorDialog(shell);
+
     try {
-      job.join();
+      dialog.run(true /* fork */, true /* cancelable */, runnable);
+    } catch (InvocationTargetException e) {
+      e.printStackTrace();
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-
-//    Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-//    ProgressMonitorDialog dialog = new ProgressMonitorDialog(shell);
-//    try {
-//      dialog.run(true /* fork */, true /* cancelable */, runnable);
-//      GroupInfo result = new GroupInfo();
-//      result.typesByGroups = typesByGroups;
-//      result.groupDependenciesByTypes = groupDependenciesByTypes;
-//
-//      return result;
-//    } catch (InvocationTargetException e) {
-//      e.printStackTrace();
-//    } catch (InterruptedException e) {
-//      e.printStackTrace();
-//    }
 
     return result;
   }
@@ -509,8 +488,7 @@ public class TestSearchEngine {
       if (message == null) {
         message = ResourceUtil.getString("TestSearchEngine.message.searching");  //$NON-NLS-1$
       }
-      pm.beginTask(message, 1000);
-//      ppp("CURRENT ELEMENT:" + element.getClass());
+
       while((element instanceof ISourceReference) && !(element instanceof ICompilationUnit)) {
         if(element instanceof IType) {
           if(filter.accept((IType) element)) {
@@ -526,7 +504,6 @@ public class TestSearchEngine {
         ICompilationUnit cu = (ICompilationUnit) element;
 
         IType[] types = cu.getAllTypes();
-        pm.beginTask(message, types.length); //$NON-NLS-1$
         for(int i = 0; i < types.length; i++) {
           pm.worked(1);
           if(filter.accept(types[i])) {
@@ -553,16 +530,18 @@ public class TestSearchEngine {
       }
     }
     finally {
-      pm.done();
+//      pm.done();
     }
   }
 
   public static void findTestTypes(IProgressMonitor pm,
       IJavaElement ije, Set<IType> result, Filters.ITypeFilter filter) {
+
     if(IJavaElement.PACKAGE_FRAGMENT > ije.getElementType()) {
       try {
         IJavaElement[] children = ((IParent) ije).getChildren();
 
+//        SubMonitor sm = SubMonitor.convert(pm, "Package fragment " + children.length, children.length);
         for(int i = 0; i < children.length; i++) {
           pm.worked(1);
           findTestTypes(pm, children[i], result, filter);
@@ -580,7 +559,6 @@ public class TestSearchEngine {
           pm.worked(1);
           findTestTypes(pm, compilationUnits[i], result, filter);
         }
-        pm.done();
       }
       catch(JavaModelException jme) {
         TestNGPlugin.log(jme);
@@ -592,9 +570,11 @@ public class TestSearchEngine {
       try {
         IType[] types = ((ICompilationUnit) ije).getAllTypes();
 
+//        SubMonitor sm = SubMonitor.convert(pm, "Compilation unit " + types.length, types.length);
         for(int i = 0; i < types.length; i++) {
           if(filter.accept(types[i])) {
             pm.worked(1);
+//            pm.subTask("Type:" + types[i]);
             result.add(types[i]);
           }
         }
