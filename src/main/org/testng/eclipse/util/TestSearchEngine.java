@@ -394,7 +394,7 @@ public class TestSearchEngine {
     Map<IType, List<String>> groupDependenciesByTypes = Maps.newHashMap();
   }
 
-  public static GroupInfo findTypesByGroups(final IJavaProject ijp) {
+  public static GroupInfo findGroupInfo(final IJavaProject ijp) {
     final Map<String, List<IType>> typesByGroups = Maps.newHashMap();
     final Map<IType, List<String>> groupDependenciesByTypes = Maps.newHashMap();
 

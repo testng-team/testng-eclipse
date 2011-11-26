@@ -446,11 +446,11 @@ public class JDTUtil {
     DependencyVisitor dv = parse(methodDef.getMethod());
     
     List<MethodDefinition> results = Lists.newArrayList();
-    List dependesonmethods= dv.getDependsOnMethods();
+    List<String> dependesonmethods= dv.getDependsOnMethods();
     
     if(!dependesonmethods.isEmpty()) {
       for(int i= 0; i < dependesonmethods.size(); i++) {
-        String methodName= (String) dependesonmethods.get(i);
+        String methodName= dependesonmethods.get(i);
         if(!parsedMethods.contains(methodName)) {
           IMethod meth= solveMethod(methodDef.getMethod().getDeclaringType(), methodName);
           if(null != meth) {
@@ -465,7 +465,7 @@ public class JDTUtil {
       }
     }
     
-    methodDef.addDependecyGroups(dv.getDependsOnGroups());
+    methodDef.addDependencyGroups(dv.getDependsOnGroups());
     
     return results;
   }
@@ -522,7 +522,7 @@ public class JDTUtil {
       m_method= method;
     }
     
-    public void addDependecyGroups(List dependsOnGroups) {
+    public void addDependencyGroups(List dependsOnGroups) {
       if(null != dependsOnGroups && !dependsOnGroups.isEmpty()) {
         m_dependsongroups.addAll(dependsOnGroups);
       }

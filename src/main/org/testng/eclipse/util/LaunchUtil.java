@@ -388,7 +388,7 @@ public class LaunchUtil {
     // If we depend on groups, need to add all the necessary types
     Object[] groupDependencies = findGroupDependencies(types);
     if (groupDependencies.length > 0) {
-      GroupInfo map = TestSearchEngine.findTypesByGroups(ijp);
+      GroupInfo map = TestSearchEngine.findGroupInfo(ijp);
       Set<IType> closure = findTransitiveClosure(types, map);
       allTypes.addAll(closure);
     }
