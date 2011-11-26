@@ -568,8 +568,8 @@ public class JDTUtil {
 
     @Override
     public boolean visit(NormalAnnotation annotation) {
-      if(!TEST_ANNOTATION.equals(annotation.getTypeName().getFullyQualifiedName()) 
-          && !TEST_ANNOTATION_FQN.equals(annotation.getTypeName().getFullyQualifiedName())) {
+      String typeName = annotation.getTypeName().getFullyQualifiedName();
+      if(!TEST_ANNOTATION.equals(typeName) && !TEST_ANNOTATION_FQN.equals(typeName)) {
         return false;
       }
       
@@ -578,10 +578,11 @@ public class JDTUtil {
       if(null != values && !values.isEmpty()) {
         for(int i= 0; i < values.size(); i++) {
           MemberValuePair pair= (MemberValuePair) values.get(i);
-          if(DEPENDS_ON_METHODS.equals(pair.getName().toString())) {
+          String name = pair.getName().toString();
+          if(DEPENDS_ON_METHODS.equals(name)) {
             m_dependsOnMethods.addAll(extractValues(pair.getValue()));
           }
-          else if(DEPENDS_ON_GROUPS.equals(pair.getName().toString())) {
+          else if(DEPENDS_ON_GROUPS.equals(name)) {
             m_dependsOnGroups.addAll(extractValues(pair.getValue()));
           }
         }
@@ -607,6 +608,8 @@ public class JDTUtil {
           StringLiteral str= literals.get(j);
           values.add(str.getLiteralValue());
         }
+      } else if (paramAttr instanceof StringLiteral) {
+        values.add(((StringLiteral) paramAttr).getLiteralValue());
       }
 
       return values;
