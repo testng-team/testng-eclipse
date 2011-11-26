@@ -6,10 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import com.beust.jcommander.internal.Maps;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -43,6 +40,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.collections.Lists;
+import org.testng.eclipse.collections.Sets;
 import org.testng.eclipse.ui.RunInfo;
 
 /**
@@ -427,9 +425,9 @@ public class JDTUtil {
   }
   
   public static List<MethodDefinition> solveDependencies(IMethod method) {
-    Map<String, String> parsedMethods = Maps.newHashMap();
+    Set<String> parsedMethods = Sets.newHashSet();
     MethodDefinition md = new MethodDefinition(method);
-    parsedMethods.put(method.getElementName(), method.getElementName());
+    parsedMethods.add(method.getElementName());
     
     List<MethodDefinition> results = Lists.newArrayList();
     results.add(md);
@@ -444,7 +442,7 @@ public class JDTUtil {
    * @param allMethods
    */
   private static List<MethodDefinition> solveDependencies(MethodDefinition methodDef,
-      Map<String, String> parsedMethods) {
+      Set<String> parsedMethods) {
     DependencyVisitor dv = parse(methodDef.getMethod());
     
     List<MethodDefinition> results = Lists.newArrayList();
@@ -453,12 +451,12 @@ public class JDTUtil {
     if(!dependesonmethods.isEmpty()) {
       for(int i= 0; i < dependesonmethods.size(); i++) {
         String methodName= (String) dependesonmethods.get(i);
-        if(!parsedMethods.containsKey(methodName)) {
+        if(!parsedMethods.contains(methodName)) {
           IMethod meth= solveMethod(methodDef.getMethod().getDeclaringType(), methodName);
           if(null != meth) {
             MethodDefinition md= new MethodDefinition(meth);
             
-            parsedMethods.put(meth.getElementName(), meth.getElementName());
+            parsedMethods.add(meth.getElementName());
             results.add(md);
             methodDef.addDependencyMethod(md);
             results.addAll(solveDependencies(md, parsedMethods));
