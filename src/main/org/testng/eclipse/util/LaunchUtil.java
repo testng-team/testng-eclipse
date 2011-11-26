@@ -52,7 +52,6 @@ import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.RunInfo;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.util.JDTUtil.MethodDefinition;
-import org.testng.eclipse.util.TestSearchEngine.GroupInfo;
 import org.testng.eclipse.util.param.ParameterSolver;
 import org.testng.reporters.FailedReporter;
 
@@ -260,7 +259,7 @@ public class LaunchUtil {
 
     try {
       if (methodDependsOnGroups(iMethod)) {
-        GroupInfo groupInfo = TestSearchEngine.findGroupInfo(javaProject);
+        GroupInfo groupInfo = GroupInfo.createGroupInfo(javaProject);
         methods.addAll(findMethodTransitiveClosure(iMethod, groupInfo));
       }
     } catch (JavaModelException e) {
@@ -393,8 +392,8 @@ public class LaunchUtil {
      return jvmArgs.indexOf("-Dtestng.eclipse.stringprotocol") >= 0;
   }
 
-  private static void launchTypeBasedConfiguration(IJavaProject ijp, String confName, IType[] types,
-      String mode) {
+  private static void launchTypeBasedConfiguration(IJavaProject javaProject, String confName,
+      IType[] types, String mode) {
     Multimap<String, String> classMethods = ArrayListMultimap.create();
     List<String> typeNames = Lists.newArrayList();
     Set<IType> allTypes = Sets.newHashSet();
@@ -405,7 +404,7 @@ public class LaunchUtil {
     // If we depend on groups, need to add all the necessary types
     Object[] groupDependencies = findGroupDependencies(types);
     if (groupDependencies.length > 0) {
-      GroupInfo groupInfo = TestSearchEngine.findGroupInfo(ijp);
+      GroupInfo groupInfo = GroupInfo.createGroupInfo(javaProject);
       Set<IType> closure = findTypeTransitiveClosure(types, groupInfo);
       allTypes.addAll(closure);
       Set<IMethod> methods = findMethodTransitiveClosure(types, groupInfo);
@@ -423,7 +422,7 @@ public class LaunchUtil {
     }
 
     ILaunchConfigurationWorkingCopy workingCopy =
-        createLaunchConfiguration(ijp.getProject(), confName, null);
+        createLaunchConfiguration(javaProject.getProject(), confName, null);
 
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
         LaunchType.CLASS.ordinal());

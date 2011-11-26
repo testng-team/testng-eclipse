@@ -31,12 +31,6 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.ArrayInitializer;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.MemberValuePair;
-import org.eclipse.jdt.core.dom.NormalAnnotation;
-import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchPage;
@@ -429,7 +423,7 @@ public class JDTUtil {
     Set<String> parsedMethods = Sets.newHashSet();
     MethodDefinition md = new MethodDefinition(method);
     parsedMethods.add(method.getElementName());
-    
+
     List<MethodDefinition> results = Lists.newArrayList();
     results.add(md);
     results.addAll(solveDependencies(md, parsedMethods));
@@ -447,11 +441,11 @@ public class JDTUtil {
     DependencyVisitor dv = parse(methodDef.getMethod());
     
     List<MethodDefinition> results = Lists.newArrayList();
-    List<String> dependesonmethods= dv.getDependsOnMethods();
+    List<String> dependsOnMethods = dv.getDependsOnMethods();
     
-    if(!dependesonmethods.isEmpty()) {
-      for(int i= 0; i < dependesonmethods.size(); i++) {
-        String methodName= dependesonmethods.get(i);
+    if(!dependsOnMethods.isEmpty()) {
+      for(int i= 0; i < dependsOnMethods.size(); i++) {
+        String methodName= dependsOnMethods.get(i);
         if(!parsedMethods.contains(methodName)) {
           IMethod meth= solveMethod(methodDef.getMethod().getDeclaringType(), methodName);
           if(null != meth) {
@@ -549,69 +543,6 @@ public class JDTUtil {
      */
     public Set/*<String>*/ getGroups() {
       return m_dependsongroups;
-    }
-  }
-  
-  /**
-   * An <code>ASTVisitor</code> that extracts the <tt>dependsOnMethods</tt> and <tt>dependsOnGroups</tt>.
-   */
-  private static class DependencyVisitor extends ASTVisitor {
-    private static final String ANNOTATION_PACKAGE = "org.testng.annotations.";
-    private static final String TEST_ANNOTATION = "Test";
-    private static final String TEST_ANNOTATION_FQN = ANNOTATION_PACKAGE + TEST_ANNOTATION;
-    private static final String DEPENDS_ON_METHODS= "dependsOnMethods";
-    private static final String DEPENDS_ON_GROUPS= "dependsOnGroups";
-    
-    List<String> m_dependsOnMethods = Lists.newArrayList();
-    List<String> m_dependsOnGroups= Lists.newArrayList();
-
-    @Override
-    public boolean visit(NormalAnnotation annotation) {
-      String typeName = annotation.getTypeName().getFullyQualifiedName();
-      if(!TEST_ANNOTATION.equals(typeName) && !TEST_ANNOTATION_FQN.equals(typeName)) {
-        return false;
-      }
-      
-      List values= annotation.values();
-      
-      if(null != values && !values.isEmpty()) {
-        for(int i= 0; i < values.size(); i++) {
-          MemberValuePair pair= (MemberValuePair) values.get(i);
-          String name = pair.getName().toString();
-          if(DEPENDS_ON_METHODS.equals(name)) {
-            m_dependsOnMethods.addAll(extractValues(pair.getValue()));
-          }
-          else if(DEPENDS_ON_GROUPS.equals(name)) {
-            m_dependsOnGroups.addAll(extractValues(pair.getValue()));
-          }
-        }
-      }
-      
-      return false;
-    }
-
-    public List<String> getDependsOnGroups() {
-      return m_dependsOnGroups;
-    }
-    
-    public List<String> getDependsOnMethods() {
-      return m_dependsOnMethods;
-    }
-
-    private List<String> extractValues(Expression paramAttr) {
-      List<String> values = Lists.newArrayList();
-      if(paramAttr instanceof ArrayInitializer) {
-        List<StringLiteral> literals= ((ArrayInitializer) paramAttr).expressions();
-//        List paramNames= new ArrayList(literals.size());
-        for(int j= 0; j < literals.size(); j++) {
-          StringLiteral str= literals.get(j);
-          values.add(str.getLiteralValue());
-        }
-      } else if (paramAttr instanceof StringLiteral) {
-        values.add(((StringLiteral) paramAttr).getLiteralValue());
-      }
-
-      return values;
     }
   }
 }
