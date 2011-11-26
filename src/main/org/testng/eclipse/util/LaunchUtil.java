@@ -28,9 +28,11 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -233,14 +235,38 @@ public class LaunchUtil {
           String runMode) {
 	  launchMethodConfiguration(javaProject, imethod, runMode, null);
   }
-  
+
+  private static boolean methodDependsOnGroups(IMethod method) throws JavaModelException {
+    IAnnotation annotation = method.getAnnotation("Test");
+    return annotation != null && contains(annotation.getMemberValuePairs(), "dependsOnGroups");
+  }
+
+  private static boolean contains(IMemberValuePair[] memberValuePairs, String string) {
+    for (IMemberValuePair pair : memberValuePairs) {
+      if (string.equals(pair.getMemberName())) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   public static void launchMethodConfiguration(IJavaProject javaProject,
           IMethod iMethod,
           String runMode,
           RunInfo runInfo) {
 
-    GroupInfo groupInfo = TestSearchEngine.findGroupInfo(javaProject);
-    Set<IMethod> methods = findMethodTransitiveClosure(iMethod, groupInfo);
+    Set<IMethod> methods = Sets.newHashSet(iMethod);
+
+    try {
+      if (methodDependsOnGroups(iMethod)) {
+        GroupInfo groupInfo = TestSearchEngine.findGroupInfo(javaProject);
+        methods.addAll(findMethodTransitiveClosure(iMethod, groupInfo));
+      }
+    } catch (JavaModelException e) {
+      e.printStackTrace();
+    }
+
     launchMethodBasedConfiguration(javaProject, methods.toArray(new IMethod[methods.size()]),
         runMode, runInfo);
   }
