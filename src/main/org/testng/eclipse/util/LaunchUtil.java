@@ -382,19 +382,22 @@ public class LaunchUtil {
       String mode) {
     Map<String, List<String>> classMethods = Maps.newHashMap();
     List<String> typeNames = Lists.newArrayList();
-
     Set<IType> allTypes = Sets.newHashSet();
-    GroupInfo map = TestSearchEngine.findTypesByGroups(ijp);
-    Set<IType> closure = findTransitiveClosure(types, map);
     allTypes.addAll(Arrays.asList(types));
-    allTypes.addAll(closure);
+
+    // If we depend on groups, need to add all the necessary types
+    Object[] groupDependencies = findGroupDependencies(types);
+    if (groupDependencies.length > 0) {
+      GroupInfo map = TestSearchEngine.findTypesByGroups(ijp);
+      Set<IType> closure = findTransitiveClosure(types, map);
+      allTypes.addAll(closure);
+    }
 
     for (IType type : allTypes) {
       typeNames.add(type.getFullyQualifiedName());
       classMethods.put(type.getFullyQualifiedName(), EMPTY_ARRAY_PARAM);
     }
 
-//    Object[] groupDependencies = findGroupDependencies(types);
 //    String[] groups = new String[groupDependencies.length];
 //    for (int i = 0; i < groupDependencies.length; i++) {
 //      groups[i] = groupDependencies[i].toString();
@@ -425,29 +428,35 @@ public class LaunchUtil {
     runConfig(workingCopy, mode);
   }
   
-  private static Set<IType> findTransitiveClosure(IType[] types, GroupInfo map) {
+  private static Set<IType> findTransitiveClosure(IType[] types, GroupInfo groupInfo) {
     Set<IType> result = Sets.newHashSet();
     Set<IType> currentTypes = Sets.newHashSet();
     currentTypes.addAll(Arrays.asList(types));
     Set<IType> nextTypes = Sets.newHashSet();
+    Set<String> initialGroups = Sets.newHashSet();
 
     while (! currentTypes.isEmpty()) {
       for (IType type : currentTypes) {
         result.add(type);
 
-        List<String> groups = map.groupDependenciesByTypes.get(type);
+        List<String> groups = groupInfo.groupDependenciesByTypes.get(type);
         if (groups != null) {
+          if (initialGroups.isEmpty()) initialGroups.addAll(groups);
           for (String group : groups) {
-            List<IType> depTypes = map.typesByGroups.get(group);
-            for (IType depType : depTypes) {
-              if (! result.contains(depTypes)) {
-                result.add(depType);
-                nextTypes.add(depType);
+            List<IType> depTypes = groupInfo.typesByGroups.get(group);
+            if (depTypes != null) {
+              for (IType depType : depTypes) {
+                if (! result.contains(depTypes)) {
+                  result.add(depType);
+                  nextTypes.add(depType);
+                }
               }
+            } else {
+              System.out.println("Can't find any types defining the group " + group);
             }
           }
         } else {
-          System.out.println("Null group");
+          System.out.println("No groups depended upon by type: " + type.getElementName());
         }
       }
 
@@ -456,9 +465,14 @@ public class LaunchUtil {
       nextTypes.clear();
     }
 
+    StringBuilder sb = new StringBuilder();
+    for (IType type : result) {
+      sb.append(type.getFullyQualifiedName()).append(" ");
+    }
+    TestNGPlugin.log("Transitive closure for groups \"" + initialGroups + "\":"  + sb.toString());
+
     return result;
   }
-
 
   private static Object[] findGroupDependencies(ICompilationUnit[] units) {
     List<IResource> resources = Lists.newArrayList();

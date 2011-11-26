@@ -14,8 +14,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -392,48 +394,91 @@ public class TestSearchEngine {
     Map<IType, List<String>> groupDependenciesByTypes = Maps.newHashMap();
   }
 
-  public static GroupInfo findTypesByGroups(IJavaProject ijp) {
-    Map<String, List<IType>> typesByGroups = Maps.newHashMap();
-    Map<IType, List<String>> groupDependenciesByTypes = Maps.newHashMap();
+  public static GroupInfo findTypesByGroups(final IJavaProject ijp) {
+    final Map<String, List<IType>> typesByGroups = Maps.newHashMap();
+    final Map<IType, List<String>> groupDependenciesByTypes = Maps.newHashMap();
 
-    Set<IType> allTypes = Sets.newHashSet();
-    try {
-      collectTypes(ijp, new NullProgressMonitor(), allTypes, Filters.SINGLE_TEST);
-      for (IType type : allTypes) {
-        for (IMethod method : type.getMethods()) {
-          for (IAnnotation annotation : method.getAnnotations()) {
-            IMemberValuePair[] pairs = annotation.getMemberValuePairs();
-            if ("Test".equals(annotation.getElementName()) && pairs.length > 0) {
-              for (IMemberValuePair pair : pairs) {
+    final IRunnableWithProgress runnable = new IRunnableWithProgress() {
 
-                if ("groups".equals(pair.getMemberName())) {
-                  Object groups = pair.getValue();
-                  if (groups.getClass().isArray()) {
-                    for (Object o : (Object[]) groups) {
-                      addToMultimap(typesByGroups, o.toString(), type);
+      public void run(IProgressMonitor monitor)
+          throws InvocationTargetException, InterruptedException {
+        final Set<IType> allTypes = Sets.newHashSet();
+        try {
+          collectTypes(ijp, monitor, allTypes, Filters.SINGLE_TEST, "Parsing tests");
+          for (IType type : allTypes) {
+            for (IMethod method : type.getMethods()) {
+              for (IAnnotation annotation : method.getAnnotations()) {
+                IMemberValuePair[] pairs = annotation.getMemberValuePairs();
+                if ("Test".equals(annotation.getElementName()) && pairs.length > 0) {
+                  for (IMemberValuePair pair : pairs) {
+
+                    if ("groups".equals(pair.getMemberName())) {
+                      Object groups = pair.getValue();
+                      if (groups.getClass().isArray()) {
+                        for (Object o : (Object[]) groups) {
+                          addToMultimap(typesByGroups, o.toString(), type);
+                        }
+                      } else {
+                        addToMultimap(typesByGroups, groups.toString(), type);
+                      }
+                    } else if ("dependsOnGroups".equals(pair.getMemberName())) {
+                      Object dependencies = pair.getValue();
+                      if (dependencies.getClass().isArray()) {
+                        for (Object o : (Object[]) dependencies) {
+                          addToMultimap(groupDependenciesByTypes, type, o.toString());
+                        }
+                      } else {
+                        addToMultimap(groupDependenciesByTypes, type, dependencies.toString());
+                      }
+
                     }
-                  } else {
-                    addToMultimap(typesByGroups, groups.toString(), type);
                   }
-                } else if ("dependsOnGroups".equals(pair.getMemberName())) {
-                  Object dependencies = pair.getValue();
-                  if (dependencies.getClass().isArray()) {
-                    for (Object o : (Object[]) dependencies) {
-                      addToMultimap(groupDependenciesByTypes, type, o.toString());
-                    }
-                  } else {
-                    addToMultimap(groupDependenciesByTypes, type, dependencies.toString());
-                  }
-
                 }
               }
             }
           }
+        } catch (CoreException e) {
+          e.printStackTrace();
         }
       }
-    } catch (CoreException e) {
+
+    };
+
+    Job job = new Job("TestNG: calculating dependencies") {
+      @Override
+      protected IStatus run(IProgressMonitor monitor) {
+        try {
+          runnable.run(monitor);
+          return Status.OK_STATUS;
+        } catch (InvocationTargetException e) {
+          e.printStackTrace();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        return Status.CANCEL_STATUS;
+      }
+    };
+    job.schedule();
+    try {
+      job.join();
+    } catch (InterruptedException e) {
       e.printStackTrace();
     }
+
+//    Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+//    ProgressMonitorDialog dialog = new ProgressMonitorDialog(shell);
+//    try {
+//      dialog.run(true /* fork */, true /* cancelable */, runnable);
+//      GroupInfo result = new GroupInfo();
+//      result.typesByGroups = typesByGroups;
+//      result.groupDependenciesByTypes = groupDependenciesByTypes;
+//
+//      return result;
+//    } catch (InvocationTargetException e) {
+//      e.printStackTrace();
+//    } catch (InterruptedException e) {
+//      e.printStackTrace();
+//    }
 
     GroupInfo result = new GroupInfo();
     result.typesByGroups = typesByGroups;
@@ -442,13 +487,13 @@ public class TestSearchEngine {
     return result;
   }
 
-  private static <K, V> void addToMultimap(Map<K, List<V>> result, K group, V type) {
-    List<V> l = result.get(group);
+  private static <K, V> void addToMultimap(Map<K, List<V>> result, K key, V value) {
+    List<V> l = result.get(key);
     if (l == null) {
       l = Lists.newArrayList();
-      result.put(group, l);
+      result.put(key, l);
     }
-    l.add(type);
+    l.add(value);
   }
 
   /**
@@ -456,12 +501,23 @@ public class TestSearchEngine {
    * an IJavaProject, an IPackageFragmentRoot or a IPackageFragment.
    */
   public static void collectTypes(Object element,
-                                   IProgressMonitor pm,
-                                   Set<IType> result,
-                                   Filters.ITypeFilter filter) throws CoreException {
-    pm.beginTask(ResourceUtil.getString("TestSearchEngine.message.searching"), 10); //$NON-NLS-1$
+      IProgressMonitor pm,
+      Set<IType> result,
+      Filters.ITypeFilter filter) throws CoreException {
+    collectTypes(element, pm, result, filter, null);
+  }
+
+  public static void collectTypes(Object element,
+      IProgressMonitor pm,
+      Set<IType> result,
+      Filters.ITypeFilter filter,
+      String message) throws CoreException {
     element = computeScope(element);
     try {
+      if (message == null) {
+        message = ResourceUtil.getString("TestSearchEngine.message.searching");  //$NON-NLS-1$
+      }
+      pm.beginTask(message, 1000);
 //      ppp("CURRENT ELEMENT:" + element.getClass());
       while((element instanceof ISourceReference) && !(element instanceof ICompilationUnit)) {
         if(element instanceof IType) {
@@ -478,8 +534,9 @@ public class TestSearchEngine {
         ICompilationUnit cu = (ICompilationUnit) element;
 
         IType[] types = cu.getAllTypes();
-
+        pm.beginTask(message, types.length); //$NON-NLS-1$
         for(int i = 0; i < types.length; i++) {
+          pm.worked(1);
           if(filter.accept(types[i])) {
             result.add(types[i]);
           }
@@ -500,26 +557,23 @@ public class TestSearchEngine {
         }
       }
       else if (element instanceof IJavaElement) {
-        findTestTypes(((IJavaElement) element).getJavaProject(), result, filter);
+        findTestTypes(pm, ((IJavaElement) element).getJavaProject(), result, filter);
       }
     }
     finally {
       pm.done();
     }
   }
-  
 
-
-
-  public static void findTestTypes(IJavaElement ije, 
-                                    Set<IType> result,
-                                    Filters.ITypeFilter filter) {
+  public static void findTestTypes(IProgressMonitor pm,
+      IJavaElement ije, Set<IType> result, Filters.ITypeFilter filter) {
     if(IJavaElement.PACKAGE_FRAGMENT > ije.getElementType()) {
       try {
         IJavaElement[] children = ((IParent) ije).getChildren();
 
         for(int i = 0; i < children.length; i++) {
-          findTestTypes(children[i], result, filter);
+          pm.worked(1);
+          findTestTypes(pm, children[i], result, filter);
         }
       }
       catch(JavaModelException jme) {
@@ -530,10 +584,11 @@ public class TestSearchEngine {
     if(IJavaElement.PACKAGE_FRAGMENT == ije.getElementType()) {
       try {
         ICompilationUnit[] compilationUnits = ((IPackageFragment) ije).getCompilationUnits();
-
         for(int i = 0; i < compilationUnits.length; i++) {
-          findTestTypes(compilationUnits[i], result, filter);
+          pm.worked(1);
+          findTestTypes(pm, compilationUnits[i], result, filter);
         }
+        pm.done();
       }
       catch(JavaModelException jme) {
         TestNGPlugin.log(jme);
@@ -547,6 +602,7 @@ public class TestSearchEngine {
 
         for(int i = 0; i < types.length; i++) {
           if(filter.accept(types[i])) {
+            pm.worked(1);
             result.add(types[i]);
           }
         }
