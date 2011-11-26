@@ -1,14 +1,10 @@
 package org.testng.eclipse.util;
 
 
-import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.launch.components.Filters;
-import org.testng.eclipse.launch.components.ITestContent;
-import org.testng.eclipse.ui.util.TypeParser;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,11 +14,14 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -35,6 +34,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.PlatformUI;
+import org.testng.collections.Lists;
+import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.collections.Maps;
+import org.testng.eclipse.collections.Sets;
+import org.testng.eclipse.launch.components.Filters;
+import org.testng.eclipse.launch.components.ITestContent;
+import org.testng.eclipse.ui.util.TypeParser;
 
 /**
  * Search engine for TestNG related elements.
@@ -58,7 +64,7 @@ public class TestSearchEngine {
   public static IType[] findTests(IRunnableContext context,
                                   final Object[] elements,
                                   final Filters.ITypeFilter filter) throws InvocationTargetException, InterruptedException {
-    final Set result = new HashSet();
+    final Set<IType> result = Sets.newHashSet();
 
     if(elements.length != 0) {
       IRunnableWithProgress runnable = new IRunnableWithProgress() {
@@ -69,13 +75,13 @@ public class TestSearchEngine {
       context.run(true, true, runnable);
     }
 
-    return (IType[]) result.toArray(new IType[result.size()]);
+    return result.toArray(new IType[result.size()]);
   }
   
   public static String[] findPackages(IRunnableContext context,
 			final Object[] elements)
 			throws InvocationTargetException, InterruptedException {
-		final Set result = new HashSet();
+    final Set<String> result = Sets.newHashSet();
 
 		if (elements.length != 0) {
 			IRunnableWithProgress runnable = new IRunnableWithProgress() {
@@ -87,7 +93,7 @@ public class TestSearchEngine {
 			context.run(true, true, runnable);
 		}
 
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
   
   public static String[] findMethods(IRunnableContext context,
@@ -381,13 +387,77 @@ public class TestSearchEngine {
     }
   }
 
+  public static class GroupInfo {
+    Map<String, List<IType>> typesByGroups = Maps.newHashMap();
+    Map<IType, List<String>> groupDependenciesByTypes = Maps.newHashMap();
+  }
+
+  public static GroupInfo findTypesByGroups(IJavaProject ijp) {
+    Map<String, List<IType>> typesByGroups = Maps.newHashMap();
+    Map<IType, List<String>> groupDependenciesByTypes = Maps.newHashMap();
+
+    Set<IType> allTypes = Sets.newHashSet();
+    try {
+      collectTypes(ijp, new NullProgressMonitor(), allTypes, Filters.SINGLE_TEST);
+      for (IType type : allTypes) {
+        for (IMethod method : type.getMethods()) {
+          for (IAnnotation annotation : method.getAnnotations()) {
+            IMemberValuePair[] pairs = annotation.getMemberValuePairs();
+            if ("Test".equals(annotation.getElementName()) && pairs.length > 0) {
+              for (IMemberValuePair pair : pairs) {
+
+                if ("groups".equals(pair.getMemberName())) {
+                  Object groups = pair.getValue();
+                  if (groups.getClass().isArray()) {
+                    for (Object o : (Object[]) groups) {
+                      addToMultimap(typesByGroups, o.toString(), type);
+                    }
+                  } else {
+                    addToMultimap(typesByGroups, groups.toString(), type);
+                  }
+                } else if ("dependsOnGroups".equals(pair.getMemberName())) {
+                  Object dependencies = pair.getValue();
+                  if (dependencies.getClass().isArray()) {
+                    for (Object o : (Object[]) dependencies) {
+                      addToMultimap(groupDependenciesByTypes, type, o.toString());
+                    }
+                  } else {
+                    addToMultimap(groupDependenciesByTypes, type, dependencies.toString());
+                  }
+
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (CoreException e) {
+      e.printStackTrace();
+    }
+
+    GroupInfo result = new GroupInfo();
+    result.typesByGroups = typesByGroups;
+    result.groupDependenciesByTypes = groupDependenciesByTypes;
+
+    return result;
+  }
+
+  private static <K, V> void addToMultimap(Map<K, List<V>> result, K group, V type) {
+    List<V> l = result.get(group);
+    if (l == null) {
+      l = Lists.newArrayList();
+      result.put(group, l);
+    }
+    l.add(type);
+  }
+
   /**
    * Collect all the types under the parameter element, which is expected to be either
    * an IJavaProject, an IPackageFragmentRoot or a IPackageFragment.
    */
-  private static void collectTypes(Object element,
+  public static void collectTypes(Object element,
                                    IProgressMonitor pm,
-                                   Set result,
+                                   Set<IType> result,
                                    Filters.ITypeFilter filter) throws CoreException {
     pm.beginTask(ResourceUtil.getString("TestSearchEngine.message.searching"), 10); //$NON-NLS-1$
     element = computeScope(element);
@@ -396,7 +466,7 @@ public class TestSearchEngine {
       while((element instanceof ISourceReference) && !(element instanceof ICompilationUnit)) {
         if(element instanceof IType) {
           if(filter.accept((IType) element)) {
-            result.add(element);
+            result.add((IType) element);
 
             return;
           }
@@ -441,8 +511,8 @@ public class TestSearchEngine {
 
 
 
-  private static void findTestTypes(IJavaElement ije, 
-                                    Set result,
+  public static void findTestTypes(IJavaElement ije, 
+                                    Set<IType> result,
                                     Filters.ITypeFilter filter) {
     if(IJavaElement.PACKAGE_FRAGMENT > ije.getElementType()) {
       try {
@@ -570,7 +640,7 @@ public class TestSearchEngine {
 					IType classType;
 					if (Filters.SINGLE_TEST.accept(types[i])) {
 						if (IJavaElement.TYPE == types[i].getElementType()) {
-							classType = (IType)types[i];
+							classType = types[i];
 						}
 						else if (IJavaElement.CLASS_FILE == types[i].getElementType()) {
 							classType = ((IClassFile)types[i]).findPrimaryType();
