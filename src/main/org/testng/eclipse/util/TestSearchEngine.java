@@ -1,16 +1,13 @@
 package org.testng.eclipse.util;
 
 
-import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.launch.components.Filters;
-import org.testng.eclipse.launch.components.ITestContent;
-import org.testng.eclipse.ui.util.TypeParser;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import com.google.common.collect.Sets;
 
 import org.eclipse.core.internal.resources.File;
 import org.eclipse.core.resources.IContainer;
@@ -35,6 +32,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.PlatformUI;
+import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.launch.components.Filters;
+import org.testng.eclipse.launch.components.ITestContent;
+import org.testng.eclipse.ui.util.TypeParser;
 
 /**
  * Search engine for TestNG related elements.
@@ -58,7 +59,7 @@ public class TestSearchEngine {
   public static IType[] findTests(IRunnableContext context,
                                   final Object[] elements,
                                   final Filters.ITypeFilter filter) throws InvocationTargetException, InterruptedException {
-    final Set result = new HashSet();
+    final Set<IType> result = Sets.newHashSet();
 
     if(elements.length != 0) {
       IRunnableWithProgress runnable = new IRunnableWithProgress() {
@@ -69,13 +70,13 @@ public class TestSearchEngine {
       context.run(true, true, runnable);
     }
 
-    return (IType[]) result.toArray(new IType[result.size()]);
+    return result.toArray(new IType[result.size()]);
   }
   
   public static String[] findPackages(IRunnableContext context,
 			final Object[] elements)
 			throws InvocationTargetException, InterruptedException {
-		final Set result = new HashSet();
+    final Set<String> result = Sets.newHashSet();
 
 		if (elements.length != 0) {
 			IRunnableWithProgress runnable = new IRunnableWithProgress() {
@@ -87,7 +88,7 @@ public class TestSearchEngine {
 			context.run(true, true, runnable);
 		}
 
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
   
   public static String[] findMethods(IRunnableContext context,
@@ -251,7 +252,7 @@ public class TestSearchEngine {
       }
     }
     finally {
-      pm.done();
+//      pm.done();
     }
   }
   
@@ -385,18 +386,28 @@ public class TestSearchEngine {
    * Collect all the types under the parameter element, which is expected to be either
    * an IJavaProject, an IPackageFragmentRoot or a IPackageFragment.
    */
-  private static void collectTypes(Object element,
-                                   IProgressMonitor pm,
-                                   Set result,
-                                   Filters.ITypeFilter filter) throws CoreException {
-    pm.beginTask(ResourceUtil.getString("TestSearchEngine.message.searching"), 10); //$NON-NLS-1$
+  public static void collectTypes(Object element,
+      IProgressMonitor pm,
+      Set<IType> result,
+      Filters.ITypeFilter filter) throws CoreException {
+    collectTypes(element, pm, result, filter, null);
+  }
+
+  public static void collectTypes(Object element,
+      IProgressMonitor pm,
+      Set<IType> result,
+      Filters.ITypeFilter filter,
+      String message) throws CoreException {
     element = computeScope(element);
     try {
-//      ppp("CURRENT ELEMENT:" + element.getClass());
+      if (message == null) {
+        message = ResourceUtil.getString("TestSearchEngine.message.searching");  //$NON-NLS-1$
+      }
+
       while((element instanceof ISourceReference) && !(element instanceof ICompilationUnit)) {
         if(element instanceof IType) {
           if(filter.accept((IType) element)) {
-            result.add(element);
+            result.add((IType) element);
 
             return;
           }
@@ -408,8 +419,8 @@ public class TestSearchEngine {
         ICompilationUnit cu = (ICompilationUnit) element;
 
         IType[] types = cu.getAllTypes();
-
         for(int i = 0; i < types.length; i++) {
+          pm.worked(1);
           if(filter.accept(types[i])) {
             result.add(types[i]);
           }
@@ -430,26 +441,25 @@ public class TestSearchEngine {
         }
       }
       else if (element instanceof IJavaElement) {
-        findTestTypes(((IJavaElement) element).getJavaProject(), result, filter);
+        findTestTypes(pm, ((IJavaElement) element).getJavaProject(), result, filter);
       }
     }
     finally {
-      pm.done();
+//      pm.done();
     }
   }
-  
 
+  public static void findTestTypes(IProgressMonitor pm,
+      IJavaElement ije, Set<IType> result, Filters.ITypeFilter filter) {
 
-
-  private static void findTestTypes(IJavaElement ije, 
-                                    Set result,
-                                    Filters.ITypeFilter filter) {
     if(IJavaElement.PACKAGE_FRAGMENT > ije.getElementType()) {
       try {
         IJavaElement[] children = ((IParent) ije).getChildren();
 
+//        SubMonitor sm = SubMonitor.convert(pm, "Package fragment " + children.length, children.length);
         for(int i = 0; i < children.length; i++) {
-          findTestTypes(children[i], result, filter);
+          pm.worked(1);
+          findTestTypes(pm, children[i], result, filter);
         }
       }
       catch(JavaModelException jme) {
@@ -460,9 +470,9 @@ public class TestSearchEngine {
     if(IJavaElement.PACKAGE_FRAGMENT == ije.getElementType()) {
       try {
         ICompilationUnit[] compilationUnits = ((IPackageFragment) ije).getCompilationUnits();
-
         for(int i = 0; i < compilationUnits.length; i++) {
-          findTestTypes(compilationUnits[i], result, filter);
+          pm.worked(1);
+          findTestTypes(pm, compilationUnits[i], result, filter);
         }
       }
       catch(JavaModelException jme) {
@@ -475,8 +485,11 @@ public class TestSearchEngine {
       try {
         IType[] types = ((ICompilationUnit) ije).getAllTypes();
 
+//        SubMonitor sm = SubMonitor.convert(pm, "Compilation unit " + types.length, types.length);
         for(int i = 0; i < types.length; i++) {
           if(filter.accept(types[i])) {
+            pm.worked(1);
+//            pm.subTask("Type:" + types[i]);
             result.add(types[i]);
           }
         }
@@ -570,7 +583,7 @@ public class TestSearchEngine {
 					IType classType;
 					if (Filters.SINGLE_TEST.accept(types[i])) {
 						if (IJavaElement.TYPE == types[i].getElementType()) {
-							classType = (IType)types[i];
+							classType = types[i];
 						}
 						else if (IJavaElement.CLASS_FILE == types[i].getElementType()) {
 							classType = ((IClassFile)types[i]).findPrimaryType();

@@ -1,7 +1,5 @@
 package org.testng.eclipse.launch.components;
 
-import org.testng.eclipse.ui.util.TypeParser;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +14,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.testng.eclipse.ui.util.TypeParser;
 
 
 public class Filters {
@@ -47,6 +46,7 @@ public class Filters {
       m_rejectedEntries = rejectedEntries;
     }
     
+    @Override
     public boolean select(Viewer viewer, Object parentElement, Object element) {
       if(null == m_rejectedEntries || m_rejectedEntries.size() == 0) {
         return true;
@@ -63,6 +63,7 @@ public class Filters {
   }
   
   private static class TestViewerFilter extends ViewerFilter {
+    @Override
     public boolean select(Viewer viewer, Object parentElement, Object element) {
       if(element instanceof IProject) {
         return true;
@@ -79,6 +80,7 @@ public class Filters {
   }
   
   private static class SourceDirectoryFilter extends ViewerFilter {
+    @Override
     public boolean select(Viewer viewer, Object parentElement, Object element) {
       if(element instanceof IProject) {
         return true;
@@ -168,7 +170,28 @@ public class Filters {
     }
   };
 
-  
+  public static class GroupFilter implements ITypeFilter {
+    private String[] m_groupNames;
+
+    public GroupFilter(String... groupNames) {
+      m_groupNames = groupNames;
+    }
+
+    public boolean accept(IType type) {
+      ITestContent parsedType = TypeParser.parseType(type);
+      if (! parsedType.isTestNGClass()) {
+        return false;
+      } else {
+        for (String group : m_groupNames) {
+          if (parsedType.getGroups().contains(group)) {
+            return true;
+          }
+        }
+        return false;
+      }
+    }
+  }
+
   public static Filters.ITypeFilter SUITE  = new Filters.ITypeFilter() {
     public boolean accept(IType type) {
       boolean result = false;

@@ -1,21 +1,6 @@
 package org.testng.eclipse.util;
 
 
-import org.testng.TestNGException;
-import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.collections.Lists;
-import org.testng.eclipse.collections.Maps;
-import org.testng.internal.Utils;
-import org.testng.remote.RemoteTestNG;
-import org.testng.reporters.XMLStringBuffer;
-import org.testng.xml.LaunchSuite;
-import org.testng.xml.Parser;
-import org.testng.xml.XmlMethodSelector;
-import org.testng.xml.XmlSuite;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.ParserConfigurationException;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,6 +13,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import org.testng.TestNGException;
+import org.testng.eclipse.TestNGPlugin;
+import org.testng.internal.Utils;
+import org.testng.remote.RemoteTestNG;
+import org.testng.reporters.XMLStringBuffer;
+import org.testng.xml.LaunchSuite;
+import org.testng.xml.Parser;
+import org.testng.xml.XmlMethodSelector;
+import org.testng.xml.XmlSuite;
+import org.xml.sax.SAXException;
 
 /**
  * Base class used by classes that generate XML suite files.
@@ -220,6 +221,7 @@ abstract public class CustomSuite extends LaunchSuite {
     }
   }
 
+  @Override
   public XMLStringBuffer getSuiteBuffer() {
     if(null == m_suiteBuffer) {
       m_suiteBuffer= createContentBuffer();

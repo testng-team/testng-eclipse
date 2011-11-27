@@ -2,6 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src/main"/>
 	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry exported="true" kind="lib" path="lib/guava-base-r03.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/guava-collections-r03.jar" sourcepath="/Users/cedric/java/guava-collections/guava-collections-r03-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/testng.jar" sourcepath="/testng"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="lib" path="lib/junit-4.8.2.jar" sourcepath="/Users/cbeust/.m2/repository/junit/junit/4.8.2/junit-4.8.2-sources.jar"/>

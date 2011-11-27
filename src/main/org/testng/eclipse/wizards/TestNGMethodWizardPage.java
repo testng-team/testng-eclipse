@@ -1,5 +1,11 @@
 package org.testng.eclipse.wizards;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import com.google.common.collect.Lists;
+
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -14,13 +20,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
-import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.Utils.JavaElement;
-
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 /**
  * A wizard page that displays the list of public methods on the currently selected class

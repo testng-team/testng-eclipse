@@ -1,5 +1,10 @@
 package org.testng.eclipse.launch;
 
+import java.util.Arrays;
+import java.util.List;
+
+import com.google.common.collect.Lists;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
@@ -25,12 +30,8 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IEditorPart;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.launch.tester.JavaTypeExtender;
 import org.testng.eclipse.util.LaunchUtil;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Right-click launcher.

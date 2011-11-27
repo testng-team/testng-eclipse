@@ -1,5 +1,11 @@
 package org.testng.eclipse.refactoring;
 
+import java.io.ByteArrayInputStream;
+import java.util.List;
+import java.util.Set;
+
+import com.google.common.collect.Sets;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -22,7 +28,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.collections.Sets;
 import org.testng.eclipse.util.PreferenceStoreUtil.SuiteMethodTreatment;
 import org.testng.eclipse.util.SWTUtil;
 import org.testng.eclipse.util.Utils;
@@ -31,10 +36,6 @@ import org.testng.xml.XmlClass;
 import org.testng.xml.XmlPackage;
 import org.testng.xml.XmlSuite;
 import org.testng.xml.XmlTest;
-
-import java.io.ByteArrayInputStream;
-import java.util.List;
-import java.util.Set;
 
 /**
  * The page in the refactoring wizard that lets the user configure the

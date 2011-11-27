@@ -1,20 +1,21 @@
 package org.testng.eclipse.launch;
 
-import org.eclipse.core.internal.resources.File;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.swt.widgets.Composite;
-import org.testng.collections.Maps;
-import org.testng.eclipse.collections.Lists;
-import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
-import org.testng.eclipse.ui.util.ConfigurationHelper;
-import org.testng.eclipse.util.StringUtils;
-import org.testng.eclipse.util.TestSearchEngine;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import com.google.common.collect.Lists;
+
+import org.eclipse.core.internal.resources.File;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.swt.widgets.Composite;
+import org.testng.collections.Maps;
+import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
+import org.testng.eclipse.ui.util.ConfigurationHelper;
+import org.testng.eclipse.util.StringUtils;
+import org.testng.eclipse.util.TestSearchEngine;
 
 /**
  * Allow the user to select one or many suite files in this launch configuration.

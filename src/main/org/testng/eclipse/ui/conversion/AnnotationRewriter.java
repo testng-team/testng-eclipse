@@ -1,7 +1,14 @@
 package org.testng.eclipse.ui.conversion;
 
-import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.JavaModelException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import com.google.common.collect.Maps;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -27,15 +34,7 @@ import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.util.PreferenceStoreUtil.SuiteMethodTreatment;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * A rewriter that will convert the current JUnit file to TestNG
@@ -77,11 +76,11 @@ public class AnnotationRewriter implements IRewriteProvider
       Name importName = oldImports.get(i).getName();
       String fqn = importName.getFullyQualifiedName();
       if (IMPORTS_TO_REMOVE.contains(fqn)) {
-        result.remove((ImportDeclaration) oldImports.get(i), null);
+        result.remove(oldImports.get(i), null);
       }
       for (String s : STATIC_IMPORTS_TO_REMOVE) {
         if (fqn.contains(s)) {
-          result.remove((ImportDeclaration) oldImports.get(i), null);
+          result.remove(oldImports.get(i), null);
         }
       }
     }

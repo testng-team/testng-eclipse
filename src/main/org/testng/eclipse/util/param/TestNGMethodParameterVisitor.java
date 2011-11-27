@@ -1,10 +1,11 @@
 package org.testng.eclipse.util.param;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import com.beust.jcommander.internal.Lists;
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -19,9 +20,8 @@ import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-
 /**
- * This class/interface 
+ * Visitor for TestNG methods.
  */
 public class TestNGMethodParameterVisitor extends ASTVisitor {
   private static final String ANNOTATION_PACKAGE = "org.testng.annotations.";
@@ -32,10 +32,10 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
   private static final String TEST_ANNOTATION = "Test";
   private static final String TEST_ANNOTATION_FQN = ANNOTATION_PACKAGE + TEST_ANNOTATION;
   
-  private Map m_parameters= new HashMap();
+  private Map<MethodDeclaration, List<String>> m_parameters = Maps.newHashMap();
   private IType m_typeFilter;
   private IMethod m_methodFilter;
-  
+
   public TestNGMethodParameterVisitor() {
   }
   
@@ -46,8 +46,8 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
   public TestNGMethodParameterVisitor(IType typeOnly) {
     m_typeFilter= typeOnly;
   }
-  
-  
+
+  @Override
   public boolean visit(TypeDeclaration node) {
     if(null != m_typeFilter) {
       return node.getName().getIdentifier().equals(m_typeFilter.getElementName());
@@ -56,8 +56,8 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
       return true;
     }
   }
-
   
+  @Override
   public boolean visit(MethodDeclaration node) {
     if(null != m_methodFilter) {
       return node.getName().getIdentifier().equals(m_methodFilter.getElementName())
@@ -72,10 +72,12 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
    * No MarkerAnnotated method can have parameters. Ignore.
    * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MarkerAnnotation)
    */
+  @Override
   public boolean visit(MarkerAnnotation annotation) {
     return false;
   }
 
+  @Override
   public boolean visit(NormalAnnotation annotation) {
     if(!isKnownAnnotation(annotation.getTypeName().getFullyQualifiedName())) {
       return false;
@@ -90,6 +92,8 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
           Expression paramAttr= pair.getValue();
           if(paramAttr instanceof ArrayInitializer) {
             record((MethodDeclaration) annotation.getParent(), (ArrayInitializer) paramAttr);
+          } else if (paramAttr instanceof StringLiteral) {
+            record((MethodDeclaration) annotation.getParent(), (StringLiteral) paramAttr);
           }
         }
       }
@@ -103,11 +107,14 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
    * 
    * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SingleMemberAnnotation)
    */
+  @Override
   public boolean visit(SingleMemberAnnotation annotation) {
     if(isParameterAnnotation(annotation.getTypeName().getFullyQualifiedName())) {
       Expression paramValues= annotation.getValue();
-      if(paramValues instanceof ArrayInitializer) {
+      if (paramValues instanceof ArrayInitializer) {
         record((MethodDeclaration) annotation.getParent(), (ArrayInitializer) paramValues);
+      } else if (paramValues instanceof StringLiteral) {
+        record((MethodDeclaration) annotation.getParent(), (StringLiteral) paramValues);
       }
     }
     
@@ -117,6 +124,18 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
   public boolean hasParameters() {
     return !m_parameters.isEmpty();
   }
+
+  private void record(MethodDeclaration method, List<String> paramNames) {
+    m_parameters.put(method,  paramNames);
+  }
+
+  protected void record(MethodDeclaration method, StringLiteral value){
+    if (! Strings.isNullOrEmpty(value.getLiteralValue())) {
+      List<String> paramNames = Lists.newArrayList();
+      paramNames.add(value.getLiteralValue());
+      record(method, paramNames);
+    }
+  }
   
   /**
    * 
@@ -124,14 +143,14 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
    * @param values array initializer containing StringLiterals for the parameter names
    */
   protected void record(MethodDeclaration method, ArrayInitializer values) {
-    List literals= values.expressions();
-    List paramNames= new ArrayList(literals.size());
+    List literals = values.expressions();
+    List<String> paramNames = Lists.newArrayList(literals.size());
     for(int i= 0; i < literals.size(); i++) {
-      StringLiteral str= (StringLiteral) literals.get(i);
+      StringLiteral str = (StringLiteral) literals.get(i);
       paramNames.add(str.getLiteralValue());
     }
-    
-    m_parameters.put(method, paramNames);
+
+    record(method, paramNames);
   }
   
   protected boolean isParameterAnnotation(String annotationType) {
@@ -148,11 +167,9 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
   /**
    * @return
    */
-  public Map getParametersMap() {
-    Map parameterMap= new HashMap();
-    for(Iterator it= m_parameters.values().iterator(); it.hasNext(); ) {
-      List paramNames= (List) it.next();
-      
+  public Map<String, String> getParametersMap() {
+    Map<String, String> parameterMap = Maps.newHashMap();
+    for (List<String> paramNames : m_parameters.values()) {
       for(int i= 0; i < paramNames.size(); i++) { 
         parameterMap.put(paramNames.get(i), "not-found");
       }

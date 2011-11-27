@@ -1,30 +1,25 @@
 package org.testng.eclipse.refactoring;
 
-import org.eclipse.core.resources.IFile;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ui.IWorkbenchPage;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.collections.Maps;
-import org.testng.eclipse.collections.Sets;
-import org.testng.eclipse.launch.components.Filters.ITypeFilter;
-import org.testng.eclipse.ui.conversion.JUnitConverterQuickAssistProcessor;
-import org.testng.eclipse.ui.conversion.JUnitVisitor;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.Utils;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * A composite change that gathers all the changes needs to convert the current

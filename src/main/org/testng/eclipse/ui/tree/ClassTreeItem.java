@@ -1,7 +1,6 @@
 package org.testng.eclipse.ui.tree;
 
 import org.eclipse.swt.widgets.TreeItem;
-import org.testng.ITestResult;
 import org.testng.eclipse.ui.RunInfo;
 
 /**
@@ -22,7 +21,7 @@ public class ClassTreeItem extends BaseTreeItem implements ITreeItem {
   }
 
   public void update(RunInfo runInfo) {
-    getTreeItem().setText(runInfo.getClassName());
+    getTreeItem().setText(runInfo.getInstanceName());
     maybeUpdateImage(runInfo);
   }
 

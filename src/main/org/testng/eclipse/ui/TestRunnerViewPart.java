@@ -1,5 +1,15 @@
 package org.testng.eclipse.ui;
 
+import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import com.google.common.collect.Lists;
+
 import org.eclipse.core.internal.resources.Workspace;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -73,7 +83,6 @@ import org.eclipse.ui.progress.UIJob;
 import org.testng.ITestResult;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
-import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.ui.summary.SummaryTab;
 import org.testng.eclipse.util.CustomSuite;
 import org.testng.eclipse.util.JDTUtil;
@@ -90,14 +99,6 @@ import org.testng.remote.strprotocol.StringMessageSender;
 import org.testng.remote.strprotocol.SuiteMessage;
 import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
-
-import java.net.SocketTimeoutException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 /**
  * A ViewPart that shows the results of a test run.
@@ -1480,6 +1481,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
                        trm.getTestClass(),
                        trm.getMethod(),
                        trm.getTestDescription(),
+                       trm.getInstanceName(),
                        trm.getParameters(),
                        trm.getParameterTypes(),
                        trm.getEndMillis() - trm.getStartMillis(),

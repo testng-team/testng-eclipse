@@ -6,6 +6,10 @@
  */
 package org.testng.eclipse.util;
 
+import java.util.List;
+
+import com.google.common.collect.Lists;
+
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
@@ -14,9 +18,6 @@ import org.eclipse.core.runtime.Platform;
 import org.testng.IReporter;
 import org.testng.ITestNGListener;
 import org.testng.TestListenerAdapter;
-import org.testng.eclipse.collections.Lists;
-
-import java.util.List;
 
 /**
  * @author jocraig

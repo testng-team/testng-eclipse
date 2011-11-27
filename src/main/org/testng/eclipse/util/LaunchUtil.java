@@ -1,5 +1,21 @@
 package org.testng.eclipse.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -12,9 +28,11 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -29,8 +47,6 @@ import org.eclipse.search.ui.text.FileTextSearchScope;
 import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
-import org.testng.eclipse.collections.Lists;
-import org.testng.eclipse.collections.Maps;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.RunInfo;
@@ -38,15 +54,6 @@ import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.util.JDTUtil.MethodDefinition;
 import org.testng.eclipse.util.param.ParameterSolver;
 import org.testng.reporters.FailedReporter;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * An utility class that centralize the work about configuration launchers.
@@ -72,7 +79,7 @@ import java.util.Set;
  * @author <a href='mailto:the_mindstorm@evolva.ro'>Alexandru Popescu</a>
  */
 public class LaunchUtil {
-  private static final List EMPTY_ARRAY_PARAM= new ArrayList();
+  private static final List<String> EMPTY_ARRAY_PARAM = Lists.newArrayList();
   
   /**
    * Suite file launcher. The file may reside outside the workbench.
@@ -144,7 +151,7 @@ public class LaunchUtil {
   
   public static void launchMapConfiguration(IProject project,
                                             String configName,
-                                            Map launchAttributes,
+                                            Map<String, Map> launchAttributes,
                                             ICompilationUnit compilationUnit,
                                             String launchMode) {
     ILaunchConfigurationWorkingCopy workingCopy= createLaunchConfiguration(project, configName, null);
@@ -170,32 +177,33 @@ public class LaunchUtil {
    * Creates a Map containing the basic properties of a new launch configuration,
    * based on types.
    */
-  public static Map createClassLaunchConfigurationMap(IType mainType, IType[] types, String annotationType) {
-    Map attrs= new HashMap();
+  public static Map<String, Object> createClassLaunchConfigurationMap(IType mainType, IType[] types, String annotationType) {
+    Map<String, Object> attrs= new HashMap<String, Object>();
 
     List<String> classNames= Lists.newArrayList();
-    Map<String, List<String>> classMethods= Maps.newHashMap();
+    Multimap<String, String> classMethods = ArrayListMultimap.create();
+    classMethods.get(null);
 
     for(int i= 0; i < types.length; i++) {
       classNames.add(types[i].getFullyQualifiedName());
-      classMethods.put(types[i].getFullyQualifiedName(), EMPTY_ARRAY_PARAM);
+//      classMethods.put(types[i].getFullyQualifiedName(), EMPTY_ARRAY_PARAM);
     }
 
     attrs.put(TestNGLaunchConfigurationConstants.TYPE, LaunchType.CLASS.ordinal());
     attrs.put(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST, classNames);
 //    attrs.put(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR, annotationType);
     attrs.put(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST, 
-        ConfigurationHelper.toClassMethodsMap(classMethods));
+        ConfigurationHelper.toClassMethodsMap(classMethods.asMap()));
 
     return attrs;
   }
   
   public static void launchPackageConfiguration(IJavaProject ijp, IPackageFragment ipf, String mode) {
-    List packageNames= new ArrayList();
+    List<String> packageNames= new ArrayList<String>();
     packageNames.add(ipf.getElementName());
 
     try {
-      if(haveGroupsDependency(ipf.getCompilationUnits())) {
+      if (findGroupDependencies(ipf.getCompilationUnits()).length > 0) {
         groupDependencyWarning("package " + ipf.getElementName(), null);
       }
     }
@@ -214,7 +222,7 @@ public class LaunchUtil {
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
         LaunchType.PACKAGE.ordinal());
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
-                             ConfigurationHelper.toClassMethodsMap(new HashMap()));
+        ConfigurationHelper.toClassMethodsMap(new HashMap<String, Collection<String>>()));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
                              solveParameters(ipf));
 
@@ -224,35 +232,49 @@ public class LaunchUtil {
   public static void launchMethodConfiguration(IJavaProject javaProject,
           IMethod imethod,
           String runMode) {
-	  launchMethodConfiguration (javaProject, imethod, runMode, null);
+	  launchMethodConfiguration(javaProject, imethod, runMode, null);
   }
-  
-  public static void launchMethodConfiguration(IJavaProject javaProject,
-          IMethod imethod,
-          String runMode,
-          RunInfo runInfo) {
-	     
-    Set/*<String>*/ groups= new HashSet();
-    List allmethods= solveDependsOn(imethod);
-    IMethod[] methods= new IMethod[allmethods.size()];
-    for(int i= 0; i < allmethods.size(); i++) {
-      MethodDefinition md= (MethodDefinition) allmethods.get(i);
-      methods[i]= md.getMethod();
-      groups.addAll(md.getGroups());
-    }
-    
-    if(!groups.isEmpty()) {
-      groupDependencyWarning(imethod.getElementName(), groups);
+
+  private static boolean methodDependsOnGroups(IMethod method) throws JavaModelException {
+    IAnnotation annotation = method.getAnnotation("Test");
+    return annotation != null && contains(annotation.getMemberValuePairs(), "dependsOnGroups");
+  }
+
+  private static boolean contains(IMemberValuePair[] memberValuePairs, String string) {
+    for (IMemberValuePair pair : memberValuePairs) {
+      if (string.equals(pair.getMemberName())) {
+        return true;
+      }
     }
 
-    launchMethodBasedConfiguration(javaProject, methods, runMode, runInfo);
+    return false;
+  }
+
+  public static void launchMethodConfiguration(IJavaProject javaProject,
+          IMethod iMethod,
+          String runMode,
+          RunInfo runInfo) {
+
+    Set<IMethod> methods = Sets.newHashSet(iMethod);
+
+    try {
+      if (methodDependsOnGroups(iMethod)) {
+        GroupInfo groupInfo = GroupInfo.createGroupInfo(javaProject);
+        methods.addAll(findMethodTransitiveClosure(iMethod, groupInfo));
+      }
+    } catch (JavaModelException e) {
+      e.printStackTrace();
+    }
+
+    launchMethodBasedConfiguration(javaProject, methods.toArray(new IMethod[methods.size()]),
+        runMode, runInfo);
   }
  
   /**
    * @param elementName
    * @param groups
    */
-  private static void groupDependencyWarning(String elementName, Set groups) {
+  private static void groupDependencyWarning(String elementName, Set<String> groups) {
     ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), 
         "WARNING", 
         elementName + " defines group dependencies that will be ignored. To reliably test methods with group dependencies use a suite definition.", 
@@ -265,27 +287,22 @@ public class LaunchUtil {
   
   private static void launchMethodBasedConfiguration(IJavaProject ijp,  
 		  IMethod[] methods, String runMode, RunInfo runInfo) {
-    Set typesSet= new HashSet();
+    Set<IType> typesSet= new HashSet<IType>();
     for(int i= 0; i < methods.length; i++) {
       typesSet.add(methods[i].getDeclaringType());
     }
     
-    List/*<String>*/ methodNames= new ArrayList();
-    Map/*<String, List<String>>*/ classMethods= new HashMap();
+    List<String> methodNames = Lists.newArrayList();
+    Multimap<String, String> classMethods = ArrayListMultimap.create();
     for(int i= 0; i < methods.length; i++) {
       methodNames.add(methods[i].getElementName());
-      
-      List methodList= (List) classMethods.get(methods[i].getDeclaringType().getFullyQualifiedName());
-      if(null == methodList) {
-        methodList= new ArrayList();
-        classMethods.put(methods[i].getDeclaringType().getFullyQualifiedName(), methodList); 
-      }
-      methodList.add(methods[i].getElementName());
+      classMethods.put(methods[i].getDeclaringType().getFullyQualifiedName(),
+          methods[i].getElementName());
     }
     
-    IType[] types= (IType[]) typesSet.toArray(new IType[typesSet.size()]);
+    IType[] types= typesSet.toArray(new IType[typesSet.size()]);
     
-    List typeNames = new ArrayList();
+    List<String> typeNames = new ArrayList<String>();
     for(int i = 0; i < types.length; i++) {
       typeNames.add(types[i].getFullyQualifiedName());
     }
@@ -302,7 +319,7 @@ public class LaunchUtil {
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
         LaunchType.METHOD.ordinal());
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
-                             ConfigurationHelper.toClassMethodsMap(classMethods));
+                             ConfigurationHelper.toClassMethodsMap(classMethods.asMap()));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
                              solveParameters(methods));
 //    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
@@ -375,41 +392,169 @@ public class LaunchUtil {
      return jvmArgs.indexOf("-Dtestng.eclipse.stringprotocol") >= 0;
   }
 
-  private static void launchTypeBasedConfiguration(IJavaProject ijp, String confName, IType[] types, String mode) {
-    Map classMethods= new HashMap();
-    List typeNames = new ArrayList();
-    
-    for(int i = 0; i < types.length; i++) {
-      typeNames.add(types[i].getFullyQualifiedName());
-      classMethods.put(types[i].getFullyQualifiedName(), EMPTY_ARRAY_PARAM);
+  private static void launchTypeBasedConfiguration(IJavaProject javaProject, String confName,
+      IType[] types, String mode) {
+    Multimap<String, String> classMethods = ArrayListMultimap.create();
+    List<String> typeNames = Lists.newArrayList();
+    Set<IType> allTypes = Sets.newHashSet();
+    allTypes.addAll(Arrays.asList(types));
+
+    Set<IMethod> allMethods = Sets.newHashSet();
+
+    // If we depend on groups, need to add all the necessary types
+    Object[] groupDependencies = findGroupDependencies(types);
+    if (groupDependencies.length > 0) {
+      GroupInfo groupInfo = GroupInfo.createGroupInfo(javaProject);
+      Set<IType> closure = findTypeTransitiveClosure(types, groupInfo);
+      allTypes.addAll(closure);
+      Set<IMethod> methods = findMethodTransitiveClosure(types, groupInfo);
+      allMethods.addAll(methods);
     }
 
-    if(haveGroupsDependency(types)) {
-      groupDependencyWarning(confName, null);
+    for (IType type : allTypes) {
+      typeNames.add(type.getFullyQualifiedName());
     }
-    
-    ILaunchConfigurationWorkingCopy workingCopy = createLaunchConfiguration(ijp.getProject(), confName, null); 
-    
+
+    List<String> methodNames = Lists.newArrayList();
+    for (IMethod m : allMethods) {
+      methodNames.add(m.getElementName());
+      classMethods.put(m.getDeclaringType().getFullyQualifiedName(), m.getElementName());
+    }
+
+    ILaunchConfigurationWorkingCopy workingCopy =
+        createLaunchConfiguration(javaProject.getProject(), confName, null);
+
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
         LaunchType.CLASS.ordinal());
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
-                             ConfigurationHelper.toClassMethodsMap(classMethods));
+                             ConfigurationHelper.toClassMethodsMap(classMethods.asMap()));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
                              typeNames);
-//    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
-//                             getQuickComplianceLevel(types));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
-                             solveParameters(types));
+                             solveParameters(allTypes.toArray(new IType[allTypes.size()])));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.METHOD_TEST_LIST,
-                             EMPTY_ARRAY_PARAM);
+        methodNames);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST,
                              EMPTY_ARRAY_PARAM);
 
     runConfig(workingCopy, mode);
   }
-  
-  private static boolean haveGroupsDependency(ICompilationUnit[] units) {
-    List resources= new ArrayList();
+
+  public static Set<IMethod> findMethodTransitiveClosure(IType[] types, GroupInfo groupInfo) {
+    Set<IMethod> result = Sets.newHashSet();
+    for (IType type : types) {
+      result.addAll(findMethodTransitiveClosure(type, groupInfo));
+    }
+
+    return result;
+  }
+
+  public static Set<IMethod> findMethodTransitiveClosure(IType type, GroupInfo groupInfo) {
+    Set<IMethod> result = Sets.newHashSet();
+    try {
+      for (IMethod method : type.getMethods()) {
+        result.addAll(findMethodTransitiveClosure(method, groupInfo));
+      }
+    } catch(JavaModelException ex) {
+      ex.printStackTrace();
+    }
+
+    return result;
+  }
+
+  public static Set<IMethod> findMethodTransitiveClosure(IMethod method, GroupInfo groupInfo) {
+    Set<IMethod> result = Sets.newHashSet();
+    Set<IMethod> currentMethods = Sets.newHashSet();
+    currentMethods.add(method);
+    Set<IMethod> nextMethods = Sets.newHashSet();
+    Set<String> initialGroups = Sets.newHashSet();
+
+    while (! currentMethods.isEmpty()) {
+      result.add(method);
+
+      Collection<String> groups = groupInfo.groupDependenciesByMethods.get(method);
+      if (groups != null) {
+        if (initialGroups.isEmpty()) initialGroups.addAll(groups);
+        for (String group : groups) {
+          Collection<IMethod> depMethods = groupInfo.methodsByGroups.get(group);
+          if (depMethods != null) {
+            for (IMethod depMethod : depMethods) {
+              if (! result.contains(depMethod)) {
+                result.add(depMethod);
+                nextMethods.add(depMethod);
+              }
+            }
+          } else {
+            System.out.println("Can't find any method defining the group " + group);
+          }
+        }
+      } else {
+        System.out.println("No groups depended upon by method: " + method.getElementName());
+      }
+
+      currentMethods.clear();
+      currentMethods.addAll(nextMethods);
+      nextMethods.clear();
+    }
+
+    StringBuilder sb = new StringBuilder();
+    for (IMethod m : result) {
+      sb.append(m.getDeclaringType().getFullyQualifiedName())
+          .append(".").append(m.getElementName()).append(" ");
+    }
+    TestNGPlugin.log("Transitive closure for groups \"" + initialGroups + "\":"  + sb.toString());
+
+    return result;
+  }
+
+  private static Set<IType> findTypeTransitiveClosure(IType[] types, GroupInfo groupInfo) {
+    Set<IType> result = Sets.newHashSet();
+    Set<IType> currentTypes = Sets.newHashSet();
+    currentTypes.addAll(Arrays.asList(types));
+    Set<IType> nextTypes = Sets.newHashSet();
+    Set<String> initialGroups = Sets.newHashSet();
+
+    while (! currentTypes.isEmpty()) {
+      for (IType type : currentTypes) {
+        result.add(type);
+
+        Collection<String> groups = groupInfo.groupDependenciesByTypes.get(type);
+        if (groups != null) {
+          if (initialGroups.isEmpty()) initialGroups.addAll(groups);
+          for (String group : groups) {
+            Collection<IType> depTypes = groupInfo.typesByGroups.get(group);
+            if (depTypes != null) {
+              for (IType depType : depTypes) {
+                if (! result.contains(depType)) {
+                  result.add(depType);
+                  nextTypes.add(depType);
+                }
+              }
+            } else {
+              System.out.println("Can't find any types defining the group " + group);
+            }
+          }
+        } else {
+          System.out.println("No groups depended upon by type: " + type.getElementName());
+        }
+      }
+
+      currentTypes.clear();
+      currentTypes.addAll(nextTypes);
+      nextTypes.clear();
+    }
+
+    StringBuilder sb = new StringBuilder();
+    for (IType type : result) {
+      sb.append(type.getFullyQualifiedName()).append(" ");
+    }
+    TestNGPlugin.log("Transitive closure for groups \"" + initialGroups + "\":"  + sb.toString());
+
+    return result;
+  }
+
+  private static Object[] findGroupDependencies(ICompilationUnit[] units) {
+    List<IResource> resources = Lists.newArrayList();
     for(int i= 0; i < units.length; i++) {
       try {
         resources.add(units[i].getCorrespondingResource());
@@ -418,25 +563,25 @@ public class LaunchUtil {
         ;
       }
     }
-    IResource[] scopeResources= (IResource[]) resources.toArray(new IResource[resources.size()]);
+    IResource[] scopeResources= resources.toArray(new IResource[resources.size()]);
     ISearchQuery query= new FileSearchQuery("@Test\\(.*\\s*dependsOnGroups\\s*=.*", 
         true /*regexp*/ , 
         true /*casesensitive*/, 
         FileTextSearchScope.newSearchScope(scopeResources, new String[] {"*.java"}, false));
     query.run(new NullProgressMonitor());
     FileSearchResult result= (FileSearchResult) query.getSearchResult(); 
-    Object[] elements= result.getElements();
+    Object[] elements = result.getElements();
     
-    return elements != null && elements.length > 0;
+    return elements;
   }
   
-  private static boolean haveGroupsDependency(IType[] types) {
+  private static Object[] findGroupDependencies(IType[] types) {
     ICompilationUnit[] units= new ICompilationUnit[types.length];
     for(int i= 0; i < types.length; i++) {
       units[i]= types[i].getCompilationUnit();
     }
     
-    return haveGroupsDependency(units);
+    return findGroupDependencies(units);
   }
   
   /**
@@ -502,7 +647,7 @@ public class LaunchUtil {
     return null;
   }
 
-  private static List/*<MethodDefinition>*/ solveDependsOn(IMethod imethod) {
+  private static List<MethodDefinition> solveDependsOn(IMethod imethod) {
     return JDTUtil.solveDependencies(imethod);
   }
 

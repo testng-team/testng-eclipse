@@ -1,5 +1,10 @@
 package org.testng.eclipse.launch.components;
 
+import java.util.Collection;
+import java.util.List;
+
+import com.google.common.collect.Lists;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -17,11 +22,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
-import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.util.ResourceUtil;
-
-import java.util.Collection;
-import java.util.List;
 
 /**
  * A Table with checkboxes to present group names.

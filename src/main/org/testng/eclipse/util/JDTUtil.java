@@ -1,6 +1,16 @@
 package org.testng.eclipse.util;
 
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -12,7 +22,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -22,30 +31,12 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.ArrayInitializer;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.MemberValuePair;
-import org.eclipse.jdt.core.dom.NormalAnnotation;
-import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.collections.Lists;
 import org.testng.eclipse.ui.RunInfo;
-import org.testng.eclipse.util.Utils.JavaElement;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Class offering utility method to access different Eclipse resources.
@@ -325,14 +316,14 @@ public class JDTUtil {
     if (null == paramTypes) {
       paramTypes= new String[0];
     }
-    List params= new ArrayList(paramTypes.length);
+    List<String> params= new ArrayList<String>(paramTypes.length);
     for(int i= 0; i < paramTypes.length; i++) {
       int idx= paramTypes[i].lastIndexOf('.');
       String typeName= idx == -1 ? paramTypes[i] : paramTypes[i].substring(idx + 1);
       params.add(Signature.createTypeSignature(typeName, false));
     }
     IMethod method= findMethodInTypeHierarchy(type, methodName,
-        (String[]) params.toArray(new String[paramTypes.length]));
+        params.toArray(new String[paramTypes.length]));
     if (null == method) {
       method = fuzzyFindMethodInTypeHierarchy(type, methodName, paramTypes);
     }
@@ -401,7 +392,7 @@ public class JDTUtil {
   }
 
   private static IMethod fuzzyFindMethodInTypeHierarchy(IType type, String methodName, String[] paramTypes) throws JavaModelException {
-    List fuzzyResults= new ArrayList();
+    List<IMethod> fuzzyResults= new ArrayList<IMethod>();
     IMethod[] methods = type.getMethods();
     for(int i = 0; i < methods.length; i++) {
       if(methodName.equals(methods[i].getElementName()) && methods[i].exists()) {
@@ -425,17 +416,17 @@ public class JDTUtil {
       }
     }
 
-    return (fuzzyResults.isEmpty() ? null : (IMethod) fuzzyResults.get(0) );
+    return (fuzzyResults.isEmpty() ? null : fuzzyResults.get(0) );
   }
   
-  public static List/*<MethodDefinition>*/ solveDependencies(IMethod method) {
-    Map/*<String, MethodDefinition>*/ parsedmethods= new HashMap();
-    MethodDefinition md= new MethodDefinition(method);
-    parsedmethods.put(method.getElementName(), method.getElementName());
-    
-    List/*<MethodDefinition>*/ results= new ArrayList();
+  public static List<MethodDefinition> solveDependencies(IMethod method) {
+    Set<String> parsedMethods = Sets.newHashSet();
+    MethodDefinition md = new MethodDefinition(method);
+    parsedMethods.add(method.getElementName());
+
+    List<MethodDefinition> results = Lists.newArrayList();
     results.add(md);
-    results.addAll(solveDependencies(md, parsedmethods));
+    results.addAll(solveDependencies(md, parsedMethods));
     
     return results;
   }
@@ -445,21 +436,22 @@ public class JDTUtil {
    * @param method
    * @param allMethods
    */
-  private static List/*<MethodDefinition>*/ solveDependencies(MethodDefinition methodDef, Map parsedMethods) {
-    DependencyVisitor dv= parse(methodDef.getMethod());
+  private static List<MethodDefinition> solveDependencies(MethodDefinition methodDef,
+      Set<String> parsedMethods) {
+    DependencyVisitor dv = parse(methodDef.getMethod());
     
-    List/*<MethodDefinition>*/ results= new ArrayList();
-    List dependesonmethods= dv.getDependsOnMethods();
+    List<MethodDefinition> results = Lists.newArrayList();
+    List<String> dependsOnMethods = dv.getDependsOnMethods();
     
-    if(!dependesonmethods.isEmpty()) {
-      for(int i= 0; i < dependesonmethods.size(); i++) {
-        String methodName= (String) dependesonmethods.get(i);
-        if(!parsedMethods.containsKey(methodName)) {
+    if(!dependsOnMethods.isEmpty()) {
+      for(int i= 0; i < dependsOnMethods.size(); i++) {
+        String methodName= dependsOnMethods.get(i);
+        if(!parsedMethods.contains(methodName)) {
           IMethod meth= solveMethod(methodDef.getMethod().getDeclaringType(), methodName);
           if(null != meth) {
             MethodDefinition md= new MethodDefinition(meth);
             
-            parsedMethods.put(meth.getElementName(), meth.getElementName());
+            parsedMethods.add(meth.getElementName());
             results.add(md);
             methodDef.addDependencyMethod(md);
             results.addAll(solveDependencies(md, parsedMethods));
@@ -468,7 +460,7 @@ public class JDTUtil {
       }
     }
     
-    methodDef.addDependecyGroups(dv.getDependsOnGroups());
+    methodDef.addDependencyGroups(dv.getDependsOnGroups());
     
     return results;
   }
@@ -519,13 +511,13 @@ public class JDTUtil {
   public static class MethodDefinition {
     private final IMethod m_method;
     private final Set/*<String>*/ m_dependsongroups= new HashSet();
-    private final Set/*<IMethod>*/ m_dependsonmethods= new HashSet();
+    private final Set/*<IMethod>*/<MethodDefinition> m_dependsonmethods= new HashSet<MethodDefinition>();
     
     public MethodDefinition(IMethod method) {
       m_method= method;
     }
     
-    public void addDependecyGroups(List dependsOnGroups) {
+    public void addDependencyGroups(List dependsOnGroups) {
       if(null != dependsOnGroups && !dependsOnGroups.isEmpty()) {
         m_dependsongroups.addAll(dependsOnGroups);
       }
@@ -551,65 +543,6 @@ public class JDTUtil {
      */
     public Set/*<String>*/ getGroups() {
       return m_dependsongroups;
-    }
-  }
-  
-  /**
-   * An <code>ASTVisitor</code> that extracts the <tt>dependsOnMethods</tt> and <tt>dependsOnGroups</tt>.
-   */
-  private static class DependencyVisitor extends ASTVisitor {
-    private static final String ANNOTATION_PACKAGE = "org.testng.annotations.";
-    private static final String TEST_ANNOTATION = "Test";
-    private static final String TEST_ANNOTATION_FQN = ANNOTATION_PACKAGE + TEST_ANNOTATION;
-    private static final String DEPENDS_ON_METHODS= "dependsOnMethods";
-    private static final String DEPENDS_ON_GROUPS= "dependsOnGroups";
-    
-    List m_dependsOnMethods= new ArrayList();
-    List m_dependsOnGroups= new ArrayList();
-
-    public boolean visit(NormalAnnotation annotation) {
-      if(!TEST_ANNOTATION.equals(annotation.getTypeName().getFullyQualifiedName()) 
-          && !TEST_ANNOTATION_FQN.equals(annotation.getTypeName().getFullyQualifiedName())) {
-        return false;
-      }
-      
-      List values= annotation.values();
-      
-      if(null != values && !values.isEmpty()) {
-        for(int i= 0; i < values.size(); i++) {
-          MemberValuePair pair= (MemberValuePair) values.get(i);
-          if(DEPENDS_ON_METHODS.equals(pair.getName().toString())) {
-            m_dependsOnMethods.addAll(extractValues(pair.getValue()));
-          }
-          else if(DEPENDS_ON_GROUPS.equals(pair.getName().toString())) {
-            m_dependsOnGroups.addAll(extractValues(pair.getValue()));
-          }
-        }
-      }
-      
-      return false;
-    }
-
-    public List getDependsOnGroups() {
-      return m_dependsOnGroups;
-    }
-    
-    public List getDependsOnMethods() {
-      return m_dependsOnMethods;
-    }
-
-    private List extractValues(Expression paramAttr) {
-      List values= new ArrayList();
-      if(paramAttr instanceof ArrayInitializer) {
-        List literals= ((ArrayInitializer) paramAttr).expressions();
-        List paramNames= new ArrayList(literals.size());
-        for(int j= 0; j < literals.size(); j++) {
-          StringLiteral str= (StringLiteral) literals.get(j);
-          values.add(str.getLiteralValue());
-        }
-      }
-
-      return values;
     }
   }
 }

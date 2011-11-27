@@ -1,5 +1,12 @@
 package org.testng.eclipse.refactoring;
 
+import java.lang.reflect.Modifier;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.google.common.collect.Sets;
+
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
@@ -7,13 +14,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.testng.collections.Maps;
-import org.testng.eclipse.collections.Sets;
 import org.testng.eclipse.ui.conversion.Visitor;
-
-import java.lang.reflect.Modifier;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * The visitor for a TestNG class.
@@ -61,6 +62,7 @@ public class TestNGVisitor extends Visitor {
   /**
    * Record whether this type declaration is a TestCase or a TestSuite.
    */
+  @Override
   public boolean visit(TypeDeclaration td) {
     m_type = td;
     m_testClassAnnotation = getAnnotation(td, "Test");

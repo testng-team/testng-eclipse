@@ -2,6 +2,7 @@ package org.testng.eclipse.util.param;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,10 +11,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -153,7 +152,9 @@ public class ParameterSolver {
       selectedSuite= (IFile) suiteFiles[0];
     }
 
-    return extractParameterValues(selectedSuite, parameters);
+    return selectedSuite != null
+        ? extractParameterValues(selectedSuite, parameters)
+        : Collections.emptyMap();
   }
   
   private static Map extractParameterValues(IFile file, Map parameters) {
@@ -244,6 +245,7 @@ public class ParameterSolver {
       m_params= parameters;
     }
     
+    @Override
     public InputSource resolveEntity(String systemId, String publicId) throws SAXException {
       InputSource result = null;
       if (Parser.DEPRECATED_TESTNG_DTD_URL.equals(publicId) || Parser.TESTNG_DTD_URL.equals(publicId)) {
@@ -279,6 +281,7 @@ public class ParameterSolver {
       return result;
     }
     
+    @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
       String name = attributes.getValue("name");
 
