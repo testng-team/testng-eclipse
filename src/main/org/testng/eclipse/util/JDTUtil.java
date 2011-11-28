@@ -447,7 +447,7 @@ public class JDTUtil {
       for(int i= 0; i < dependsOnMethods.size(); i++) {
         String methodName= dependsOnMethods.get(i);
         if(!parsedMethods.contains(methodName)) {
-          IMethod meth= solveMethod(methodDef.getMethod().getDeclaringType(), methodName);
+          IMethod meth= solveMethod(methodDef, methodName);
           if(null != meth) {
             MethodDefinition md= new MethodDefinition(meth);
             
@@ -479,12 +479,43 @@ public class JDTUtil {
     return dv;
   }
   
-  private static IMethod solveMethod(IType type, String methodName) {
+  private static IMethod solveMethod(MethodDefinition methodDef,
+      String methodName) {
+    int lastIndexOfDot = methodName.lastIndexOf('.');
+    final IType dependType;
+    final String methodSimpleName;
+    if (lastIndexOfDot != -1 && lastIndexOfDot < methodName.length() - 1) {
+      /*
+       * The dependency is defined as a fully qualified method name.
+       * Let's assume that the type for this method belongs
+       * to the same java project as the one for the input method.
+       */
+      IType type = methodDef.getMethod().getDeclaringType();
+      IJavaProject javaProject = type.getJavaProject();
+      String fullyQualifiedTypeName = methodName.substring(0, lastIndexOfDot);
+      try {
+        dependType = javaProject.findType(fullyQualifiedTypeName);
+        methodSimpleName = methodName.substring(lastIndexOfDot + 1);
+      } catch (JavaModelException e) {
+        return null;
+      }
+    } else {
+      /*
+       * The dependency is defined as a simple method name.
+       * Just lookup hierarchy of the corresponding type.
+       */
+      dependType= methodDef.getMethod().getDeclaringType();
+      methodSimpleName= methodName;
+    }
+    return solveMethod(dependType, methodSimpleName);
+  }
+
+  private static IMethod solveMethod(IType type, String methodSimpleName) {
     try {
       IMethod[] typemethods= type.getMethods();
       
       for(int i=0; i < typemethods.length; i++) {
-        if(methodName.equals(typemethods[i].getElementName())) {
+        if(methodSimpleName.equals(typemethods[i].getElementName())) {
           return typemethods[i];
         }
       }
@@ -495,7 +526,7 @@ public class JDTUtil {
         IMethod[] methods= superTypes[i].getMethods();
         
         for(int j=0; j < methods.length; j++) {
-          if(methodName.equals(methods[j].getElementName())) {
+          if(methodSimpleName.equals(methods[j].getElementName())) {
             return methods[j];
           }
         }
