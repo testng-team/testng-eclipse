@@ -25,15 +25,15 @@ import org.testng.eclipse.launch.components.Filters;
  * (which types depend on which groups, which types define groups, which methods
  * define on which groups and which methods define groups.
  */
-public class GroupInfo {
+public class DependencyInfo {
   Multimap<String, IType> typesByGroups = ArrayListMultimap.create();
   Multimap<IType, String> groupDependenciesByTypes = ArrayListMultimap.create();
   Multimap<String, IMethod> methodsByGroups = ArrayListMultimap.create();
   Multimap<IMethod, String> groupDependenciesByMethods = ArrayListMultimap.create();
   Multimap<IMethod, IMethod> methodsByMethods = ArrayListMultimap.create();
 
-  public static GroupInfo createGroupInfo(final IJavaProject javaProject) {
-    final GroupInfo result = new GroupInfo();
+  public static DependencyInfo createDependencyInfo(final IJavaProject javaProject) {
+    final DependencyInfo result = new DependencyInfo();
 
     final IRunnableWithProgress runnable = new IRunnableWithProgress() {
 

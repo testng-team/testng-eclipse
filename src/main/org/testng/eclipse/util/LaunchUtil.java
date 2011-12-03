@@ -261,7 +261,7 @@ public class LaunchUtil {
 
     try {
       if (methodHasDependencies(iMethod)) {
-        GroupInfo groupInfo = GroupInfo.createGroupInfo(javaProject);
+        DependencyInfo groupInfo = DependencyInfo.createDependencyInfo(javaProject);
         methods.addAll(findMethodTransitiveClosure(iMethod, groupInfo));
       }
     } catch (JavaModelException e) {
@@ -406,7 +406,7 @@ public class LaunchUtil {
     // If we depend on groups, need to add all the necessary types
     Object[] groupDependencies = findGroupDependencies(types);
     if (groupDependencies.length > 0) {
-      GroupInfo groupInfo = GroupInfo.createGroupInfo(javaProject);
+      DependencyInfo groupInfo = DependencyInfo.createDependencyInfo(javaProject);
       Set<IType> closure = findTypeTransitiveClosure(types, groupInfo);
       allTypes.addAll(closure);
       Set<IMethod> methods = findMethodTransitiveClosure(types, groupInfo);
@@ -442,7 +442,7 @@ public class LaunchUtil {
     runConfig(workingCopy, mode);
   }
 
-  public static Set<IMethod> findMethodTransitiveClosure(IType[] types, GroupInfo groupInfo) {
+  public static Set<IMethod> findMethodTransitiveClosure(IType[] types, DependencyInfo groupInfo) {
     Set<IMethod> result = Sets.newHashSet();
     for (IType type : types) {
       result.addAll(findMethodTransitiveClosure(type, groupInfo));
@@ -451,7 +451,7 @@ public class LaunchUtil {
     return result;
   }
 
-  public static Set<IMethod> findMethodTransitiveClosure(IType type, GroupInfo groupInfo) {
+  public static Set<IMethod> findMethodTransitiveClosure(IType type, DependencyInfo groupInfo) {
     Set<IMethod> result = Sets.newHashSet();
     try {
       for (IMethod method : type.getMethods()) {
@@ -464,7 +464,7 @@ public class LaunchUtil {
     return result;
   }
 
-  public static Set<IMethod> findMethodTransitiveClosure(IMethod startMethod, GroupInfo groupInfo) {
+  public static Set<IMethod> findMethodTransitiveClosure(IMethod startMethod, DependencyInfo groupInfo) {
     Set<IMethod> result = Sets.newHashSet();
     Set<IMethod> currentMethods = Sets.newHashSet();
     currentMethods.add(startMethod);
@@ -522,7 +522,7 @@ public class LaunchUtil {
     return result;
   }
 
-  private static Set<IType> findTypeTransitiveClosure(IType[] types, GroupInfo groupInfo) {
+  private static Set<IType> findTypeTransitiveClosure(IType[] types, DependencyInfo groupInfo) {
     Set<IType> result = Sets.newHashSet();
     Set<IType> currentTypes = Sets.newHashSet();
     currentTypes.addAll(Arrays.asList(types));
