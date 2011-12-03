@@ -391,7 +391,8 @@ public class JDTUtil {
     return null;
   }
 
-  private static IMethod fuzzyFindMethodInTypeHierarchy(IType type, String methodName, String[] paramTypes) throws JavaModelException {
+  public static IMethod fuzzyFindMethodInTypeHierarchy(IType type, String methodName,
+      String[] paramTypes) throws JavaModelException {
     List<IMethod> fuzzyResults= new ArrayList<IMethod>();
     IMethod[] methods = type.getMethods();
     for(int i = 0; i < methods.length; i++) {

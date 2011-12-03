@@ -30,6 +30,7 @@ public class GroupInfo {
   Multimap<IType, String> groupDependenciesByTypes = ArrayListMultimap.create();
   Multimap<String, IMethod> methodsByGroups = ArrayListMultimap.create();
   Multimap<IMethod, String> groupDependenciesByMethods = ArrayListMultimap.create();
+  Multimap<IMethod, IMethod> methodsByMethods = ArrayListMultimap.create();
 
   public static GroupInfo createGroupInfo(final IJavaProject javaProject) {
     final GroupInfo result = new GroupInfo();
@@ -41,7 +42,7 @@ public class GroupInfo {
         final Set<IType> allTypes = Sets.newHashSet();
         try {
           monitor.beginTask("Launching", 2000);
-          monitor.subTask("Calculating the groups to run");
+          monitor.subTask("Calculating dependencies");
           TestSearchEngine.collectTypes(javaProject, monitor, allTypes, Filters.SINGLE_TEST,
               "Parsing tests");
           monitor.subTask("Collecting group information");
@@ -77,6 +78,20 @@ public class GroupInfo {
                         result.groupDependenciesByMethods.put(method,dependencies.toString());
                       }
 
+                    } else if ("dependsOnMethods".equals(pair.getMemberName())) {
+                      Object dependencies = pair.getValue();
+                      IType methodType = method.getDeclaringType();
+                      if (dependencies.getClass().isArray()) {
+                        for (Object o : (Object[]) dependencies) {
+                          IMethod depMethod = JDTUtil.fuzzyFindMethodInTypeHierarchy(
+                              methodType, o.toString(), new String[0]);
+                          result.methodsByMethods.put(method, depMethod);
+                        }
+                      } else {
+                        IMethod depMethod = JDTUtil.fuzzyFindMethodInTypeHierarchy(
+                            methodType, dependencies.toString(), new String[0]);
+                        result.methodsByMethods.put(method, depMethod);
+                      }
                     }
                   }
                 }
