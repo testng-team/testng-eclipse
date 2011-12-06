@@ -235,9 +235,11 @@ public class LaunchUtil {
 	  launchMethodConfiguration(javaProject, imethod, runMode, null);
   }
 
-  private static boolean methodDependsOnGroups(IMethod method) throws JavaModelException {
+  private static boolean methodHasDependencies(IMethod method) throws JavaModelException {
     IAnnotation annotation = method.getAnnotation("Test");
-    return annotation != null && contains(annotation.getMemberValuePairs(), "dependsOnGroups");
+    return annotation != null &&
+        (contains(annotation.getMemberValuePairs(), "dependsOnGroups")
+         || contains(annotation.getMemberValuePairs(), "dependsOnMethods"));
   }
 
   private static boolean contains(IMemberValuePair[] memberValuePairs, String string) {
@@ -258,8 +260,8 @@ public class LaunchUtil {
     Set<IMethod> methods = Sets.newHashSet(iMethod);
 
     try {
-      if (methodDependsOnGroups(iMethod)) {
-        GroupInfo groupInfo = GroupInfo.createGroupInfo(javaProject);
+      if (methodHasDependencies(iMethod)) {
+        DependencyInfo groupInfo = DependencyInfo.createDependencyInfo(javaProject);
         methods.addAll(findMethodTransitiveClosure(iMethod, groupInfo));
       }
     } catch (JavaModelException e) {
@@ -404,7 +406,7 @@ public class LaunchUtil {
     // If we depend on groups, need to add all the necessary types
     Object[] groupDependencies = findGroupDependencies(types);
     if (groupDependencies.length > 0) {
-      GroupInfo groupInfo = GroupInfo.createGroupInfo(javaProject);
+      DependencyInfo groupInfo = DependencyInfo.createDependencyInfo(javaProject);
       Set<IType> closure = findTypeTransitiveClosure(types, groupInfo);
       allTypes.addAll(closure);
       Set<IMethod> methods = findMethodTransitiveClosure(types, groupInfo);
@@ -440,7 +442,7 @@ public class LaunchUtil {
     runConfig(workingCopy, mode);
   }
 
-  public static Set<IMethod> findMethodTransitiveClosure(IType[] types, GroupInfo groupInfo) {
+  public static Set<IMethod> findMethodTransitiveClosure(IType[] types, DependencyInfo groupInfo) {
     Set<IMethod> result = Sets.newHashSet();
     for (IType type : types) {
       result.addAll(findMethodTransitiveClosure(type, groupInfo));
@@ -449,7 +451,7 @@ public class LaunchUtil {
     return result;
   }
 
-  public static Set<IMethod> findMethodTransitiveClosure(IType type, GroupInfo groupInfo) {
+  public static Set<IMethod> findMethodTransitiveClosure(IType type, DependencyInfo groupInfo) {
     Set<IMethod> result = Sets.newHashSet();
     try {
       for (IMethod method : type.getMethods()) {
@@ -462,34 +464,46 @@ public class LaunchUtil {
     return result;
   }
 
-  public static Set<IMethod> findMethodTransitiveClosure(IMethod method, GroupInfo groupInfo) {
+  public static Set<IMethod> findMethodTransitiveClosure(IMethod startMethod, DependencyInfo groupInfo) {
     Set<IMethod> result = Sets.newHashSet();
     Set<IMethod> currentMethods = Sets.newHashSet();
-    currentMethods.add(method);
+    currentMethods.add(startMethod);
     Set<IMethod> nextMethods = Sets.newHashSet();
     Set<String> initialGroups = Sets.newHashSet();
 
     while (! currentMethods.isEmpty()) {
-      result.add(method);
+      for (IMethod method : currentMethods) {
+        result.add(method);
 
-      Collection<String> groups = groupInfo.groupDependenciesByMethods.get(method);
-      if (groups != null) {
-        if (initialGroups.isEmpty()) initialGroups.addAll(groups);
-        for (String group : groups) {
-          Collection<IMethod> depMethods = groupInfo.methodsByGroups.get(group);
-          if (depMethods != null) {
-            for (IMethod depMethod : depMethods) {
-              if (! result.contains(depMethod)) {
-                result.add(depMethod);
-                nextMethods.add(depMethod);
+        Collection<String> groups = groupInfo.groupDependenciesByMethods.get(method);
+        if (groups != null) {
+          if (initialGroups.isEmpty()) initialGroups.addAll(groups);
+          for (String group : groups) {
+            Collection<IMethod> depMethods = groupInfo.methodsByGroups.get(group);
+            if (depMethods != null) {
+              for (IMethod depMethod : depMethods) {
+                if (! result.contains(depMethod)) {
+                  result.add(depMethod);
+                  nextMethods.add(depMethod);
+                }
               }
+            } else {
+              System.out.println("Can't find any method defining the group " + group);
             }
-          } else {
-            System.out.println("Can't find any method defining the group " + group);
+          }
+        } else {
+          System.out.println("No groups depended upon by method: " + method.getElementName());
+        }
+
+        Collection<IMethod> depMethods = groupInfo.methodsByMethods.get(method);
+        if (depMethods != null) {
+          for (IMethod dm : depMethods) {
+            if (! result.contains(dm)) {
+              result.add(dm);
+              nextMethods.add(dm);
+            }
           }
         }
-      } else {
-        System.out.println("No groups depended upon by method: " + method.getElementName());
       }
 
       currentMethods.clear();
@@ -502,12 +516,13 @@ public class LaunchUtil {
       sb.append(m.getDeclaringType().getFullyQualifiedName())
           .append(".").append(m.getElementName()).append(" ");
     }
-    TestNGPlugin.log("Transitive closure for groups \"" + initialGroups + "\":"  + sb.toString());
+    TestNGPlugin.log("Transitive closure for method " + startMethod.getElementName()
+        + ": "  + sb.toString());
 
     return result;
   }
 
-  private static Set<IType> findTypeTransitiveClosure(IType[] types, GroupInfo groupInfo) {
+  private static Set<IType> findTypeTransitiveClosure(IType[] types, DependencyInfo groupInfo) {
     Set<IType> result = Sets.newHashSet();
     Set<IType> currentTypes = Sets.newHashSet();
     currentTypes.addAll(Arrays.asList(types));
