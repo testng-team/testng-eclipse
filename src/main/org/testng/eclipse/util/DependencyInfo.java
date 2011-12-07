@@ -18,6 +18,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.components.Filters;
 
 /**
@@ -85,12 +86,23 @@ public class DependencyInfo {
                         for (Object o : (Object[]) dependencies) {
                           IMethod depMethod = JDTUtil.fuzzyFindMethodInTypeHierarchy(
                               methodType, o.toString(), new String[0]);
-                          result.methodsByMethods.put(method, depMethod);
+                          if (depMethod == null) {
+                            // just log the error only, since the testng core is responsible for print the true error message
+                            TestNGPlugin.log("Could not find the enclosed class for: " + o.toString());
+                          }
+                          else {
+                            result.methodsByMethods.put(method, depMethod);
+                          }
                         }
                       } else {
                         IMethod depMethod = JDTUtil.fuzzyFindMethodInTypeHierarchy(
                             methodType, dependencies.toString(), new String[0]);
-                        result.methodsByMethods.put(method, depMethod);
+                        if (depMethod == null) {
+                          TestNGPlugin.log("Could not find the enclosed class for: " + dependencies.toString());
+                        }
+                        else {
+                          result.methodsByMethods.put(method, depMethod);
+                        }
                       }
                     }
                   }
