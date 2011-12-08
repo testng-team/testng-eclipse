@@ -428,6 +428,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         }
         return Status.OK_STATUS;
       }
+
+      @Override
+      protected void canceling() {
+        messageMarshaller.shutDown();
+        super.canceling();
+      }
     };
     testRunListeningJob.schedule();
 //    getViewSite().getActionBars().updateActionBars();
