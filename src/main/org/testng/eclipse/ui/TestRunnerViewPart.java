@@ -401,6 +401,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       protected IStatus run(IProgressMonitor monitor) {
         try {
           messageMarshaller.initReceiver();
+          if (monitor.isCanceled()) return Status.CANCEL_STATUS;
           fTestRunnerClient.startListening(TestRunnerViewPart.this, TestRunnerViewPart.this, messageMarshaller);
 
           postSyncRunnable(new Runnable() {
