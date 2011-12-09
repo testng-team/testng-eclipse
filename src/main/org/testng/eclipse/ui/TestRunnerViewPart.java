@@ -197,6 +197,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   public static final String NAME = "org.testng.eclipse.ResultView"; //$NON-NLS-1$
   public static final String ID_EXTENSION_POINT_TESTRUN_TABS = TestNGPlugin.PLUGIN_ID + "." //$NON-NLS-1$
       + "internal_testRunTabs";  //$NON-NLS-1$
+  public static final String LISTENING_JOB_FAMILY = TestNGPlugin.PLUGIN_ID + "." //$NON-NLS-1$
+      + "listening_job_family";  //$NON-NLS-1$
 
   static final int REFRESH_INTERVAL = 200;
 
@@ -434,6 +436,15 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       protected void canceling() {
         messageMarshaller.shutDown();
         super.canceling();
+      }
+
+      @Override
+      public boolean belongsTo(Object family) {
+        if (family != null && LISTENING_JOB_FAMILY.equals(family))
+        {
+          return true;
+        }
+        return super.belongsTo(family);
       }
     };
     testRunListeningJob.schedule();
