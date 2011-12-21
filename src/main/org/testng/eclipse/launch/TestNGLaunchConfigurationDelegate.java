@@ -1,21 +1,25 @@
 package org.testng.eclipse.launch;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.ExecutionArguments;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
@@ -33,13 +37,7 @@ import org.testng.remote.RemoteArgs;
 import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import com.google.common.base.Joiner;
 
 public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigurationDelegate {
 
@@ -48,53 +46,123 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
    */
   public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch,
       IProgressMonitor monitor) throws CoreException {
-    IJavaProject javaProject = getJavaProject(configuration);
-    if ((javaProject == null) || !javaProject.exists()) {
-      abort(ResourceUtil.getString("TestNGLaunchConfigurationDelegate.error.invalidproject"), //$NON-NLS-1$
-          null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT);
+    if (monitor == null) {
+      monitor = new NullProgressMonitor();
     }
 
-    IVMInstall install = getVMInstall(configuration);
-    IVMRunner runner = install.getVMRunner(mode);
-    if (runner == null) {
-      abort(ResourceUtil.getFormattedString("TestNGLaunchConfigurationDelegate.error.novmrunner", //$NON-NLS-1$
-          new String[] { install.getId() }), null,
-          IJavaLaunchConfigurationConstants.ERR_VM_RUNNER_DOES_NOT_EXIST);
+    monitor.beginTask(MessageFormat.format("{0}...", configuration.getName()), 3); //$NON-NLS-1$
+    // check for cancellation
+    if (monitor.isCanceled()) {
+      return;
     }
 
-    int port = SocketUtil.findFreePort();
-    VMRunnerConfiguration runConfig = launchTypes(configuration, launch, javaProject, port, mode);
-    setDefaultSourceLocator(launch, configuration);
+    try {
+      IJavaProject javaProject = getJavaProject(configuration);
+      if ((javaProject == null) || !javaProject.exists() || !javaProject.isOpen()) {
+        abort(
+            ResourceUtil.getString("TestNGLaunchConfigurationDelegate.error.invalidproject"), //$NON-NLS-1$
+            null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT);
+      }
 
-    launch.setAttribute(TestNGLaunchConfigurationConstants.PORT, Integer.toString(port));
-    launch.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, javaProject
-        .getElementName());
-    launch.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_RUN_NAME_ATTR,
-        getRunNameAttr(configuration));
+      IVMRunner runner = getVMRunner(configuration, mode);
+      if (runner == null) {
+        abort(ResourceUtil.getFormattedString(
+            "TestNGLaunchConfigurationDelegate.error.novmrunner", //$NON-NLS-1$
+            new String[] { getVMInstall(configuration).getId() }), null,
+            IJavaLaunchConfigurationConstants.ERR_VM_RUNNER_DOES_NOT_EXIST);
+      }
 
-    StringBuilder sb = new StringBuilder();
-    for (String arg : runConfig.getProgramArguments()) {
-      sb.append(arg).append(" ");
+      int port = evaluatePort();
+      launch.setAttribute(TestNGLaunchConfigurationConstants.PORT,
+          Integer.toString(port));
+
+      VMRunnerConfiguration runConfig = launchTypes(configuration, launch,
+          javaProject, port, mode);
+      // check for cancellation
+      if (monitor.isCanceled()) {
+        return;
+      }
+
+      // done the verification phase
+      monitor.worked(1);
+
+      // set the default source locator if required
+      setDefaultSourceLocator(launch, configuration);
+      monitor.worked(1);
+
+      launch.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+          javaProject.getElementName());
+      launch.setAttribute(
+          TestNGLaunchConfigurationConstants.TESTNG_RUN_NAME_ATTR,
+          getRunNameAttr(configuration));
+
+      TestNGPlugin.log("[TestNGLaunchConfigurationDelegate] "
+          + debugConfig(runConfig));
+      runner.run(runConfig, launch, monitor);
+
+      // check for cancellation
+      if (monitor.isCanceled()) {
+        return;
+      }
+    } finally {
+      monitor.done();
     }
-    TestNGPlugin.log("[TestNGLaunchConfigurationDelegate] " + debugConfig(runConfig));
-    runner.run(runConfig, launch, monitor);
   }
 
-  private static String join(String[] strings) {
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < strings.length; i++) {
-      if (i > 0) sb.append(" ");
-      sb.append(strings[i]);
+  private int evaluatePort() throws CoreException {
+    int port= SocketUtil.findFreePort();
+    if (port == -1) {
+      abort("No socket available", null, IJavaLaunchConfigurationConstants.ERR_NO_SOCKET_AVAILABLE);
     }
-    return sb.toString();
+    return port;
+  }
+
+  @SuppressWarnings("unchecked")
+  protected VMRunnerConfiguration launchTypes(final ILaunchConfiguration configuration,
+      ILaunch launch, final IJavaProject jproject, final int port, final String mode)
+      throws CoreException {
+
+    String mainTypeName= verifyMainTypeName(configuration);
+
+    File workingDir = verifyWorkingDirectory(configuration);
+    String workingDirName = null;
+    if (workingDir != null) {
+      workingDirName = workingDir.getAbsolutePath();
+    }
+
+    // Environment variables
+    String[] envp= getEnvironment(configuration);
+
+    ArrayList vmArguments= new ArrayList();
+    ArrayList programArguments= new ArrayList();
+    collectExecutionArguments(configuration, vmArguments, programArguments, launch, jproject, port, mode);
+
+    // VM-specific attributes
+    Map vmAttributesMap= getVMSpecificAttributesMap(configuration);
+
+    // Classpath
+    String[] classpath= getClasspath(configuration);
+
+    // Create VM config
+    VMRunnerConfiguration runConfig= new VMRunnerConfiguration(mainTypeName, classpath);
+    runConfig.setVMArguments((String[]) vmArguments.toArray(new String[vmArguments.size()]));
+    runConfig.setProgramArguments((String[]) programArguments.toArray(new String[programArguments.size()]));
+    runConfig.setEnvironment(envp);
+    runConfig.setWorkingDirectory(workingDirName);
+    runConfig.setVMSpecificAttributesMap(vmAttributesMap);
+
+    // Bootpath
+    runConfig.setBootClassPath(getBootpath(configuration));
+
+    return runConfig;
   }
 
   private String debugConfig(VMRunnerConfiguration config) {
     StringBuilder sb = new StringBuilder("Launching:");
-    sb.append("\n  Classpath: " + join(config.getClassPath()));
-    sb.append("\n  VMArgs:    " + join(config.getVMArguments()));
+    sb.append("\n  Classpath: " + Joiner.on(' ').join(config.getClassPath()));
+    sb.append("\n  VMArgs:    " + Joiner.on(' ').join((config.getVMArguments())));
     sb.append("\n  Class:     " + config.getClassToLaunch());
-    sb.append("\n  Args:      " + join(config.getProgramArguments()));
+    sb.append("\n  Args:      " + Joiner.on(' ').join((config.getProgramArguments())));
     sb.append("\n");
 
     return sb.toString();
@@ -104,40 +172,6 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     if (TestNGPlugin.isVerbose()) {
       System.out.println("[TestNGLaunchConfigurationDelegate] " + s);
     }
-  }
-
-  @SuppressWarnings("unchecked")
-  protected VMRunnerConfiguration launchTypes(final ILaunchConfiguration configuration,
-      ILaunch launch, final IJavaProject jproject, final int port, final String mode)
-      throws CoreException {
-
-    File workingDir = verifyWorkingDirectory(configuration);
-    String workingDirName = null;
-    if (workingDir != null) {
-      workingDirName = workingDir.getAbsolutePath();
-    }
-
-    // Program & VM args
-    StringBuilder vmArgs = new StringBuilder(ConfigurationHelper.getJvmArgs(configuration))
-        // getVMArguments(configuration))
-        .append(" ")
-        .append(TestNGLaunchConfigurationConstants.VM_ENABLEASSERTION_OPTION); // $NON-NLS-1$
-    addDebugProperties(vmArgs);
-    ExecutionArguments execArgs = new ExecutionArguments(vmArgs.toString(), ""); //$NON-NLS-1$
-    String[] envp = DebugPlugin.getDefault().getLaunchManager().getEnvironment(configuration);
-
-    VMRunnerConfiguration runConfig = createVMRunner(configuration, launch, jproject, port, mode);
-    runConfig.setVMArguments(execArgs.getVMArgumentsArray());
-    runConfig.setWorkingDirectory(workingDirName);
-    runConfig.setEnvironment(envp);
-
-    Map vmAttributesMap = getVMSpecificAttributesMap(configuration);
-    runConfig.setVMSpecificAttributesMap(vmAttributesMap);
-
-    String[] bootpath = getBootpath(configuration);
-    runConfig.setBootClassPath(bootpath);
-
-    return runConfig;
   }
 
   /**
@@ -155,9 +189,39 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     }
   }
 
-  private String getRemoteClassName() {
-    return TestNGPlugin.isDebug() ? EmptyRemoteTestNG.class.getName()
-        : RemoteTestNG.class.getName();
+  @Override
+  public String verifyMainTypeName(ILaunchConfiguration configuration)
+      throws CoreException {
+    return "org.testng.remote.RemoteTestNG";
+  }
+
+  @Override
+  public String[] getClasspath(ILaunchConfiguration configuration)
+      throws CoreException {
+    String[] originalClasspath = super.getClasspath(configuration);
+
+    boolean userProjectJar = false;
+    String projectName = getJavaProjectName(configuration);
+    if (null != projectName) {
+      userProjectJar = TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(projectName);
+    }
+
+    if (!userProjectJar) {
+      String testngJarLocation = getTestNGLibraryVersion();
+      String[] allClasspath = new String[originalClasspath.length + 1];
+      try {
+        // workaround: use embedded testng.jar to make sure the compatiblility of the RemoteTestNG
+        allClasspath[0] = FileLocator.toFileURL(TestNGPlugin.getDefault().getBundle().getEntry(testngJarLocation)).getFile();
+      } catch (IOException ioe) {
+        TestNGPlugin.log(ioe);
+        abort("Cannot create runtime classpath", ioe, 1000); //$NON-NLS-1$
+      }
+      System.arraycopy(originalClasspath, 0, allClasspath, 1, originalClasspath.length);
+      return allClasspath;
+    }
+    else {
+      return originalClasspath;
+    }
   }
 
   /**
@@ -168,19 +232,25 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
    * plugin. In addition it adds the port for the RemoteTestRunner as an
    * argument.
    */
-  protected VMRunnerConfiguration createVMRunner(final ILaunchConfiguration configuration,
-      ILaunch launch, final IJavaProject jproject, final int port, final String runMode)
-      throws CoreException {
+  protected void collectExecutionArguments(ILaunchConfiguration configuration,
+      List/* String */vmArguments, List/* String */programArguments,
+      ILaunch launch, final IJavaProject jproject, final int port,
+      final String runMode) throws CoreException {
+    
+    // Program & VM args
+    StringBuilder vmArgs = new StringBuilder(ConfigurationHelper.getJvmArgs(configuration))
+        // getVMArguments(configuration))
+        .append(" ")
+        .append(TestNGLaunchConfigurationConstants.VM_ENABLEASSERTION_OPTION); // $NON-NLS-1$
+    addDebugProperties(vmArgs);
 
-    String[] classPath = createClassPath(configuration);
     String progArgs = getProgramArguments(configuration);
-    VMRunnerConfiguration vmConfig =
-        new VMRunnerConfiguration(getRemoteClassName(), //$NON-NLS-1$
-        classPath);
 
     // insert the program arguments
     Vector<String> argv = new Vector<String>(10);
-    ExecutionArguments execArgs = new ExecutionArguments("", progArgs); //$NON-NLS-1$
+    ExecutionArguments execArgs = new ExecutionArguments(vmArgs.toString(), progArgs); //$NON-NLS-1$
+    vmArguments.addAll(Arrays.asList(execArgs.getVMArgumentsArray()));
+
     String[] pa = execArgs.getProgramArgumentsArray();
     for (int i = 0; i < pa.length; i++) {
       argv.add(pa[i]);
@@ -274,79 +344,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
           StringUtils.listToString(tempSuites));
     }
 
-    vmConfig.setProgramArguments(argv.toArray(new String[argv.size()]));
-
-    return vmConfig;
-  }
-
-  private String[] createClassPath(ILaunchConfiguration configuration)
-      throws CoreException {
-    URL url = Platform.getBundle(TestNGPlugin.PLUGIN_ID).getEntry("/"); //$NON-NLS-1$
-
-    String[] cp = getClasspath(configuration);
-    String[] classPath = null;
-    String testngJarLocation = getTestNGLibraryVersion();
-    String testngJarName = testngJarLocation.indexOf('/') != -1 ? testngJarLocation
-        .substring(testngJarLocation.indexOf('/') + 1) : testngJarLocation;
-    boolean donotappendjar = false;
-    String projectName = getJavaProjectName(configuration);
-    if (null != projectName) {
-      donotappendjar = TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(projectName);
-    }
-
-    int addedSize = 2;
-    if (donotappendjar) {
-      addedSize = 1;
-    } else {
-      for (int i = 0; i < cp.length; i++) {
-        if (cp[i].endsWith(testngJarName)) {
-          addedSize = 1;
-          break;
-        }
-      }
-    }
-
-    try {
-      if (Platform.inDevelopmentMode()) {
-
-        // we first try the bin output folder
-        List<String> entries = new ArrayList<String>();
-
-        try {
-          entries.add(FileLocator.toFileURL(new URL(url, "build/classes")).getFile()); //$NON-NLS-1$
-        } catch (IOException e3) {
-          try {
-            entries.add(FileLocator.toFileURL(new URL(url, "eclipse-testng.jar")).getFile()); //$NON-NLS-1$
-          } catch (IOException e4) {
-            // ignore
-          }
-        }
-        if (addedSize == 2) {
-          entries.add(FileLocator.toFileURL(new URL(url, testngJarLocation)).getFile()); //$NON-NLS-1$
-        }
-
-        Assert.isTrue(entries.size() == addedSize, "Required JARs available"); //$NON-NLS-1$
-
-        classPath = new String[cp.length + entries.size()];
-
-        Object[] jea = entries.toArray();
-        System.arraycopy(cp, 0, classPath, addedSize, cp.length);
-        System.arraycopy(jea, 0, classPath, 0, jea.length);
-      } else {
-        classPath = new String[cp.length + addedSize];
-        System.arraycopy(cp, 0, classPath, addedSize, cp.length);
-        classPath[0] = FileLocator.toFileURL(new URL(url, "eclipse-testng.jar")).getFile(); //$NON-NLS-1$
-
-        if (addedSize == 2) {
-          classPath[1] = FileLocator.toFileURL(new URL(url, testngJarLocation)).getFile();
-        }
-      }
-    } catch (IOException ioe) {
-      TestNGPlugin.log(ioe);
-      abort("Cannot create runtime classpath", ioe, 1000); //$NON-NLS-1$
-    }
-
-    return classPath;
+    programArguments.addAll(argv);
   }
 
   private String getRunNameAttr(ILaunchConfiguration configuration) {
@@ -373,8 +371,4 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     return testngLib;
   }
 
-  private static void ppp(final Object msg) {
-    TestNGPlugin
-        .log(new Status(IStatus.INFO, TestNGPlugin.PLUGIN_ID, 1, String.valueOf(msg), null));
-  }
 }
