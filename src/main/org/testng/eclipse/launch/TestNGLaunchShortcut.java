@@ -8,6 +8,10 @@ import com.google.common.collect.Lists;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -40,9 +44,9 @@ import org.testng.eclipse.util.LaunchUtil;
  */
 public class TestNGLaunchShortcut implements ILaunchShortcut {
 
-  public void launch(ISelection selection, String mode) {
+  public void launch(ISelection selection, final String mode) {
     if(selection instanceof StructuredSelection) {
-      List<IType> types = Lists.newArrayList();
+      final List<IType> types = Lists.newArrayList();
       IJavaProject javaProject = null;
       IProject project = null;
 
@@ -82,9 +86,18 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
         }
 
       }
-      
+
+      final IJavaProject p = javaProject;
       if (! types.isEmpty()) {
-        LaunchUtil.launchTypesConfiguration(javaProject, types, mode);
+        Job job = new Job("Launching test") {
+          @Override
+          protected IStatus run(IProgressMonitor monitor) {
+            monitor.beginTask("Computing dependencies", 100);
+            LaunchUtil.launchTypesConfiguration(p, types, mode, monitor);
+            return Status.OK_STATUS;
+          }
+        };
+        job.schedule();
       }
     }
   }
@@ -173,42 +186,46 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
     return (ITextSelection) selection;
   }
 
-  protected void run(IJavaElement ije, String mode) {
-    IJavaProject ijp = ije.getJavaProject();
+  protected void run(final IJavaElement ije, final String mode) {
+    final IJavaProject ijp = ije.getJavaProject();
 
-    switch(ije.getElementType()) {
-      case IJavaElement.PACKAGE_FRAGMENT:
-      {
-        LaunchUtil.launchPackageConfiguration(ijp, (IPackageFragment) ije, mode);
-        
-        return;
-      }
-      
-      case IJavaElement.COMPILATION_UNIT:
-      {
-        LaunchUtil.launchCompilationUnitConfiguration(ijp,
-            Arrays.asList(new ICompilationUnit[] { (ICompilationUnit) ije }), mode); 
+    Job job = new Job("Launching test") {
+      @Override
+      protected IStatus run(IProgressMonitor monitor) {
+        monitor.beginTask("Computing dependencies", 2000);
 
-        return;
+        switch(ije.getElementType()) {
+        case IJavaElement.PACKAGE_FRAGMENT:
+        {
+          LaunchUtil.launchPackageConfiguration(ijp, (IPackageFragment) ije, mode, monitor);
+          return Status.OK_STATUS;
+        }
+
+        case IJavaElement.COMPILATION_UNIT:
+        {
+          LaunchUtil.launchCompilationUnitConfiguration(ijp,
+              Arrays.asList(new ICompilationUnit[] { (ICompilationUnit) ije }), mode, monitor);
+          return Status.OK_STATUS;
+        }
+
+        case IJavaElement.TYPE:
+        {
+          LaunchUtil.launchTypeConfiguration(ijp, (IType) ije, mode, monitor);
+          return Status.OK_STATUS;
+        }
+
+        case IJavaElement.METHOD:
+        {
+          LaunchUtil.launchMethodConfiguration(ijp, (IMethod) ije, mode, monitor);
+          return Status.OK_STATUS;
+        }
+
+        default:
+          return Status.CANCEL_STATUS;
+        }
       }
-      
-      case IJavaElement.TYPE:
-      {
-        LaunchUtil.launchTypeConfiguration(ijp, (IType) ije, mode);
-        
-        return;
-      }
-      
-      case IJavaElement.METHOD:
-      {
-        LaunchUtil.launchMethodConfiguration(ijp, (IMethod) ije, mode); 
-        
-        return;
-      }
-      
-      default:
-        return;
-    }    
+    };
+    job.schedule();
   }
 
   /*protected void launchConfiguration(ILaunchConfiguration config, String mode) {

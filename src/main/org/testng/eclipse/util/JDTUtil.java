@@ -391,6 +391,41 @@ public class JDTUtil {
     return null;
   }
 
+  /**
+   * @param type
+   * @param methodName simple method name or fully qualified method name 
+   * @param paramTypes
+   * @return
+   * @throws JavaModelException
+   */
+  public static IMethod fuzzyFindMethod(IType type, String methodName,
+          String[] paramTypes) throws JavaModelException {
+      
+    int lastIndexOfDot = methodName.lastIndexOf('.');
+    final IType dependType;
+    final String methodSimpleName;
+    if (lastIndexOfDot != -1 && lastIndexOfDot < methodName.length() - 1) {
+      /*
+       * dependency is defined as a fully qualified method name.
+       */
+      String fullyQualifiedTypeName = methodName.substring(0, lastIndexOfDot);
+      /*
+       * assume class is defined in same project as type
+       */
+      IJavaProject javaProject = type.getJavaProject();
+      dependType = javaProject.findType(fullyQualifiedTypeName);
+      methodSimpleName = methodName.substring(lastIndexOfDot + 1);
+    } else {
+      /*
+       * The dependency is defined as a simple method name.
+       * Just lookup hierarchy of the corresponding type.
+       */
+      dependType= type;
+      methodSimpleName= methodName;
+    }
+    return fuzzyFindMethodInTypeHierarchy(dependType, methodSimpleName, paramTypes);
+  }
+  
   public static IMethod fuzzyFindMethodInTypeHierarchy(IType type, String methodName,
       String[] paramTypes) throws JavaModelException {
     List<IMethod> fuzzyResults= new ArrayList<IMethod>();
