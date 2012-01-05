@@ -2,6 +2,7 @@ package org.testng.eclipse.ui.preferences;
 
 
 import org.eclipse.debug.internal.ui.preferences.BooleanFieldEditor2;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
@@ -82,6 +83,9 @@ public class WorkspacePreferencePage
     m_excludedStackTraces = new StringFieldEditor(TestNGPluginConstants.S_EXCLUDED_STACK_TRACES,
         "Excluded stack traces:", parentComposite);
     m_excludedStackTraces.fillIntoGrid(parentComposite, 3);
+    GridDataFactory.fillDefaults().grab(true, false)
+        .hint(convertWidthInCharsToPixels(36), SWT.DEFAULT)
+        .applyTo(m_excludedStackTraces.getTextControl(parentComposite));
 
     addField(m_outputdir);
     addField(m_absolutePath);
