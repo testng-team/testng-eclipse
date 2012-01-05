@@ -48,8 +48,9 @@ public class BuildPathSupport {
     IPath bundleBase = getBundleLocation();
     if (bundleBase != null) {
       IPath jarLocation = bundleBase.append(ResourceUtil.getString("TestNG.jdk15.library")); //$NON-NLS-1$
+      IPath srcLocation = bundleBase.append(ResourceUtil.getString("TestNG.jdk15.sources")); //$NON-NLS-1$
 
-      return JavaCore.newLibraryEntry(jarLocation, null, null);
+      return JavaCore.newLibraryEntry(jarLocation, srcLocation, null);
     }
 
     return null;
