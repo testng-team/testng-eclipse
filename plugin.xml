@@ -151,8 +151,15 @@
       <page
             class="org.testng.eclipse.ui.preferences.ProjectPropertyPage"
             id="org.testng.eclipse.properties.propertyPage1"
-            name="TestNG"
-            objectClass="org.eclipse.core.resources.IProject"/>
+            name="TestNG">
+         <enabledWhen>
+            <and>
+               <adapt
+                     type="org.eclipse.core.resources.IProject">
+               </adapt>
+            </and>
+         </enabledWhen>
+      </page>
   </extension>
    
   <extension
