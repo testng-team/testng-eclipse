@@ -383,7 +383,7 @@
  <extension
        point="org.eclipse.jdt.ui.classpathContainerPage">
     <classpathContainerPage
-          class="org.testng.eclipse.ui.buildpath.TestNGContainerWiardPage"
+          class="org.testng.eclipse.ui.buildpath.TestNGContainerWizardPage"
           id="org.testng.TESTNG_CONTAINER"
           name="TestNG">
     </classpathContainerPage>

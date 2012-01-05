@@ -13,12 +13,12 @@ import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.buildpath.TestNGContainerInitializer;
 import org.testng.eclipse.util.ResourceUtil;
 
-public class TestNGContainerWiardPage extends WizardPage implements IClasspathContainerPage {
+public class TestNGContainerWizardPage extends WizardPage implements IClasspathContainerPage {
 
-  public TestNGContainerWiardPage() {
-    super("TestNGContainerWiardPage"); //$NON-NLS-1$
-    setTitle(ResourceUtil.getString("TestNGContainerWiardPage.title"));  //$NON-NLS-1$
-    setDescription(ResourceUtil.getString("TestNGContainerWiardPage.description")); //$NON-NLS-1$
+  public TestNGContainerWizardPage() {
+    super("TestNGContainerWizardPage"); //$NON-NLS-1$
+    setTitle(ResourceUtil.getString("TestNGContainerWizardPage.title"));  //$NON-NLS-1$
+    setDescription(ResourceUtil.getString("TestNGContainerWizardPage.description")); //$NON-NLS-1$
     setImageDescriptor(TestNGPlugin.getImageDescriptor("wizban/addlibrary_wiz.png")); //$NON-NLS-1$
   }
 
@@ -29,7 +29,7 @@ public class TestNGContainerWiardPage extends WizardPage implements IClasspathCo
     layout.marginWidth = 0;
     container.setLayout(layout);
 
-    new Label(container, SWT.NONE).setText(ResourceUtil.getString("TestNGContainerWiardPage.message")); //$NON-NLS-1$
+    new Label(container, SWT.NONE).setText(ResourceUtil.getString("TestNGContainerWizardPage.message")); //$NON-NLS-1$
 
     setControl(container);
     Dialog.applyDialogFont(container);
