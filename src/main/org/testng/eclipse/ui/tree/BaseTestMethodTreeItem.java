@@ -30,6 +30,8 @@ abstract public class BaseTestMethodTreeItem extends BaseTreeItem implements ITr
 
   private Image getImage(int state) {
     switch(state) {
+      case ITestResult.STARTED:
+        return Images.getImage(Images.IMG_TEST_RUN);
       case ITestResult.SUCCESS:
         return Images.getImage(Images.IMG_TEST_OK);
       case ITestResult.FAILURE:

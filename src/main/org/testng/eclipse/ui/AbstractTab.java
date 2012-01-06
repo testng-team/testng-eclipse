@@ -3,7 +3,6 @@ package org.testng.eclipse.ui;
 import static org.testng.eclipse.ui.Images.IMG_TEST_HIERARCHY;
 
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -317,11 +316,13 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   }
 
   @Override
-  public void updateTestResult(List<RunInfo> results) {
+  public void updateTestResult(Map<String, RunInfo> results) {
     if (results.size() > 0) {
       reset();
-      for (RunInfo ri : results) {
-        updateTestResult(ri, false /* don't expand, we'll do that at the end */);
+      synchronized(results) {
+        for (RunInfo ri : results.values()) {
+          updateTestResult(ri, false /* don't expand, we'll do that at the end */);
+        }
       }
     }
     postExpandAll();

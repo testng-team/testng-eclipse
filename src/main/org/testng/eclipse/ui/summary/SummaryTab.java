@@ -1,6 +1,7 @@
 package org.testng.eclipse.ui.summary;
 
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -382,6 +383,10 @@ public class SummaryTab extends TestRunTab  {
     }
   }
 
+  /**
+   * Note that this implementation only updates the data model,
+   * us {@link #updateTestResult(List)} to refresh the UI.
+   */
   @Override
   public void updateTestResult(RunInfo runInfo, boolean expand) {
     //
@@ -397,8 +402,18 @@ public class SummaryTab extends TestRunTab  {
     tr.time += runInfo.getTime();
     tr.methods.add(runInfo.getMethodId());
     tr.classes.add(runInfo.getClassId());
+  }
+  
+  /**
+   * Use this opportunity to just refresh viewer, the
+   * results have been individually collected with {@link #updateTestResult(RunInfo, boolean)}
+   * TODO: refactor
+   */
+  @Override
+  public void updateTestResult(Map<String, RunInfo> results) {
     m_testViewer.refresh();
   }
+
 
   @Override
   public void aboutToStart() {
