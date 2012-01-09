@@ -1,7 +1,9 @@
 package org.testng.eclipse.ui;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
@@ -18,7 +20,7 @@ import org.testng.eclipse.util.ResourceUtil;
 
 /**
  * A quick launcher from the TestNG viewer.
- * 
+ *
  * @author <a href='mailto:the_mindstorm[at]evolva[dot]ro'>Alexandru Popescu</a>
  */
 public class QuickRunAction extends Action {
@@ -54,28 +56,35 @@ public class QuickRunAction extends Action {
   }
   
   public void run() {
-    IMethod imethod= null;  
+    final IMethod imethod;
     try {
-      imethod= (IMethod) JDTUtil.findElement(m_javaProject, m_runInfo); 
+      imethod= (IMethod) JDTUtil.findElement(m_javaProject, m_runInfo);
+      /*
+       * The runInfo is passed along in order to preserve any
+       * jvm args used in the original launcher when
+       * QuickRunAction is activated from the FailureTab to re-run failed
+       * methods.
+       */
+      ILaunchConfiguration config = m_previousRun.getLaunchConfiguration();
+      m_runInfo.setJvmArgs(ConfigurationHelper.getJvmArgs(config));
+      Job job = new Job("Launching test") {
+        @Override
+        protected IStatus run(IProgressMonitor monitor) {
+          monitor.beginTask("Computing dependencies", 2000);
+          LaunchUtil.launchMethodConfiguration(m_javaProject,
+            imethod,
+            m_runMode, m_runInfo,
+            monitor);
+          return Status.OK_STATUS;
+        }
+      };
+      job.schedule();
     }
     catch(JavaModelException jmex) {
-      TestNGPlugin.log(new Status(IStatus.ERROR, TestNGPlugin.PLUGIN_ID, 3333, 
+      TestNGPlugin.log(new Status(IStatus.ERROR, TestNGPlugin.PLUGIN_ID, 3333,
           "Cannot find method " + m_runInfo.getMethodDisplay() + " in class " + m_runInfo.getClassName(), //$NON-NLS-1$ $NON-NLS-2$
           jmex));
     }
-
-    if(null == imethod) return;
-    /*
-     * The runInfo is passed along in order to preserve any 
-     * jvm args used in the original launcher when
-     * QuickRunAction is activated from the FailureTab to re-run failed 
-     * methods. 
-     */
-    ILaunchConfiguration config = m_previousRun.getLaunchConfiguration();
-    m_runInfo.setJvmArgs(ConfigurationHelper.getJvmArgs(config));
-    LaunchUtil.launchMethodConfiguration(m_javaProject, 
-        imethod, 
-        m_runMode, m_runInfo);    
   }
   
 }

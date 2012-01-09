@@ -18,10 +18,9 @@ import com.google.common.collect.Sets;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -37,13 +36,16 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.search.internal.ui.text.FileSearchQuery;
-import org.eclipse.search.internal.ui.text.FileSearchResult;
-import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.text.FileTextSearchScope;
 import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
@@ -198,12 +200,12 @@ public class LaunchUtil {
     return attrs;
   }
   
-  public static void launchPackageConfiguration(IJavaProject ijp, IPackageFragment ipf, String mode) {
+  public static void launchPackageConfiguration(IJavaProject ijp, IPackageFragment ipf, String mode, IProgressMonitor monitor) {
     List<String> packageNames= new ArrayList<String>();
     packageNames.add(ipf.getElementName());
 
     try {
-      if (findGroupDependencies(ipf.getCompilationUnits()).length > 0) {
+      if (findGroupAndMethodDependencies(ipf.getCompilationUnits(), monitor)) {
         groupDependencyWarning("package " + ipf.getElementName(), null);
       }
     }
@@ -231,13 +233,21 @@ public class LaunchUtil {
   
   public static void launchMethodConfiguration(IJavaProject javaProject,
           IMethod imethod,
-          String runMode) {
-	  launchMethodConfiguration(javaProject, imethod, runMode, null);
+          String runMode,
+          IProgressMonitor monitor) {
+	  launchMethodConfiguration(javaProject, imethod, runMode, null, monitor);
   }
 
   private static boolean methodHasDependencies(IMethod method) throws JavaModelException {
-    IAnnotation annotation = method.getAnnotation("Test");
+    if (!hasDependsOn(method.getAnnotation("Test"))) {
+      return hasDependsOn(((IType) method.getParent()).getAnnotation("Test"));
+    }
+    return false;
+  }
+
+  private static boolean hasDependsOn(IAnnotation annotation) throws JavaModelException {
     return annotation != null &&
+        annotation.exists() &&
         (contains(annotation.getMemberValuePairs(), "dependsOnGroups")
          || contains(annotation.getMemberValuePairs(), "dependsOnMethods"));
   }
@@ -255,13 +265,14 @@ public class LaunchUtil {
   public static void launchMethodConfiguration(IJavaProject javaProject,
           IMethod iMethod,
           String runMode,
-          RunInfo runInfo) {
+          RunInfo runInfo,
+          IProgressMonitor monitor) {
 
     Set<IMethod> methods = Sets.newHashSet(iMethod);
 
     try {
       if (methodHasDependencies(iMethod)) {
-        DependencyInfo groupInfo = DependencyInfo.createDependencyInfo(javaProject);
+        DependencyInfo groupInfo = DependencyInfo.createDependencyInfo(javaProject, monitor);
         methods.addAll(findMethodTransitiveClosure(iMethod, groupInfo));
       }
     } catch (JavaModelException e) {
@@ -341,15 +352,15 @@ public class LaunchUtil {
   /**
    * Launch a type-based test.
    */
-  public static void launchTypeConfiguration(IJavaProject ijp, IType type, String mode) {
-    launchTypeBasedConfiguration(ijp, type.getElementName(), new IType[] {type}, mode);
+  public static void launchTypeConfiguration(IJavaProject ijp, IType type, String mode, IProgressMonitor monitor) {
+    launchTypeBasedConfiguration(ijp, type.getElementName(), new IType[] {type}, mode, monitor);
   }
 
   /**
    * Launch a compilation unit (a source file) based test.
    */
   public static void launchCompilationUnitConfiguration(IJavaProject ijp,
-      List<ICompilationUnit> units, String mode) {
+      List<ICompilationUnit> units, String mode, IProgressMonitor monitor) {
     List<IType> types = Lists.newArrayList();
     IType mainType = null;
     for (ICompilationUnit icu : units) {
@@ -368,7 +379,7 @@ public class LaunchUtil {
     }
 
     launchTypeBasedConfiguration(ijp, createConfName(mainType, units.size()),
-        types.toArray(new IType[types.size()]), mode);
+        types.toArray(new IType[types.size()]), mode, monitor);
   }
 
   /**
@@ -383,10 +394,10 @@ public class LaunchUtil {
     return result;
   }
 
-  public static void launchTypesConfiguration(IJavaProject project, List<IType> types, String mode)
+  public static void launchTypesConfiguration(IJavaProject project, List<IType> types, String mode, IProgressMonitor monitor)
   {
     launchTypeBasedConfiguration(project, createConfName(types.get(0), types.size()),
-        types.toArray(new IType[types.size()]), mode);
+        types.toArray(new IType[types.size()]), mode, monitor);
   }
 
   public static boolean useStringProtocol(ILaunchConfiguration configuration) {
@@ -395,7 +406,7 @@ public class LaunchUtil {
   }
 
   private static void launchTypeBasedConfiguration(IJavaProject javaProject, String confName,
-      IType[] types, String mode) {
+      IType[] types, String mode, IProgressMonitor monitor) {
     Multimap<String, String> classMethods = ArrayListMultimap.create();
     List<String> typeNames = Lists.newArrayList();
     Set<IType> allTypes = Sets.newHashSet();
@@ -403,10 +414,9 @@ public class LaunchUtil {
 
     Set<IMethod> allMethods = Sets.newHashSet();
 
-    // If we depend on groups, need to add all the necessary types
-    Object[] groupDependencies = findGroupDependencies(types);
-    if (groupDependencies.length > 0) {
-      DependencyInfo groupInfo = DependencyInfo.createDependencyInfo(javaProject);
+    // If we depend on groups and/or methods, need to add all the necessary types
+    if (findGroupAndMethodDependencies(types, monitor)) {
+      DependencyInfo groupInfo = DependencyInfo.createDependencyInfo(javaProject, monitor);
       Set<IType> closure = findTypeTransitiveClosure(types, groupInfo);
       allTypes.addAll(closure);
       Set<IMethod> methods = findMethodTransitiveClosure(types, groupInfo);
@@ -568,35 +578,41 @@ public class LaunchUtil {
     return result;
   }
 
-  private static Object[] findGroupDependencies(ICompilationUnit[] units) {
-    List<IResource> resources = Lists.newArrayList();
-    for(int i= 0; i < units.length; i++) {
-      try {
-        resources.add(units[i].getCorrespondingResource());
+  private static boolean findGroupAndMethodDependencies(ICompilationUnit[] units, final IProgressMonitor monitor) {
+    SearchPattern pattern = SearchPattern.createPattern("org.testng.annotations.Test.dependsOn",
+        IJavaSearchConstants.METHOD,
+        IJavaSearchConstants.REFERENCES,
+        SearchPattern.R_PREFIX_MATCH) ;
+    final boolean[] result = new boolean[1];
+    SearchEngine searchEngine = new SearchEngine();
+    SearchParticipant[] participants = new SearchParticipant[] {
+        SearchEngine.getDefaultSearchParticipant() };
+    IJavaSearchScope scope =
+        SearchEngine.createJavaSearchScope(units);
+    SearchRequestor requestor = new SearchRequestor() {
+      @Override
+      public void acceptSearchMatch(SearchMatch match) throws CoreException {
+        result[0] = true;
+        // TODO: (performance?) we might want to refactor the various way of walking
+        // the AST to take advantage of this very efficient JDT query
+        monitor.setCanceled(true);
       }
-      catch(JavaModelException jmex) {
-        ;
-      }
+  };
+    try {
+      searchEngine.search(pattern, participants, scope, requestor, monitor);
+    } catch (CoreException e) {
+      e.printStackTrace();
     }
-    IResource[] scopeResources= resources.toArray(new IResource[resources.size()]);
-    ISearchQuery query= new FileSearchQuery("@Test\\(.*\\s*dependsOnGroups\\s*=.*", 
-        true /*regexp*/ , 
-        true /*casesensitive*/, 
-        FileTextSearchScope.newSearchScope(scopeResources, new String[] {"*.java"}, false));
-    query.run(new NullProgressMonitor());
-    FileSearchResult result= (FileSearchResult) query.getSearchResult(); 
-    Object[] elements = result.getElements();
-    
-    return elements;
+    return result[0];
   }
-  
-  private static Object[] findGroupDependencies(IType[] types) {
+
+  private static boolean findGroupAndMethodDependencies(IType[] types, IProgressMonitor monitor) {
     ICompilationUnit[] units= new ICompilationUnit[types.length];
     for(int i= 0; i < types.length; i++) {
       units[i]= types[i].getCompilationUnit();
     }
-    
-    return findGroupDependencies(units);
+
+    return findGroupAndMethodDependencies(units, monitor);
   }
   
   /**

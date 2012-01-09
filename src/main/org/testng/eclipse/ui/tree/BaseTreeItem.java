@@ -57,6 +57,8 @@ abstract public class BaseTreeItem implements ITreeItem {
    */
   protected Image getSuiteImage(int state) {
     switch(state) {
+      case ITestResult.STARTED:
+        return Images.getImage(Images.IMG_SUITE_RUN);
       case ITestResult.SUCCESS:
         return Images.getImage(Images.IMG_SUITE_OK);
       case ITestResult.FAILURE:

@@ -285,6 +285,11 @@ abstract public class CustomSuite extends LaunchSuite {
 //    }
     testAttrs.setProperty("verbose", String.valueOf(m_logLevel));
 
+    /* Since we're pulling dependencies automatically, the default order
+     * is usually not right, let's testng runtime compute the correct order.
+     */
+    testAttrs.setProperty("preserve-order", "false");
+
     suiteBuffer.push("test", testAttrs);
 
     groupsElement(suiteBuffer);
