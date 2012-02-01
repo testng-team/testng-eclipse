@@ -293,38 +293,35 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
 
   public String[] createClassPath(ILaunchConfiguration configuration) {
     try {
-      return oldCreateClassPath(configuration);
+      return newCreateClassPath(configuration);
     } catch(CoreException ex) {
       TestNGPlugin.log(ex);
-      return new String[0];
+    } catch (MalformedURLException ex) {
+      TestNGPlugin.log(ex);
+    } catch (IOException ex) {
+      TestNGPlugin.log(ex);
     }
+    return new String[0];
   }
 
   private String[] newCreateClassPath(ILaunchConfiguration configuration)
-      throws CoreException {
+      throws CoreException, MalformedURLException, IOException {
     URL url = Platform.getBundle(TestNGPlugin.PLUGIN_ID).getEntry("/"); //$NON-NLS-1$
 
     String testngJarLocation = getTestNGLibraryVersion();
     boolean useProjectJar = false;
     String projectName = getJavaProjectName(configuration);
-    String testngJarName = testngJarLocation.indexOf('/') != -1 ? testngJarLocation
-          .substring(testngJarLocation.indexOf('/') + 1) : testngJarLocation;
     if (null != projectName) {
       useProjectJar = TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(projectName);
     }
 
     List<String> result = Lists.newArrayList();
-    result.addAll(Arrays.asList(getClasspath(configuration)));
+    result.add(FileLocator.toFileURL(new URL(url, "build")).getFile()); //$NON-NLS-1$
     // Add our own lib/testng.jar unless this project is configured to use its own testng.jar
     if (! useProjectJar) {
-      try {
-        result.add(FileLocator.toFileURL(new URL(url, testngJarLocation)).getFile());
-      } catch (MalformedURLException e) {
-        TestNGPlugin.log(e);
-      } catch (IOException e) {
-        TestNGPlugin.log(e);
-      }
+      result.add(FileLocator.toFileURL(new URL(url, testngJarLocation)).getFile());
     }
+    result.addAll(Arrays.asList(getClasspath(configuration)));
     return result.toArray(new String[result.size()]);
   }
   
