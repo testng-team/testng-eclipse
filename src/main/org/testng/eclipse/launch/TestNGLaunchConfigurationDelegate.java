@@ -316,10 +316,22 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     }
 
     List<String> result = Lists.newArrayList();
-    result.add(FileLocator.toFileURL(new URL(url, "build")).getFile()); //$NON-NLS-1$
+    try {
+      result.add(FileLocator.toFileURL(new URL(url, "build")).getFile()); //$NON-NLS-1$
+    } catch(Exception ex) {
+      // Ignore
+//      LaunchUtil.errorDialog("Couldn't find a build/ directory i the plug-in", ex);
+//      throw new RuntimeException(ex);
+    }
     // Add our own lib/testng.jar unless this project is configured to use its own testng.jar
     if (! useProjectJar) {
-      result.add(FileLocator.toFileURL(new URL(url, testngJarLocation)).getFile());
+      try {
+        result.add(FileLocator.toFileURL(new URL(url, testngJarLocation)).getFile());
+      } catch(Exception ex) {
+        LaunchUtil.errorDialog("Couldn't find a testng.jar at " + testngJarLocation
+            + " in the plug-in", ex);
+        throw new RuntimeException(ex);
+      }
     }
     result.addAll(Arrays.asList(getClasspath(configuration)));
     return result.toArray(new String[result.size()]);

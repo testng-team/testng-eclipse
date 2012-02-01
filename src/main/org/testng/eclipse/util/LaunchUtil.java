@@ -44,6 +44,7 @@ import org.eclipse.search.internal.ui.text.FileSearchQuery;
 import org.eclipse.search.internal.ui.text.FileSearchResult;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.text.FileTextSearchScope;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
@@ -803,6 +804,15 @@ public class LaunchUtil {
 		}
 	  catch (CoreException ce) {}
 	  return config;
+  }
+
+  public static void errorDialog(String string, Throwable ex) {
+    ErrorDialog.openError(Display.getCurrent().getActiveShell(),
+        "Fatal error",
+        string + (ex.getMessage() != null ? ": " + ex.getMessage() : ""),
+        new Status(IStatus.ERROR, TestNGPlugin.PLUGIN_ID, 0,
+            "Status Error Message", null));
+    TestNGPlugin.log(ex);
   }
 
 }
