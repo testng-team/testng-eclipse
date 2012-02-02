@@ -10,6 +10,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.debug.internal.ui.actions.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.FolderSelectionDialog;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -67,9 +69,9 @@ public class ProjectPropertyPage extends PropertyPage {
    * @see PreferencePage#createContents(Composite)
    */
   protected Control createContents(Composite parent) {
-    Composite parentComposite = parent;
-//    parentComposite.setLayout(new GridLayout());
-//    parentComposite.setLayoutData(SWTUtil.createGridData());
+    Composite parentComposite = new Composite(parent, SWT.NONE);
+    GridLayoutFactory.fillDefaults().applyTo(parentComposite);
+    GridDataFactory.fillDefaults().grab(true, true).applyTo(parentComposite);
 
     //
     // Output directory
