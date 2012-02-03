@@ -197,6 +197,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   public static final String NAME = "org.testng.eclipse.ResultView"; //$NON-NLS-1$
   public static final String ID_EXTENSION_POINT_TESTRUN_TABS = TestNGPlugin.PLUGIN_ID + "." //$NON-NLS-1$
       + "internal_testRunTabs";  //$NON-NLS-1$
+  public static final String LISTENING_JOB_FAMILY = TestNGPlugin.PLUGIN_ID + "." //$NON-NLS-1$
+      + "listening_job_family";  //$NON-NLS-1$
 
   static final int REFRESH_INTERVAL = 200;
 
@@ -379,7 +381,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     else return ITestResult.SUCCESS;
   }
 
-  public void startTestRunListening(IJavaProject project, 
+  public void startTestRunListening(final IJavaProject project, 
                                     String subName, 
                                     int port, 
                                     ILaunch launch) {
@@ -392,28 +394,60 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //      stopTest();
 //    }
     fTestRunnerClient = new EclipseTestRunnerClient();
-    IMessageSender messageMarshaller = LaunchUtil.useStringProtocol(launch.getLaunchConfiguration())
+    final IMessageSender messageMarshaller = LaunchUtil.useStringProtocol(launch.getLaunchConfiguration())
         ? new StringMessageSender("localhost", port)
         : new SerializedMessageSender("localhost", port);
-    try {
-      messageMarshaller.initReceiver();
-      fTestRunnerClient.startListening(this, this, messageMarshaller);
+    String jobName = ResourceUtil.getString("TestRunnerViewPart.message.startTestRunListening");
+    Job testRunListeningJob = new Job(jobName) {
+      @Override
+      protected IStatus run(IProgressMonitor monitor) {
+        try {
+          messageMarshaller.initReceiver();
+          if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+          fTestRunnerClient.startListening(TestRunnerViewPart.this, TestRunnerViewPart.this, messageMarshaller);
 
-      m_rerunAction.setEnabled(true);
-      m_rerunFailedAction.setEnabled(false);
-      m_openReportAction.setEnabled(true);
-    }
-    catch(SocketTimeoutException ex) {
-      boolean useProjectJar =
-          TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(project.getProject().getName());
-      String suggestion = useProjectJar
-         ? "Uncheck the 'Use Project testng.jar' option from your Project properties and try again."
-         : "Make sure you don't have an older version of testng.jar on your class path.";
-      new ErrorDialog(m_counterComposite.getShell(), "Couldn't launch TestNG",
-          "Couldn't contact the RemoteTestNG client. " + suggestion,
-          new StatusInfo(IStatus.ERROR, "Timeout while trying to contact RemoteTestNG."),
-          IStatus.ERROR).open();
-    }
+          postSyncRunnable(new Runnable() {
+            public void run() {
+              m_rerunAction.setEnabled(true);
+              m_rerunFailedAction.setEnabled(false);
+              m_openReportAction.setEnabled(true);
+            }
+          });
+        }
+        catch(SocketTimeoutException ex) {
+          postSyncRunnable(new Runnable() {
+            public void run() {
+              boolean useProjectJar =
+                  TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(project.getProject().getName());
+              String suggestion = useProjectJar
+                 ? "Uncheck the 'Use Project testng.jar' option from your Project properties and try again."
+                 : "Make sure you don't have an older version of testng.jar on your class path.";
+              new ErrorDialog(m_counterComposite.getShell(), "Couldn't launch TestNG",
+                  "Couldn't contact the RemoteTestNG client. " + suggestion,
+                  new StatusInfo(IStatus.ERROR, "Timeout while trying to contact RemoteTestNG."),
+                  IStatus.ERROR).open();
+            }
+          });
+        }
+        return Status.OK_STATUS;
+      }
+
+      @Override
+      protected void canceling() {
+        messageMarshaller.shutDown();
+        super.canceling();
+      }
+
+      @Override
+      public boolean belongsTo(Object family) {
+        if (family != null && LISTENING_JOB_FAMILY.equals(family))
+        {
+          return true;
+        }
+        return super.belongsTo(family);
+      }
+    };
+    testRunListeningJob.schedule();
 //    getViewSite().getActionBars().updateActionBars();
   }
 
