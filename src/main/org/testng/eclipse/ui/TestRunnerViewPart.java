@@ -395,20 +395,28 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     IMessageSender messageMarshaller = LaunchUtil.useStringProtocol(launch.getLaunchConfiguration())
         ? new StringMessageSender("localhost", port)
         : new SerializedMessageSender("localhost", port);
-    try {
-      messageMarshaller.initReceiver();
+    
+    boolean isInitSuccess = false;
+    do {
+      try {
+        messageMarshaller.initReceiver();
+        isInitSuccess = true;
+      } catch (SocketTimeoutException e) {
+        TestNGPlugin.log(e);
+      }
+    } while (isInitSuccess == false && launch.isTerminated() == false);
+    
+    if (isInitSuccess == true) {
       fTestRunnerClient.startListening(this, this, messageMarshaller);
-
       m_rerunAction.setEnabled(true);
       m_rerunFailedAction.setEnabled(false);
       m_openReportAction.setEnabled(true);
-    }
-    catch(SocketTimeoutException ex) {
+    } else {
       boolean useProjectJar =
           TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(project.getProject().getName());
       String suggestion = useProjectJar
-         ? "Uncheck the 'Use Project testng.jar' option from your Project properties and try again."
-         : "Make sure you don't have an older version of testng.jar on your class path.";
+          ? "Uncheck the 'Use Project testng.jar' option from your Project properties and try again."
+              : "Make sure you don't have an older version of testng.jar on your class path.";
       new ErrorDialog(m_counterComposite.getShell(), "Couldn't launch TestNG",
           "Couldn't contact the RemoteTestNG client. " + suggestion,
           new StatusInfo(IStatus.ERROR, "Timeout while trying to contact RemoteTestNG."),
