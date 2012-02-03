@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.testng.eclipse"
-      label="TestNG"
-      version="6.1.1.20110823_1537"
-      provider-name="Cedric Beust">
+      id="org.testng.eclipse.feature"
+      label="%pluginName"
+      version="6.3.1.qualifier"
+      provider-name="%providerName">
 
    <description url="http://testng.org">
       TestNG plug-in for Eclipse.

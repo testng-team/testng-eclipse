@@ -1,12 +1,17 @@
 package org.testng.eclipse.launch;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
@@ -32,14 +37,6 @@ import org.testng.eclipse.util.StringUtils;
 import org.testng.remote.RemoteArgs;
 import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
 
 public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigurationDelegate {
 
@@ -81,9 +78,13 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
   }
 
   private static String join(String[] strings) {
+    return join(strings, " ");
+  }
+
+  private static String join(String[] strings, String sep) {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < strings.length; i++) {
-      if (i > 0) sb.append(" ");
+      if (i > 0) sb.append(sep);
       sb.append(strings[i]);
     }
     return sb.toString();
@@ -96,6 +97,12 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     sb.append("\n  Class:     " + config.getClassToLaunch());
     sb.append("\n  Args:      " + join(config.getProgramArguments()));
     sb.append("\n");
+
+    sb.append("java "
+        + join(config.getVMArguments())
+        + " -classpath " + join(config.getClassPath(), ":")
+        + " " + config.getClassToLaunch()
+        + " " + join(config.getProgramArguments()));
 
     return sb.toString();
   }
@@ -155,7 +162,9 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     }
   }
 
-  private String getRemoteClassName() {
+  @Override
+  public String getMainTypeName(ILaunchConfiguration configuration)
+      throws CoreException {
     return TestNGPlugin.isDebug() ? EmptyRemoteTestNG.class.getName()
         : RemoteTestNG.class.getName();
   }
@@ -172,11 +181,10 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       ILaunch launch, final IJavaProject jproject, final int port, final String runMode)
       throws CoreException {
 
-    String[] classPath = createClassPath(configuration);
+    String[] classPath = getClasspath(configuration);
     String progArgs = getProgramArguments(configuration);
     VMRunnerConfiguration vmConfig =
-        new VMRunnerConfiguration(getRemoteClassName(), //$NON-NLS-1$
-        classPath);
+        new VMRunnerConfiguration(getMainTypeName(configuration), classPath);
 
     // insert the program arguments
     Vector<String> argv = new Vector<String>(10);
@@ -279,74 +287,28 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     return vmConfig;
   }
 
-  private String[] createClassPath(ILaunchConfiguration configuration)
+  public String[] getClasspath(ILaunchConfiguration configuration)
       throws CoreException {
-    URL url = Platform.getBundle(TestNGPlugin.PLUGIN_ID).getEntry("/"); //$NON-NLS-1$
+    String[] originalClasspath = super.getClasspath(configuration);
 
-    String[] cp = getClasspath(configuration);
-    String[] classPath = null;
-    String testngJarLocation = getTestNGLibraryVersion();
-    String testngJarName = testngJarLocation.indexOf('/') != -1 ? testngJarLocation
-        .substring(testngJarLocation.indexOf('/') + 1) : testngJarLocation;
-    boolean donotappendjar = false;
     String projectName = getJavaProjectName(configuration);
-    if (null != projectName) {
-      donotappendjar = TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(projectName);
+    boolean useProjectJar = TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(projectName);
+    if (useProjectJar) {
+      return originalClasspath;
     }
-
-    int addedSize = 2;
-    if (donotappendjar) {
-      addedSize = 1;
-    } else {
-      for (int i = 0; i < cp.length; i++) {
-        if (cp[i].endsWith(testngJarName)) {
-          addedSize = 1;
-          break;
-        }
+    else {
+      String testngJarLocation = getTestNGLibraryVersion();
+      String[] allClasspath = new String[originalClasspath.length + 1];
+      try {
+        // insert the bundle embedded testng.jar to the classpath
+        allClasspath[0] = FileLocator.toFileURL(TestNGPlugin.getDefault().getBundle().getEntry(testngJarLocation)).getFile();
+      } catch (IOException ioe) {
+        TestNGPlugin.log(ioe);
+        abort("Cannot create runtime classpath", ioe, 1000); //$NON-NLS-1$
       }
+      System.arraycopy(originalClasspath, 0, allClasspath, 1, originalClasspath.length);
+      return allClasspath;
     }
-
-    try {
-      if (Platform.inDevelopmentMode()) {
-
-        // we first try the bin output folder
-        List<String> entries = new ArrayList<String>();
-
-        try {
-          entries.add(FileLocator.toFileURL(new URL(url, "build/classes")).getFile()); //$NON-NLS-1$
-        } catch (IOException e3) {
-          try {
-            entries.add(FileLocator.toFileURL(new URL(url, "eclipse-testng.jar")).getFile()); //$NON-NLS-1$
-          } catch (IOException e4) {
-            // ignore
-          }
-        }
-        if (addedSize == 2) {
-          entries.add(FileLocator.toFileURL(new URL(url, testngJarLocation)).getFile()); //$NON-NLS-1$
-        }
-
-        Assert.isTrue(entries.size() == addedSize, "Required JARs available"); //$NON-NLS-1$
-
-        classPath = new String[cp.length + entries.size()];
-
-        Object[] jea = entries.toArray();
-        System.arraycopy(cp, 0, classPath, addedSize, cp.length);
-        System.arraycopy(jea, 0, classPath, 0, jea.length);
-      } else {
-        classPath = new String[cp.length + addedSize];
-        System.arraycopy(cp, 0, classPath, addedSize, cp.length);
-        classPath[0] = FileLocator.toFileURL(new URL(url, "eclipse-testng.jar")).getFile(); //$NON-NLS-1$
-
-        if (addedSize == 2) {
-          classPath[1] = FileLocator.toFileURL(new URL(url, testngJarLocation)).getFile();
-        }
-      }
-    } catch (IOException ioe) {
-      TestNGPlugin.log(ioe);
-      abort("Cannot create runtime classpath", ioe, 1000); //$NON-NLS-1$
-    }
-
-    return classPath;
   }
 
   private String getRunNameAttr(ILaunchConfiguration configuration) {
