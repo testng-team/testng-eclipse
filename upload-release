@@ -24,7 +24,7 @@ rm -rf $ver
 mkdir $ver
 cd $ver
 jar xf $jar
-jar xf eclipse-testng.jar
+#jar xf eclipse-testng.jar
 
 for i in `find . -name \*class`
 do
