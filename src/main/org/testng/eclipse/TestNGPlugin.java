@@ -198,7 +198,6 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
     
     n_trackedLaunches.remove(launch);
 
-    // should use UI thread?!
     asyncExec(new Runnable() {
         public void run() {
           connectTestRunner(launch, ijp, name, finalPort);

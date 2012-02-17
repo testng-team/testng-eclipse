@@ -382,42 +382,52 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     else return ITestResult.SUCCESS;
   }
 
-  public void startTestRunListening(IJavaProject project, 
+  public void startTestRunListening(final IJavaProject project, 
                                     String subName, 
-                                    int port, 
-                                    ILaunch launch) {
+                                    final int port, 
+                                    final ILaunch launch) {
     m_LastLaunch = launch;
     m_workingProject = project;
 
     aboutToLaunch(subName);
     
-//    if(null != fTestRunnerClient) {
-//      stopTest();
-//    }
-    fTestRunnerClient = new EclipseTestRunnerClient();
-    IMessageSender messageMarshaller = LaunchUtil.useStringProtocol(launch.getLaunchConfiguration())
-        ? new StringMessageSender("localhost", port)
+    Job job = new Job("Waiting for TestNG test runner to connect") {
+      protected IStatus run(IProgressMonitor monitor) {
+            
+        fTestRunnerClient = new EclipseTestRunnerClient();
+        IMessageSender messageMarshaller = LaunchUtil.useStringProtocol(launch.getLaunchConfiguration())
+            ? new StringMessageSender("localhost", port)
         : new SerializedMessageSender("localhost", port);
-    try {
-      messageMarshaller.initReceiver();
-      fTestRunnerClient.startListening(this, this, messageMarshaller);
+            try {
+              messageMarshaller.initReceiver();
+              fTestRunnerClient.startListening(TestRunnerViewPart.this, TestRunnerViewPart.this, messageMarshaller);
 
-      m_rerunAction.setEnabled(true);
-      m_rerunFailedAction.setEnabled(false);
-      m_openReportAction.setEnabled(true);
-    }
-    catch(SocketTimeoutException ex) {
-      boolean useProjectJar =
-          TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(project.getProject().getName());
-      String suggestion = useProjectJar
-         ? "Uncheck the 'Use Project testng.jar' option from your Project properties and try again."
-         : "Make sure you don't have an older version of testng.jar on your class path.";
-      new ErrorDialog(m_counterComposite.getShell(), "Couldn't launch TestNG",
-          "Couldn't contact the RemoteTestNG client. " + suggestion,
-          new StatusInfo(IStatus.ERROR, "Timeout while trying to contact RemoteTestNG."),
-          IStatus.ERROR).open();
-    }
-//    getViewSite().getActionBars().updateActionBars();
+              getDisplay().asyncExec(new Runnable() {
+                public void run() {
+                  m_rerunAction.setEnabled(true);
+                  m_rerunFailedAction.setEnabled(false);
+                  m_openReportAction.setEnabled(true);
+                }
+              });
+            }
+            catch(SocketTimeoutException ex) {
+              boolean useProjectJar =
+                  TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(project.getProject().getName());
+              String suggestion = useProjectJar
+                  ? "Uncheck the 'Use Project testng.jar' option from your Project properties and try again."
+                      : "Make sure you don't have an older version of testng.jar on your class path.";
+              new ErrorDialog(m_counterComposite.getShell(), "Couldn't launch TestNG",
+                  "Couldn't contact the RemoteTestNG client. " + suggestion,
+                  new StatusInfo(IStatus.ERROR, "Timeout while trying to contact RemoteTestNG."),
+                  IStatus.ERROR).open();
+            }
+            //    getViewSite().getActionBars().updateActionBars();
+        
+            return Status.OK_STATUS;
+         }
+      };
+      job.setPriority(Job.BUILD);
+      job.schedule();
   }
 
   /**
@@ -1546,7 +1556,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     postTestResult(createRunInfo(trm, null, ITestResult.STARTED), 0 /*no error*/);
   }
 
-  public void onStart(SuiteMessage suiteMessage) {
+  public void onStart(final SuiteMessage suiteMessage) {
     m_summaryTab.setExcludedMethodsModel(suiteMessage);
   }
 
