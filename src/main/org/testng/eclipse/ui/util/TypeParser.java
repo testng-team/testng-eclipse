@@ -3,10 +3,8 @@ package org.testng.eclipse.ui.util;
 import org.testng.eclipse.launch.components.AnnotationVisitor;
 import org.testng.eclipse.launch.components.BaseVisitor;
 import org.testng.eclipse.launch.components.ITestContent;
-import org.testng.eclipse.launch.components.NoTests;
 
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -20,26 +18,18 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 public class TypeParser {
   
   public static ITestContent parseType(IType type) {
-    try {
-      String source = type.getSource();
-      if (source != null) {
-        BaseVisitor result = new AnnotationVisitor();
-        ASTParser parser = ASTParser.newParser(AST.JLS3);
-        parser.setKind(ASTParser.K_COMPILATION_UNIT);
-        parser.setResolveBindings(true);
-        parser.setSource(source.toCharArray());
-        parser.setProject(type.getJavaProject());
-        parser.setUnitName(type.getCompilationUnit().getPath().toString());
-        CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+      BaseVisitor result = new AnnotationVisitor();
+      ASTParser parser = ASTParser.newParser(AST.JLS3);
+      parser.setKind(ASTParser.K_COMPILATION_UNIT);
+      parser.setResolveBindings(true);
+      parser.setSource(type.getCompilationUnit());
+      parser.setProject(type.getJavaProject());
+      parser.setUnitName(type.getCompilationUnit().getPath().toString());
+      CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 //      ppp("===== VISITING " + type.getFullyQualifiedName());
-        cu.accept(result);
+      cu.accept(result);
 //      ppp("===== DONE VISITING " + type.getFullyQualifiedName());
-        return result;
-      }
-    } catch (JavaModelException e) {
-      e.printStackTrace();
-    }    
-    return new NoTests();
+      return result;
   }
   
   public static void ppp(String s) {
