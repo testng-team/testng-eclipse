@@ -8,11 +8,9 @@ import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -90,7 +88,7 @@ public class AnnotationVisitor extends BaseVisitor {
               addGroup(g);
             }
           }
-          else if (value instanceof SimpleName) {
+          else if (value instanceof Name) {
             Object v = value.resolveConstantExpressionValue();
             String boundValue = v != null ? v.toString() : value.toString();
             addGroup(boundValue);
