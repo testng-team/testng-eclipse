@@ -1,14 +1,5 @@
 package org.testng.eclipse.ui.util;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -32,6 +23,15 @@ import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.SuiteGenerator;
 import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Helper methods to store and retrieve values from a launch configuration.
@@ -148,12 +148,18 @@ public class ConfigurationHelper {
   public static String getJvmArgs(ILaunchConfiguration configuration) {
     String result = getProjectJvmArgs();
 
-    // JVM args from the previous configuration take precedence over the preference
     if (configuration != null) {
   		try {
-  			result = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
+  			String vmArgs =
+  			    configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
   			    result);
-  			result = VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(result);
+  			String substituted = VariablesPlugin.getDefault()
+  			      .getStringVariableManager().performStringSubstitution(result);
+  			if (! StringUtils.isEmptyString(substituted)) {
+  			  result = substituted;
+  			} else {
+  			  result = vmArgs;
+  			}
   		} catch (CoreException e) {
   			e.printStackTrace();
   		}
