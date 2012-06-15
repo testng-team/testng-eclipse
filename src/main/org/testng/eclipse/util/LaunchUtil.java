@@ -139,13 +139,13 @@ public class LaunchUtil {
     if (failureDescriptions != null && failureDescriptions.size() > 0) {
     	Iterator it = failureDescriptions.iterator();
     	StringBuffer buf = new StringBuffer();
-		boolean first = true;
-		while (it.hasNext()) {
-			if (first) first = false;
-			else buf.append(",");
-			buf.append (it.next());
-		}
-		setFailedTestsJvmArg(buf.toString(), configWC);
+  		boolean first = true;
+  		while (it.hasNext()) {
+  			if (first) first = false;
+  			else buf.append(",");
+  			buf.append (it.next());
+  		}
+  		setFailedTestsJvmArg(buf.toString(), configWC);
     }
     runConfig(configWC, mode);
   }
