@@ -132,9 +132,11 @@ public class LaunchUtil {
         createLaunchConfiguration(project, fileConfName, null);
 
     try {
-      Map<?, ?> previousEnv
-          = prevConfig.getAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, (Map<?, ?>) null);
-      configWC.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, previousEnv);
+      if (prevConfig != null) {
+        Map<?, ?> previousEnv
+            = prevConfig.getAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, (Map<?, ?>) null);
+        configWC.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, previousEnv);
+      }
     } catch (CoreException e) {
       e.printStackTrace();
     }
