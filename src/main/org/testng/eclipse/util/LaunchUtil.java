@@ -125,9 +125,19 @@ public class LaunchUtil {
   }
   
     
-  private static void launchSuiteConfiguration(IProject project, String fileConfName, String suiteFilePath, 
+  private static void launchSuiteConfiguration(IProject project, String fileConfName,
+      String suiteFilePath,
 		  String mode, ILaunchConfiguration prevConfig, Set failureDescriptions) {
-    ILaunchConfigurationWorkingCopy configWC= createLaunchConfiguration(project, fileConfName, null);
+    ILaunchConfigurationWorkingCopy configWC =
+        createLaunchConfiguration(project, fileConfName, null);
+
+    try {
+      Map<?, ?> previousEnv
+          = prevConfig.getAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, (Map<?, ?>) null);
+      configWC.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, previousEnv);
+    } catch (CoreException e) {
+      e.printStackTrace();
+    }
 
     configWC.setAttribute(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
                           Collections.singletonList(suiteFilePath));
