@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.testng.eclipse; singleton:=true
-Bundle-Version: 6.4.0.20120308_1617
+Bundle-Version: 6.5.2.20120614_2151
 Bundle-Activator: org.testng.eclipse.TestNGPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
