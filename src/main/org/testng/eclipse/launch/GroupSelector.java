@@ -104,6 +104,7 @@ public class GroupSelector extends MultiSelector {
       for(int i = 0; i < groupNames.size(); i++) {
         m_groupMap.put(groupNames.get(i), groupClassNames);
       }
+      getValueMap().putAll(m_groupMap);
     }
   }
 
