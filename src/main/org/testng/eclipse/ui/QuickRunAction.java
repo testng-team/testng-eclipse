@@ -1,5 +1,8 @@
 package org.testng.eclipse.ui;
 
+import java.util.Map;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
@@ -73,6 +76,13 @@ public class QuickRunAction extends Action {
      */
     ILaunchConfiguration config = m_previousRun.getLaunchConfiguration();
     m_runInfo.setJvmArgs(ConfigurationHelper.getJvmArgs(config));
+    try {
+      m_runInfo.setEnvironmentVariables(config.getAttribute(
+          ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, (Map<?, ?>) null));
+    } catch (CoreException e) {
+      // TODO
+      e.printStackTrace();
+    }
     LaunchUtil.launchMethodConfiguration(m_javaProject, 
         imethod, 
         m_runMode, m_runInfo);    
