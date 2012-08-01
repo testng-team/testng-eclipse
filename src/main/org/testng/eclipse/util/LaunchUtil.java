@@ -346,6 +346,10 @@ public class LaunchUtil {
     	String jargs = runInfo.getJvmArgs();
     	if (jargs != null) workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
     			jargs);
+      Map envVars = runInfo.getEnvironmentVariables();
+      if (envVars != null)
+        workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES,
+            envVars);
     	setFailedTestsJvmArg(runInfo.getTestDescription(), workingCopy);
     }
     runConfig(workingCopy, runMode);

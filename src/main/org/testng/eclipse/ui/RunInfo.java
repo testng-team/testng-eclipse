@@ -1,6 +1,7 @@
 package org.testng.eclipse.ui;
 
 
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.testng.ITestResult;
@@ -35,6 +36,7 @@ public class RunInfo {
   private int m_status;
   private String m_testDescription;
   private String m_jvmArgs;
+  private Map m_environment;
   private long m_time;
   private int m_invocationCount;
   private int m_currentInvocationCount;
@@ -310,6 +312,14 @@ public class RunInfo {
     this.m_jvmArgs = m_jvmArgs;
   }
 
+  public Map getEnvironmentVariables() {
+    return m_environment;
+  }
+
+  public void setEnvironmentVariables(Map environment) {
+    this.m_environment = environment;
+  }
+  
   /**
    * The string that will be displayed in the tree view of AbstractHierarchyTab.
    */
