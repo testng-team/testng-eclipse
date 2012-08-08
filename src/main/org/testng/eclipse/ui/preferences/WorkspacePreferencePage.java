@@ -32,6 +32,7 @@ public class WorkspacePreferencePage
   private BooleanFieldEditor2 m_disabledDefaultListeners;
   private FileFieldEditor m_xmlTemplateFile;
   private StringFieldEditor m_excludedStackTraces;
+  private StringFieldEditor m_preDefinedListeners;
   
   public WorkspacePreferencePage() {
     super(GRID);
@@ -87,11 +88,15 @@ public class WorkspacePreferencePage
         .hint(convertWidthInCharsToPixels(36), SWT.DEFAULT)
         .applyTo(m_excludedStackTraces.getTextControl(parentComposite));
 
+    m_preDefinedListeners = new StringFieldEditor(TestNGPluginConstants.S_PRE_DEFINED_LISTENERS,
+        "Pre Defined Listeners", parentComposite);
+
     addField(m_outputdir);
     addField(m_absolutePath);
     addField(m_disabledDefaultListeners);    
     addField(m_xmlTemplateFile);
     addField(m_excludedStackTraces);
+    addField(m_preDefinedListeners);
   }
 
   /* (non-Javadoc)
