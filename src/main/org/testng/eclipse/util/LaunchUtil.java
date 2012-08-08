@@ -11,11 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -55,6 +50,11 @@ import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.util.JDTUtil.MethodDefinition;
 import org.testng.eclipse.util.param.ParameterSolver;
 import org.testng.reporters.FailedReporter;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 /**
  * An utility class that centralize the work about configuration launchers.
@@ -130,7 +130,6 @@ public class LaunchUtil {
 		  String mode, ILaunchConfiguration prevConfig, Set failureDescriptions) {
     ILaunchConfigurationWorkingCopy configWC =
         createLaunchConfiguration(project, fileConfName, null);
-
     try {
       if (prevConfig != null) {
         Map<?, ?> previousEnv
@@ -144,6 +143,8 @@ public class LaunchUtil {
     configWC.setAttribute(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
                           Collections.singletonList(suiteFilePath));
     configWC.setAttribute(TestNGLaunchConfigurationConstants.TYPE, LaunchType.SUITE.ordinal());
+
+
     // carry over jvm args from prevConfig
     // set failed test jvm args
     String jargs = ConfigurationHelper.getJvmArgs(prevConfig);
@@ -238,6 +239,12 @@ public class LaunchUtil {
         ConfigurationHelper.toClassMethodsMap(new HashMap<String, Collection<String>>()));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
                              solveParameters(ipf));
+
+    String projectName= ijp.getProject().getName();
+    
+    PreferenceStoreUtil storage = TestNGPlugin.getPluginPreferenceStore();
+    String preDefinedListeners = storage.getPreDefinedListeners(projectName, false);
+    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PRE_DEFINED_LISTENERS, preDefinedListeners.toString().trim());
 
     runConfig(workingCopy, mode);
   }
@@ -339,6 +346,12 @@ public class LaunchUtil {
                              solveParameters(methods));
 //    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
 //                             complianceLevel);
+    String projectName= ijp.getProject().getName();
+    
+    PreferenceStoreUtil storage = TestNGPlugin.getPluginPreferenceStore();
+    String preDefinedListeners = storage.getPreDefinedListeners(projectName, false);
+    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PRE_DEFINED_LISTENERS, preDefinedListeners.toString().trim());
+
     if (runInfo != null) {
     	// set the class and method
     	
@@ -413,6 +426,7 @@ public class LaunchUtil {
 
   private static void launchTypeBasedConfiguration(IJavaProject javaProject, String confName,
       IType[] types, String mode) {
+    
     Multimap<String, String> classMethods = ArrayListMultimap.create();
     List<String> typeNames = Lists.newArrayList();
     Set<IType> allTypes = Sets.newHashSet();
@@ -455,6 +469,13 @@ public class LaunchUtil {
         methodNames);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST,
                              EMPTY_ARRAY_PARAM);
+    
+    String projectName= javaProject.getProject().getName();
+    
+    PreferenceStoreUtil storage = TestNGPlugin.getPluginPreferenceStore();
+    String preDefinedListeners = storage.getPreDefinedListeners(projectName, false);
+    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PRE_DEFINED_LISTENERS, preDefinedListeners.toString().trim());
+
 
     runConfig(workingCopy, mode);
   }
@@ -650,7 +671,6 @@ public class LaunchUtil {
 
   private static void runConfig(ILaunchConfigurationWorkingCopy launchConfiguration, String runMode) {
     ILaunchConfiguration conf= save(launchConfiguration);
-    
     if(null != conf) {
 //      try {
 //        Map attrs= conf.getAttributes();

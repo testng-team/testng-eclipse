@@ -123,6 +123,35 @@ public class Utils {
     enableControls(result, enabled);
     return result;
   }
+  
+  
+  /**
+   * Create a line of widgets, made of:
+   * - A label
+   * - A text field
+   */
+  public static Widgets createStringEditorControl(Composite suppliedParent,
+      String labelKey, ModifyListener textListener, boolean enabled){
+    
+    final Widgets result = new Widgets();
+    Composite parent = createParent(suppliedParent, true);
+    //
+    // Label
+    //
+    Label label = new Label(parent, SWT.NULL);
+    label.setText(ResourceUtil.getString(labelKey));
+
+    //
+    // Text widget
+    //
+    result.text = new Text(parent, SWT.SINGLE | SWT.BORDER);
+    GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
+    result.text.setLayoutData(gd);
+    if (textListener != null) result.text.addModifyListener(textListener);
+    
+    enableControls(result, enabled);
+    return result;
+  }
 
   private static void enableControls(Widgets result, boolean enabled) {
     if (result.text != null) result.text.setEnabled(enabled);

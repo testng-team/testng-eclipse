@@ -41,6 +41,10 @@ public class PreferenceStoreUtil {
   public void storeXmlTemplateFile(String projectName, String xmlFile) {
     m_storage.setValue(projectName + TestNGPluginConstants.S_XML_TEMPLATE_FILE, xmlFile);
   }
+  
+  public void storePreDefinedListeners(String projectName, String listeners){
+    m_storage.setValue(projectName + TestNGPluginConstants.S_PRE_DEFINED_LISTENERS, listeners);
+  }
 
   public String getExcludedStackTraces(String projectName) {
     return getString(projectName, false, TestNGPluginConstants.S_EXCLUDED_STACK_TRACES);
@@ -56,6 +60,10 @@ public class PreferenceStoreUtil {
   
   public String getXmlTemplateFile(String projectName, boolean projectOnly) {
     return getString(projectName, projectOnly, TestNGPluginConstants.S_XML_TEMPLATE_FILE);
+  }
+  
+  public String getPreDefinedListeners(String projectName, boolean projectOnly){
+    return getString(projectName, projectOnly, TestNGPluginConstants.S_PRE_DEFINED_LISTENERS);
   }
 
   public IPath getOutputDirectoryPath(IJavaProject project) {
