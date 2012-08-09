@@ -215,16 +215,32 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
 //      }
 //    }
 
+    
     PreferenceStoreUtil storage = TestNGPlugin.getPluginPreferenceStore();
     argv.add(CommandLineArgs.OUTPUT_DIRECTORY);
     argv.add(storage.getOutputAbsolutePath(jproject).toOSString());
 
+    
 //    String reporters = storage.getReporters(project.getName(), false);
 //    if (null != reporters && !"".equals(reporters)) {
 //      argv.add(TestNGCommandLineArgs.LISTENER_COMMAND_OPT);
 //      argv.add(reporters.replace(' ', ';'));
 //    }
+    
+    String preDefinedListeners = configuration.getAttribute(TestNGLaunchConfigurationConstants.PRE_DEFINED_LISTENERS,"");
+    
+    if (!preDefinedListeners.trim().equals("")){
+      if (!argv.contains(CommandLineArgs.LISTENER)) {
+        argv.add(CommandLineArgs.LISTENER);
+        argv.add(preDefinedListeners);
+      } else {
+        String listeners = argv.get(argv.size() - 1);
+        listeners += (";" + preDefinedListeners);
+        argv.set(argv.size() - 1, listeners);
+      }
+    }
 
+    
     List<ITestNGListener> contributors = ListenerContributorUtil.findReporterContributors();
     contributors.addAll(ListenerContributorUtil.findTestContributors());
     StringBuffer reportersContributors = new StringBuffer();

@@ -94,6 +94,8 @@ public abstract class TestNGLaunchConfigurationConstants {
   
   public static final String VM_ENABLEASSERTION_OPTION = "-ea";
   
+  public static final String PRE_DEFINED_LISTENERS=
+      make("PRE_DEFINED_LISTENERS");
   // What kind of run we are doing
   // This would be a nice place for an enum when jdk1.5 or later can be 
   // required.

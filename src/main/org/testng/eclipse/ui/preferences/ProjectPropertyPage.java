@@ -1,5 +1,8 @@
 package org.testng.eclipse.ui.preferences;
 
+import java.io.File;
+import java.util.ArrayList;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -41,9 +44,6 @@ import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.SWTUtil;
 import org.testng.reporters.XMLReporter;
 
-import java.io.File;
-import java.util.ArrayList;
-
 /**
  * Project specific properties.
  *
@@ -55,6 +55,7 @@ public class ProjectPropertyPage extends PropertyPage {
   private Button m_absolutePath;
   private Button m_disabledDefaultListeners;
   private Text m_xmlTemplateFile;
+  private Text m_preDefinedListeners;
   private IProject m_workingProject;
   private Button m_projectJar;
   private Text m_watchResultText;
@@ -154,6 +155,7 @@ public class ProjectPropertyPage extends PropertyPage {
 //    m_disabledDefaultListeners.setLayoutData(SWTUtil.createGridData());//new GridData(SWT.FILL, SWT.NONE, true, false, 4, 1));
 //    m_disabledDefaultListeners.setBackground(new Color(parent.getDisplay(), 0xcc, 0, 0));
 
+    
     //
     // Project jar
     //
@@ -163,7 +165,13 @@ public class ProjectPropertyPage extends PropertyPage {
 //        false /* don't grab excess horizontal */,
 //        false /* don't grab excess vertical */,
 //        2, 1));
-
+    
+    //Create a string editor control: A label and a text area
+    {
+      Widgets w = Utils.createStringEditorControl(parentComposite, "TestNGPropertyPage.preDefinedListeners", null, true);
+      m_preDefinedListeners = w.text;
+      m_preDefinedListeners.setToolTipText("Split multi listener using ;");
+    }
     loadDefaults();
 
     return parentComposite;
@@ -176,6 +184,7 @@ public class ProjectPropertyPage extends PropertyPage {
     m_absolutePath.dispose();
     m_disabledDefaultListeners.dispose();
     m_xmlTemplateFile.dispose();
+    m_preDefinedListeners.dispose();
     
     super.dispose();
   }
@@ -194,6 +203,7 @@ public class ProjectPropertyPage extends PropertyPage {
     m_watchResultRadio.setSelection(storage.getWatchResults(projectName));
     String dir = storage.getWatchResultDirectory(projectName);
     m_watchResultText.setText(dir);
+    m_preDefinedListeners.setText(storage.getPreDefinedListeners(projectName, false));
   }
 
   protected void performDefaults() {
@@ -207,6 +217,7 @@ public class ProjectPropertyPage extends PropertyPage {
     storage.storeOutputDir(projectName, m_outputdir.getText(), m_absolutePath.getSelection());
     storage.storeDisabledListeners(projectName, m_disabledDefaultListeners.getSelection());
     storage.storeXmlTemplateFile(projectName, m_xmlTemplateFile.getText());
+    storage.storePreDefinedListeners(projectName, m_preDefinedListeners.getText());
     storage.storeUseProjectJar(projectName, m_projectJar.getSelection());
     storage.storeWatchResults(projectName, m_watchResultRadio.getSelection());
     storage.storeWatchResultLocation(projectName, m_watchResultText.getText());
