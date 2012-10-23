@@ -92,7 +92,7 @@
                       <test property="org.eclipse.debug.ui.matchesPattern" value="*.class"/>
                       <instanceof value="org.eclipse.jdt.core.IJavaElement"/>
                     </or>
-                    <test property="org.testng.eclipse.isTest"/>
+                    <test property="org.testng.eclipse.isTest" forcePluginActivation="true"/>
                   </iterate>
                </with>
             </enablement>
