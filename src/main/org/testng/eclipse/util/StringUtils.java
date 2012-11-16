@@ -1,6 +1,7 @@
 package org.testng.eclipse.util;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -39,8 +40,14 @@ public class StringUtils {
     StringBuffer result = new StringBuffer();
 
     if(null != l) {
-      for (String s : l) {
-        result.append(s).append(",");
+      Iterator<String> iter = l.iterator();
+      while(iter.hasNext()) {
+        String s = iter.next();
+        result.append(s);
+        // only append if it's not the last entry
+        if(iter.hasNext()) {
+          result.append(",");
+        }
       }
     }
 
