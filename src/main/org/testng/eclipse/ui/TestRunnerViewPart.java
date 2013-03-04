@@ -1197,11 +1197,11 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private void showResultsInTree() {
     postSyncRunnable(new Runnable() {
       public void run() {
-        long start = System.currentTimeMillis();
+//        long start = System.currentTimeMillis();
         for (TestRunTab tab : ALL_TABS) {
           tab.updateTestResult(m_results);
         }
-        System.out.println("Done updating tree:" + (System.currentTimeMillis() - start) + "ms");
+//        System.out.println("Done updating tree:" + (System.currentTimeMillis() - start) + "ms");
       }
     });
   }
@@ -1542,7 +1542,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   	return testDescriptions;
   }
   
-    /**
+  /**
 	 * If any test descriptions of failed tests have been saved, pass them along
 	 * as a jvm argument. They can they be used by
 	 * @Factory methods to select which parameters to use for creating the set
