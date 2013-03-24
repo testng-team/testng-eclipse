@@ -116,6 +116,7 @@ public class SWTUtil {
       public void widgetSelected(SelectionEvent e) {
         ContainerSelectionDialog dialog = new ContainerSelectionDialog(container.getShell(),
             ResourcesPlugin.getWorkspace().getRoot(), false, "Select new file container");
+        dialog.showClosedProjects(false);
         if (dialog.open() == ContainerSelectionDialog.OK) {
           Object[] res = dialog.getResult();
           if (res.length == 1) {
