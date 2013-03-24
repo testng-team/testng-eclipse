@@ -3,6 +3,10 @@ package org.testng.eclipse.wizards;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.IDialogPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -16,7 +20,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.dialogs.SelectionDialog;
+import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SWTUtil;
 import org.testng.eclipse.util.StringUtils;
@@ -69,7 +76,7 @@ public class NewTestNGClassWizardPage extends WizardPage {
   }
 
   private void createTop(Composite parent) {
-    Composite container = SWTUtil.createGridContainer(parent, 3);
+    final Composite container = SWTUtil.createGridContainer(parent, 3);
 
     //
     // Source folder
@@ -101,7 +108,7 @@ public class NewTestNGClassWizardPage extends WizardPage {
       button.setText("Browse...");
       button.addSelectionListener(new SelectionAdapter() {
         public void widgetSelected(SelectionEvent e) {
-          handleBrowsePackages();
+          handleBrowsePackages(container.getShell());
         }
       });
     }
@@ -193,7 +200,22 @@ public class NewTestNGClassWizardPage extends WizardPage {
     return m_elements;
   }
 
-  private void handleBrowsePackages() {
+  private void handleBrowsePackages(Shell dialogParrentShell) {
+    try {
+      IResource sourceContainer = ResourcesPlugin.getWorkspace().getRoot().findMember(
+          new Path(getSourceFolder()));
+      IJavaProject javaProject = JDTUtil.getJavaProject(sourceContainer.getProject().getName());
+      
+      SelectionDialog dialog = JavaUI.createPackageDialog(dialogParrentShell, javaProject, 0);
+      if (dialog.open() == SelectionDialog.OK) {
+        Object[] selectedPackages = dialog.getResult();
+        if (selectedPackages.length == 1) {
+          m_packageNameText.setText(((IPackageFragment) selectedPackages[0]).getElementName());
+        }
+      }
+    } catch (JavaModelException e) {
+      updateStatus("Failed to list packages.");
+    }
   }
 
   /**
@@ -204,6 +226,10 @@ public class NewTestNGClassWizardPage extends WizardPage {
         new Path(getSourceFolder()));
     String className = getClassName();
 
+    if (container.getProject() == null || container.getProject().getName() == null || container.getProject().getName().length() == 0) {
+      updateStatus("The source folder of an existing project must be specified.");
+      return;
+    }    
     if (getPackageName().length() == 0) {
       updateStatus("The package must be specified");
       return;
