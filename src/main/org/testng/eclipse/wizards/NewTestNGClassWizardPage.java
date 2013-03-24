@@ -207,6 +207,9 @@ public class NewTestNGClassWizardPage extends WizardPage {
       IJavaProject javaProject = JDTUtil.getJavaProject(sourceContainer.getProject().getName());
       
       SelectionDialog dialog = JavaUI.createPackageDialog(dialogParrentShell, javaProject, 0);
+      dialog.setTitle("Package selection");
+      dialog.setMessage("&Choose a package:");
+      
       if (dialog.open() == SelectionDialog.OK) {
         Object[] selectedPackages = dialog.getResult();
         if (selectedPackages.length == 1) {
