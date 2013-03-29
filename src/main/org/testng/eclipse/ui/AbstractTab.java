@@ -299,21 +299,34 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
       }
 
       // Create a node for the parameter values, if applicable
+      ITreeItem methodParam = null;
       if (!StringUtils.isEmptyString(runInfo.getParametersDisplay())) {
-        TestMethodParametersTreeItem mwp = new TestMethodParametersTreeItem(method.getTreeItem(), runInfo);
-        mwp.addToCumulatedTime(runInfo);
+        methodParam = new TestMethodParametersTreeItem(method.getTreeItem(),
+            runInfo);
+        methodParam.addToCumulatedTime(runInfo);
       }
       if (expand) {
-        method.getTreeItem().setExpanded(true);
-        cls.getTreeItem().setExpanded(true);
-        test.getTreeItem().setExpanded(true);
         suite.getTreeItem().setExpanded(true);
+        test.getTreeItem().setExpanded(true);
+        cls.getTreeItem().setExpanded(true);
+        method.getTreeItem().setExpanded(true);
+        if (methodParam != null) {
+          methodParam.getTreeItem().setExpanded(true);
+          focus(methodParam.getTreeItem());
+        } else {
+          focus(method.getTreeItem());
+        }
       }
-      method.addToCumulatedTime(runInfo);
-      cls.addToCumulatedTime(runInfo);
-      test.addToCumulatedTime(runInfo);
       suite.addToCumulatedTime(runInfo);
+      test.addToCumulatedTime(runInfo);
+      cls.addToCumulatedTime(runInfo);
+      method.addToCumulatedTime(runInfo);
     }
+  }
+
+  private void focus(TreeItem treeItem) {
+    // how to remove the annoying selection background?
+    treeItem.getParent().setSelection(treeItem);
   }
 
   @Override
@@ -406,11 +419,10 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     }
   }
 
-  protected void expandAll() {
-    TreeItem[] treeItems = m_tree.getItems();
+  private void expandAll() {
     m_tree.setRedraw(false);
-    for(int i = 0; i < treeItems.length; i++) {
-      expandAll(treeItems[i]);
+    for (TreeItem treeItem : m_tree.getItems()) {
+      expandAll(treeItem);
     }
     m_tree.setRedraw(true);
   }
@@ -418,9 +430,8 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   private void expandAll(TreeItem item) {
     item.setExpanded(true);
 
-    TreeItem[] items = item.getItems();
-    for(int i = 0; i < items.length; i++) {
-      expandAll(items[i]);
+    for (TreeItem subItem : item.getItems()) {
+      expandAll(subItem);
     }
   }
 
