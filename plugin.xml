@@ -52,7 +52,7 @@
             id="org.testng.eclipse.launchConfigurationTabGroup.testng"/>
       <launchConfigurationTabGroup
             type="org.testng.eclipse.launchconfigPlugin"
-            class="org.testng.eclipse.launch.TestNGPluginTabGroup"
+            class="org.testng.eclipse.launch.plugin.TestNGPluginTabGroup"
             id="org.testng.eclipse.launchConfigurationTabGroup.testngPlugin"/>
   </extension>
   <extension
@@ -66,7 +66,7 @@
             sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
       </launchConfigurationType>
       <launchConfigurationType
-            delegate="org.testng.eclipse.launch.TestNGPluginLaunchConfigurationDelegate"
+            delegate="org.testng.eclipse.launch.plugin.TestNGPluginLaunchConfigurationDelegate"
             id="org.testng.eclipse.launchconfigPlugin"
             modes="run, debug"
             name="%PluginLaunch.label"

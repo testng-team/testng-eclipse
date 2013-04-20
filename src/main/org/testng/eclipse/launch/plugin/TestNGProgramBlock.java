@@ -1,4 +1,4 @@
-package org.testng.eclipse.launch;
+package org.testng.eclipse.launch.plugin;
 
 import java.util.TreeSet;
 
@@ -7,9 +7,10 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.pde.internal.launching.launcher.LauncherUtils;
 import org.eclipse.pde.internal.ui.launcher.ProgramBlock;
+import org.eclipse.pde.launching.IPDELauncherConstants;
 import org.eclipse.pde.ui.launcher.AbstractLauncherTab;
-import org.eclipse.pde.ui.launcher.IPDELauncherConstants;
 
+@SuppressWarnings({"restriction", "rawtypes", "unchecked"})
 public class TestNGProgramBlock extends ProgramBlock {
 	public TestNGProgramBlock(AbstractLauncherTab tab) {
 		super(tab);
@@ -21,15 +22,14 @@ public class TestNGProgramBlock extends ProgramBlock {
 	
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
 		if (!LauncherUtils.requiresUI(config))
-			config.setAttribute(IPDELauncherConstants.APPLICATION, 
-					TestNGPluginLaunchConfigurationDelegate.CORE_TEST_APPLICATION);
+			config.setAttribute(IPDELauncherConstants.APPLICATION, ITestNGPluginLauncherConstants.CORE_TEST_APPLICATION);
 		else
 			super.setDefaults(config);
 	}
 	
-	protected String[] getApplicationNames() {
+  protected String[] getApplicationNames() {
 		TreeSet result = new TreeSet();
-		result.add(TestNGPluginLaunchConfigurationDelegate.TestNGProgramBlock_headless); 
+		result.add(ITestNGPluginLauncherConstants.TestNGProgramBlock_headless); 
 		String[] appNames = super.getApplicationNames();
 		for (int i = 0; i < appNames.length; i++) {
 			result.add(appNames[i]);
@@ -40,11 +40,10 @@ public class TestNGProgramBlock extends ProgramBlock {
 	/* (non-Javadoc)
 	 * @see org.eclipse.pde.internal.ui.launcher.BasicLauncherTab#initializeApplicationSection(org.eclipse.debug.core.ILaunchConfiguration)
 	 */
-	protected void initializeApplicationSection(ILaunchConfiguration config)
-			throws CoreException {
+	protected void initializeApplicationSection(ILaunchConfiguration config) throws CoreException {
 		String application = config.getAttribute(IPDELauncherConstants.APPLICATION, (String)null);
-		if (TestNGPluginLaunchConfigurationDelegate.CORE_TEST_APPLICATION.equals(application)) 
-			fApplicationCombo.setText(TestNGPluginLaunchConfigurationDelegate.TestNGProgramBlock_headless); 
+		if (ITestNGPluginLauncherConstants.CORE_TEST_APPLICATION.equals(application)) 
+			fApplicationCombo.setText(ITestNGPluginLauncherConstants.TestNGProgramBlock_headless); 
 		else
 			super.initializeApplicationSection(config);
 	}
@@ -53,8 +52,8 @@ public class TestNGProgramBlock extends ProgramBlock {
 	 * @see org.eclipse.pde.internal.ui.launcher.BasicLauncherTab#saveApplicationSection(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
 	 */
 	protected void saveApplicationSection(ILaunchConfigurationWorkingCopy config) {
-		if (fApplicationCombo.getText().equals(TestNGPluginLaunchConfigurationDelegate.TestNGProgramBlock_headless)) { 
-			String appName = fApplicationCombo.isEnabled() ? TestNGPluginLaunchConfigurationDelegate.CORE_TEST_APPLICATION : null;
+		if (fApplicationCombo.getText().equals(ITestNGPluginLauncherConstants.TestNGProgramBlock_headless)) { 
+			String appName = fApplicationCombo.isEnabled() ? ITestNGPluginLauncherConstants.CORE_TEST_APPLICATION : null;
 			config.setAttribute(IPDELauncherConstants.APPLICATION, appName);
 			config.setAttribute(IPDELauncherConstants.APP_TO_TEST, (String)null);
 		} else {
