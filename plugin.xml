@@ -28,6 +28,12 @@
          <groupMarker name="content"/>
          <separator name="additions"/>
       </menu>
+      <action
+            class="org.testng.eclipse.launch.RunEditorLaunchDelegate"
+            id="testng.run.popup.actionPlugin"
+            label="Run as plugin test"
+            menubarPath="testng.editor.menu/content">
+      </action>
     </viewerContribution>
   </extension>
 
@@ -44,6 +50,10 @@
             type="org.testng.eclipse.launchconfig"
             class="org.testng.eclipse.launch.TestNGTabGroup"
             id="org.testng.eclipse.launchConfigurationTabGroup.testng"/>
+      <launchConfigurationTabGroup
+            type="org.testng.eclipse.launchconfigPlugin"
+            class="org.testng.eclipse.launch.TestNGPluginTabGroup"
+            id="org.testng.eclipse.launchConfigurationTabGroup.testngPlugin"/>
   </extension>
   <extension
          point="org.eclipse.debug.core.launchConfigurationTypes">
@@ -55,12 +65,24 @@
             sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
             sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
       </launchConfigurationType>
+      <launchConfigurationType
+            delegate="org.testng.eclipse.launch.TestNGPluginLaunchConfigurationDelegate"
+            id="org.testng.eclipse.launchconfigPlugin"
+            modes="run, debug"
+            name="%PluginLaunch.label"
+            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+            sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
+      </launchConfigurationType>
   </extension>
 
   <extension
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
             configTypeID="org.testng.eclipse.launchconfig"
+            icon="icons/full/main16/testng.gif"
+            id="org.testng.eclipse.launchimage"/>
+      <launchConfigurationTypeImage
+            configTypeID="org.testng.eclipse.launchconfigPlugin"
             icon="icons/full/main16/testng.gif"
             id="org.testng.eclipse.launchimage"/>
   </extension>
