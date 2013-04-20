@@ -392,21 +392,40 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //      stopTest();
 //    }
     fTestRunnerClient = new EclipseTestRunnerClient();
-    IMessageSender messageMarshaller = LaunchUtil.useStringProtocol(launch.getLaunchConfiguration())
+    final IMessageSender messageMarshaller = LaunchUtil.useStringProtocol(launch.getLaunchConfiguration())
         ? new StringMessageSender("localhost", port)
         : new SerializedMessageSender("localhost", port);
     
-    boolean isInitSuccess = false;
+    final Boolean[] isInitSuccess = new Boolean[] { false };
+    Display display = Display.getCurrent();
     do {
-      try {
-        messageMarshaller.initReceiver();
-        isInitSuccess = true;
-      } catch (SocketTimeoutException e) {
-        TestNGPlugin.log(e);
+
+      Job initJob = new Job("Init TestNG receiver") {
+        @Override
+        protected IStatus run(IProgressMonitor monitor) {
+          try {
+            messageMarshaller.initReceiver();
+            isInitSuccess[0] = true;
+          } catch (SocketTimeoutException e) {
+            TestNGPlugin.log(e);
+          }
+          return Status.OK_STATUS;
+        }
+      };
+      initJob.setSystem(true);
+      initJob.schedule();
+      while (initJob.getState() != Job.NONE) {
+        if (!display.readAndDispatch()) {
+          try {
+            Thread.sleep(1);
+          } catch (InterruptedException e) {
+            //ignore
+          }
+        }
       }
-    } while (isInitSuccess == false && launch.isTerminated() == false);
+    } while (!isInitSuccess[0] && !launch.isTerminated());
     
-    if (isInitSuccess == true) {
+    if (isInitSuccess[0]) {
       fTestRunnerClient.startListening(this, this, messageMarshaller);
       m_rerunAction.setEnabled(true);
       m_rerunFailedAction.setEnabled(false);
