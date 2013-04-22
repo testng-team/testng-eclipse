@@ -43,7 +43,8 @@ public class TestTab extends AbstractLaunchConfigurationTab {
 	private ILaunchConfigurationDialog fLaunchConfigurationDialog;
 
 	private final TestNGMainTab testngLaunchTab;
-	private Button runInUIThread;
+  private Button keepRunning;
+  private Button runInUIThread;
 
 	/**
 	 * Constructor to create a new junit test tab
@@ -57,9 +58,21 @@ public class TestTab extends AbstractLaunchConfigurationTab {
 
 		Composite composite = (Composite) getControl();
 		createSpacer(composite);
+		createKeepRunningGroup(composite);
 		createRunInUIThreadGroup(composite);
 	}
 
+  private void createKeepRunningGroup(Composite comp) {
+    keepRunning = new Button(comp, SWT.CHECK);
+    keepRunning.addSelectionListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        updateLaunchConfigurationDialog();
+      }
+    });
+    keepRunning.setText("Keep running in debug mode after the test is finished");
+    GridDataFactory.fillDefaults().span(2, 0).grab(true, false).applyTo(keepRunning);
+  }
+  
 	private void createRunInUIThreadGroup(Composite comp) {
 		runInUIThread = new Button(comp, SWT.CHECK);
 		runInUIThread.addSelectionListener(new SelectionAdapter() {
@@ -78,9 +91,19 @@ public class TestTab extends AbstractLaunchConfigurationTab {
 
 	public void initializeFrom(ILaunchConfiguration config) {
 		testngLaunchTab.initializeFrom(config);
-		updateRunInUIThreadGroup(config);
+    updateKeepRunningGroup(config);
+    updateRunInUIThreadGroup(config);
 	}
 
+  private void updateKeepRunningGroup(ILaunchConfiguration config) {
+    boolean shouldKeepRunning = false;
+    try {
+      shouldKeepRunning = config.getAttribute(ITestNGPluginLauncherConstants.KEEP_RUNNING, false);
+    } catch (CoreException ce) {
+    }
+    keepRunning.setSelection(shouldKeepRunning);
+  }
+  
 	private void updateRunInUIThreadGroup(ILaunchConfiguration config) {
 		boolean shouldRunInUIThread = true;
 		try {
@@ -92,7 +115,9 @@ public class TestTab extends AbstractLaunchConfigurationTab {
 
 	public void performApply(ILaunchConfigurationWorkingCopy config) {
 		testngLaunchTab.performApply(config);
-		boolean selection = runInUIThread.getSelection();
+		boolean selection = keepRunning.getSelection();
+		config.setAttribute(ITestNGPluginLauncherConstants.KEEP_RUNNING, selection);
+		selection = runInUIThread.getSelection();
 		config.setAttribute(IPDELauncherConstants.RUN_IN_UI_THREAD, selection);
 	}
 
@@ -144,5 +169,13 @@ public class TestTab extends AbstractLaunchConfigurationTab {
 		testngLaunchTab.setLaunchConfigurationDialog(dialog);
 		this.fLaunchConfigurationDialog = dialog;
 	}
+	
+  public Control getControl() {
+    return testngLaunchTab.getControl();
+  }
+
+  protected ILaunchConfigurationDialog getLaunchConfigurationDialog() {
+    return fLaunchConfigurationDialog;
+  }
 
 }

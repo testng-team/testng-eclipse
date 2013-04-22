@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: TestNG PDE Runtime Plug-in
+Bundle-SymbolicName: org.testng.eclipse.pde.runtime;singleton:=true
+Bundle-Version: 3.4.0.qualifier
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.core.runtime,
+ org.testng;visibility:=reexport,
+ org.eclipse.ui;visibility:=reexport
+Export-Package: org.testng.eclipse.pde.runtime
+Bundle-RequiredExecutionEnvironment: J2SE-1.5

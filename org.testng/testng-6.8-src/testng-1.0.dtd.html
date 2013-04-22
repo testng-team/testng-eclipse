@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+    <head>
+    <title>DTD for TestNG 1.0</title>
+        <link rel="stylesheet" href="http://beust.com/beust.css" type="text/css"/>
+    </head>
+<body>
+
+<pre class="code"><span class="xml-comment">&lt;!--
+
+Here is a quick overview of the main parts of this DTD.  For more information,
+refer to the &lt;a <span class="attribute">href="http://testng.org"</span> &gt;main web site<span class="tag">&lt;/a&gt;.
+
+</span>                                                      
+A <span class="tag">&lt;b&gt;suite&lt;/b&gt;</span> is made of <span class="tag">&lt;b&gt;tests&lt;/b&gt;</span> and <span class="tag">&lt;b&gt;parameters&lt;/b&gt;.
+</span>                                                      
+
+A <span class="tag">&lt;b&gt;test&lt;/b&gt;</span> is made of three parts:                        
+
+<span class="tag">&lt;ul&gt;
+&lt;li&gt;</span> <span class="tag">&lt;b&gt;parameters&lt;/b&gt;,</span> which override the suite parameters     
+<span class="tag">&lt;li&gt;</span> <span class="tag">&lt;b&gt;groups&lt;/b&gt;,</span> made of two parts                           
+
+<span class="tag">&lt;li&gt;</span> <span class="tag">&lt;b&gt;classes&lt;/b&gt;,</span> defining which classes are going to be part
+  of this test run                                    
+<span class="tag">&lt;/ul&gt;
+</span>                                                      
+In turn, <span class="tag">&lt;b&gt;groups&lt;/b&gt;</span> are made of two parts:                
+
+<span class="tag">&lt;ul&gt;
+&lt;li&gt;</span> Definitions, which allow you to group groups into   
+  bigger groups                                       
+<span class="tag">&lt;li&gt;</span> Runs, which defines the groups that the methods     
+  must belong to in order to be run during this test  
+<span class="tag">&lt;/ul&gt;
+</span>                                                      
+Cedric Beust & Alexandru Popescu                      
+@title DTD for TestNG                                    
+@root suite
+
+--&gt;</span>
+
+
+<span class="xml-comment">&lt;!-- A suite is the top-level element of a testng.xml file                  --&gt;</span>
+
+&lt;!ELEMENT suite (listeners|packages|test|parameter|method-selectors|suite-files)* &gt;
+
+<span class="xml-comment">&lt;!-- Attributes: --&gt;</span>
+<span class="xml-comment">&lt;!--
+@attr  name        The name of this suite (as it will appear in the reports)
+@attr  junit       Whether to run in JUnit mode.
+@attr  verbose     How verbose the output on the console will be.  
+                This setting has no impact on the HTML reports.
+@attr  parallel   Whether TestNG should use different threads
+                to run your tests (might speed up the process)
+@attr  configfailurepolicy  Whether to continue attempting Before/After
+                Class/Methods after they've failed once or just skip remaining.
+@attr  thread-count An integer giving the size of the thread pool to use
+                if you set parallel.
+@attr  annotations  If "javadoc", TestNG will look for
+                JavaDoc annotations in your sources, otherwise it will
+                use JDK5 annotations.
+@attr  time-out     The time to wait in milliseconds before aborting the
+                method (if <span class="attribute">parallel="methods"</span> ) or the test (parallel="tests")
+@attr  skipfailedinvocationCounts Whether to skip failed invocations.
+@attr  data-provider-thread-count An integer givin the size of the thread pool to use
+       for parallel data providers.
+@attr  object-factory A class that implements IObjectFactory that will be used to
+       instantiate the test objects.
+--&gt;</span>
+&lt;!ATTLIST suite 
+    name CDATA #REQUIRED
+    junit (true | false) "false"
+    verbose CDATA #IMPLIED
+    parallel (false | methods | tests | classes) "false"
+    configfailurepolicy (skip | continue) "skip"
+    thread-count CDATA "5"
+    annotations CDATA #IMPLIED
+    time-out CDATA #IMPLIED
+    skipfailedinvocationCounts (true | false) "false"
+    data-provider-thread-count CDATA "10"
+    object-factory CDATA #IMPLIED
+&gt;
+
+<span class="xml-comment">&lt;!-- A list of XML files that contain more suite descriptions --&gt;</span>
+&lt;!ELEMENT suite-files (suite-file)* &gt;
+
+&lt;!ELEMENT suite-file ANY &gt;
+&lt;!ATTLIST suite-file
+    path CDATA #REQUIRED
+&gt;
+
+<span class="xml-comment">&lt;!--
+Parameters can be defined at the <span class="tag">&lt;suite&gt;</span> or at the <span class="tag">&lt;test&gt;</span> level.
+Parameters defined at the <span class="tag">&lt;test&gt;</span> level override parameters of the same name in <span class="tag">&lt;suite&gt;
+
+Parameters</span> are used to link Java method parameters to their actual value, defined here.
+--&gt;</span>
+&lt;!ELEMENT parameter ANY&gt;
+&lt;!ATTLIST parameter
+    name CDATA #REQUIRED
+    value CDATA #REQUIRED &gt;
+
+<span class="xml-comment">&lt;!--
+Method selectors define user classes used to select which methods to run.
+They need to implement <span class="tag">&lt;tt&gt;org.testng.IMethodSelector&lt;/tt&gt;</span> 
+--&gt;</span>
+&lt;!ELEMENT method-selectors (method-selector*) &gt;
+
+&lt;!ELEMENT method-selector ((selector-class)*|script) &gt;
+&lt;!ELEMENT selector-class ANY&gt;
+&lt;!ATTLIST selector-class
+    name CDATA #REQUIRED
+  priority CDATA #IMPLIED
+&gt;
+&lt;!ELEMENT script ANY&gt;
+&lt;!ATTLIST script
+    language CDATA #REQUIRED
+&gt;
+
+<span class="xml-comment">&lt;!--
+A test contains parameters and classes.  Additionally, you can define additional groups ("groups of groups")
+--&gt;</span>
+
+&lt;!ELEMENT test (method-selectors?,parameter*,groups?,packages?,classes?) &gt;
+
+<span class="xml-comment">&lt;!--
+@attr  name         The name of this test (as it will appear in the reports)
+@attr  junit        Whether to run in JUnit mode.
+@attr  verbose      How verbose the output on the console will be.
+                This setting has no impact on the HTML reports.
+                Default value: suite level verbose.
+@attr  parallel     Whether TestNG should use different threads
+                to run your tests (might speed up the process)
+@attr  thread-count An integer giving the size of the thread pool to be used if
+                parallel mode is used. Overrides the suite level value.
+@attr  annotations  If "javadoc", TestNG will look for
+                JavaDoc annotations in your sources, otherwise it will
+                use JDK5 annotations.
+@attr  time-out     the time to wait in milliseconds before aborting
+                the method (if <span class="attribute">parallel="methods"</span> ) or the test (if <span class="attribute">parallel="tests"</span> )
+@attr  enabled      flag to enable/disable current test. Default value: true 
+@attr  skipfailedinvocationCounts Whether to skip failed invocations.
+--&gt;</span>
+&lt;!ATTLIST test
+    name CDATA #REQUIRED 
+    junit (true | false) "false"
+    verbose  CDATA #IMPLIED
+    parallel  CDATA #IMPLIED
+    thread-count CDATA #IMPLIED
+    annotations  CDATA #IMPLIED
+    time-out CDATA #IMPLIED
+    enabled CDATA #IMPLIED
+    skipfailedinvocationCounts (true | false) "false"
+&gt;
+
+<span class="xml-comment">&lt;!--
+Defines additional groups ("groups of groups") and also which groups to include in this test run
+--&gt;</span>
+&lt;!ELEMENT groups (define*,run?) &gt;
+
+&lt;!ELEMENT define (include*)&gt;
+
+&lt;!ATTLIST define
+    name CDATA #REQUIRED&gt;
+
+<span class="xml-comment">&lt;!-- Defines which groups to include in the current group of groups         --&gt;</span>
+&lt;!ELEMENT include ANY&gt;
+&lt;!ATTLIST include
+    name CDATA #REQUIRED&gt;
+
+<span class="xml-comment">&lt;!-- Defines which groups to exclude from the current group of groups       --&gt;</span>
+&lt;!ELEMENT exclude ANY&gt;
+&lt;!ATTLIST exclude
+    name CDATA #REQUIRED&gt;
+
+<span class="xml-comment">&lt;!-- The subtag of groups used to define which groups should be run         --&gt;</span>
+&lt;!ELEMENT run (include?,exclude?)* &gt;
+
+<span class="xml-comment">&lt;!-- The list of classes to include in this test                            --&gt;</span>
+&lt;!ELEMENT classes (class*) &gt;
+&lt;!ELEMENT class (methods*) &gt;
+&lt;!ATTLIST class
+    name CDATA #REQUIRED &gt;
+
+<span class="xml-comment">&lt;!-- The list of packages to include in this test                           --&gt;</span>
+&lt;!ELEMENT packages (package*) &gt;
+
+<span class="xml-comment">&lt;!-- The package description. 
+     If the package name ends with .* then subpackages are included too.
+--&gt;</span>
+&lt;!ELEMENT package (include?,exclude?)*&gt;
+&lt;!ATTLIST package
+    name CDATA #REQUIRED &gt;
+
+<span class="xml-comment">&lt;!-- The list of methods to include/exclude from this test                 --&gt;</span>
+&lt;!ELEMENT methods (include?,exclude?)* &gt;
+
+<span class="xml-comment">&lt;!-- The list of listeners that will be passed to TestNG --&gt;</span>
+&lt;!ELEMENT listeners (listener*) &gt;
+
+&lt;!ELEMENT listener ANY&gt;
+&lt;!ATTLIST listener
+    class-name CDATA #REQUIRED &gt;
+</pre>

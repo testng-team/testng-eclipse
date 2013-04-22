@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.testng.eclipse"
-      label="TestNG"
-      version="6.1.1.20110823_1537"
+      label="TestNG Eclipse Plug-in"
+      version="6.8.1.qualifier"
       provider-name="Cedric Beust">
 
    <description url="http://testng.org">
-      TestNG plug-in for Eclipse.
+      TestNG support for Eclipse (includes TestNG runtime for eclipse environtment)
    </description>
 
    <copyright url="http://beust.com">
@@ -169,10 +169,28 @@ by reason of your accepting any such warranty or additional liability.
 END OF TERMS AND CONDITIONS
    </license>
 
+   <includes
+         id="org.testng.eclipse.pde.runtime.sdk"
+         version="0.0.0"/>
+
    <plugin
          id="org.testng.eclipse"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
+
+   <plugin
+         id="org.testng"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.testng.eclipse.pde.runtime"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>

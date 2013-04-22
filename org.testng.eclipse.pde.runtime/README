@@ -1,0 +1,3 @@
+This plugin requires a modified testng-eclipse plugin. Here is a howto:
+Checkout http://testng-eclipse.googlecode.com/svn/trunk revision 100
+Apply the patch org.testng.eclipse-plugin-support.patch to the testng-eclipse project

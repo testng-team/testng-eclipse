@@ -19,6 +19,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMRunner;
@@ -104,7 +105,7 @@ public class TestNGPluginLaunchConfigurationDelegate extends TestNGLaunchConfigu
 
   @Override
   protected void collectExecutionArguments(ILaunchConfiguration configuration, ILaunch launch,
-      List<String> vmArguments, List<String> programArgs) throws CoreException {
+      List<String> vmArguments, List<String> programArgs, String runMode) throws CoreException {
     // Specify the TestNG Plug-in test application to launch
     programArgs.add("-application"); //$NON-NLS-1$
     String application = getApplication(configuration);
@@ -194,7 +195,11 @@ public class TestNGPluginLaunchConfigurationDelegate extends TestNGLaunchConfigu
     programArgs.add("-testpluginname"); //$NON-NLS-1$
     programArgs.add(getTestPluginId(configuration));
     
-    super.collectExecutionArguments(configuration, launch, vmArguments, programArgs);
+    if (runMode.equals(ILaunchManager.DEBUG_MODE) && configuration.getAttribute(ITestNGPluginLauncherConstants.KEEP_RUNNING, false)) {
+      programArgs.add("-keeprunning");
+    }
+    
+    super.collectExecutionArguments(configuration, launch, vmArguments, programArgs, runMode);
   }
   
   /**
@@ -227,7 +232,7 @@ public class TestNGPluginLaunchConfigurationDelegate extends TestNGLaunchConfigu
     // if application is not set, we should launch the default UI test app
     // Check to see if we should launch the legacy UI app
     if (application == null) {
-      IPluginModelBase model = (IPluginModelBase) fAllBundles.get("org.testng.eclipse.runtime"); //$NON-NLS-1$
+      IPluginModelBase model = (IPluginModelBase) fAllBundles.get("org.testng.eclipse.pde.runtime"); //$NON-NLS-1$
       BundleDescription desc = model != null ? model.getBundleDescription() : null;
       if (desc != null) {
         Version version = desc.getVersion();
@@ -433,7 +438,7 @@ public class TestNGPluginLaunchConfigurationDelegate extends TestNGLaunchConfigu
   }
   
   private String[] getRequiredPlugins(ILaunchConfiguration configuration) {
-    return new String[] {"org.testng", "org.testng.eclipse.runtime"}; //$NON-NLS-1$ //$NON-NLS-2$
+    return new String[] {"org.testng", "org.testng.eclipse.pde.runtime"}; //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   /**

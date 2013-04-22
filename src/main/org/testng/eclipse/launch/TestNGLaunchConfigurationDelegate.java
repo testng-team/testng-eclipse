@@ -185,9 +185,10 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
    * @param launch The result of the launch
    * @param vmArguments a {@link List} of {@link String} representing the resulting VM arguments
    * @param programArguments a {@link List} of {@link String} representing the resulting program arguments
+   * @param runMode 
    * @exception CoreException if unable to collect the execution arguments
    */
-   protected void collectExecutionArguments(ILaunchConfiguration configuration, ILaunch launch, List<String> vmArguments, List<String> programArguments) throws CoreException {
+   protected void collectExecutionArguments(ILaunchConfiguration configuration, ILaunch launch, List<String> vmArguments, List<String> programArguments, String runMode) throws CoreException {
     // add program & VM arguments provided by getProgramArguments and getVMArguments
     String pgmArgs = getProgramArguments(configuration);
     StringBuilder vmArgs = new StringBuilder(ConfigurationHelper.getJvmArgs(configuration))
@@ -321,7 +322,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     VMRunnerConfiguration vmConfig = new VMRunnerConfiguration(mainType, classPath);
     ArrayList<String> vmArguments= new ArrayList<String>();
     ArrayList<String> programArguments= new ArrayList<String>();
-    collectExecutionArguments(configuration, launch, vmArguments, programArguments);
+    collectExecutionArguments(configuration, launch, vmArguments, programArguments, runMode);
    
     vmConfig.setProgramArguments(programArguments.toArray(new String[programArguments.size()]));
     vmConfig.setVMArguments(vmArguments.toArray(new String[vmArguments.size()]));
