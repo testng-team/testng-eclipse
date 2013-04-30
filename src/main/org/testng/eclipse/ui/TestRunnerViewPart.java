@@ -1160,18 +1160,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   private void postTestResult(final RunInfo runInfo, final int progressStep) {
     m_results.add(runInfo);
-    if (runInfo.getStatus() == ITestResult.FAILURE) {
-      //
-      // Show failures in real time
-      //
-      postSyncRunnable(new Runnable() {
-        public void run() {
-          for (TestRunTab tab : ALL_TABS) {
-            tab.updateTestResult(runInfo, true /* expand */);
-          }
-        }
-      });
-    }
 
 //    long start = System.currentTimeMillis();
 
@@ -1183,11 +1171,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
         fProgressBar.step(progressStep);
         fProgressBar.setTestName(runInfo.getTestName());
-        // Update the summary tab in real time but not the other tabs
-        m_summaryTab.updateTestResult(runInfo, true /* expand */);
-//        for (TestRunTab tab : ALL_TABS) {
-//          tab.updateTestResult(runInfo);
-//        }
+        for (TestRunTab tab : ALL_TABS) {
+          tab.updateTestResult(runInfo, true /* expand */);
+        }
 
       }
     });
