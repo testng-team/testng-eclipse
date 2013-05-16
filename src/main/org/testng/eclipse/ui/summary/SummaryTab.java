@@ -52,7 +52,7 @@ public class SummaryTab extends TestRunTab  {
   private TableViewer m_testViewer;
 
   /** A test result, updated whenever we receive a new test result */
-  class TestResult {
+  static class TestResult {
     Long time = 0L;
     Set<String> methods = Sets.newHashSet();
     Set<String> classes = Sets.newHashSet();
@@ -205,6 +205,11 @@ public class SummaryTab extends TestRunTab  {
     });
   }
 
+  /**
+   * Parses the fully qualified name to extract the package and class name.
+   * 
+   * @return an String array made of the package name and the class name  
+   */
   private String[] parseFqn(String fqn) {
     String packageName = fqn;
     String className = fqn;
@@ -400,6 +405,16 @@ public class SummaryTab extends TestRunTab  {
     m_testViewer.refresh();
   }
 
+  @Override
+  public void updateTestResult(List<RunInfo> results) {
+    if (results.size() > 0) {
+      aboutToStart(); // do a reset
+      for (RunInfo ri : results) {
+        updateTestResult(ri, false /* unused param in this tab */);
+      }
+    }
+  }
+  
   @Override
   public void aboutToStart() {
     m_tests.clear();

@@ -8,8 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.Lists;
-
 import org.eclipse.core.internal.resources.Workspace;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -21,7 +19,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
@@ -114,21 +111,15 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   /** set from IPartListener2 part lifecycle listener. */
   protected boolean m_partIsVisible = false;
 
-  /** store the state. */ 
+  /** store the state. */
   private IMemento m_stateMemento;
-  
-  /** 
-   * The launcher that has started the test.
-   * May be used for reruns. 
-   */
-  private ILaunch m_LastLaunch;
 
   /** The launched project */
   private IJavaProject m_workingProject;
-  
+
   /** status text. */
   protected volatile String  m_statusMessage;
-  
+
   // view components
   private Composite   m_parentComposite;
   private CTabFolder m_tabFolder;
@@ -166,11 +157,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private ToggleOrientationAction[] fToggleOrientationActions;
   private Action m_rerunAction;
   private Action m_rerunFailedAction;
+  private RunHistoryAction m_runHistoryAction;
   private Action m_openReportAction;
-  
-  private long m_startTime;
-  private long m_stopTime;
-  
+
   /**
    * Whether the output scrolls and reveals tests as they are executed.
    */
@@ -209,32 +198,23 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private static final int MAX_RESULTS_THRESHOLD = 1000;
   private static final int MAX_TEXT_SIZE_THRESHOLD = 3;
 
-  //~ counters
-  protected int m_suitesTotalCount;
-  protected int m_testsTotalCount;
-  protected int m_methodTotalCount;
-  protected volatile int m_suiteCount;
-  protected volatile int m_testCount;
-  protected volatile int m_methodCount;
-  protected volatile int m_passedCount;
-  protected volatile int m_failedCount;
-  protected volatile int m_skippedCount;
-  protected volatile int m_successPercentageFailed;
-  
+  /** Infos for the current suite run. */
+  private SuiteRunInfo currentSuiteRunInfo;
+
   /**
    * The client side of the remote test runner
    */
   private EclipseTestRunnerClient fTestRunnerClient;
 
-  // Stores any test descriptions of failed tests. For any test class
-  // that implements ITest, this will be the returned value of getTestName().
+  /**
+   * Stores any test descriptions of failed tests. For any test class that
+   * implements ITest, this will be the returned value of getTestName().
+   */
   private Set<String> testDescriptions;
   private Text m_searchText;
 
   /** The thread that watches the testng-results.xml file */
   private WatchResultThread m_watchThread;
-
-  private List<RunInfo> m_results;
 
   private Action m_clearTreeAction;
 
@@ -351,6 +331,13 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   public void reset() {
     reset(0, 0);
     clearStatus();
+
+    // disable all the actions on resetting the view
+    fNextAction.setEnabled(false);
+    fPrevAction.setEnabled(false);
+    m_rerunAction.setEnabled(false);
+    m_rerunFailedAction.setEnabled(false);
+    m_openReportAction.setEnabled(false);
   }
 
   private void stopUpdateJobs() {
@@ -364,21 +351,10 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
-  private boolean hasErrors() {
-    return m_failedCount > 0 || m_successPercentageFailed > 0;
-  }
-
-  private int getStatus() {
-    if (hasErrors()) return ITestResult.FAILURE;
-    else if (m_skippedCount > 0) return ITestResult.SKIP;
-    else return ITestResult.SUCCESS;
-  }
-
   public void startTestRunListening(IJavaProject project, 
                                     String subName, 
                                     int port, 
                                     ILaunch launch) {
-    m_LastLaunch = launch;
     m_workingProject = project;
 
     aboutToLaunch(subName);
@@ -402,7 +378,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     } while (isInitSuccess == false && launch.isTerminated() == false);
     
     if (isInitSuccess == true) {
-      fTestRunnerClient.startListening(this, this, messageMarshaller);
+      newSuiteRunInfo(launch);
+
+      fTestRunnerClient.startListening(currentSuiteRunInfo, currentSuiteRunInfo, messageMarshaller);
       m_rerunAction.setEnabled(true);
       m_rerunFailedAction.setEnabled(false);
       m_openReportAction.setEnabled(true);
@@ -429,11 +407,21 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     if (m_watchThread != null) m_watchThread.stopWatching();
     if (enabled) {
       TestNGPlugin.log("Monitoring results at " + path);
-      m_watchThread = new WatchResultThread(path, this, this);
+      newSuiteRunInfo(null);
+
+      m_watchThread = new WatchResultThread(path, currentSuiteRunInfo, currentSuiteRunInfo);
     } else {
       if (! StringUtils.isEmptyString(path)) TestNGPlugin.log("No longer monitoring results at " + path);
       m_watchThread = null;
     }
+  }
+
+  private void newSuiteRunInfo(ILaunch launch) {
+    if (currentSuiteRunInfo != null) {
+      currentSuiteRunInfo.removeDelegateListeners();
+    }
+    currentSuiteRunInfo = new SuiteRunInfo(this, this, launch);
+    this.m_runHistoryAction.add(currentSuiteRunInfo);
   }
 
   /**
@@ -499,16 +487,16 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private void refreshCounters() {
-    m_counterPanel.setMethodCount(m_methodCount);
-    m_counterPanel.setPassedCount(m_passedCount);
-    m_counterPanel.setFailedCount(m_failedCount);
-    m_counterPanel.setSkippedCount(m_skippedCount);
+    m_counterPanel.setMethodCount(currentSuiteRunInfo.getMethodCount());
+    m_counterPanel.setPassedCount(currentSuiteRunInfo.getPassedCount());
+    m_counterPanel.setFailedCount(currentSuiteRunInfo.getFailedCount());
+    m_counterPanel.setSkippedCount(currentSuiteRunInfo.getSkippedCount());
     String msg= "";
-    if(m_startTime != 0L && m_stopTime != 0L) {
-      msg= " (" + (m_stopTime - m_startTime) + " ms)";
+    if (currentSuiteRunInfo.hasRun()) {
+      msg = " (" + currentSuiteRunInfo.getRunDuration() + " ms)";
     }
-    
-    fProgressBar.refresh(getStatus(), msg);
+
+    fProgressBar.refresh(currentSuiteRunInfo.getStatus(), msg);
   }
 
   protected void postShowTestResultsView() {
@@ -652,21 +640,10 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
-  private void reset(final int suiteCount, final int testCount) {
-    m_suitesTotalCount = suiteCount;
-    m_testsTotalCount = testCount;
-    m_methodTotalCount = 0;
-    m_suiteCount = 0;
-    m_testCount = 0;
-    m_methodCount = 0;
-    m_passedCount = 0;
-    m_failedCount = 0;
-    m_skippedCount = 0;
-    m_successPercentageFailed = 0;
-    m_startTime= 0L;
-    m_stopTime= 0L;
-    m_results = Lists.newArrayList();
-    
+  void reset(final int suiteCount, final int testCount) {
+    currentSuiteRunInfo.setSuitesTotalCount(suiteCount);
+    currentSuiteRunInfo.setTestsTotalCount(testCount);
+
     postSyncRunnable(new Runnable() {
       public void run() {
         if(isDisposed()) {
@@ -758,6 +735,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     fPrevAction = new ShowPreviousFailureAction(this);
     m_rerunAction= new RerunAction();
     m_rerunFailedAction= new RerunFailedAction();
+    m_runHistoryAction = new RunHistoryAction(this);
     m_openReportAction= new OpenReportAction();
 
     m_clearTreeAction = new ClearResultsAction(ALL_TABS);
@@ -777,6 +755,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     toolBar.add(new Separator());
     toolBar.add(m_rerunAction);
     toolBar.add(m_rerunFailedAction);
+    toolBar.add(m_runHistoryAction);
     toolBar.add(new Separator());
     toolBar.add(m_openReportAction);
     
@@ -875,8 +854,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
           // Update the tree based on the search filter only if we don't have too many
           // results, otherwise, wait for at least n characters to be typed.
           String filter = "";
-          if (m_results.size() < MAX_RESULTS_THRESHOLD ||
-              m_results.size() >= MAX_RESULTS_THRESHOLD
+          if (currentSuiteRunInfo.getNbResults() < MAX_RESULTS_THRESHOLD
+              || currentSuiteRunInfo.getNbResults() >= MAX_RESULTS_THRESHOLD
               && m_searchText.getText().length() >= MAX_TEXT_SIZE_THRESHOLD) {
             filter = m_searchText.getText();
           }
@@ -905,7 +884,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   public ILaunch getLastLaunch() {
-    return m_LastLaunch;
+    return currentSuiteRunInfo.getLaunch();
   }
 
   private boolean isDisposed() {
@@ -1055,7 +1034,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private void postTestResult(final RunInfo runInfo, final int progressStep) {
-    m_results.add(runInfo);
+    currentSuiteRunInfo.add(runInfo);
 
 //    long start = System.currentTimeMillis();
 
@@ -1080,7 +1059,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       public void run() {
 //        long start = System.currentTimeMillis();
         for (TestRunTab tab : ALL_TABS) {
-          tab.updateTestResult(m_results);
+          tab.updateTestResult(currentSuiteRunInfo.getResults());
         }
 //        System.out.println("Done updating tree:" + (System.currentTimeMillis() - start) + "ms");
       }
@@ -1118,7 +1097,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       }
     }
   };
-  
+
   private class RerunAction extends Action {
     public RerunAction() {
       setText(ResourceUtil.getString("TestRunnerViewPart.rerunaction.label")); //$NON-NLS-1$
@@ -1130,8 +1109,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       
     @Override
     public void run() {
-      if(null != m_LastLaunch) {
-        DebugUITools.launch(m_LastLaunch.getLaunchConfiguration(), m_LastLaunch.getLaunchMode());
+      ILaunch launch = getLastLaunch();
+      if(null != launch) {
+        DebugUITools.launch(launch.getLaunchConfiguration(), launch.getLaunchMode());
       }
     }
   }
@@ -1216,10 +1196,11 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     
     @Override
     public void run() {
-      if(null != m_LastLaunch && hasErrors()) {
+      ILaunch launch = getLastLaunch();
+      if(null != launch && currentSuiteRunInfo.hasErrors()) {
         LaunchUtil.launchFailedSuiteConfiguration(m_workingProject, 
-        		m_LastLaunch.getLaunchMode(), 
-        		m_LastLaunch.getLaunchConfiguration(),
+        		launch.getLaunchMode(), 
+        		launch.getLaunchConfiguration(),
         		getTestDescriptions());
       }
     }    
@@ -1251,15 +1232,14 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     // the filtering to occur.
     postAsyncRunnable(new Runnable() {
       public void run() {
-        m_searchText.setToolTipText(m_results.size() > MAX_RESULTS_THRESHOLD
-            ? ResourceUtil.getFormattedString("TestRunnerViewPart.typeCharacters.tooltip",
-                MAX_TEXT_SIZE_THRESHOLD)
-            : "");
+        m_searchText
+            .setToolTipText(currentSuiteRunInfo.getNbResults() > MAX_RESULTS_THRESHOLD ? ResourceUtil
+                .getFormattedString(
+                    "TestRunnerViewPart.typeCharacters.tooltip",
+                    MAX_TEXT_SIZE_THRESHOLD) : "");
       }
     });
 
-    m_suiteCount++;
-    
 //    postSyncRunnable(new Runnable() {
 //      public void run() {
 //        if(isDisposed()) {
@@ -1273,13 +1253,13 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
     fProgressBar.setTestName(null);
 
-    if(m_suitesTotalCount == m_suiteCount) {
-      fNextAction.setEnabled(hasErrors());
-      fPrevAction.setEnabled(hasErrors());
-      m_rerunFailedAction.setEnabled(hasErrors());
+    if (currentSuiteRunInfo.isSuiteRunFinished()) {
+      final boolean hasErrors = currentSuiteRunInfo.hasErrors();
+      fNextAction.setEnabled(hasErrors);
+      fPrevAction.setEnabled(hasErrors);
+      m_rerunFailedAction.setEnabled(hasErrors);
       postShowTestResultsView();
       stopTest();
-      m_stopTime= System.currentTimeMillis();
       postSyncRunnable(new Runnable() {
         public void run() {
           if(isDisposed()) {
@@ -1298,8 +1278,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   public void onStart(TestMessage tm) {
     RunInfo ri= new RunInfo(tm.getSuiteName(), tm.getTestName());
-    ri.m_methodCount= tm.getTestMethodCount();
-    m_methodTotalCount += tm.getTestMethodCount();
+    ri.m_methodCount = tm.getTestMethodCount();
 
     postSyncRunnable(new Runnable() {
       public void run() {
@@ -1317,21 +1296,14 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private void updateProgressBar() {
     postSyncRunnable(new Runnable() {
       public void run() {
-        int newMaxBar = (m_methodTotalCount * m_testsTotalCount) / (m_testCount + 1);
-        fProgressBar.setMaximum(newMaxBar, m_methodTotalCount);
+        int newMaxBar = currentSuiteRunInfo.getNewMax();
+        // FIXME JNR progress bar does not move to maximum anymore
+        fProgressBar.setMaximum(newMaxBar, currentSuiteRunInfo.getMethodTotalCount());
       }
     });
   }
 
   public void onFinish(TestMessage tm) {
-    m_testCount++;
-
-    // The method count is more accurate than m_methodTotalCount since it also takes
-    // data providers and other dynamic invocations into account.
-    if (m_methodCount != m_methodTotalCount) {
-        m_methodTotalCount= m_methodCount; // trust the methodCount
-    }
-
     updateProgressBar();
 
     postSyncRunnable(new Runnable() {
@@ -1371,15 +1343,10 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
   
   public void onTestSuccess(TestResultMessage trm) {
-    m_passedCount++;
-    m_methodCount++;
-    
     postTestResult(createRunInfo(trm, null, ITestResult.SUCCESS), 0 /*no error*/);
   }
 
   public void onTestFailure(TestResultMessage trm) {
-    m_failedCount++;
-    m_methodCount++;
     String desc = trm.getTestDescription();
     if (desc != null) {
     	getTestDescriptions().add (desc);
@@ -1389,17 +1356,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   public void onTestSkipped(TestResultMessage trm) {
-    m_skippedCount++;
-    m_methodCount++;
 //    System.out.println("[INFO:onTestSkipped]:" + trm.getMessageAsString());
     postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.SKIP), 1 /*error*/
     );
   }
 
   public void onTestFailedButWithinSuccessPercentage(TestResultMessage trm) {
-    m_successPercentageFailed++;
-    m_methodCount++;
-    
     postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.SUCCESS_PERCENTAGE_FAILURE),
                    1 /*error*/
     );
@@ -1411,16 +1373,17 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   	}
   	return testDescriptions;
   }
-  
-  /**
+
+	/**
 	 * If any test descriptions of failed tests have been saved, pass them along
-	 * as a jvm argument. They can they be used by
+	 * as a jvm argument. They can then be used by
 	 * @Factory methods to select which parameters to use for creating the set
 	 * of test instances to re-run.
 	 */
 	public void run() {
-		if (null != m_LastLaunch && hasErrors()) {
-			ILaunchConfiguration config = m_LastLaunch.getLaunchConfiguration();
+		ILaunch launch = getLastLaunch();
+		if (null != launch && currentSuiteRunInfo.hasErrors()) {
+			ILaunchConfiguration config = launch.getLaunchConfiguration();
 
 			try {
 				ILaunchConfigurationWorkingCopy wc = config.getWorkingCopy();
@@ -1445,7 +1408,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 				ce.printStackTrace();
 			}
 			LaunchUtil.launchFailedSuiteConfiguration(m_workingProject,
-					m_LastLaunch.getLaunchMode());
+					launch.getLaunchMode());
 		}
 	}
 
@@ -1465,4 +1428,22 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     IJavaProject project = getLaunchedProject();
     return project != null ? project.getProject().getName() : null;
   }
+
+  void reset(final SuiteRunInfo run) {
+    postSyncRunnable(new Runnable() {
+      public void run() {
+        if(isDisposed()) {
+          return;
+        }
+
+        currentSuiteRunInfo = run;
+        refreshCounters();
+        clearStatus();
+        for (TestRunTab tab : ALL_TABS) {
+          tab.updateTestResult(currentSuiteRunInfo.getResults());
+        }
+      }
+    });
+  }
+
 }
