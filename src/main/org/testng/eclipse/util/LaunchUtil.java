@@ -198,8 +198,8 @@ public class LaunchUtil {
     Multimap<String, String> classMethods = ArrayListMultimap.create();
     classMethods.get(null);
 
-    for(int i= 0; i < types.length; i++) {
-      classNames.add(types[i].getFullyQualifiedName());
+    for (IType type : types) {
+      classNames.add(type.getFullyQualifiedName());
 //      classMethods.put(types[i].getFullyQualifiedName(), EMPTY_ARRAY_PARAM);
     }
 
@@ -310,23 +310,23 @@ public class LaunchUtil {
   private static void launchMethodBasedConfiguration(IJavaProject ijp,  
 		  IMethod[] methods, String runMode, RunInfo runInfo) {
     Set<IType> typesSet= new HashSet<IType>();
-    for(int i= 0; i < methods.length; i++) {
-      typesSet.add(methods[i].getDeclaringType());
+    for (IMethod method : methods) {
+      typesSet.add(method.getDeclaringType());
     }
     
     List<String> methodNames = Lists.newArrayList();
     Multimap<String, String> classMethods = ArrayListMultimap.create();
-    for(int i= 0; i < methods.length; i++) {
-      methodNames.add(methods[i].getElementName());
-      classMethods.put(methods[i].getDeclaringType().getFullyQualifiedName(),
-          methods[i].getElementName());
+    for (IMethod method : methods) {
+      methodNames.add(method.getElementName());
+      classMethods.put(method.getDeclaringType().getFullyQualifiedName(),
+          method.getElementName());
     }
     
     IType[] types= typesSet.toArray(new IType[typesSet.size()]);
     
     List<String> typeNames = new ArrayList<String>();
-    for(int i = 0; i < types.length; i++) {
-      typeNames.add(types[i].getFullyQualifiedName());
+    for (IType type : types) {
+      typeNames.add(type.getFullyQualifiedName());
     }
     String name = typeNames.get(0).toString() + "." + methodNames.get(0).toString();
 //    final String complianceLevel= annotationType != null ? annotationType : getQuickComplianceLevel(types);
@@ -608,9 +608,9 @@ public class LaunchUtil {
 
   private static Object[] findGroupDependencies(ICompilationUnit[] units) {
     List<IResource> resources = Lists.newArrayList();
-    for(int i= 0; i < units.length; i++) {
+    for (ICompilationUnit unit : units) {
       try {
-        resources.add(units[i].getCorrespondingResource());
+        resources.add(unit.getCorrespondingResource());
       }
       catch(JavaModelException jmex) {
         ;

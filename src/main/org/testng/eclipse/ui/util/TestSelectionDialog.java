@@ -26,7 +26,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.TwoPaneElementSelector;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.util.ResourceUtil;
@@ -57,7 +56,7 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 			if (element instanceof IType) {
 				result = super.getImage(((IType) element).getPackageFragment());
 			} else if (element instanceof File) {
-				result = super.getImage((File) element);
+				result = super.getImage(element);
 			}
 
 			return result;

@@ -14,7 +14,6 @@ import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.text.edits.TextEdit;
 import org.testng.eclipse.ui.conversion.AnnotationRewriter;
-import org.testng.eclipse.ui.conversion.JUnitVisitor;
 
 import java.util.Collection;
 

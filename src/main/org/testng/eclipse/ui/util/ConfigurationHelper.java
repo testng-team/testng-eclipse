@@ -452,21 +452,21 @@ public class ConfigurationHelper {
 				final String projectName = project.getName();
 				final String mainRunner = TestNGPluginConstants.MAIN_RUNNER;
 
-				for (int i = 0; i < availConfs.length; i++) {
+				for (ILaunchConfiguration availConf : availConfs) {
 					String confProjectName = ConfigurationHelper
-					.getProjectName(availConfs[i]);
+					.getProjectName(availConf);
 					String confMainName = ConfigurationHelper
-					.getMain(availConfs[i]);
+					.getMain(availConf);
 
 					if (projectName.equals(confProjectName)
 							&& mainRunner.equals(confMainName) ) {
-						if (confName != null && 
-								confName.equals(availConfs[i].getName())) {
-							resultConf = availConfs[i];
+						if (confName != null &&
+								confName.equals(availConf.getName())) {
+							resultConf = availConf;
 							break;
 						}
 						else if (runInfo != null) {
-							Map<String, List<String>> availableClassMethods = getClassMethods(availConfs[i]);
+							Map<String, List<String>> availableClassMethods = getClassMethods(availConf);
 							String method = runInfo.getMethodName();
 							if (method != null && availableClassMethods != null) {
 								String className = runInfo.getClassName();
@@ -476,7 +476,7 @@ public class ConfigurationHelper {
 									if (methods.size() == 1) {
 										String available = (String) methods.get(0);
 										if (method.equalsIgnoreCase(available)) {
-											resultConf = availConfs[i];
+											resultConf = availConf;
 											break;
 										}
 									}

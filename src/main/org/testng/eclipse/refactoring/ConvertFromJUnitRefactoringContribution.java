@@ -2,7 +2,6 @@ package org.testng.eclipse.refactoring;
 
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
-import org.eclipse.ui.IWorkbenchPage;
 
 import java.util.Map;
 
