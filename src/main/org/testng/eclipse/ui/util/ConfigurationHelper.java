@@ -316,11 +316,9 @@ public class ConfigurationHelper {
     }
     else if (type == LaunchType.CLASS) {
       testClasses = getClasses(configuration);
-      classMethods= getClassMethods(configuration);
     }
     else if (type == LaunchType.METHOD) {
-      classMethods= getClassMethods(configuration); 
-      testClasses = getClasses(configuration);
+      classMethods= getClassMethods(configuration);
     }
     else if (type == LaunchType.PACKAGE) {
       packages= getListAttribute(configuration, TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST);

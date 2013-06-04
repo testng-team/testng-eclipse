@@ -286,9 +286,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       trt.setOrientation(horizontal);
     }
 
-    for(int i = 0; i < fToggleOrientationActions.length; ++i) {
-      fToggleOrientationActions[i].setChecked(
-          fOrientation == fToggleOrientationActions[i].getOrientation());
+    for (ToggleOrientationAction fToggleOrientationAction : fToggleOrientationActions) {
+      fToggleOrientationAction.setChecked(
+          fOrientation == fToggleOrientationAction.getOrientation());
     }
     fCurrentOrientation = orientation;
 
@@ -758,9 +758,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     toolBar.add(m_runHistoryAction);
     toolBar.add(new Separator());
     toolBar.add(m_openReportAction);
-    
-    for(int i = 0; i < fToggleOrientationActions.length; ++i) {
-      viewMenu.add(fToggleOrientationActions[i]);
+
+    for (ToggleOrientationAction fToggleOrientationAction : fToggleOrientationActions) {
+      viewMenu.add(fToggleOrientationAction);
     }
 
     actionBars.updateActionBars();
@@ -884,7 +884,10 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   public ILaunch getLastLaunch() {
-    return currentSuiteRunInfo.getLaunch();
+    if (currentSuiteRunInfo != null) {
+      return currentSuiteRunInfo.getLaunch();
+    }
+    return null;
   }
 
   private boolean isDisposed() {

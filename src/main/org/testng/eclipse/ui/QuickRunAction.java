@@ -56,6 +56,7 @@ public class QuickRunAction extends Action {
     }
   }
   
+  @Override
   public void run() {
     IMethod imethod= null;  
     try {
@@ -67,7 +68,7 @@ public class QuickRunAction extends Action {
           jmex));
     }
 
-    if(null == imethod) return;
+    if (null == imethod || m_previousRun == null) return;
     /*
      * The runInfo is passed along in order to preserve any 
      * jvm args used in the original launcher when
@@ -80,8 +81,7 @@ public class QuickRunAction extends Action {
       m_runInfo.setEnvironmentVariables(config.getAttribute(
           ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, (Map<?, ?>) null));
     } catch (CoreException e) {
-      // TODO
-      e.printStackTrace();
+      TestNGPlugin.log(e);
     }
     LaunchUtil.launchMethodConfiguration(m_javaProject, 
         imethod, 

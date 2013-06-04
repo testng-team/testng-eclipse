@@ -285,7 +285,7 @@ public class LaunchUtil {
         methods.addAll(findMethodTransitiveClosure(iMethod, groupInfo));
       }
     } catch (JavaModelException e) {
-      e.printStackTrace();
+      TestNGPlugin.log(e);
     }
 
     launchMethodBasedConfiguration(javaProject, methods.toArray(new IMethod[methods.size()]),
@@ -305,15 +305,10 @@ public class LaunchUtil {
             + " which due to a plugin limitation will be ignored", null));
 
   }
-  
-  
-  private static void launchMethodBasedConfiguration(IJavaProject ijp,  
+
+
+  private static void launchMethodBasedConfiguration(IJavaProject ijp,
 		  IMethod[] methods, String runMode, RunInfo runInfo) {
-    Set<IType> typesSet= new HashSet<IType>();
-    for (IMethod method : methods) {
-      typesSet.add(method.getDeclaringType());
-    }
-    
     List<String> methodNames = Lists.newArrayList();
     Multimap<String, String> classMethods = ArrayListMultimap.create();
     for (IMethod method : methods) {
@@ -321,16 +316,20 @@ public class LaunchUtil {
       classMethods.put(method.getDeclaringType().getFullyQualifiedName(),
           method.getElementName());
     }
-    
-    IType[] types= typesSet.toArray(new IType[typesSet.size()]);
-    
+
+    final Set<IType> typesSet= new HashSet<IType>();
+    for (IMethod method : methods) {
+      typesSet.add(method.getDeclaringType());
+    }
+    final IType[] types= typesSet.toArray(new IType[typesSet.size()]);
+
     List<String> typeNames = new ArrayList<String>();
     for (IType type : types) {
       typeNames.add(type.getFullyQualifiedName());
     }
-    String name = typeNames.get(0).toString() + "." + methodNames.get(0).toString();
+    String name = types[0].getTypeQualifiedName().toString() + "." + methodNames.get(0).toString();
 //    final String complianceLevel= annotationType != null ? annotationType : getQuickComplianceLevel(types);
-  
+
     ILaunchConfigurationWorkingCopy workingCopy= createLaunchConfiguration(ijp.getProject(), name, runInfo);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
                              typeNames);

@@ -203,9 +203,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
     LaunchType type = ConfigurationHelper.getType(configuration);
     setType(type);
-    if(LaunchType.METHOD == type) {
-      m_classMethods = ConfigurationHelper.getClassMethods(configuration);
-    }
+    m_classMethods = ConfigurationHelper.getClassMethods(configuration);
 
     attachModificationListeners();
   }
