@@ -165,7 +165,7 @@ public class SuiteRunInfo implements IRemoteSuiteListener, IRemoteTestListener {
   }
 
   public boolean isSuiteRunFinished() {
-    return m_suitesTotalCount == m_suiteCount;
+    return m_suitesTotalCount < m_suiteCount;
   }
 
   public boolean hasRun() {

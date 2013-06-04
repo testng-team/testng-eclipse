@@ -7,7 +7,6 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
 
 public class ConvertFromJUnitRefactoring extends Refactoring {
   private RefactoringStatus m_status = new RefactoringStatus();

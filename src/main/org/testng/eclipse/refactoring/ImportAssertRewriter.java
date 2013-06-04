@@ -3,12 +3,9 @@ package org.testng.eclipse.refactoring;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.testng.eclipse.ui.conversion.IRewriteProvider;
-
-import java.util.Set;
 
 public class ImportAssertRewriter implements IRewriteProvider {
 

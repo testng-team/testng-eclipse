@@ -190,8 +190,8 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     Vector<String> argv = new Vector<String>(10);
     ExecutionArguments execArgs = new ExecutionArguments("", progArgs); //$NON-NLS-1$
     String[] pa = execArgs.getProgramArgumentsArray();
-    for (int i = 0; i < pa.length; i++) {
-      argv.add(pa[i]);
+    for (String element : pa) {
+      argv.add(element);
     }
 
     // Use -serPort (serialized protocol) or -port (string protocol) based on
@@ -303,6 +303,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     return vmConfig;
   }
 
+  @Override
   public String[] getClasspath(ILaunchConfiguration configuration)
       throws CoreException {
     String[] originalClasspath = super.getClasspath(configuration);
@@ -332,14 +333,16 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     LaunchType runType = ConfigurationHelper.getType(configuration);
 
     switch (runType) {
-    case CLASS:
-      return "class " + configuration.getName();
-    case GROUP:
-      return "groups";
     case SUITE:
       return "suite";
+    case GROUP:
+      return "groups";
     case PACKAGE:
       return "package";
+    case CLASS:
+      return "class " + configuration.getName();
+    case METHOD:
+      return "method " + configuration.getName();
     default:
       return "from context";
     }
