@@ -14,7 +14,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.testng.ITestResult;
 
 /**
  * Action that displays the test run history. It can:
@@ -60,18 +59,20 @@ public class RunHistoryAction extends Action implements IMenuCreator {
     fMenu = new Menu(parent);
     for (final SuiteRunInfo run : runs) {
       Action filterAction = new Action(getText(run)) {
+        @Override
         public void run() {
           currentlyDisplayedRun = run;
           testRunnerViewPart.reset(run);
         }
       };
 
-      addActionToMenu(fMenu, filterAction, getImage(run.getStatus()));
+      addActionToMenu(fMenu, filterAction, ImagesUtil.getImage(run.getStatus()));
     }
 
     new MenuItem(fMenu, SWT.SEPARATOR);
 
     addActionToMenu(fMenu, new Action("Clear History") {
+      @Override
       public void run() {
         runs.clear();
         currentlyDisplayedRun = null;
@@ -95,20 +96,6 @@ public class RunHistoryAction extends Action implements IMenuCreator {
           + dateStr + ")";
     }
     return prefix + "(" + dateStr + ")";
-  }
-
-  private Image getImage(int state) {
-    switch(state) {
-      case ITestResult.SUCCESS:
-        return Images.getImage(Images.IMG_TEST_OK);
-      case ITestResult.FAILURE:
-      case ITestResult.SUCCESS_PERCENTAGE_FAILURE:
-        return Images.getImage(Images.IMG_TEST_FAIL);
-      case ITestResult.SKIP:
-        return Images.getImage(Images.IMG_TEST_SKIP);
-      default:
-        throw new IllegalArgumentException("Illegal state: " + state);
-    }
   }
 
   protected void addActionToMenu(Menu parent, Action action, Image image) {
