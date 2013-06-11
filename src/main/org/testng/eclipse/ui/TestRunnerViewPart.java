@@ -1036,7 +1036,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
-  private void postTestResult(final RunInfo runInfo, final int progressStep) {
+  private void postTestResult(final RunInfo runInfo, final boolean isSuccess) {
     currentSuiteRunInfo.add(runInfo);
 
 //    long start = System.currentTimeMillis();
@@ -1047,8 +1047,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
           return;
         }
 
-        fProgressBar.step(progressStep);
-        fProgressBar.setTestName(runInfo.getTestName());
+        fProgressBar.step(isSuccess);
         for (TestRunTab tab : ALL_TABS) {
           tab.updateTestResult(runInfo, true /* expand */);
         }
@@ -1254,8 +1253,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //      }
 //    });
 
-    fProgressBar.setTestName(null);
-
     if (currentSuiteRunInfo.isSuiteRunFinished()) {
       final boolean hasErrors = currentSuiteRunInfo.hasErrors();
       fNextAction.setEnabled(hasErrors);
@@ -1342,32 +1339,28 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
                        type,
                        trm.getInvocationCount(),
                        trm.getCurrentInvocationCount());
-                       
   }
-  
+
   public void onTestSuccess(TestResultMessage trm) {
-    postTestResult(createRunInfo(trm, null, ITestResult.SUCCESS), 0 /*no error*/);
+    postTestResult(createRunInfo(trm, null, ITestResult.SUCCESS), true);
   }
 
   public void onTestFailure(TestResultMessage trm) {
     String desc = trm.getTestDescription();
     if (desc != null) {
     	getTestDescriptions().add (desc);
-    }	
+    }
     //    System.out.println("[INFO:onTestFailure]:" + trm.getMessageAsString());
-    postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.FAILURE), 1 /*error*/);
+    postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.FAILURE), false);
   }
 
   public void onTestSkipped(TestResultMessage trm) {
 //    System.out.println("[INFO:onTestSkipped]:" + trm.getMessageAsString());
-    postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.SKIP), 1 /*error*/
-    );
+    postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.SKIP), false);
   }
 
   public void onTestFailedButWithinSuccessPercentage(TestResultMessage trm) {
-    postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.SUCCESS_PERCENTAGE_FAILURE),
-                   1 /*error*/
-    );
+    postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.SUCCESS_PERCENTAGE_FAILURE), false);
   }
 
   public Set<String> getTestDescriptions() {
