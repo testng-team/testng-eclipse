@@ -14,6 +14,10 @@ package org.testng.eclipse.ui;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareViewerPane;
@@ -86,6 +90,14 @@ public class CompareResultDialog extends Dialog {
   private IDialogSettings            fSettings;
   protected Rectangle                fNewBounds;
 
+  static List<Pattern> patternList;
+  static String[] regexes = { 
+      ".*expected:<(.*)> but was:<(.*)>.*", 
+      ".*expected not same with:<(.*)> but was same:<(.*)>.*", 
+      ".*expected same with:<(.*)> but was:<(.*)>.*", 
+      ".*expected \\[(.*)\\] but found \\[(.*)\\].*" 
+      };
+
   public CompareResultDialog(Shell parentShell, RunInfo failure) {
     super(parentShell);
     fgThis = this;
@@ -112,32 +124,30 @@ public class CompareResultDialog extends Dialog {
     fExpected = trace.substring(ind1 + IS.length(), ind2);
     fActual = trace.substring(ind3 + WAS.length(), ind4);
   }
-
+  
+  static List<Pattern> getPatterns() {
+    if (patternList == null) {
+      patternList = new ArrayList<Pattern>();
+      for (String rgx : regexes) {
+        patternList.add(Pattern.compile(rgx, Pattern.DOTALL));
+      }
+    }
+    return patternList;
+  }
+  
   private void parseTestNGTrace(String trace) {
-    String firstToken= "expected:<";
-    String nextTokenString= "> but was:<";
-    int idxStart= trace.indexOf(firstToken);
-    if(idxStart == -1) {
-      firstToken= "expected not same with:<";
-      idxStart= trace.indexOf(firstToken);
-      nextTokenString= "> but was same:<";
+    Matcher m;
+    for (Pattern p : getPatterns()) {
+      m = p.matcher(trace);
+      if (m.find()) {
+        fExpected = m.group(1);
+        fActual = m.group(2);
+        return;
+      }
     }
-    if(idxStart == -1) {
-      firstToken= "expected same with:<";
-      idxStart= trace.indexOf(firstToken);
-      nextTokenString= "> but was:<";
-    }
-    
-    if(idxStart != -1) {
-      int idxEnd= trace.indexOf(nextTokenString); //trace.indexOf('>', idxStart);
-      fExpected= trace.substring(idxStart + firstToken.length(), idxEnd);
-      idxStart= idxEnd + nextTokenString.length();
-      fActual= trace.substring(idxStart, trace.lastIndexOf('>'));
-    }
-    else {
-      fActual= "N/A";
-      fExpected= "N/A";
-    }
+    fActual= "N/A";
+    fExpected= "N/A";
+    return;
   }
   
   protected Point getInitialSize() {
