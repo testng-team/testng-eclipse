@@ -3,8 +3,6 @@ package org.testng.eclipse.launch.components;
 import java.util.Collection;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -23,6 +21,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 import org.testng.eclipse.util.ResourceUtil;
+
+import com.google.common.collect.Lists;
 
 /**
  * A Table with checkboxes to present group names.
@@ -48,6 +48,16 @@ public class CheckBoxTable extends SelectionStatusDialog {
     setTitle(ResourceUtil.getString(titleId));
   }
   
+  protected void removeSelectionElements(){
+    List<Object> toRemove = Lists.newArrayList();
+    for (Object element : m_selection) {
+      if (!m_viewer.setChecked(element.toString(), true)) {
+        toRemove.add(element);
+      }
+    }
+    m_selection.removeAll(toRemove);
+  }
+  
   /**
    * Handles cancel button pressed event.
    */
@@ -66,21 +76,15 @@ public class CheckBoxTable extends SelectionStatusDialog {
   protected CheckboxTableViewer createTableViewer(Composite parent) {
     m_viewer = CheckboxTableViewer.newCheckList(parent, SWT.BORDER);
 
-    m_viewer.setContentProvider(new GroupNamesContentProvider(m_elements));
+    m_viewer.setContentProvider(new GroupNamesContentProvider());
     m_viewer.setLabelProvider(new GroupNameLabelProvider());
 
     m_viewer.setInput(m_elements);
-    List<Object> toRemove = Lists.newArrayList();
-    for (Object element : m_selection) {
-      if (!m_viewer.setChecked(element.toString(), true)) {
-        toRemove.add(element);
-      }
-    }
-    m_selection.removeAll(toRemove);
-
+    removeSelectionElements();
     return m_viewer;
   }
 
+  
   @Override
   protected Control createDialogArea(Composite parent) {
     Composite composite = (Composite) super.createDialogArea(parent);
@@ -135,14 +139,12 @@ public class CheckBoxTable extends SelectionStatusDialog {
   }
   
   private static class GroupNamesContentProvider implements IStructuredContentProvider {
-    private String[] m_groupNames;
     
-    public GroupNamesContentProvider(final String[] groups) {
-      m_groupNames = groups;
-    }
-    
-    public Object[] getElements(Object inputElement) {
-      return m_groupNames;
+    public Object[] getElements(Object inputElement) {      
+      if (inputElement instanceof String[]){
+        return (String[])inputElement;
+      }
+      return null;
     }
 
     public void dispose() {
