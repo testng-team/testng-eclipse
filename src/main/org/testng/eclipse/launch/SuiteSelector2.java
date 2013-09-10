@@ -6,16 +6,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
-
 import org.eclipse.core.internal.resources.File;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 import org.testng.collections.Maps;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
+import org.testng.eclipse.launch.components.CheckBoxTable;
+import org.testng.eclipse.launch.components.SuiteFileCheckBoxTable;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.TestSearchEngine;
+
+import com.google.common.collect.Lists;
 
 /**
  * Allow the user to select one or many suite files in this launch configuration.
@@ -47,7 +50,6 @@ public class SuiteSelector2 extends MultiSelector {
     }
 
     return result;
-//    return ConfigurationHelper.getSuites(configuration);
   }
 
   @Override
@@ -65,12 +67,8 @@ public class SuiteSelector2 extends MultiSelector {
     return result;
   }
 
-//  @Override
-//  protected ButtonHandler createButtonHandler() {
-//    return new TestngTestSelector.ButtonHandler() {
-//      public void handleButton() {
-//        getCallback().handleSearchButtonSelected(LaunchType.SUITE);
-//      }
-//    };
-//  }
+  @Override
+  protected CheckBoxTable getCheckBoxTable(Shell shell, String[] values, String titleId){
+    return new SuiteFileCheckBoxTable(getCallback().getShell(), values, titleId);
+  }
 }
