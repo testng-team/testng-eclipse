@@ -65,7 +65,9 @@ public class SuiteFileCheckBoxTable extends CheckBoxTable {
     btn.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         FileDialog fileselect = new FileDialog(getShell(), SWT.SINGLE);
-        fileselect.setFilterExtensions(new String[] { "*.xml" });
+        
+        fileselect.setFilterNames(new String[] { "(*.xml or *.yaml)" });
+        fileselect.setFilterExtensions(new String[] { "*.xml;*.yaml" });
         String url = fileselect.open();
         m_viewer.setInput(new String[] { url });
         m_viewer.setChecked(url, true);
