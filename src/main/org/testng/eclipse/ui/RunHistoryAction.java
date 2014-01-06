@@ -111,7 +111,7 @@ public class RunHistoryAction extends Action implements IMenuCreator {
     this.runs.addFirst(run);
     // limit the number of displayed runs
     if (this.runs.size() > 20) {
-      this.runs.remove(0);
+      this.runs.removeLast();
     }
     this.currentlyDisplayedRun = run;
   }
