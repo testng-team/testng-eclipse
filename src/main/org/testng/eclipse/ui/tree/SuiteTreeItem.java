@@ -31,17 +31,16 @@ public class SuiteTreeItem extends BaseTreeItem implements ITreeItem {
     else m_percentage++;
     updateView(runInfo);
   }
-  
+
   private void updateView(RunInfo runInfo) {
     getTreeItem().setText(MessageFormat.format(FORMATTED_MESSAGE,
-      new Object[] {
           getRunInfo().getSuiteName(),
           new Integer(m_passed),
           new Integer(m_failed),
           new Integer(m_skipped),
           new Integer(m_percentage),
           getTime() / 1000
-      })
+      )
     );
     maybeUpdateImage(runInfo);
   }

@@ -102,23 +102,17 @@ import org.testng.remote.strprotocol.TestResultMessage;
  *
  * @author Cedric Beust <cedric@beust.com>
  */
-public class TestRunnerViewPart extends ViewPart 
+public class TestRunnerViewPart extends ViewPart
 implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   /** used by IWorkbenchSiteProgressService */
   private static final Object FAMILY_RUN = new Object();
-
-  /** set from IPartListener2 part lifecycle listener. */
-  protected boolean m_partIsVisible = false;
 
   /** store the state. */
   private IMemento m_stateMemento;
 
   /** The launched project */
   private IJavaProject m_workingProject;
-
-  /** status text. */
-  protected volatile String  m_statusMessage;
 
   // view components
   private Composite   m_parentComposite;
@@ -128,9 +122,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private TestRunTab m_activeRunTab;
 
   // Orientations
-  static final int VIEW_ORIENTATION_VERTICAL = 0;
-  static final int VIEW_ORIENTATION_HORIZONTAL = 1;
-  static final int VIEW_ORIENTATION_AUTOMATIC = 2;
+  private static final int VIEW_ORIENTATION_VERTICAL = 0;
+  private static final int VIEW_ORIENTATION_HORIZONTAL = 1;
+  private static final int VIEW_ORIENTATION_AUTOMATIC = 2;
 
   /**
    * The current orientation; either <code>VIEW_ORIENTATION_HORIZONTAL</code>
@@ -144,10 +138,10 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
    */
   private int fCurrentOrientation;
 
-  protected CounterPanel m_counterPanel;
+  private CounterPanel m_counterPanel;
   private Composite m_counterComposite;
 
-  final Image m_viewIcon = TestNGPlugin.getImageDescriptor("main16/testng_noshadow.gif").createImage();//$NON-NLS-1$
+  private final Image m_viewIcon = TestNGPlugin.getImageDescriptor("main16/testng_noshadow.gif").createImage();//$NON-NLS-1$
 
   /**
    * Actions
@@ -160,37 +154,32 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private RunHistoryAction m_runHistoryAction;
   private Action m_openReportAction;
 
-  /**
-   * Whether the output scrolls and reveals tests as they are executed.
-   */
-  protected boolean fAutoScroll = true;
-
-  protected ProgressBar fProgressBar;
+  private ProgressBar fProgressBar;
   private ToolItem m_stopButton;
-  
+
   private Color fOKColor;
   private Color fFailureColor;
 
   private boolean m_isDisposed = false;
-  
+
   // JOBS
   private UpdateUIJob m_updateUIJob;
   /**
-   * A Job that runs as long as a test run is running. 
+   * A Job that runs as long as a test run is running.
    * It is used to get the progress feedback for running jobs in the view.
    */
   private IsRunningJob m_isRunningJob;
   private ILock m_runLock;
-  
+
   public static final String NAME = "org.testng.eclipse.ResultView"; //$NON-NLS-1$
   public static final String ID_EXTENSION_POINT_TESTRUN_TABS = TestNGPlugin.PLUGIN_ID + "." //$NON-NLS-1$
       + "internal_testRunTabs";  //$NON-NLS-1$
 
-  static final int REFRESH_INTERVAL = 200;
+  private static final int REFRESH_INTERVAL = 200;
 
   // Persistence tags.
-  static final String TAG_PAGE = "page"; //$NON-NLS-1$
-  static final String TAG_ORIENTATION = "orientation"; //$NON-NLS-1$
+  private static final String TAG_PAGE = "page"; //$NON-NLS-1$
+  private static final String TAG_ORIENTATION = "orientation"; //$NON-NLS-1$
 
   // If the tree has more than this number of results, then typing a key in the
   // search filter should only update it if the text size is above
@@ -351,14 +340,14 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
-  public void startTestRunListening(IJavaProject project, 
-                                    String subName, 
-                                    int port, 
+  public void startTestRunListening(IJavaProject project,
+                                    String subName,
+                                    int port,
                                     ILaunch launch) {
     m_workingProject = project;
 
     aboutToLaunch(subName);
-    
+
 //    if(null != fTestRunnerClient) {
 //      stopTest();
 //    }
@@ -366,7 +355,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     IMessageSender messageMarshaller = LaunchUtil.useStringProtocol(launch.getLaunchConfiguration())
         ? new StringMessageSender("localhost", port)
         : new SerializedMessageSender("localhost", port);
-    
+
     boolean isInitSuccess = false;
     do {
       try {
@@ -376,7 +365,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         TestNGPlugin.log(e);
       }
     } while (isInitSuccess == false && launch.isTerminated() == false);
-    
+
     if (isInitSuccess == true) {
       newSuiteRunInfo(launch);
 
@@ -455,7 +444,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
-  protected void aboutToLaunch(final String message) {
+  private void aboutToLaunch(final String message) {
     String msg =
       ResourceUtil.getFormattedString("TestRunnerViewPart.message.launching", message); //$NON-NLS-1$
     setPartName(msg);
@@ -468,7 +457,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     stopTest();
 
     TestNGPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
-    getViewSite().getPage().removePartListener(fPartListener);
     m_viewIcon.dispose();
     fOKColor.dispose();
     fFailureColor.dispose();
@@ -499,7 +487,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     fProgressBar.refresh(currentSuiteRunInfo.getStatus(), msg);
   }
 
-  protected void postShowTestResultsView() {
+  private void postShowTestResultsView() {
     postSyncRunnable(new Runnable() {
       public void run() {
         if(isDisposed()) {
@@ -519,7 +507,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     TestRunnerViewPart testRunner = null;
 
     if(page != null) {
-      try { 
+      try {
         testRunner = (TestRunnerViewPart) page.findView(TestRunnerViewPart.NAME);
         if(testRunner == null) {
 
@@ -539,31 +527,13 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
-  /**
-   * Can display addition infos.
-   * FIXME
-   */
-//  protected void doShowStatus() {
-//    setContentDescription(m_statusMessage);
-//  }
-
-  /**
-   * FIXME
-   */
-  protected void setInfoMessage(final String message) {
-    m_statusMessage = message;
-  }
-
-  /**
-   * FIXME
-   */
   private void clearStatus() {
     getStatusLine().setMessage(null);
     getStatusLine().setErrorMessage(null);
   }
 
 
-  protected CTabFolder createTestRunTabs(Composite parent) {
+  private CTabFolder createTestRunTabs(Composite parent) {
     CTabFolder tabFolder = new CTabFolder(parent, SWT.TOP);
     tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
@@ -702,8 +672,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
     TestNGPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 
-    getViewSite().getPage().addPartListener(fPartListener);
-
     if (m_stateMemento != null) {
       restoreLayoutState(m_stateMemento);
     }
@@ -744,7 +712,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_rerunAction.setEnabled(false);
     m_rerunFailedAction.setEnabled(false);
     m_openReportAction.setEnabled(false);
-    
+
     actionBars.setGlobalActionHandler(ActionFactory.NEXT.getId(), fNextAction);
     actionBars.setGlobalActionHandler(ActionFactory.PREVIOUS.getId(), fPrevAction);
 
@@ -794,7 +762,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     return getViewSite().getActionBars().getStatusLineManager();
   }
 
-  protected void createProgressCountPanel(Composite parent) {
+  private void createProgressCountPanel(Composite parent) {
     Display display= parent.getDisplay();
     fFailureColor= new Color(display, 159, 63, 63);
     fOKColor= new Color(display, 95, 191, 95);
@@ -922,7 +890,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       layout.numColumns = 2;
     }
   }
-  
+
   private class ToggleOrientationAction extends Action {
 
     private final int fActionOrientation;
@@ -958,7 +926,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   /**
-   * Background job running in UI thread for updating components info. 
+   * Background job running in UI thread for updating components info.
    */
   class UpdateUIJob extends UIJob {
     private volatile boolean fRunning = true;
@@ -1023,7 +991,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   public Image getTitleImage() {
     return m_viewIcon;
   }
-  
+
   /**
    * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
    */
@@ -1036,7 +1004,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
-  private void postTestResult(final RunInfo runInfo, final int progressStep) {
+  private void postTestResult(final RunInfo runInfo, final boolean isSuccess) {
     currentSuiteRunInfo.add(runInfo);
 
 //    long start = System.currentTimeMillis();
@@ -1047,8 +1015,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
           return;
         }
 
-        fProgressBar.step(progressStep);
-        fProgressBar.setTestName(runInfo.getTestName());
+        fProgressBar.step(isSuccess);
         for (TestRunTab tab : ALL_TABS) {
           tab.updateTestResult(runInfo, true /* expand */);
         }
@@ -1069,38 +1036,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     });
   }
 
-  private IPartListener2 fPartListener = new IPartListener2() {
-    public void partActivated(IWorkbenchPartReference ref) {
-    }
-
-    public void partBroughtToTop(IWorkbenchPartReference ref) {
-    }
-
-    public void partInputChanged(IWorkbenchPartReference ref) {
-    }
-
-    public void partClosed(IWorkbenchPartReference ref) {
-    }
-
-    public void partDeactivated(IWorkbenchPartReference ref) {
-    }
-
-    public void partOpened(IWorkbenchPartReference ref) {
-    }
-
-    public void partVisible(IWorkbenchPartReference ref) {
-      if(getSite().getId().equals(ref.getId())) {
-        m_partIsVisible = true;
-      }
-    }
-
-    public void partHidden(IWorkbenchPartReference ref) {
-      if(getSite().getId().equals(ref.getId())) {
-        m_partIsVisible = false;
-      }
-    }
-  };
-
   private class RerunAction extends Action {
     public RerunAction() {
       setText(ResourceUtil.getString("TestRunnerViewPart.rerunaction.label")); //$NON-NLS-1$
@@ -1109,7 +1044,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
       setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
     }
-      
+
     @Override
     public void run() {
       ILaunch launch = getLastLaunch();
@@ -1118,7 +1053,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       }
     }
   }
-  
+
   private class OpenReportAction extends Action {
     public OpenReportAction() {
       setText(ResourceUtil.getString("TestRunnerViewPart.openreport.label")); //$NON-NLS-1$
@@ -1140,7 +1075,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       }
       try {
         IDE.openEditor(page, file);
-      } 
+      }
       catch(final PartInitException e) {
         TestNGPlugin.log(e);
       }
@@ -1156,7 +1091,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       PreferenceStoreUtil storage= TestNGPlugin.getPluginPreferenceStore();
       IPath filePath= new Path(storage.getOutputDirectoryPath(javaProject).toOSString() + "/index.html");
       boolean isAbsolute= storage.isOutputAbsolutePath(javaProject.getElementName(), false);
-      
+
       IProgressMonitor progressMonitor= new NullProgressMonitor();
       if(isAbsolute) {
         IFile file = javaProject.getProject().getFile("temp-testng-index.html");
@@ -1187,7 +1122,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       }
     }
   }
-  
+
   private class RerunFailedAction extends Action {
     public RerunFailedAction() {
       setText(ResourceUtil.getString("TestRunnerViewPart.rerunfailedsaction.label")); //$NON-NLS-1$
@@ -1196,17 +1131,17 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunchf.gif")); //$NON-NLS-1$
       setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunchf.gif")); //$NON-NLS-1$
     }
-    
+
     @Override
     public void run() {
       ILaunch launch = getLastLaunch();
       if(null != launch && currentSuiteRunInfo.hasErrors()) {
-        LaunchUtil.launchFailedSuiteConfiguration(m_workingProject, 
-        		launch.getLaunchMode(), 
+        LaunchUtil.launchFailedSuiteConfiguration(m_workingProject,
+        		launch.getLaunchMode(),
         		launch.getLaunchConfiguration(),
         		getTestDescriptions());
       }
-    }    
+    }
   }
 
   /// ~ ITestNGRemoteEventListener
@@ -1254,8 +1189,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //      }
 //    });
 
-    fProgressBar.setTestName(null);
-
     if (currentSuiteRunInfo.isSuiteRunFinished()) {
       final boolean hasErrors = currentSuiteRunInfo.hasErrors();
       fNextAction.setEnabled(hasErrors);
@@ -1273,7 +1206,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
           m_stopButton.setEnabled(false);
         }
       });
-      
+
     }
 
     showResultsInTree();
@@ -1317,7 +1250,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //        for(int i = 0; i < ALL_TABS.size(); i++) {
 //          ((TestRunTab) ALL_TABS.elementAt(i)).updateEntry(entryId);
 //        }
-        
+
         fProgressBar.stepTests();
         m_stopButton.setEnabled(false);
       }
@@ -1342,32 +1275,28 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
                        type,
                        trm.getInvocationCount(),
                        trm.getCurrentInvocationCount());
-                       
   }
-  
+
   public void onTestSuccess(TestResultMessage trm) {
-    postTestResult(createRunInfo(trm, null, ITestResult.SUCCESS), 0 /*no error*/);
+    postTestResult(createRunInfo(trm, null, ITestResult.SUCCESS), true);
   }
 
   public void onTestFailure(TestResultMessage trm) {
     String desc = trm.getTestDescription();
     if (desc != null) {
     	getTestDescriptions().add (desc);
-    }	
+    }
     //    System.out.println("[INFO:onTestFailure]:" + trm.getMessageAsString());
-    postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.FAILURE), 1 /*error*/);
+    postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.FAILURE), false);
   }
 
   public void onTestSkipped(TestResultMessage trm) {
 //    System.out.println("[INFO:onTestSkipped]:" + trm.getMessageAsString());
-    postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.SKIP), 1 /*error*/
-    );
+    postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.SKIP), false);
   }
 
   public void onTestFailedButWithinSuccessPercentage(TestResultMessage trm) {
-    postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.SUCCESS_PERCENTAGE_FAILURE),
-                   1 /*error*/
-    );
+    postTestResult(createRunInfo(trm, trm.getStackTrace(), ITestResult.SUCCESS_PERCENTAGE_FAILURE), false);
   }
 
   public Set<String> getTestDescriptions() {
