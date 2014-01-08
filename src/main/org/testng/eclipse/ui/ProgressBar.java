@@ -27,7 +27,6 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-
 import org.testng.ITestResult;
 
 /**
@@ -55,12 +54,12 @@ public class ProgressBar extends Canvas {
   private int m_methodsCounter;
   private String m_currentMessage = "Tests: 0/0  Methods: 0/0";
   private String m_timeMessage= "";
-  private String m_testName;
 
   public ProgressBar(Composite parent) {
     super(parent, SWT.NONE);
 
     addControlListener(new ControlAdapter() {
+      @Override
       public void controlResized(ControlEvent e) {
         m_colorBarWidth = scale(m_currentTickCount);
         redraw();
@@ -211,6 +210,7 @@ public class ProgressBar extends Canvas {
                   true);
   }
 
+  @Override
   public Point computeSize(int wHint, int hHint, boolean changed) {
     checkWidget();
     Point size = new Point(DEFAULT_WIDTH, DEFAULT_HEIGHT);
@@ -224,13 +224,13 @@ public class ProgressBar extends Canvas {
     return size;
   }
 
-  public void step(int failures) {
+  public void step(boolean isSuccess) {
     m_currentTickCount++;
     m_methodsCounter++;
     int x = m_colorBarWidth;
 
     m_colorBarWidth = scale(m_currentTickCount);
-    if (m_error == ITestResult.SUCCESS && (failures > 0)) {
+    if (m_error == ITestResult.SUCCESS && !isSuccess) {
       m_error = ITestResult.FAILURE;
       x = 1;
     }
@@ -256,7 +256,4 @@ public class ProgressBar extends Canvas {
 //    System.out.println("[JUP]: " + msg);
   }
 
-  public void setTestName(String testName) {
-    m_testName = testName;
-  }
 }

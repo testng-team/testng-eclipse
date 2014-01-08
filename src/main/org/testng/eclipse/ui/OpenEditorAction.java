@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.testng.eclipse.ui;
 
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -26,8 +25,8 @@ import org.testng.eclipse.util.ResourceUtil;
  * Abstract Action for opening a Java editor.
  */
 public abstract class OpenEditorAction extends Action {
-  protected String             fClassName;
-  protected TestRunnerViewPart fTestRunner;
+  private String fClassName;
+  private TestRunnerViewPart fTestRunner;
   private final boolean        fActivate;
 
   /**
@@ -44,9 +43,7 @@ public abstract class OpenEditorAction extends Action {
     fActivate = activate;
   }
 
-  /*
-   * @see IAction#run()
-   */
+  @Override
   public void run() {
     ITextEditor textEditor = null;
     try {
@@ -55,7 +52,6 @@ public abstract class OpenEditorAction extends Action {
         MessageDialog.openError(getShell(),
                                 ResourceUtil.getString("OpenEditorAction.error.cannotopen.title"), //$NON-NLS-1$
                                 ResourceUtil.getFormattedString("OpenEditorAction.error.cannotopen.message", fClassName)); //$NON-NLS-1$
-
         return;
       }
       textEditor = (ITextEditor) EditorUtility.openInEditor(element, fActivate);
@@ -65,12 +61,9 @@ public abstract class OpenEditorAction extends Action {
                             ResourceUtil.getString("OpenEditorAction.error.dialog.title"), //$NON-NLS-1$
                             ResourceUtil.getFormattedString("OpenEditorAction.error.dialog.message", fClassName), //$NON-NLS-1$
                             e.getStatus());
-
       return;
     }
     if(textEditor == null) {
-      fTestRunner.setInfoMessage(ResourceUtil.getFormattedString("OpenEditorAction.error.cannotopen.message", fClassName)); //$NON-NLS-1$
-
       return;
     }
     reveal(textEditor);

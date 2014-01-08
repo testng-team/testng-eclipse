@@ -20,10 +20,9 @@ public class TestTreeItem extends BaseTreeItem implements ITreeItem {
 
   public void update(RunInfo runInfo) {
     getTreeItem().setText(MessageFormat.format(FORMATTED_MESSAGE,
-      new Object[] {
         getRunInfo().getTestName(),
         getTime() / 1000
-      })
+      )
     );
 
     maybeUpdateImage(runInfo);
