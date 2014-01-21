@@ -125,10 +125,8 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     }
 
     // Program & VM args
-    StringBuilder vmArgs = new StringBuilder(ConfigurationHelper.getJvmArgs(configuration))
+    StringBuilder vmArgs = new StringBuilder(ConfigurationHelper.getJvmArgs(configuration));
         // getVMArguments(configuration))
-        .append(" ")
-        .append(TestNGLaunchConfigurationConstants.VM_ENABLEASSERTION_OPTION); // $NON-NLS-1$
     addDebugProperties(vmArgs);
     ExecutionArguments execArgs = new ExecutionArguments(vmArgs.toString(), ""); //$NON-NLS-1$
     String[] envp = DebugPlugin.getDefault().getLaunchManager().getEnvironment(configuration);
