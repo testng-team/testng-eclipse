@@ -110,7 +110,7 @@ public class ProjectPropertyPage extends PropertyPage {
       SelectionAdapter listener = new SelectionAdapter() {
         public void widgetSelected(SelectionEvent evt) {
           DirectoryDialog dlg= new DirectoryDialog(m_xmlTemplateFile.getShell());
-          dlg.setMessage("Select Template XML file");
+          dlg.setMessage("Select TestNG Output Directory");
           String selectedDir = dlg.open();
           if (new File(selectedDir).isDirectory()) {
             selectedDir = selectedDir + File.separator + XMLReporter.FILE_NAME;
