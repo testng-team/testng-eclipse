@@ -2,8 +2,11 @@ package org.testng.eclipse.launch.tester;
 
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaElement;
+import org.testng.eclipse.launch.TestNGLaunchShortcut;
+import org.testng.eclipse.launch.xtend.WorkflowPropertyTester;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +29,7 @@ public class TestNGPropertyTester extends PropertyTester {
 
   private JavaTypeExtender m_typeExtender= new JavaTypeExtender();
   private FileExtender m_fileExtender= new FileExtender();
+  private WorkflowPropertyTester m_propertyExtender= new WorkflowPropertyTester();
 
   public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
     p("Testing property:" + property + " receiver:" + receiver);
@@ -56,11 +60,17 @@ public class TestNGPropertyTester extends PropertyTester {
     else {
       IAdaptable adaptable= (IAdaptable) receiver;
       IJavaElement element= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
+      
+      if(null == element) {
+        IResource r = (IResource) ((IAdaptable) receiver).getAdapter(IResource.class);
+        element = TestNGLaunchShortcut.getJavaElementForResource(r);
+      }
+      
       if(null != element) {
         return m_typeExtender.test(element, property, args, expectedValue);
-      }      
+      } 
     }
-    return false;
+    return m_propertyExtender.test(receiver, property, args, expectedValue);
   }
   
   private boolean isTestSuite(Object receiver, String property, Object[] args,
