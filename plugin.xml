@@ -89,6 +89,7 @@
                   <iterate>
                     <or>
                       <test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/>
+                      <test property="org.eclipse.debug.ui.matchesPattern" value="*.xtend"/>
                       <test property="org.eclipse.debug.ui.matchesPattern" value="*.class"/>
                       <instanceof value="org.eclipse.jdt.core.IJavaElement"/>
                     </or>

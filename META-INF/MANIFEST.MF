@@ -25,7 +25,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.search,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.ltk.ui.refactoring,
- org.eclipse.core.variables
+ org.eclipse.core.variables,
+ org.eclipse.xtext.ui;bundle-version="2.5.4"
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

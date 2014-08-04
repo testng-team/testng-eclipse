@@ -1,14 +1,24 @@
 package org.testng.eclipse.launch;
 
+import static org.testng.eclipse.launch.xtend.WorkflowLaunchUtils.runWorkflow;
+import static org.testng.eclipse.launch.xtend.WorkflowLaunchUtils.workflowFileFor;
+
 import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.debug.ui.ILaunchShortcut;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -17,6 +27,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.core.PackageFragment;
@@ -29,8 +40,19 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.xtext.generator.IDerivedResourceMarkers;
+import org.eclipse.xtext.nodemodel.ILeafNode;
+import org.eclipse.xtext.nodemodel.INode;
+import org.eclipse.xtext.nodemodel.util.NodeIterator;
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
+import org.eclipse.xtext.parser.IParseResult;
+import org.eclipse.xtext.resource.XtextResource;
+import org.eclipse.xtext.ui.editor.XtextEditor;
+import org.eclipse.xtext.util.concurrent.IUnitOfWork;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.tester.JavaTypeExtender;
+import org.testng.eclipse.launch.xtend.GenerateArtifactsLaunchShortcut;
 import org.testng.eclipse.util.LaunchUtil;
 
 /**
@@ -64,8 +86,9 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
             IResource r = (IResource) ((IAdaptable) obj).getAdapter(IResource.class);
             if (r != null) {
               project = r.getProject();
+              element =  getJavaElementForResource(r);
             }
-          }
+          } 
         }
         if (element != null) {
           javaProject = element.getJavaProject();
@@ -89,6 +112,51 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
     }
   }
 
+  public static IJavaElement getJavaElementForResource(IResource resource) {
+    try {
+      final String getSourcePath = URI.createPlatformResourceURI(resource.getFullPath().toString(), true).toString();
+      List<IFile> resources = findDerivedResources(resource.getProject(), "org.eclipse.xtend.core.Xtend", getSourcePath);
+      for (IFile file : resources) {
+        if (containsElementsSearchedFor(file))
+          return JavaCore.create(file);
+      }
+    } catch (CoreException e) {
+       e.printStackTrace();
+    }
+    return null;
+  }
+  
+  
+  public static boolean containsElementsSearchedFor(IFile file) {
+    return true;
+  }
+  public final static String MARKER_ID = "org.eclipse.xtext.builder.derivedresource"; 
+  public final static String ATTR_SOURCE = "source"; 
+  public final static String ATTR_GENERATOR = "generator"; 
+  public static List<IFile> findDerivedResources(IContainer container, String generator, String source) throws CoreException {
+    List<IFile> result = Lists.newArrayList();
+    if (!container.exists())
+      return result;
+    IMarker[] markers = container.findMarkers(MARKER_ID, true, IResource.DEPTH_INFINITE);
+    for (IMarker iMarker : markers) {
+      if (generator.equals(iMarker.getAttribute(ATTR_GENERATOR))) {
+        if (source == null || source.equals(iMarker.getAttribute(ATTR_SOURCE))) {
+          result.add((IFile) iMarker.getResource());
+        }
+      }
+    }
+    return result;
+  }
+  
+  protected IJavaElement getJavaElementForEditor(IEditorPart editor) {
+    if (editor.getEditorInput() instanceof IFileEditorInput) {
+      IFile file = ((IFileEditorInput) editor.getEditorInput()).getFile();
+//      if (fileExtensionProvider.isValid(file.getFileExtension())) 
+        return getJavaElementForResource(file);
+    }
+    return null;
+  }  
+  
   private void maybeAddJavaElement(IJavaElement element, List<IType> units)
       throws JavaModelException {
     p("Examining Java element:" + element);
@@ -136,6 +204,7 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
 	      run(root, mode);
 	    }
 	  }
+	  launch(new StructuredSelection(getJavaElementForEditor(editor)), mode);
   }
 
   private IMethod resolveSelectedMethod(IEditorPart editor, ITypeRoot root) {
