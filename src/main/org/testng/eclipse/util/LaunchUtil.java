@@ -132,8 +132,8 @@ public class LaunchUtil {
         createLaunchConfiguration(project, fileConfName, null);
     try {
       if (prevConfig != null) {
-        Map<?, ?> previousEnv
-            = prevConfig.getAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, (Map<?, ?>) null);
+        Map<String, String> previousEnv
+            = prevConfig.getAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, (Map<String, String>) null);
         configWC.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, previousEnv);
       }
     } catch (CoreException e) {
@@ -165,7 +165,7 @@ public class LaunchUtil {
   
   public static void launchMapConfiguration(IProject project,
                                             String configName,
-                                            Map<String, Map> launchAttributes,
+                                            Map<String, Object> launchAttributes,
                                             ICompilationUnit compilationUnit,
                                             String launchMode) {
     ILaunchConfigurationWorkingCopy workingCopy= createLaunchConfiguration(project, configName, null);

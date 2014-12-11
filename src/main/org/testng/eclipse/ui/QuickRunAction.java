@@ -79,7 +79,7 @@ public class QuickRunAction extends Action {
     m_runInfo.setJvmArgs(ConfigurationHelper.getJvmArgs(config));
     try {
       m_runInfo.setEnvironmentVariables(config.getAttribute(
-          ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, (Map<?, ?>) null));
+          ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, (Map<String, String>) null));
     } catch (CoreException e) {
       TestNGPlugin.log(e);
     }

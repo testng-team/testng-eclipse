@@ -526,14 +526,14 @@ public class ConfigurationHelper {
       }
     }
     Collection<String> classNames= launchInfo.m_classNames;
-    List<Object> classNamesList= new ArrayList<Object>();
+    List<String> classNamesList= new ArrayList<String>();
     if(null != classNames && !classNames.isEmpty()) {
       for (String cls : classNames) {
         classMethods.put(cls, Collections.<String>emptyList());
         classNamesList.add(cls);
       }
     }
-    List<Object> packageList = new ArrayList<Object>();
+    List<String> packageList = new ArrayList<String>();
     if (launchInfo.m_packageNames != null) {
     	packageList.addAll(launchInfo.m_packageNames);
     }    
@@ -552,7 +552,7 @@ public class ConfigurationHelper {
     configuration.setAttribute(TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST,
     		packageList);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.GROUP_LIST,
-                               new ArrayList<Object>(launchInfo.m_groupMap.keySet()));
+                               new ArrayList<String>(launchInfo.m_groupMap.keySet()));
     configuration.setAttribute(TestNGLaunchConfigurationConstants.GROUP_CLASS_LIST,
                                Utils.uniqueMergeList(launchInfo.m_groupMap.values()));
     configuration.setAttribute(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
