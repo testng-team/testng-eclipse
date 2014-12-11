@@ -28,6 +28,7 @@ public abstract class TestNGPluginConstants {
   public static final String S_EXCLUDED_STACK_TRACES = "excludedStackTraces";
   public static final String S_SUITE_METHOD_TREATMENT = "suiteMethodTreatment";
   public static final String S_PRE_DEFINED_LISTENERS = "preDefinedListeners";
+  public static final String S_SHOW_VIEW_WHEN_TESTS_COMPLETE = "showViewWhenTestComplete";
 
   private TestNGPluginConstants() {}
 }

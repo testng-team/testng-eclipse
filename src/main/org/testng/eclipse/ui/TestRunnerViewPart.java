@@ -61,13 +61,11 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
-import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -508,17 +506,29 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
     if(page != null) {
       try {
+        // Only have the view forcibly shown and take focus if the preference is
+        // set to do so, otherwise just make sure the view exists
+        boolean focusOnView = TestNGPlugin.getDefault().getPreferenceStore()
+            .getBoolean(TestNGPluginConstants.S_SHOW_VIEW_WHEN_TESTS_COMPLETE);
+
         testRunner = (TestRunnerViewPart) page.findView(TestRunnerViewPart.NAME);
-        if(testRunner == null) {
 
-          IWorkbenchPart activePart = page.getActivePart();
-          testRunner = (TestRunnerViewPart) page.showView(TestRunnerViewPart.NAME);
+        if (focusOnView) {
+          if (testRunner == null) {
+            IWorkbenchPart activePart = page.getActivePart();
+            testRunner = (TestRunnerViewPart) page
+                .showView(TestRunnerViewPart.NAME);
 
-          //restore focus
-          page.activate(activePart);
-        }
-        else {
-          page.bringToTop(testRunner);
+            // restore focus
+            page.activate(activePart);
+          } else {
+            page.bringToTop(testRunner);
+          }
+        } else {
+          // Make sure the view exists, but don't force it to the front or give
+          // it focus
+          page.showView(TestRunnerViewPart.NAME, null,
+              IWorkbenchPage.VIEW_CREATE);
         }
       }
       catch(PartInitException pie) {

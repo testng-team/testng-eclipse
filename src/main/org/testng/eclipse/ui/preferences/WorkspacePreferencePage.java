@@ -1,6 +1,8 @@
 package org.testng.eclipse.ui.preferences;
 
 
+import java.io.File;
+
 import org.eclipse.debug.internal.ui.preferences.BooleanFieldEditor2;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
@@ -18,8 +20,6 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 
-import java.io.File;
-
 /**
  * Workspace wide preferences for TestNG.
  */
@@ -30,6 +30,7 @@ public class WorkspacePreferencePage
   private FSBrowseDirectoryFieldEditor m_outputdir;
   private BooleanFieldEditor2 m_absolutePath;
   private BooleanFieldEditor2 m_disabledDefaultListeners;
+  private BooleanFieldEditor2 m_showViewWhenTestsComplete;
   private FileFieldEditor m_xmlTemplateFile;
   private StringFieldEditor m_excludedStackTraces;
   private StringFieldEditor m_preDefinedListeners;
@@ -72,6 +73,11 @@ public class WorkspacePreferencePage
         SWT.NONE, 
         parentComposite);
 
+    m_showViewWhenTestsComplete = new BooleanFieldEditor2(
+        TestNGPluginConstants.S_SHOW_VIEW_WHEN_TESTS_COMPLETE,
+        "Show view when tests complete", //$NON-NLS-1$ 
+        SWT.NONE, parentComposite);
+
     // XML template
     m_xmlTemplateFile = new FileFieldEditor(TestNGPluginConstants.S_XML_TEMPLATE_FILE,
         "Template XML file:", false /* no absolute */,
@@ -93,7 +99,8 @@ public class WorkspacePreferencePage
 
     addField(m_outputdir);
     addField(m_absolutePath);
-    addField(m_disabledDefaultListeners);    
+    addField(m_disabledDefaultListeners);
+    addField(m_showViewWhenTestsComplete);
     addField(m_xmlTemplateFile);
     addField(m_excludedStackTraces);
     addField(m_preDefinedListeners);
