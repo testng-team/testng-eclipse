@@ -29,12 +29,12 @@ be found in the ```strprotocol``` package.
 The plug-in understands two system properties, which you can define as
 VM arguments in the launch dialog:
 
-```-Dtestng.eclipse.verbose```
+   -Dtestng.eclipse.verbose
 
 This will cause both the Eclipse client and RemoteTestNG to issue a
 more verbose output.
 
-```-Dtestng.eclipse.debug```
+   -Dtestng.eclipse.debug
 
 Use this flag if you need to debug and break into RemoteTestNG. In
 this case, you need to start the RemoteTestNG process youself as a
