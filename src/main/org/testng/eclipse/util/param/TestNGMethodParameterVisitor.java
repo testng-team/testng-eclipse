@@ -1,9 +1,9 @@
 package org.testng.eclipse.util.param;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
@@ -83,7 +83,7 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
       return false;
     }
     
-    List values= annotation.values();
+    List<?> values= annotation.values();
     
     if(null != values && !values.isEmpty()) {
       for(int i= 0; i < values.size(); i++) {
@@ -131,7 +131,7 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
 
   protected void record(MethodDeclaration method, StringLiteral value){
     if (! Strings.isNullOrEmpty(value.getLiteralValue())) {
-      List<String> paramNames = Lists.newArrayList();
+      List<String> paramNames = new ArrayList<String>();
       paramNames.add(value.getLiteralValue());
       record(method, paramNames);
     }
@@ -143,8 +143,8 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
    * @param values array initializer containing StringLiterals for the parameter names
    */
   protected void record(MethodDeclaration method, ArrayInitializer values) {
-    List literals = values.expressions();
-    List<String> paramNames = Lists.newArrayList(literals.size());
+    List<?> literals = values.expressions();
+    List<String> paramNames = new ArrayList<String>(literals.size());
     for(int i= 0; i < literals.size(); i++) {
       StringLiteral str = (StringLiteral) literals.get(i);
       paramNames.add(str.getLiteralValue());

@@ -2,11 +2,14 @@
 <classpath>
 	<classpathentry kind="src" path="src/main"/>
 	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry exported="true" kind="lib" path="lib/testng-6.8.13-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/testng-6.8.13.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/bsh-2.0b4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jcommander-1.47.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/guava-base-r03.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/guava-collections-r03.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry exported="true" kind="lib" path="lib/testng.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/guava-base-r03.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/guava-collections-r03.jar" sourcepath="/Users/cedric/java/guava-collections/guava-collections-r03-sources.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
