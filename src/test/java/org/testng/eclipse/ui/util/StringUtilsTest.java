@@ -25,7 +25,7 @@ public class StringUtilsTest {
     String resultStringList = StringUtils.listToString(expectedList);
 
     Assert.assertEquals(resultStringList, 
-        "c:/With Space/test.xml,c:/WithoutSpace/test.xml,c:/test/test A/test B/test.xml,");
+        "c:/With Space/test.xml,c:/WithoutSpace/test.xml,c:/test/test A/test B/test.xml");
   }
 
   @Test
