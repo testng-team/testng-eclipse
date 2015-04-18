@@ -12,14 +12,21 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
+import org.eclipse.ui.internal.misc.StringMatcher;
 import org.testng.eclipse.util.ResourceUtil;
 
 import com.google.common.collect.Lists;
@@ -28,6 +35,7 @@ import com.google.common.collect.Lists;
  * A Table with checkboxes to present group names.
  */
 public class CheckBoxTable extends SelectionStatusDialog {
+  private Text pattern;
   protected CheckboxTableViewer m_viewer;
 
   private String[] m_elements;
@@ -89,9 +97,18 @@ public class CheckBoxTable extends SelectionStatusDialog {
   protected Control createDialogArea(Composite parent) {
     Composite composite = (Composite) super.createDialogArea(parent);
 
+    // create the pattern filter area
+    pattern = new Text(composite, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_CANCEL);
+    GridData data = new GridData(GridData.FILL_HORIZONTAL);
+    pattern.setLayoutData(data);
+
+    // create the table area
     final CheckboxTableViewer tableViewer = createTableViewer(composite);
 
-    GridData data = new GridData(GridData.FILL_BOTH);
+    final PatternFilter patternFilter = new PatternFilter();
+    tableViewer.setFilters(new ViewerFilter[] {patternFilter});
+
+    data = new GridData(GridData.FILL_BOTH);
     data.widthHint = convertWidthInCharsToPixels(60);
     data.heightHint = convertHeightInCharsToPixels(18);
 
@@ -114,9 +131,32 @@ public class CheckBoxTable extends SelectionStatusDialog {
       }
     });
 
+    pattern.addModifyListener(new ModifyListener() {
+      public void modifyText(ModifyEvent e) {
+        patternFilter.setPattern(pattern.getText());
+        tableViewer.refresh(true);
+      }
+    });
+
+    pattern.addKeyListener(new KeyAdapter() {
+      public void keyPressed(KeyEvent e) {
+        if (e.keyCode == SWT.ARROW_DOWN) {
+          if (m_viewer.getTable().getItemCount() > 0) {
+            m_viewer.getTable().setFocus();
+          }
+        }
+      }
+    });
+
     applyDialogFont(composite);
     
     return composite;
+  }
+  
+  @Override
+  public void create() {
+    super.create();
+    pattern.setFocus();
   }
   
   protected void updateOKStatus() {
@@ -214,6 +254,37 @@ public class CheckBoxTable extends SelectionStatusDialog {
   public void checkElements(String[] elements) {
     for (int i = 0; i < elements.length; i++) {
       m_selection.add(elements[i]);
+    }
+  }
+
+  private class PatternFilter extends ViewerFilter {
+
+    /**
+     * The string pattern matcher used for this pattern filter.  
+     */
+    private StringMatcher matcher;
+
+    @Override
+    public boolean select(Viewer viewer, Object parentElement, Object element) {
+      if (matcher == null)
+        return true;
+
+      return matcher.match(element.toString());
+    }
+
+    /**
+     * The pattern string for which this filter should select 
+     * elements in the viewer.
+     * 
+     * @param patternString
+     */
+    public void setPattern(String patternString) {
+      if (patternString == null || patternString.equals("")) { //$NON-NLS-1$
+        matcher = null;
+      } else {
+        String pattern = "*" + patternString + "*"; //$NON-NLS-1$
+        matcher = new StringMatcher(pattern, true, false);
+      }
     }
   }
 }
