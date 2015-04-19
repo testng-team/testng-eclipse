@@ -1,7 +1,6 @@
 package org.testng.eclipse.launch;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,7 @@ import java.util.Vector;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -27,6 +26,7 @@ import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.testng.CommandLineArgs;
 import org.testng.ITestNGListener;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.buildpath.BuildPathSupport;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.util.LaunchUtil;
@@ -315,15 +315,10 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     }
     // Add our own lib/testng.jar unless this project is configured to use its own testng.jar
     else {
-      String testngJarLocation = getTestNGLibraryVersion();
+      IPath testngJarPath = BuildPathSupport.getTestNGLibraryPath();
       String[] allClasspath = new String[originalClasspath.length + 1];
-      try {
-        // insert the bundle embedded testng.jar on the front of the classpath
-        allClasspath[0] = FileLocator.toFileURL(TestNGPlugin.getDefault().getBundle().getEntry(testngJarLocation)).getFile();
-      } catch (IOException ioe) {
-        TestNGPlugin.log(ioe);
-        abort("Cannot create runtime classpath", ioe, 1000); //$NON-NLS-1$
-      }
+      // insert the bundle embedded testng.jar on the front of the classpath
+      allClasspath[0] = testngJarPath.toOSString();
       System.arraycopy(originalClasspath, 0, allClasspath, 1, originalClasspath.length);
       return allClasspath;
     }
@@ -346,13 +341,6 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     default:
       return "from context";
     }
-  }
-
-  private String getTestNGLibraryVersion() {
-    String testngLib = null;
-    testngLib = ResourceUtil.getString("TestNG.jdk15.library"); //$NON-NLS-1$
-
-    return testngLib;
   }
 
   private static void ppp(final Object msg) {

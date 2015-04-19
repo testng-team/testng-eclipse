@@ -44,16 +44,19 @@ public class BuildPathSupport {
     return JavaCore.newContainerEntry(TestNGContainerInitializer.TESTNG_PATH);
   }
 
+  public static IPath getTestNGLibraryPath() {
+    return getBundleLocation().append(ResourceUtil.getString("TestNG.jdk15.library")); //$NON-NLS-1$
+  }
+  
+  public static IPath getTestNGSourcePath() {
+    return getBundleLocation().append(ResourceUtil.getString("TestNG.jdk15.sources")); //$NON-NLS-1$
+  }
+  
   public static IClasspathEntry getTestNGLibraryEntry() {
-    IPath bundleBase = getBundleLocation();
-    if (bundleBase != null) {
-      IPath jarLocation = bundleBase.append(ResourceUtil.getString("TestNG.jdk15.library")); //$NON-NLS-1$
-      IPath srcLocation = bundleBase.append(ResourceUtil.getString("TestNG.jdk15.sources")); //$NON-NLS-1$
+    IPath jarLocation = getTestNGLibraryPath();
+    IPath srcLocation = getTestNGSourcePath();
 
-      return JavaCore.newLibraryEntry(jarLocation, srcLocation, null);
-    }
-
-    return null;
+    return JavaCore.newLibraryEntry(jarLocation, srcLocation, null);
   }
 
   public static boolean projectContainsClasspathEntry(IJavaProject project, IClasspathEntry entry) throws JavaModelException {
