@@ -170,6 +170,7 @@ abstract public class CustomSuite extends LaunchSuite {
         put(attr, "data-provider-thread-count", s.getDataProviderThreadCount());
         put(attr, "object-factory", s.getObjectFactory());
         put(attr, "allow-return-values", s.getAllowReturnValues());
+        put(attr, "preserve-order", s.getPreserveOrder());
         suiteBuffer.push("suite", attr);
 
         // Children of <suite>
