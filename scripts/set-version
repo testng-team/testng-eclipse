@@ -1,0 +1,7 @@
+if [ $# -ne 1 ]
+then
+  echo "Need the version number"
+  exit -1
+fi
+
+mvn -e -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=$1

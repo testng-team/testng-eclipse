@@ -1,0 +1,13 @@
+if [ $# -ne 2 ]
+then
+  echo "Usage $0 version comment"
+  echo "For example: $0 6.8.22_20150503_1249 6.8.22"
+  exit -1
+fi
+
+TESTNG_JAR=`ls -ltr ../testng/target/testng*jar|grep -v source|awk '{print $9}'`
+cp ${TESTNG_JAR} testng-eclipse-plugin/lib
+scripts/set-version $1
+mvn clean package
+scripts/upload-release -m $2
+
