@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.testng.eclipse</groupId>
         <artifactId>org.testng.eclipse.parent</artifactId>
-        <version>6.8.22.20150304_1258</version>
+        <version>6.8.22.2015_05_03_1820</version>
     </parent>
     <artifactId>org.testng.eclipse</artifactId>
     <packaging>eclipse-plugin</packaging>
