@@ -1,7 +1,7 @@
 if [ $# -ne 2 ]
 then
   echo "Usage $0 version comment"
-  echo "For example: $0 6.8.22_20150503_1249 6.8.22"
+  echo "For example: $0 6.8.22_2015_05_03_1249 6.8.22"
   exit -1
 fi
 
