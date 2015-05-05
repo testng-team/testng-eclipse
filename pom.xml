@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.testng.eclipse</groupId>
     <artifactId>org.testng.eclipse.parent</artifactId>
-    <version>6.8.22.2015_05_03_1820</version>
+    <version>6.8.22-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>

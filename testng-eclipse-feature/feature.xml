@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.testng.eclipse.feature"
+      id="org.testng.eclipse"
       label="TestNG"
-      version="6.8.22.2015_05_03_1820"
+      version="6.8.22.qualifier"
       provider-name="Cedric Beust">
 
    <description url="http://testng.org">
