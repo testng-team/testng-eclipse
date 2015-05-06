@@ -1,5 +1,8 @@
 package org.testng.eclipse.launch.components;
 
+import java.util.Collection;
+import java.util.Set;
+
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -7,10 +10,8 @@ import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.util.signature.ASTMethodDescriptor;
 import org.testng.eclipse.util.signature.IMethodDescriptor;
 import org.testng.eclipse.util.signature.MethodDescriptor;
-import org.testng.internal.annotations.Sets;
 
-import java.util.Collection;
-import java.util.Set;
+import com.google.common.collect.Sets;
 
 public class BaseVisitor extends ASTVisitor implements ITestContent {
   // List<MethodDeclaration>
@@ -37,7 +38,7 @@ public class BaseVisitor extends ASTVisitor implements ITestContent {
       return m_annotationType;
     }
     
-    return ((IMethodDescriptor) m_testMethods.iterator().next()).getAnnotationType();
+    return m_testMethods.iterator().next().getAnnotationType();
   }
   
   public Set<IMethodDescriptor> getTestMethods() {

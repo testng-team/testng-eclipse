@@ -8,10 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import junit.framework.Assert;
-
-import com.google.common.collect.Maps;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Expression;
@@ -31,7 +27,11 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.testng.AssertJUnit;
 import org.testng.collections.Lists;
-import org.testng.internal.annotations.Sets;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
+import junit.framework.Assert;
 
 /**
  * This visitor stores all the interesting things in a JUnit class:
