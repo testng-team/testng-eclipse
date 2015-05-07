@@ -5,7 +5,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/testng-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/testng.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/bsh-2.0b4.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jcommander-1.47.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jcommander.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/guava-base-r03.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/guava-collections-r03.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>

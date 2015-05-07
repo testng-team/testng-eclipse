@@ -33,7 +33,7 @@ Bundle-ClassPath: .,
  lib/guava-collections-r03.jar,
  lib/testng.jar,
  lib/testng-sources.jar,
- lib/jcommander-1.47.jar,
+ lib/jcommander.jar,
  lib/bsh-2.0b4.jar
 Export-Package: 
  org.testng.eclipse,
