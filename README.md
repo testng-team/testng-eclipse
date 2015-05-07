@@ -1,4 +1,4 @@
-# User
+# User documentation
 
 The documentation for this plug-in can be found at http://testng.org/doc/eclipse.html
 
@@ -16,13 +16,13 @@ Using `SNAPSHOT` version numbers will generate UTC timestamped plugin-numbers, e
 
 ## Building
 
-Once the version is correct, build the TestNG eclipse as follows:
+Once the version is correct, build the Eclipse plug-in as follows:
 
 ```
 mvn -e clean package
 ```
 
-The update site package will be generated at `<testng-eclipse>/updatesite/target/site.zip`
+The update site package will be generated at `testng-eclipse-update-site/target/site.zip`
 
 # Developer
 
