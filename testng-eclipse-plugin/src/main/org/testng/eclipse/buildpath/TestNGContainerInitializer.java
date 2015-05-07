@@ -48,17 +48,7 @@ public class TestNGContainerInitializer extends ClasspathContainerInitializer {
   // @Override
   public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
     if (isValidTestNGContainerPath(containerPath)) {
-
-      IClasspathEntry entry = null;
-      entry = BuildPathSupport.getTestNGLibraryEntry();
-
-      IClasspathEntry[] entries;
-      if (entry != null) {
-        entries = new IClasspathEntry[] { entry };
-      }
-      else {
-        entries = new IClasspathEntry[] {};
-      }
+      IClasspathEntry[] entries = BuildPathSupport.getTestNGLibraryEntries();
       TestNGContainer testNGContainer = new TestNGContainer(containerPath, entries);
       JavaCore.setClasspathContainer(containerPath,
                                      new IJavaProject[] { project },

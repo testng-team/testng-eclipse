@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.ExecutionArguments;
@@ -313,13 +314,15 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     if (useProjectJar) {
       return originalClasspath;
     }
-    // Add our own lib/testng.jar unless this project is configured to use its own testng.jar
-    else {
-      IPath testngJarPath = BuildPathSupport.getTestNGLibraryPath();
-      String[] allClasspath = new String[originalClasspath.length + 1];
-      // insert the bundle embedded testng.jar on the front of the classpath
-      allClasspath[0] = testngJarPath.toOSString();
-      System.arraycopy(originalClasspath, 0, allClasspath, 1, originalClasspath.length);
+    else {    // Add our own testng libraries unless this project is configured to use its own testng.jar
+      IClasspathEntry[] cpEntries = BuildPathSupport.getTestNGLibraryEntries();
+      String[] allClasspath = new String[originalClasspath.length + cpEntries.length];
+      for (int i = 0; i < cpEntries.length; i++) {
+        IPath jarPath = cpEntries[i].getPath();
+        // insert the bundle embedded testng.jar on the front of the classpath
+        allClasspath[i] = jarPath.toOSString();
+      }
+      System.arraycopy(originalClasspath, 0, allClasspath, cpEntries.length, originalClasspath.length);
       return allClasspath;
     }
   }

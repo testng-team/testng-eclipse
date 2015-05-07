@@ -44,19 +44,21 @@ public class BuildPathSupport {
     return JavaCore.newContainerEntry(TestNGContainerInitializer.TESTNG_PATH);
   }
 
-  public static IPath getTestNGLibraryPath() {
-    return getBundleLocation().append(ResourceUtil.getString("TestNG.jdk15.library")); //$NON-NLS-1$
-  }
-  
-  public static IPath getTestNGSourcePath() {
-    return getBundleLocation().append(ResourceUtil.getString("TestNG.jdk15.sources")); //$NON-NLS-1$
-  }
-  
-  public static IClasspathEntry getTestNGLibraryEntry() {
-    IPath jarLocation = getTestNGLibraryPath();
-    IPath srcLocation = getTestNGSourcePath();
+  /**
+   * 
+   * @return the <code>IClasspathEntry</code> array which contains the testng jar itself and its dependencies, e.g. jcommander
+   */
+  public static IClasspathEntry[] getTestNGLibraryEntries() {
+    IClasspathEntry[] entries = new IClasspathEntry[2];
 
-    return JavaCore.newLibraryEntry(jarLocation, srcLocation, null);
+    IPath jarLocation = getBundleLocation().append(ResourceUtil.getString("TestNG.library")); //$NON-NLS-1$
+    IPath srcLocation = getBundleLocation().append(ResourceUtil.getString("TestNG.sources")); //$NON-NLS-1$
+    entries[0] = JavaCore.newLibraryEntry(jarLocation, srcLocation, null);
+
+    jarLocation = getBundleLocation().append(ResourceUtil.getString("Jcommander.library")); //$NON-NLS-1$
+    entries[1] = JavaCore.newLibraryEntry(jarLocation, null, null);
+
+    return entries;
   }
 
   public static boolean projectContainsClasspathEntry(IJavaProject project, IClasspathEntry entry) throws JavaModelException {
