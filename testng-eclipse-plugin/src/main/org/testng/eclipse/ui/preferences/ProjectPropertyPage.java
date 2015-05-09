@@ -42,6 +42,7 @@ import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.ui.util.Utils.Widgets;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
+import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SWTUtil;
 import org.testng.reporters.XMLReporter;
 
@@ -51,7 +52,6 @@ import org.testng.reporters.XMLReporter;
  * @author Cedric Beust <cedric@beust.com>
  */
 public class ProjectPropertyPage extends PropertyPage {
-  private static final IStatus ERROR = new StatusInfo(IStatus.ERROR, "");
   private Text m_outputdir;
   private Button m_absolutePath;
   private Button m_disabledDefaultListeners;
@@ -163,7 +163,7 @@ public class ProjectPropertyPage extends PropertyPage {
     // Project jar
     //
     m_projectJar= new Button(parentComposite, SWT.CHECK);
-    m_projectJar.setText("Use project TestNG jar");
+    m_projectJar.setText(ResourceUtil.getString("TestNGPropertyPage.useProjectTestNGJar"));
 //    m_projectJar.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING, SWT.NONE,
 //        false /* don't grab excess horizontal */,
 //        false /* don't grab excess vertical */,

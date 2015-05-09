@@ -5,6 +5,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.testng.TestNG;
+import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 
 import java.io.File;
@@ -12,6 +13,11 @@ import java.util.Random;
 
 /**
  * Utility methods to store and retrieve data in the preference store.
+ * 
+ * XXX The whole preference store parts are used in wrong way, 
+ *      need to be refactored to follow eclipse scoped preference story
+ *      which require to change both <code>ProjectPropertyPage</code> and
+ *      <code>WorkspacePreferencepage</code>, and also need to consider back compitability 
  *
  * @author Cedric Beust <cedric@beust.com>
  */
@@ -35,9 +41,14 @@ public class PreferenceStoreUtil {
   }
 
   public void storeUseProjectJar(String projectName, boolean selection) {
-    m_storage.setValue(projectName + TestNGPluginConstants.S_USEPROJECTJAR, selection);
+    String strUsePrjJar = String.valueOf(selection);
+    // here store the string value rather than boolean is to prevent the value being removed from store,
+    // which cause it's hard to know wheter the value should read from global or project level
+    // now by explicitly set the value "true" or "false" to know it's at project level,
+    // otherwise, it comes from global level
+    m_storage.setValue(projectName + TestNGPluginConstants.S_USEPROJECTJAR, strUsePrjJar);
   }
-  
+
   public void storeXmlTemplateFile(String projectName, String xmlFile) {
     m_storage.setValue(projectName + TestNGPluginConstants.S_XML_TEMPLATE_FILE, xmlFile);
   }
@@ -144,7 +155,13 @@ public class PreferenceStoreUtil {
   }
 
   public boolean getUseProjectJar(String projectName) {
-    return m_storage.getBoolean(projectName + TestNGPluginConstants.S_USEPROJECTJAR);
+    String strUsePrjJar = m_storage.getString(projectName + TestNGPluginConstants.S_USEPROJECTJAR);
+    // if no project level setting, query from global
+    if (strUsePrjJar == null || strUsePrjJar.isEmpty()) {
+      return TestNGPlugin.getDefault().getPreferenceStore()
+          .getBoolean(TestNGPluginConstants.S_USEPROJECTJAR_GLOBAL);
+    }
+    return Boolean.valueOf(strUsePrjJar).booleanValue();
   }
 
   public boolean getWatchResults(String projectName) {

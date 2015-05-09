@@ -27,6 +27,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
     // tests finish running
     store.setDefault(TestNGPluginConstants.S_SHOW_VIEW_WHEN_TESTS_COMPLETE,
         true);
+    store.setDefault(TestNGPluginConstants.S_USEPROJECTJAR_GLOBAL, true);
   }
 
 }
