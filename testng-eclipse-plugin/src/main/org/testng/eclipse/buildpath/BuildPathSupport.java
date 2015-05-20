@@ -45,11 +45,11 @@ public class BuildPathSupport {
   }
 
   /**
-   * 
+   *
    * @return the <code>IClasspathEntry</code> array which contains the testng jar itself and its dependencies, e.g. jcommander
    */
   public static IClasspathEntry[] getTestNGLibraryEntries() {
-    IClasspathEntry[] entries = new IClasspathEntry[3];
+    IClasspathEntry[] entries = new IClasspathEntry[4];
 
     IPath jarLocation = getBundleLocation().append(ResourceUtil.getString("TestNG.library")); //$NON-NLS-1$
     IPath srcLocation = getBundleLocation().append(ResourceUtil.getString("TestNG.sources")); //$NON-NLS-1$
@@ -60,6 +60,9 @@ public class BuildPathSupport {
 
     jarLocation = getBundleLocation().append(ResourceUtil.getString("Bsh.library")); //$NON-NLS-1$
     entries[2] = JavaCore.newLibraryEntry(jarLocation, null, null);
+
+    jarLocation = getBundleLocation().append(ResourceUtil.getString("Snakeyaml.library")); //$NON-NLS-1$
+    entries[3] = JavaCore.newLibraryEntry(jarLocation, null, null);
 
     return entries;
   }
