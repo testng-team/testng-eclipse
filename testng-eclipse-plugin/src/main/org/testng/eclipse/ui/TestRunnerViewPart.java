@@ -338,10 +338,10 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
-  public void startTestRunListening(IJavaProject project,
+  public void startTestRunListening(final IJavaProject project,
                                     String subName,
                                     int port,
-                                    ILaunch launch) {
+                                    final ILaunch launch) {
     m_workingProject = project;
 
     aboutToLaunch(subName);
@@ -350,39 +350,46 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //      stopTest();
 //    }
     fTestRunnerClient = new EclipseTestRunnerClient();
-    IMessageSender messageMarshaller = LaunchUtil.useStringProtocol(launch.getLaunchConfiguration())
+    final IMessageSender messageMarshaller = LaunchUtil.useStringProtocol(launch.getLaunchConfiguration())
         ? new StringMessageSender("localhost", port)
         : new SerializedMessageSender("localhost", port);
 
-    boolean isInitSuccess = false;
-    do {
-      try {
-        messageMarshaller.initReceiver();
-        isInitSuccess = true;
-      } catch (SocketTimeoutException e) {
-        TestNGPlugin.log(e);
-      }
-    } while (isInitSuccess == false && launch.isTerminated() == false);
+        String jobName = ResourceUtil.getString("TestRunnerViewPart.message.startTestRunListening");
+        Job testRunListeningJob = new Job(jobName) {
+          @Override
+          protected IStatus run(IProgressMonitor monitor) {
+            try {
+              messageMarshaller.initReceiver();
+              newSuiteRunInfo(launch);
+              fTestRunnerClient.startListening(currentSuiteRunInfo, currentSuiteRunInfo, messageMarshaller);
 
-    if (isInitSuccess == true) {
-      newSuiteRunInfo(launch);
-
-      fTestRunnerClient.startListening(currentSuiteRunInfo, currentSuiteRunInfo, messageMarshaller);
-      m_rerunAction.setEnabled(true);
-      m_rerunFailedAction.setEnabled(false);
-      m_openReportAction.setEnabled(true);
-    } else {
-      boolean useProjectJar =
-          TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(project.getProject().getName());
-      String suggestion = useProjectJar
-          ? "Uncheck the 'Use Project testng.jar' option from your Project properties and try again."
-              : "Make sure you don't have an older version of testng.jar on your class path.";
-      new ErrorDialog(m_counterComposite.getShell(), "Couldn't launch TestNG",
-          "Couldn't contact the RemoteTestNG client. " + suggestion,
-          new StatusInfo(IStatus.ERROR, "Timeout while trying to contact RemoteTestNG."),
-          IStatus.ERROR).open();
-    }
-//    getViewSite().getActionBars().updateActionBars();
+              postSyncRunnable(new Runnable() {
+                public void run() {
+                  m_rerunAction.setEnabled(true);
+                  m_rerunFailedAction.setEnabled(false);
+                  m_openReportAction.setEnabled(true);
+                }
+              });
+            }
+            catch(SocketTimeoutException ex) {
+              postSyncRunnable(new Runnable() {
+                public void run() {
+                  boolean useProjectJar =
+                      TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(project.getProject().getName());
+                  String suggestion = useProjectJar
+                     ? "Uncheck the 'Use Project testng.jar' option from your Project properties and try again."
+                     : "Make sure you don't have an older version of testng.jar on your class path.";
+                  new ErrorDialog(m_counterComposite.getShell(), "Couldn't launch TestNG",
+                      "Couldn't contact the RemoteTestNG client. " + suggestion,
+                      new StatusInfo(IStatus.ERROR, "Timeout while trying to contact RemoteTestNG."),
+                      IStatus.ERROR).open();
+                }
+              });
+            }
+            return Status.OK_STATUS;
+          }
+        };
+        testRunListeningJob.schedule();
   }
 
   /**
