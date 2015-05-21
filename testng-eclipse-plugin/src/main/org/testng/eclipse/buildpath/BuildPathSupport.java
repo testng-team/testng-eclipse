@@ -4,6 +4,8 @@ package org.testng.eclipse.buildpath;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -49,22 +51,22 @@ public class BuildPathSupport {
    * @return the <code>IClasspathEntry</code> array which contains the testng jar itself and its dependencies, e.g. jcommander
    */
   public static IClasspathEntry[] getTestNGLibraryEntries() {
-    IClasspathEntry[] entries = new IClasspathEntry[4];
+    List<IClasspathEntry> result = new ArrayList<IClasspathEntry>();
 
     IPath jarLocation = getBundleLocation().append(ResourceUtil.getString("TestNG.library")); //$NON-NLS-1$
     IPath srcLocation = getBundleLocation().append(ResourceUtil.getString("TestNG.sources")); //$NON-NLS-1$
-    entries[0] = JavaCore.newLibraryEntry(jarLocation, srcLocation, null);
+    result.add(JavaCore.newLibraryEntry(jarLocation, srcLocation, null));
 
     jarLocation = getBundleLocation().append(ResourceUtil.getString("Jcommander.library")); //$NON-NLS-1$
-    entries[1] = JavaCore.newLibraryEntry(jarLocation, null, null);
+    result.add(JavaCore.newLibraryEntry(jarLocation, null, null));
 
     jarLocation = getBundleLocation().append(ResourceUtil.getString("Bsh.library")); //$NON-NLS-1$
-    entries[2] = JavaCore.newLibraryEntry(jarLocation, null, null);
+    result.add(JavaCore.newLibraryEntry(jarLocation, null, null));
 
     jarLocation = getBundleLocation().append(ResourceUtil.getString("Snakeyaml.library")); //$NON-NLS-1$
-    entries[3] = JavaCore.newLibraryEntry(jarLocation, null, null);
+    result.add(JavaCore.newLibraryEntry(jarLocation, null, null));
 
-    return entries;
+    return result.toArray(new IClasspathEntry[result.size()]);
   }
 
   public static boolean projectContainsClasspathEntry(IJavaProject project, IClasspathEntry entry) throws JavaModelException {
