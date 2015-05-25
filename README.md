@@ -12,7 +12,7 @@ Set the version number with `scripts/set-version`, e.g.:
 scripts/set-version 6.8.22-SNAPSHOT
 ```
 
-Using `SNAPSHOT` version numbers will generate UTC timestamped plugin-numbers, e.g. 6.8.22.201505030200 so that you should only increase the version number if you are including a higher version of `testng.jar`.
+Using `SNAPSHOT` version numbers will generate UTC timestamped plugin-numbers, e.g. 6.8.22.201505030200 so you should only increase the version number if you are including a higher version of `testng.jar`.
 
 ## Building
 
