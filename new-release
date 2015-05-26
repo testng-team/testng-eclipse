@@ -1,9 +1,3 @@
-if [ $# -ne 1 ]
-then
-  echo "Usage $0 comment"
-  echo "For example: $0 'This is 6.8.22'"
-  exit -1
-fi
 
 TESTNG_DIR=../testng/build/libs
 
@@ -14,5 +8,15 @@ cp -f ${TESTNG_SRC_JAR} testng-eclipse-plugin/lib/testng-sources.jar
 
 #scripts/set-version $1
 mvn clean package
-scripts/upload-release -m $2
+
+echo "Created version:"
+grep version testng-eclipse-update-site/target/site/site.xml |grep eclipse
+
+if [ $# -ne 1 ]
+then
+  echo "Uploading..."
+  scripts/upload-release -m $2
+else
+  echo "No message supplied, not uploading"
+fi
 
