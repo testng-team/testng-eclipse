@@ -5,5 +5,5 @@ jdk:
   - oraclejdk7
   - openjdk7
 
-script: mvn clean package
+script: ./install-with-gradle
 
