@@ -388,5 +388,21 @@
           name="TestNG">
     </classpathContainerPage>
  </extension>
+ <extension
+       point="org.eclipse.ui.editors.templates">
+    <template
+          autoinsert="false"
+          contextTypeId="java-members"
+          description="%template.testmethod.desc"
+          id="org.testng.eclipse.template.testmethod"
+          name="%template.testmethod.name">
+       <pattern>
+          @${testType:newType(org.testng.annotations.Test)}
+public void ${testName}() throws Exception {
+    ${cursor}
+}
+       </pattern>
+    </template>
+ </extension>
 
 </plugin>
