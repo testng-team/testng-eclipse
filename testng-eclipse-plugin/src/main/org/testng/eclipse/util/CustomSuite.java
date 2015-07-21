@@ -171,6 +171,7 @@ abstract public class CustomSuite extends LaunchSuite {
         put(attr, "object-factory", s.getObjectFactory());
         put(attr, "allow-return-values", s.getAllowReturnValues());
         put(attr, "preserve-order", s.getPreserveOrder());
+        put(attr, "group-by-instances", s.getGroupByInstances());
         suiteBuffer.push("suite", attr);
 
         // Children of <suite>
