@@ -1,11 +1,13 @@
 package org.testng.eclipse.util;
 
 
-import java.io.BufferedWriter;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,9 +17,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.xml.parsers.ParserConfigurationException;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import org.testng.TestNGException;
 import org.testng.eclipse.TestNGPlugin;
@@ -29,6 +28,9 @@ import org.testng.xml.Parser;
 import org.testng.xml.XmlMethodSelector;
 import org.testng.xml.XmlSuite;
 import org.xml.sax.SAXException;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * Base class used by classes that generate XML suite files.
@@ -251,31 +253,25 @@ abstract public class CustomSuite extends LaunchSuite {
   }
 
   protected void saveSuiteContent(final File file, final XMLStringBuffer content) {
-    FileWriter fw= null;
-    BufferedWriter bw= null;
+    FileOutputStream fileOutputStream = null;
+    BufferedOutputStream bufferedOutputStream = null;
+    OutputStreamWriter osw = null;
     try {
-      fw= new FileWriter(file);
-      bw= new BufferedWriter(fw);
-      bw.write(content.getStringBuffer().toString());
-      bw.flush();
-    }
-    catch(IOException ioe) {
-    }
-    finally {
-      if(null != bw) {
+      fileOutputStream = new FileOutputStream(file);
+      bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+      // use utf8 to solve special character problem
+      osw = new OutputStreamWriter(bufferedOutputStream, Charset.forName("UTF-8"));
+      osw.write(content.getStringBuffer().toString());
+    } catch (IOException ioException) {
+      TestNGPlugin.log(ioException);
+    } finally {
         try {
-          bw.close();
+            if (osw != null) osw.close();
+            if (bufferedOutputStream != null) bufferedOutputStream.close();
+            if (fileOutputStream != null) fileOutputStream.close();
+        } catch (Exception e) {
+          TestNGPlugin.log(e);
         }
-        catch(IOException ioe) {
-        }
-      }
-      if(null != fw) {
-        try {
-          fw.close();
-        }
-        catch(IOException ioe) {
-        }
-      }
     }
   }
 
