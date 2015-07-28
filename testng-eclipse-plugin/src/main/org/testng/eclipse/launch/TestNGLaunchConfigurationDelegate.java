@@ -18,6 +18,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
+import org.eclipse.jdt.launching.AbstractVMInstall;
 import org.eclipse.jdt.launching.ExecutionArguments;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
@@ -27,6 +28,7 @@ import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.testng.CommandLineArgs;
 import org.testng.ITestNGListener;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.buildpath.BuildPathSupport;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
@@ -58,6 +60,13 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       abort(ResourceUtil.getFormattedString("TestNGLaunchConfigurationDelegate.error.novmrunner", //$NON-NLS-1$
           new String[] { install.getId() }), null,
           IJavaLaunchConfigurationConstants.ERR_VM_RUNNER_DOES_NOT_EXIST);
+    }
+    AbstractVMInstall vmi = (AbstractVMInstall) install;
+    String vmver = vmi.getJavaVersion();
+    if (vmver.compareTo("1.7") < 0) { //$NON-NLS-1$
+      abort(ResourceUtil.getFormattedString("TestNGLaunchConfigurationDelegate.error.incompatiblevmversion", //$NON-NLS-1$
+          new String[] { vmver }), null,
+          TestNGPluginConstants.LAUNCH_ERROR_JVM_VER_NOT_COMPATIBLE);
     }
 
     int port = SocketUtil.findFreePort();
