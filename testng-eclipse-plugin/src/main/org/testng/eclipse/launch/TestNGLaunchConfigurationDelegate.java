@@ -25,6 +25,7 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
+import org.osgi.framework.Version;
 import org.testng.CommandLineArgs;
 import org.testng.ITestNGListener;
 import org.testng.eclipse.TestNGPlugin;
@@ -62,10 +63,11 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
           IJavaLaunchConfigurationConstants.ERR_VM_RUNNER_DOES_NOT_EXIST);
     }
     AbstractVMInstall vmi = (AbstractVMInstall) install;
-    String vmver = vmi.getJavaVersion();
-    if (vmver.compareTo("1.7") < 0) { //$NON-NLS-1$
+    Version vmVer = new Version(vmi.getJavaVersion());
+    Version mimVer = new Version("1.7.0"); //$NON-NLS-1$
+    if (vmVer.compareTo(mimVer) < 0) {
       abort(ResourceUtil.getFormattedString("TestNGLaunchConfigurationDelegate.error.incompatiblevmversion", //$NON-NLS-1$
-          new String[] { vmver }), null,
+          new String[] { vmi.getJavaVersion() }), null,
           TestNGPluginConstants.LAUNCH_ERROR_JVM_VER_NOT_COMPATIBLE);
     }
 
