@@ -138,6 +138,13 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
         .append(" ")
         .append(TestNGLaunchConfigurationConstants.VM_ENABLEASSERTION_OPTION); // $NON-NLS-1$
     addDebugProperties(vmArgs, configuration);
+    switch (ConfigurationHelper.getProtocol(configuration)) {
+    case STRING:
+      vmArgs.append(" -Dtestng.eclipse.stringprotocol");
+      break;
+    default:
+      break;
+    }
     ExecutionArguments execArgs = new ExecutionArguments(vmArgs.toString(), ""); //$NON-NLS-1$
     String[] envp = DebugPlugin.getDefault().getLaunchManager().getEnvironment(configuration);
 

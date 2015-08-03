@@ -27,6 +27,7 @@ import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
+import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.Protocols;
 import org.testng.eclipse.ui.RunInfo;
 import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.SuiteGenerator;
@@ -52,7 +53,8 @@ public class ConfigurationHelper {
     private String m_logLevel;
     private boolean m_verbose;
     private boolean m_debug;
-    
+    private Protocols m_protocol;
+
     public LaunchInfo(String projectName,
                       LaunchType launchType,
                       Collection<String> classNames,
@@ -63,7 +65,8 @@ public class ConfigurationHelper {
                       String complianceLevel,
                       String logLevel,
                       boolean verbose, 
-                      boolean debug) {
+                      boolean debug,
+                      Protocols protocol) {
       m_projectName= projectName;
       m_launchType= launchType;
       m_classNames= classNames;
@@ -75,6 +78,7 @@ public class ConfigurationHelper {
       m_packageNames = packageNames;
       m_verbose = verbose;
       m_debug = debug;
+      m_protocol = protocol;
     }
   }
 
@@ -94,6 +98,11 @@ public class ConfigurationHelper {
 
   public static boolean getDebug(ILaunchConfiguration config) {
     return getBooleanAttribute(config, TestNGLaunchConfigurationConstants.DEBUG);
+  }
+
+  public static Protocols getProtocol(ILaunchConfiguration config) {
+    String stringResult = getStringAttribute(config, TestNGLaunchConfigurationConstants.PROTOCOL);
+    return null == stringResult ? TestNGLaunchConfigurationConstants.DEFAULT_SERIALIZATION_PROTOCOL : Protocols.get(stringResult); 
   }
 
   public static String getSourcePath(ILaunchConfiguration config) {
@@ -592,5 +601,6 @@ public class ConfigurationHelper {
                                launchInfo.m_logLevel);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.VERBOSE, launchInfo.m_verbose);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.DEBUG, launchInfo.m_debug);
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.PROTOCOL, launchInfo.m_protocol.toString());
   }
 }
