@@ -50,6 +50,8 @@ public class ConfigurationHelper {
     private Map<String, List<String>> m_groupMap = Maps.newHashMap();
     private String m_complianceLevel;
     private String m_logLevel;
+    private boolean m_verbose;
+    private boolean m_debug;
     
     public LaunchInfo(String projectName,
                       LaunchType launchType,
@@ -59,7 +61,9 @@ public class ConfigurationHelper {
                       Map<String, List<String>> groupMap,
                       String suiteName,
                       String complianceLevel,
-                      String logLevel) {
+                      String logLevel,
+                      boolean verbose, 
+                      boolean debug) {
       m_projectName= projectName;
       m_launchType= launchType;
       m_classNames= classNames;
@@ -69,6 +73,8 @@ public class ConfigurationHelper {
       m_complianceLevel= complianceLevel;
       m_logLevel= logLevel;
       m_packageNames = packageNames;
+      m_verbose = verbose;
+      m_debug = debug;
     }
   }
 
@@ -82,6 +88,14 @@ public class ConfigurationHelper {
     }
   }
   
+  public static boolean getVerbose(ILaunchConfiguration config) {
+    return getBooleanAttribute(config, TestNGLaunchConfigurationConstants.VERBOSE);
+  }
+
+  public static boolean getDebug(ILaunchConfiguration config) {
+    return getBooleanAttribute(config, TestNGLaunchConfigurationConstants.DEBUG);
+  }
+
   public static String getSourcePath(ILaunchConfiguration config) {
     return getStringAttribute(config, TestNGLaunchConfigurationConstants.DIRECTORY_TEST_LIST);
   }
@@ -155,7 +169,7 @@ public class ConfigurationHelper {
   			    result);
   			result = VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(result);
   		} catch (CoreException e) {
-  			e.printStackTrace();
+  			TestNGPlugin.log(e);
   		}
     }
 
@@ -236,6 +250,19 @@ public class ConfigurationHelper {
 
   private static int getIntAttribute(ILaunchConfiguration config, String attr) {
     int result = 0;
+    
+    try {
+      result = config.getAttribute(attr, result);
+    }
+    catch (CoreException e) {
+      TestNGPlugin.log(e);
+    }
+    
+    return result;
+  }
+
+  private static boolean getBooleanAttribute(ILaunchConfiguration config, String attr) {
+    boolean result = false;
     
     try {
       result = config.getAttribute(attr, result);
@@ -563,6 +590,7 @@ public class ConfigurationHelper {
 //                               launchInfo.m_complianceLevel);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL,
                                launchInfo.m_logLevel);
-    
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.VERBOSE, launchInfo.m_verbose);
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.DEBUG, launchInfo.m_debug);
   }
 }

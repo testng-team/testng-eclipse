@@ -17,6 +17,7 @@ import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -24,6 +25,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -81,6 +83,10 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
   // Runtime group
   private Combo m_logLevelCombo;
+
+  private Button m_verboseBtn;
+
+  private Button m_debugBtn;
 
   private List <TestngTestSelector> m_launchSelectors = Lists.newArrayList();
   private Map<String, List<String>> m_classMethods;
@@ -201,6 +207,10 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     int logLevel = ConfigurationHelper.getLogLevel(configuration);
     m_logLevelCombo.select(logLevel);
 
+    m_verboseBtn.setSelection(ConfigurationHelper.getVerbose(configuration));
+
+    m_debugBtn.setSelection(ConfigurationHelper.getDebug(configuration));
+
     LaunchType type = ConfigurationHelper.getType(configuration);
     setType(type);
     m_classMethods = ConfigurationHelper.getClassMethods(configuration);
@@ -241,7 +251,9 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
               m_groupSelector.getValueMap(),
               m_suiteSelector.getText(),
               TestNGLaunchConfigurationConstants.JDK15_COMPLIANCE, 
-              m_logLevelCombo.getText()));
+              m_logLevelCombo.getText(),
+              m_verboseBtn.getSelection(),
+              m_debugBtn.getSelection()));
   }
 
   /**
@@ -468,6 +480,31 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
         }
       });
     }
+
+    m_verboseBtn = new Button(group, SWT.CHECK);
+    m_verboseBtn.setText(ResourceUtil.getString("TestNGMainTab.testng.verbose"));
+    GridDataFactory.fillDefaults().span(3, SWT.None).applyTo(m_verboseBtn);
+    m_verboseBtn.addSelectionListener(new SelectionListener() {
+      public void widgetSelected(SelectionEvent e) {
+        updateLaunchConfigurationDialog();
+      }
+
+      public void widgetDefaultSelected(SelectionEvent e) {
+      }
+    });
+
+    m_debugBtn = new Button(group, SWT.CHECK);
+    m_debugBtn.setText(ResourceUtil.getString("TestNGMainTab.testng.debug"));
+    GridDataFactory.fillDefaults().span(3, SWT.None).applyTo(m_debugBtn);
+    m_debugBtn.addSelectionListener(new SelectionListener() {
+      public void widgetSelected(SelectionEvent e) {
+        updateLaunchConfigurationDialog();
+      }
+
+      public void widgetDefaultSelected(SelectionEvent e) {
+      }
+    });
+
   }
 
   private void createProjectSelectionGroup(Composite comp) {
