@@ -90,6 +90,12 @@ public abstract class TestNGLaunchConfigurationConstants {
   
   public static final String LOG_LEVEL = make("LOG_LEVEL");  //$NON-NLS-1$ 
   
+  public static final String VERBOSE = make("VERBOSE");  //$NON-NLS-1$
+  
+  public static final String DEBUG = make("DEBUG");  //$NON-NLS-1$
+  
+  public static final String PROTOCOL = make("PROTOCOL");  //$NON-NLS-1$
+  
 //  public static final String TESTNG_COMPLIANCE_LEVEL_ATTR = make("COMPLIANCE_LEVEL"); //$NON-NLS-1$
   
   public static final String VM_ENABLEASSERTION_OPTION = "-ea";
@@ -123,5 +129,38 @@ public abstract class TestNGLaunchConfigurationConstants {
 
   public static final String PARAMS = make("PARAMETERS");
   
-  
+  public static final Protocols[] SERIALIZATION_PROTOCOLS = {Protocols.OBJECT, Protocols.STRING};
+  public static final Protocols DEFAULT_SERIALIZATION_PROTOCOL = SERIALIZATION_PROTOCOLS[0];
+
+  public static enum Protocols {
+    OBJECT("object"),
+    STRING("string");
+    
+    private final String text;
+
+    /**
+     * @param text
+     */
+    private Protocols(final String text) {
+        this.text = text;
+    }
+    
+    public static Protocols get(String text) {
+      switch (text) {
+      case "object":
+        return OBJECT;
+      case "string":
+        return STRING;
+      default:
+        throw new IllegalArgumentException("Unrecognized protocol: " + text);
+      }
+    }
+
+    @Override
+    public String toString() {
+        return text;
+    }
+  }
+
 }
+

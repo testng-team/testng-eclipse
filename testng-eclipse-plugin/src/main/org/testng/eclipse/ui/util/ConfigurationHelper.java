@@ -27,6 +27,7 @@ import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
+import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.Protocols;
 import org.testng.eclipse.ui.RunInfo;
 import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.SuiteGenerator;
@@ -50,7 +51,10 @@ public class ConfigurationHelper {
     private Map<String, List<String>> m_groupMap = Maps.newHashMap();
     private String m_complianceLevel;
     private String m_logLevel;
-    
+    private boolean m_verbose;
+    private boolean m_debug;
+    private Protocols m_protocol;
+
     public LaunchInfo(String projectName,
                       LaunchType launchType,
                       Collection<String> classNames,
@@ -59,7 +63,10 @@ public class ConfigurationHelper {
                       Map<String, List<String>> groupMap,
                       String suiteName,
                       String complianceLevel,
-                      String logLevel) {
+                      String logLevel,
+                      boolean verbose, 
+                      boolean debug,
+                      Protocols protocol) {
       m_projectName= projectName;
       m_launchType= launchType;
       m_classNames= classNames;
@@ -69,6 +76,9 @@ public class ConfigurationHelper {
       m_complianceLevel= complianceLevel;
       m_logLevel= logLevel;
       m_packageNames = packageNames;
+      m_verbose = verbose;
+      m_debug = debug;
+      m_protocol = protocol;
     }
   }
 
@@ -82,6 +92,19 @@ public class ConfigurationHelper {
     }
   }
   
+  public static boolean getVerbose(ILaunchConfiguration config) {
+    return getBooleanAttribute(config, TestNGLaunchConfigurationConstants.VERBOSE);
+  }
+
+  public static boolean getDebug(ILaunchConfiguration config) {
+    return getBooleanAttribute(config, TestNGLaunchConfigurationConstants.DEBUG);
+  }
+
+  public static Protocols getProtocol(ILaunchConfiguration config) {
+    String stringResult = getStringAttribute(config, TestNGLaunchConfigurationConstants.PROTOCOL);
+    return null == stringResult ? TestNGLaunchConfigurationConstants.DEFAULT_SERIALIZATION_PROTOCOL : Protocols.get(stringResult); 
+  }
+
   public static String getSourcePath(ILaunchConfiguration config) {
     return getStringAttribute(config, TestNGLaunchConfigurationConstants.DIRECTORY_TEST_LIST);
   }
@@ -155,7 +178,7 @@ public class ConfigurationHelper {
   			    result);
   			result = VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(result);
   		} catch (CoreException e) {
-  			e.printStackTrace();
+  			TestNGPlugin.log(e);
   		}
     }
 
@@ -236,6 +259,19 @@ public class ConfigurationHelper {
 
   private static int getIntAttribute(ILaunchConfiguration config, String attr) {
     int result = 0;
+    
+    try {
+      result = config.getAttribute(attr, result);
+    }
+    catch (CoreException e) {
+      TestNGPlugin.log(e);
+    }
+    
+    return result;
+  }
+
+  private static boolean getBooleanAttribute(ILaunchConfiguration config, String attr) {
+    boolean result = false;
     
     try {
       result = config.getAttribute(attr, result);
@@ -563,6 +599,8 @@ public class ConfigurationHelper {
 //                               launchInfo.m_complianceLevel);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL,
                                launchInfo.m_logLevel);
-    
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.VERBOSE, launchInfo.m_verbose);
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.DEBUG, launchInfo.m_debug);
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.PROTOCOL, launchInfo.m_protocol.toString());
   }
 }

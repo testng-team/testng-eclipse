@@ -17,13 +17,20 @@ import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -38,6 +45,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
+import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.Protocols;
 import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.ui.Images;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
@@ -56,7 +64,6 @@ import org.testng.eclipse.util.TestSearchEngine;
  */
 public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILaunchConfigurationTab
 {
-  private static ImageRegistry m_imageRegistry = null;
   private static final String UNKNOWN_CONSTANT = "Unknown TestNGLaunchConfigurationConstants: ";
 
   private Text m_projectText;
@@ -81,6 +88,12 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
   // Runtime group
   private Combo m_logLevelCombo;
+
+  private Button m_verboseBtn;
+
+  private Button m_debugBtn;
+
+  private ComboViewer m_protocolComboViewer;
 
   private List <TestngTestSelector> m_launchSelectors = Lists.newArrayList();
   private Map<String, List<String>> m_classMethods;
@@ -201,6 +214,12 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     int logLevel = ConfigurationHelper.getLogLevel(configuration);
     m_logLevelCombo.select(logLevel);
 
+    m_verboseBtn.setSelection(ConfigurationHelper.getVerbose(configuration));
+
+    m_debugBtn.setSelection(ConfigurationHelper.getDebug(configuration));
+
+    m_protocolComboViewer.setSelection(new StructuredSelection(ConfigurationHelper.getProtocol(configuration)));
+
     LaunchType type = ConfigurationHelper.getType(configuration);
     setType(type);
     m_classMethods = ConfigurationHelper.getClassMethods(configuration);
@@ -241,7 +260,10 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
               m_groupSelector.getValueMap(),
               m_suiteSelector.getText(),
               TestNGLaunchConfigurationConstants.JDK15_COMPLIANCE, 
-              m_logLevelCombo.getText()));
+              m_logLevelCombo.getText(),
+              m_verboseBtn.getSelection(),
+              m_debugBtn.getSelection(),
+              (Protocols) ((StructuredSelection) m_protocolComboViewer.getSelection()).getFirstElement()));
   }
 
   /**
@@ -468,6 +490,51 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
         }
       });
     }
+
+    m_verboseBtn = new Button(group, SWT.CHECK);
+    m_verboseBtn.setText(ResourceUtil.getString("TestNGMainTab.testng.verbose"));
+    GridDataFactory.fillDefaults().span(3, SWT.None).applyTo(m_verboseBtn);
+    m_verboseBtn.addSelectionListener(new SelectionListener() {
+      public void widgetSelected(SelectionEvent e) {
+        updateLaunchConfigurationDialog();
+      }
+
+      public void widgetDefaultSelected(SelectionEvent e) {
+      }
+    });
+
+    m_debugBtn = new Button(group, SWT.CHECK);
+    m_debugBtn.setText(ResourceUtil.getString("TestNGMainTab.testng.debug"));
+    GridDataFactory.fillDefaults().span(3, SWT.None).applyTo(m_debugBtn);
+    m_debugBtn.addSelectionListener(new SelectionListener() {
+      public void widgetSelected(SelectionEvent e) {
+        updateLaunchConfigurationDialog();
+      }
+
+      public void widgetDefaultSelected(SelectionEvent e) {
+      }
+    });
+
+
+    Label label = new Label(group, SWT.NONE);
+    label.setText(ResourceUtil.getString("TestNGMainTab.testng.protocol"));
+
+    m_protocolComboViewer = new ComboViewer(group, SWT.READ_ONLY);
+    GridDataFactory.fillDefaults().span(2, SWT.None).applyTo(m_protocolComboViewer.getCombo());
+    m_protocolComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+      @Override
+      public void selectionChanged(SelectionChangedEvent event) {
+        updateLaunchConfigurationDialog();
+      }
+    });
+    m_protocolComboViewer.setContentProvider(ArrayContentProvider.getInstance());
+    m_protocolComboViewer.setLabelProvider(new LabelProvider() {
+      @Override
+      public String getText(Object element) {
+        return ResourceUtil.getString("TestNGMainTab.testng.protocol." + element);
+      }
+    });
+    m_protocolComboViewer.setInput(TestNGLaunchConfigurationConstants.SERIALIZATION_PROTOCOLS);
   }
 
   private void createProjectSelectionGroup(Composite comp) {
