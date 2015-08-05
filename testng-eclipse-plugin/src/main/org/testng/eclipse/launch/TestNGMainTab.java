@@ -518,8 +518,10 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
     Label label = new Label(group, SWT.NONE);
     label.setText(ResourceUtil.getString("TestNGMainTab.testng.protocol"));
+    label.setToolTipText(ResourceUtil.getString("TestNGMainTab.testng.protocol.tooltip"));
 
     m_protocolComboViewer = new ComboViewer(group, SWT.READ_ONLY);
+    m_protocolComboViewer.getControl().setToolTipText(ResourceUtil.getString("TestNGMainTab.testng.protocol.tooltip"));
     GridDataFactory.fillDefaults().span(2, SWT.None).applyTo(m_protocolComboViewer.getCombo());
     m_protocolComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
       @Override
