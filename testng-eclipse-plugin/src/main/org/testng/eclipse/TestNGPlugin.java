@@ -1,12 +1,24 @@
 package org.testng.eclipse;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.AbstractSet;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.IBreakpointManager;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.IBreakpoint;
+import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
@@ -28,11 +40,6 @@ import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.SWTUtil;
 import org.testng.remote.RemoteTestNG;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.AbstractSet;
-import java.util.HashSet;
 
 /**
  * The plug-in runtime class for the TestNG plug-in.
@@ -169,6 +176,13 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
       return;
     }
 
+    // For debug launches, wait until we have a reference to the IDebugTarget before starting
+    // the listener.
+    IDebugTarget debugTarget = launch.getDebugTarget();
+    if (launch.getLaunchMode().equals(ILaunchManager.DEBUG_MODE) && debugTarget == null) {
+      return;
+    }
+    
     int port = -1;
     String projectName = "";
     String subName = "";
@@ -196,21 +210,45 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
     
     n_trackedLaunches.remove(launch);
 
+    final List<IBreakpoint> breakpoints = getApplicableBreakpoints(launch, debugTarget);
     asyncExec(new Runnable() {
         public void run() {
-          connectTestRunner(launch, ijp, name, finalPort);
+          connectTestRunner(launch, ijp, name, finalPort, breakpoints);
         }
       });
   }
 
+  /**
+   * Get a list of breakpoints which apply to the current IDebugTarget, and disable any that
+   * are enabled. We'll re-enable them after the launch target connects to our view.
+   */
+  private List<IBreakpoint> getApplicableBreakpoints(ILaunch launch, IDebugTarget debugTarget) {
+    IBreakpointManager breakpointMgr = DebugPlugin.getDefault().getBreakpointManager();
+    List<IBreakpoint> breakpoints = new ArrayList<IBreakpoint>();
+    for (IBreakpoint breakpoint : breakpointMgr.getBreakpoints()) {
+      try {
+        // Capture all breakpoints that are enabled and pertain to the current debug target.
+        // We disable them and add them to our collection, to re-enable them afterwards.
+        if (breakpoint.isEnabled() && debugTarget.supportsBreakpoint(breakpoint)) {
+          breakpoint.setEnabled(false);
+          breakpoints.add(breakpoint);
+        }
+      } catch (CoreException e) {
+        log("failed to obtain enabled status for breakpoint " + breakpoint + ": " + e);
+      }
+    }
+    return breakpoints;
+  }
+  
   public void connectTestRunner(ILaunch launch, 
                                 IJavaProject launchedProject,
                                 String subName,
-                                int port) {
+                                int port,
+                                List<IBreakpoint> breakpoints) {
     IViewPart viewPart = showTestRunnerViewPartInActivePage(findTestRunnerViewPartInActivePage());
     // The returned view part could be an ErrorViewPart or null if something went wrong in the init
     if (viewPart instanceof TestRunnerViewPart) {
-      ((TestRunnerViewPart) viewPart).startTestRunListening(launchedProject, subName, port, launch);
+      ((TestRunnerViewPart) viewPart).startTestRunListening(launchedProject, subName, port, launch, breakpoints);
     }
   }
 

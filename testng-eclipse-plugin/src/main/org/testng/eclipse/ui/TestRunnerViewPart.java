@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.debug.ui.StatusInfo;
@@ -341,7 +342,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   public void startTestRunListening(final IJavaProject project,
                                     String subName,
                                     int port,
-                                    final ILaunch launch) {
+                                    final ILaunch launch,
+                                    final List<IBreakpoint> breakpoints) {
     m_workingProject = project;
 
     aboutToLaunch(subName);
@@ -360,6 +362,13 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
           protected IStatus run(IProgressMonitor monitor) {
             try {
               messageMarshaller.initReceiver();
+              for (IBreakpoint breakpoint : breakpoints) {
+                try {
+                  breakpoint.setEnabled(true);
+                } catch (CoreException e) {
+                  TestNGPlugin.log("failed to obtain enabled status for breakpoint " + breakpoint + ": " + e);
+                }
+              }
               newSuiteRunInfo(launch);
               fTestRunnerClient.startListening(currentSuiteRunInfo, currentSuiteRunInfo, messageMarshaller);
 
