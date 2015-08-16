@@ -280,9 +280,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
    */
   @Override
   public boolean isValid(ILaunchConfiguration launchConfig) {
-    boolean result = getErrorMessage() == null;
-
-    return result;
+    return getErrorMessage() == null;
   }
 
   /**
@@ -352,10 +350,8 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
           break;
         default:
           throw new IllegalArgumentException(UNKNOWN_CONSTANT + getType());
-
       }
     }
-
   }
 
   /**
@@ -555,7 +551,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     label.setText(ResourceUtil.getString("TestNGMainTab.resultviewer.retries")); // $NON-NLS-1$
     label.setToolTipText(ResourceUtil.getString("TestNGMainTab.resultviewer.retries.tootip"));
 
-    m_connRetriesText = new Spinner(group, SWT.BORDER);
+    m_connRetriesText = new Spinner(group, SWT.SINGLE | SWT.BORDER);
     m_connRetriesText.setMinimum(1);
     m_connRetriesText.setMaximum(9999);
     m_connRetriesText.setIncrement(10);
@@ -564,6 +560,23 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
     m_connRetriesText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent evt) {
+        final String string = m_connRetriesText.getText();
+        String message = null;
+        try {
+          final int value = Integer.parseInt(string);
+          final int maximum = m_connRetriesText.getMaximum();
+          final int minimum = m_connRetriesText.getMinimum();
+          if (value > maximum) {
+            message = ResourceUtil.getFormattedString("TestNGMainTab.resultviewer.retries.err1", maximum);
+          } else if (value < minimum) {
+            message = ResourceUtil.getFormattedString("TestNGMainTab.resultviewer.retries.err2", minimum);
+          }
+        } catch (final Exception ex) {
+          message = ResourceUtil.getString("TestNGMainTab.resultviewer.retries.err3");
+        }
+        if (message != null) {
+          setErrorMessage(message);
+        }
         updateLaunchConfigurationDialog();
       }
     });
@@ -636,10 +649,6 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
   public void updateDialog() {
     validatePage();
     updateLaunchConfigurationDialog();
-  }
-
-  public static void ppp(String s) {
-    System.out.println("[TestNGMainTab] " + s);
   }
 
   public IJavaProject getSelectedProject() {
