@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.internal.resources.Workspace;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -31,7 +30,6 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.internal.debug.ui.StatusInfo;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -391,7 +389,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
                      : "Make sure you don't have an older version of testng.jar on your class path.";
                   new ErrorDialog(m_counterComposite.getShell(), "Couldn't launch TestNG",
                       "Couldn't contact the RemoteTestNG client. " + suggestion,
-                      new StatusInfo(IStatus.ERROR, "Timeout while trying to contact RemoteTestNG."),
+                      new Status(IStatus.ERROR, TestNGPlugin.PLUGIN_ID, "Timeout while trying to contact RemoteTestNG."),
                       IStatus.ERROR).open();
                 }
               });
@@ -1038,12 +1036,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
-  private static void ppp(final Object message) {
-    if (true) {
-      System.out.println("[TestRunnerViewPart] " + message);
-    }
-  }
-
   /**
    * @see IWorkbenchPart#getTitleImage()
    */
@@ -1143,7 +1135,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
     @Override
     public void run() {
-      Workspace workspace = (Workspace) ResourcesPlugin.getWorkspace();
       IJavaProject javaProject= m_workingProject != null ? m_workingProject : JDTUtil.getJavaProjectContext();
       if(null == javaProject) {
         return;
@@ -1156,8 +1147,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       if(isAbsolute) {
         IFile file = javaProject.getProject().getFile("temp-testng-index.html");
         try {
-          file.createLink(filePath, IResource.NONE, progressMonitor);
           if(null == file) return;
+          file.createLink(filePath, IResource.NONE, progressMonitor);
           try {
             openEditor(file);
           }
@@ -1166,18 +1157,18 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
           }
         }
         catch(CoreException cex) {
-          ; // TODO: is there any other option?
+          TestNGPlugin.log(cex);
         }
       }
       else {
-        IFile file= (IFile) workspace.newResource(filePath, IResource.FILE);
+        IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(filePath);
         if(null == file) return;
         try {
           file.refreshLocal(IResource.DEPTH_ZERO, progressMonitor);
           openEditor(file);
         }
         catch(CoreException cex) {
-          ; // nothing I can do about it
+          TestNGPlugin.log(cex); // nothing I can do about it
         }
       }
     }
