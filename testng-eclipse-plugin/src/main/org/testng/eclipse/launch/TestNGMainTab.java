@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
@@ -95,6 +96,9 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
   private ComboViewer m_protocolComboViewer;
 
+  // Result viewer group
+  private Spinner m_connRetriesText;
+
   private List <TestngTestSelector> m_launchSelectors = Lists.newArrayList();
   private Map<String, List<String>> m_classMethods;
 
@@ -115,6 +119,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
     createSelectors(group);
     createRuntimeGroup(comp);
+    createResultViewerGroup(comp);
   }
 
   private void createSelectors(Composite comp) {
@@ -224,6 +229,8 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     setType(type);
     m_classMethods = ConfigurationHelper.getClassMethods(configuration);
 
+    m_connRetriesText.setSelection(ConfigurationHelper.getConnectReries(configuration));
+
     attachModificationListeners();
   }
 
@@ -263,7 +270,9 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
               m_logLevelCombo.getText(),
               m_verboseBtn.getSelection(),
               m_debugBtn.getSelection(),
-              (Protocols) ((StructuredSelection) m_protocolComboViewer.getSelection()).getFirstElement()));
+              (Protocols) ((StructuredSelection) m_protocolComboViewer.getSelection()).getFirstElement(),
+              m_connRetriesText.getSelection())
+        );
   }
 
   /**
@@ -539,6 +548,32 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     m_protocolComboViewer.setInput(TestNGLaunchConfigurationConstants.SERIALIZATION_PROTOCOLS);
   }
 
+  private void createResultViewerGroup(Composite parent) {
+    Group group = createGroup(parent, "TestNGMainTab.resultviewer.title"); //$NON-NLS-1$
+
+    GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+    gd.horizontalSpan = 2;
+    Label label = new Label(group, SWT.LEFT);
+    label.setLayoutData(gd);
+    label.setText(ResourceUtil.getString("TestNGMainTab.resultviewer.retries")); // $NON-NLS-1$
+    label.setToolTipText(ResourceUtil.getString("TestNGMainTab.resultviewer.retries.tootip"));
+
+    m_connRetriesText = new Spinner(group, SWT.BORDER);
+    m_connRetriesText.setMinimum(1);
+    m_connRetriesText.setMaximum(9999);
+    m_connRetriesText.setIncrement(10);
+    m_connRetriesText.setPageIncrement(100);
+    gd = new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.GRAB_HORIZONTAL);
+    gd.widthHint = 70;
+    m_connRetriesText.setLayoutData(gd);
+
+    m_connRetriesText.addModifyListener(new ModifyListener() {
+      public void modifyText(ModifyEvent evt) {
+        updateLaunchConfigurationDialog();
+      }
+    });
+  }
+  
   private void createProjectSelectionGroup(Composite comp) {
     Group projectGroup = createGroup(comp, "TestNGMainTab.label.project"); //$NON-NLS-1$
 

@@ -83,6 +83,7 @@ import org.testng.ITestResult;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.ui.summary.SummaryTab;
+import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.util.CustomSuite;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.LaunchUtil;
@@ -363,7 +364,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
           @Override
           protected IStatus run(IProgressMonitor monitor) {
             int attempt = 0;
-            int maxRetries = 600;
+            int maxRetries = ConfigurationHelper.getConnectReries(launch.getLaunchConfiguration());
             boolean connected = false;
             while (connected == false && attempt++ <= maxRetries) {
               // handle cancel event
@@ -376,7 +377,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
                 connected = true;
               }
               catch(SocketTimeoutException ex) {
-                TestNGPlugin.log("TestNG viewer connect timeout, will retry " + attempt);
+                TestNGPlugin.log("TestNG viewer connect timeout, will retry " + attempt + ", max retries " + maxRetries);
               }
             }
 
@@ -398,7 +399,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
             else {
               newSuiteRunInfo(launch);
               fTestRunnerClient.startListening(currentSuiteRunInfo, currentSuiteRunInfo, messageMarshaller);
-  
+
               postSyncRunnable(new Runnable() {
                 public void run() {
                   m_rerunAction.setEnabled(true);
@@ -410,7 +411,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
             return Status.OK_STATUS;
           }
         };
-        
+
         // handle the process terminated event
         IDebugEventSetListener listener = new IDebugEventSetListener() {
           public void handleDebugEvents(DebugEvent[] events) {
