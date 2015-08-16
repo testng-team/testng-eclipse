@@ -385,11 +385,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
                   boolean useProjectJar =
                       TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(project.getProject().getName());
                   String suggestion = useProjectJar
-                     ? "Uncheck the 'Use Project testng.jar' option from your Project properties and try again."
-                     : "Make sure you don't have an older version of testng.jar on your class path.";
-                  new ErrorDialog(m_counterComposite.getShell(), "Couldn't launch TestNG",
-                      "Couldn't contact the RemoteTestNG client. " + suggestion,
-                      new Status(IStatus.ERROR, TestNGPlugin.PLUGIN_ID, "Timeout while trying to contact RemoteTestNG."),
+                     ? ResourceUtil.getString("TestRunnerViewPart.message.suggestion1")
+                     : ResourceUtil.getString("TestRunnerViewPart.message.suggestion2");
+                  new ErrorDialog(m_counterComposite.getShell(),
+                      "Couldn't launch TestNG", suggestion,
+                      new Status(IStatus.ERROR, TestNGPlugin.PLUGIN_ID,
+                          ResourceUtil.getString("TestRunnerViewPart.message.reason")),
                       IStatus.ERROR).open();
                 }
               });
