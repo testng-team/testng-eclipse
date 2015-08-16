@@ -551,10 +551,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
   private void createResultViewerGroup(Composite parent) {
     Group group = createGroup(parent, "TestNGMainTab.resultviewer.title"); //$NON-NLS-1$
 
-    GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-    gd.horizontalSpan = 2;
-    Label label = new Label(group, SWT.LEFT);
-    label.setLayoutData(gd);
+    Label label = new Label(group, SWT.NONE);
     label.setText(ResourceUtil.getString("TestNGMainTab.resultviewer.retries")); // $NON-NLS-1$
     label.setToolTipText(ResourceUtil.getString("TestNGMainTab.resultviewer.retries.tootip"));
 
@@ -563,9 +560,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     m_connRetriesText.setMaximum(9999);
     m_connRetriesText.setIncrement(10);
     m_connRetriesText.setPageIncrement(100);
-    gd = new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.GRAB_HORIZONTAL);
-    gd.widthHint = 70;
-    m_connRetriesText.setLayoutData(gd);
+    GridDataFactory.fillDefaults().span(2, SWT.None).applyTo(m_connRetriesText);
 
     m_connRetriesText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent evt) {
@@ -573,7 +568,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
       }
     });
   }
-  
+
   private void createProjectSelectionGroup(Composite comp) {
     Group projectGroup = createGroup(comp, "TestNGMainTab.label.project"); //$NON-NLS-1$
 

@@ -62,7 +62,7 @@ public abstract class TestNGLaunchConfigurationConstants {
   
   public static final int DEFAULT_LOG_LEVEL = 2;
 
-  public static final int DEFAULT_CONNECT_RETRIES = 600;
+  public static final int DEFAULT_CONNECT_RETRIES = 360;
 
   /**
    * List of suites
