@@ -43,7 +43,7 @@ public class ConfigurationHelper {
   
   public static class LaunchInfo {
     private String m_projectName;
-    private  LaunchType m_launchType;
+    private LaunchType m_launchType;
     private Collection<String> m_classNames;
     private Collection<String> m_packageNames;
     private Map<String, List<String>> m_classMethods;
@@ -54,6 +54,7 @@ public class ConfigurationHelper {
     private boolean m_verbose;
     private boolean m_debug;
     private Protocols m_protocol;
+    private int m_connRetries;
 
     public LaunchInfo(String projectName,
                       LaunchType launchType,
@@ -66,7 +67,8 @@ public class ConfigurationHelper {
                       String logLevel,
                       boolean verbose, 
                       boolean debug,
-                      Protocols protocol) {
+                      Protocols protocol,
+                      int connRetries) {
       m_projectName= projectName;
       m_launchType= launchType;
       m_classNames= classNames;
@@ -79,6 +81,7 @@ public class ConfigurationHelper {
       m_verbose = verbose;
       m_debug = debug;
       m_protocol = protocol;
+      m_connRetries = connRetries;
     }
   }
 
@@ -103,6 +106,12 @@ public class ConfigurationHelper {
   public static Protocols getProtocol(ILaunchConfiguration config) {
     String stringResult = getStringAttribute(config, TestNGLaunchConfigurationConstants.PROTOCOL);
     return null == stringResult ? TestNGLaunchConfigurationConstants.DEFAULT_SERIALIZATION_PROTOCOL : Protocols.get(stringResult); 
+  }
+
+  public static int getConnectReries(ILaunchConfiguration config) {
+    return getIntAttribute(config,
+        TestNGLaunchConfigurationConstants.CONNECT_RETRIES,
+        TestNGLaunchConfigurationConstants.DEFAULT_CONNECT_RETRIES);
   }
 
   public static String getSourcePath(ILaunchConfiguration config) {
@@ -257,17 +266,21 @@ public class ConfigurationHelper {
     
   }
 
-  private static int getIntAttribute(ILaunchConfiguration config, String attr) {
-    int result = 0;
-    
+  private static int getIntAttribute(ILaunchConfiguration config, String attr, int defValue) {
+    int result = defValue;
+
     try {
       result = config.getAttribute(attr, result);
     }
     catch (CoreException e) {
       TestNGPlugin.log(e);
     }
-    
+
     return result;
+  }
+
+  private static int getIntAttribute(ILaunchConfiguration config, String attr) {
+    return getIntAttribute(config, attr, 0);
   }
 
   private static boolean getBooleanAttribute(ILaunchConfiguration config, String attr) {
@@ -602,5 +615,6 @@ public class ConfigurationHelper {
     configuration.setAttribute(TestNGLaunchConfigurationConstants.VERBOSE, launchInfo.m_verbose);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.DEBUG, launchInfo.m_debug);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.PROTOCOL, launchInfo.m_protocol.toString());
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.CONNECT_RETRIES, launchInfo.m_connRetries);
   }
 }

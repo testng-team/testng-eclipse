@@ -61,7 +61,9 @@ public abstract class TestNGLaunchConfigurationConstants {
   public static final String GROUP_CLASS_LIST = make("GROUP_LIST_CLASS");
   
   public static final int DEFAULT_LOG_LEVEL = 2;
-  
+
+  public static final int DEFAULT_CONNECT_RETRIES = 360;
+
   /**
    * List of suites
    */
@@ -96,6 +98,8 @@ public abstract class TestNGLaunchConfigurationConstants {
   
   public static final String PROTOCOL = make("PROTOCOL");  //$NON-NLS-1$
   
+  public static final String CONNECT_RETRIES = make("CONNECT_RETRIES");  //$NON-NLS-1$
+
 //  public static final String TESTNG_COMPLIANCE_LEVEL_ATTR = make("COMPLIANCE_LEVEL"); //$NON-NLS-1$
   
   public static final String VM_ENABLEASSERTION_OPTION = "-ea";

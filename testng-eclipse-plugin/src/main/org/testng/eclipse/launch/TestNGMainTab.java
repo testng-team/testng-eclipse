@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
@@ -95,6 +96,9 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
   private ComboViewer m_protocolComboViewer;
 
+  // Result viewer group
+  private Spinner m_connRetriesText;
+
   private List <TestngTestSelector> m_launchSelectors = Lists.newArrayList();
   private Map<String, List<String>> m_classMethods;
 
@@ -115,6 +119,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
     createSelectors(group);
     createRuntimeGroup(comp);
+    createResultViewerGroup(comp);
   }
 
   private void createSelectors(Composite comp) {
@@ -224,6 +229,8 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     setType(type);
     m_classMethods = ConfigurationHelper.getClassMethods(configuration);
 
+    m_connRetriesText.setSelection(ConfigurationHelper.getConnectReries(configuration));
+
     attachModificationListeners();
   }
 
@@ -263,7 +270,9 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
               m_logLevelCombo.getText(),
               m_verboseBtn.getSelection(),
               m_debugBtn.getSelection(),
-              (Protocols) ((StructuredSelection) m_protocolComboViewer.getSelection()).getFirstElement()));
+              (Protocols) ((StructuredSelection) m_protocolComboViewer.getSelection()).getFirstElement(),
+              m_connRetriesText.getSelection())
+        );
   }
 
   /**
@@ -271,9 +280,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
    */
   @Override
   public boolean isValid(ILaunchConfiguration launchConfig) {
-    boolean result = getErrorMessage() == null;
-
-    return result;
+    return getErrorMessage() == null;
   }
 
   /**
@@ -343,10 +350,8 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
           break;
         default:
           throw new IllegalArgumentException(UNKNOWN_CONSTANT + getType());
-
       }
     }
-
   }
 
   /**
@@ -539,6 +544,44 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     m_protocolComboViewer.setInput(TestNGLaunchConfigurationConstants.SERIALIZATION_PROTOCOLS);
   }
 
+  private void createResultViewerGroup(Composite parent) {
+    Group group = createGroup(parent, "TestNGMainTab.resultviewer.title"); //$NON-NLS-1$
+
+    Label label = new Label(group, SWT.NONE);
+    label.setText(ResourceUtil.getString("TestNGMainTab.resultviewer.retries")); // $NON-NLS-1$
+    label.setToolTipText(ResourceUtil.getString("TestNGMainTab.resultviewer.retries.tootip"));
+
+    m_connRetriesText = new Spinner(group, SWT.SINGLE | SWT.BORDER);
+    m_connRetriesText.setMinimum(1);
+    m_connRetriesText.setMaximum(9999);
+    m_connRetriesText.setIncrement(10);
+    m_connRetriesText.setPageIncrement(100);
+    GridDataFactory.fillDefaults().span(2, SWT.None).applyTo(m_connRetriesText);
+
+    m_connRetriesText.addModifyListener(new ModifyListener() {
+      public void modifyText(ModifyEvent evt) {
+        final String string = m_connRetriesText.getText();
+        String message = null;
+        try {
+          final int value = Integer.parseInt(string);
+          final int maximum = m_connRetriesText.getMaximum();
+          final int minimum = m_connRetriesText.getMinimum();
+          if (value > maximum) {
+            message = ResourceUtil.getFormattedString("TestNGMainTab.resultviewer.retries.err1", maximum);
+          } else if (value < minimum) {
+            message = ResourceUtil.getFormattedString("TestNGMainTab.resultviewer.retries.err2", minimum);
+          }
+        } catch (final Exception ex) {
+          message = ResourceUtil.getString("TestNGMainTab.resultviewer.retries.err3");
+        }
+        if (message != null) {
+          setErrorMessage(message);
+        }
+        updateLaunchConfigurationDialog();
+      }
+    });
+  }
+
   private void createProjectSelectionGroup(Composite comp) {
     Group projectGroup = createGroup(comp, "TestNGMainTab.label.project"); //$NON-NLS-1$
 
@@ -606,10 +649,6 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
   public void updateDialog() {
     validatePage();
     updateLaunchConfigurationDialog();
-  }
-
-  public static void ppp(String s) {
-    System.out.println("[TestNGMainTab] " + s);
   }
 
   public IJavaProject getSelectedProject() {
