@@ -22,9 +22,13 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.debug.core.DebugEvent;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.debug.ui.StatusInfo;
@@ -355,23 +359,28 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         : new SerializedMessageSender("localhost", port);
 
         String jobName = ResourceUtil.getString("TestRunnerViewPart.message.startTestRunListening");
-        Job testRunListeningJob = new Job(jobName) {
+        final Job testRunListeningJob = new Job(jobName) {
           @Override
           protected IStatus run(IProgressMonitor monitor) {
-            try {
-              messageMarshaller.initReceiver();
-              newSuiteRunInfo(launch);
-              fTestRunnerClient.startListening(currentSuiteRunInfo, currentSuiteRunInfo, messageMarshaller);
+            int attempt = 0;
+            int maxRetries = 600;
+            boolean connected = false;
+            while (connected == false && attempt++ <= maxRetries) {
+              // handle cancel event
+              if (monitor.isCanceled()) {
+                return Status.CANCEL_STATUS;
+              }
 
-              postSyncRunnable(new Runnable() {
-                public void run() {
-                  m_rerunAction.setEnabled(true);
-                  m_rerunFailedAction.setEnabled(false);
-                  m_openReportAction.setEnabled(true);
-                }
-              });
+              try {
+                messageMarshaller.initReceiver();
+                connected = true;
+              }
+              catch(SocketTimeoutException ex) {
+                TestNGPlugin.log("TestNG viewer connect timeout, will retry " + attempt);
+              }
             }
-            catch(SocketTimeoutException ex) {
+
+            if (!connected) {
               postSyncRunnable(new Runnable() {
                 public void run() {
                   boolean useProjectJar =
@@ -386,9 +395,42 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
                 }
               });
             }
+            else {
+              newSuiteRunInfo(launch);
+              fTestRunnerClient.startListening(currentSuiteRunInfo, currentSuiteRunInfo, messageMarshaller);
+  
+              postSyncRunnable(new Runnable() {
+                public void run() {
+                  m_rerunAction.setEnabled(true);
+                  m_rerunFailedAction.setEnabled(false);
+                  m_openReportAction.setEnabled(true);
+                }
+              });
+            }
             return Status.OK_STATUS;
           }
         };
+        
+        // handle the process terminated event
+        IDebugEventSetListener listener = new IDebugEventSetListener() {
+          public void handleDebugEvents(DebugEvent[] events) {
+            for (DebugEvent event : events) {
+              if (event.getKind() == DebugEvent.TERMINATE) {
+                Object source = event.getSource();
+                if (source instanceof IProcess) {
+                  IProcess process = (IProcess) source;
+                  if (process.getLaunch().equals(launch)) {
+                    // cancel the job if the process terminated
+                    testRunListeningJob.cancel();
+                    DebugPlugin.getDefault().removeDebugEventListener(this);
+                  }
+                }
+              }
+            }
+          }
+        };
+        DebugPlugin.getDefault().addDebugEventListener(listener);
+        
         testRunListeningJob.schedule();
   }
 
