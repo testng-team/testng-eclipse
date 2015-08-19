@@ -22,12 +22,15 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.debug.core.DebugEvent;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.internal.debug.ui.StatusInfo;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -355,11 +358,15 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         : new SerializedMessageSender("localhost", port);
 
         String jobName = ResourceUtil.getString("TestRunnerViewPart.message.startTestRunListening");
-        Job testRunListeningJob = new Job(jobName) {
+        final Job testRunListeningJob = new Job(jobName) {
+
+          private boolean initialized = false;
+
           @Override
           protected IStatus run(IProgressMonitor monitor) {
             try {
               messageMarshaller.initReceiver();
+              initialized = true;
               newSuiteRunInfo(launch);
               fTestRunnerClient.startListening(currentSuiteRunInfo, currentSuiteRunInfo, messageMarshaller);
 
@@ -372,23 +379,53 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
               });
             }
             catch(SocketTimeoutException ex) {
+              TestNGPlugin.log(ex);
               postSyncRunnable(new Runnable() {
                 public void run() {
                   boolean useProjectJar =
                       TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(project.getProject().getName());
                   String suggestion = useProjectJar
-                     ? "Uncheck the 'Use Project testng.jar' option from your Project properties and try again."
-                     : "Make sure you don't have an older version of testng.jar on your class path.";
-                  new ErrorDialog(m_counterComposite.getShell(), "Couldn't launch TestNG",
-                      "Couldn't contact the RemoteTestNG client. " + suggestion,
-                      new StatusInfo(IStatus.ERROR, "Timeout while trying to contact RemoteTestNG."),
-                      IStatus.ERROR).open();
+                      ? ResourceUtil.getString("TestRunnerViewPart.message.suggestion1")
+                      : ResourceUtil.getString("TestRunnerViewPart.message.suggestion2");
+                   new ErrorDialog(m_counterComposite.getShell(),
+                       "Couldn't launch TestNG", suggestion,
+                       new Status(IStatus.ERROR, TestNGPlugin.PLUGIN_ID,
+                           ResourceUtil.getString("TestRunnerViewPart.message.reason")),
+                       IStatus.ERROR).open();
                 }
               });
             }
             return Status.OK_STATUS;
           }
+
+          @Override
+          protected void canceling() {
+            if (initialized == false) {
+              TestNGPlugin.log("stop the socket server as it's still pending on accpeting the client");
+              messageMarshaller.stopReceiver();
+            }
+          }
         };
+
+        // handle the process terminated event
+        IDebugEventSetListener listener = new IDebugEventSetListener() {
+          public void handleDebugEvents(DebugEvent[] events) {
+            for (DebugEvent event : events) {
+              if (event.getKind() == DebugEvent.TERMINATE) {
+                Object source = event.getSource();
+                if (source instanceof IProcess) {
+                  IProcess process = (IProcess) source;
+                  if (process.getLaunch().equals(launch)) {
+                    testRunListeningJob.cancel();
+                    DebugPlugin.getDefault().removeDebugEventListener(this);
+                  }
+                }
+              }
+            }
+          }
+        };
+        DebugPlugin.getDefault().addDebugEventListener(listener);
+
         testRunListeningJob.schedule();
   }
 
