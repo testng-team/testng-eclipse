@@ -400,7 +400,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
           @Override
           protected void canceling() {
             if (initialized == false) {
-              TestNGPlugin.log("stop the socket server as it's still pending on accpeting the client");
+              TestNGPlugin.log("Stop the socket server as it's still pending on accepting the client");
               messageMarshaller.stopReceiver();
             }
           }
