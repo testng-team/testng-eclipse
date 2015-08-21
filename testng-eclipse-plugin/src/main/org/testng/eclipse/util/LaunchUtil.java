@@ -205,8 +205,7 @@ public class LaunchUtil {
 
     attrs.put(TestNGLaunchConfigurationConstants.TYPE, LaunchType.CLASS.ordinal());
     attrs.put(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST, classNames);
-//    attrs.put(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR, annotationType);
-    attrs.put(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST, 
+    attrs.put(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
         ConfigurationHelper.toClassMethodsMap(classMethods.asMap()));
 
     return attrs;
@@ -328,7 +327,6 @@ public class LaunchUtil {
       typeNames.add(type.getFullyQualifiedName());
     }
     String name = types[0].getTypeQualifiedName().toString() + "." + methodNames.get(0).toString();
-//    final String complianceLevel= annotationType != null ? annotationType : getQuickComplianceLevel(types);
 
     ILaunchConfigurationWorkingCopy workingCopy= createLaunchConfiguration(ijp.getProject(), name, runInfo);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
@@ -343,8 +341,6 @@ public class LaunchUtil {
                              ConfigurationHelper.toClassMethodsMap(classMethods.asMap()));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
                              solveParameters(methods));
-//    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
-//                             complianceLevel);
     String projectName= ijp.getProject().getName();
     
     PreferenceStoreUtil storage = TestNGPlugin.getPluginPreferenceStore();
@@ -698,10 +694,6 @@ public class LaunchUtil {
     return null;
   }
 
-  private static List<MethodDefinition> solveDependsOn(IMethod imethod) {
-    return JDTUtil.solveDependencies(imethod);
-  }
-
   private static ILaunchManager getLaunchManager() {
     return DebugPlugin.getDefault().getLaunchManager();
   }
@@ -722,45 +714,6 @@ public class LaunchUtil {
    */
   private static Map solveParameters(IJavaElement javaElement) {
     return solveParameters(new IJavaElement[] {javaElement});
-  }
-  
-  /**
-   * Uses the Eclipse search support to look for @Test annotation and decide
-   * if the compliance level should be set to JDK or JAVADOC.
-   */
-//  private static String getQuickComplianceLevel(IType[] types) {
-//    List resources= new ArrayList();
-//    for(int i= 0; i < types.length; i++) {
-//      try {
-//        resources.add(types[i].getCompilationUnit().getCorrespondingResource());
-//      }
-//      catch(JavaModelException jmex) {
-//        ;
-//      }
-//    }
-//    IResource[] scopeResources= (IResource[]) resources.toArray(new IResource[resources.size()]);
-//    ISearchQuery query= new FileSearchQuery("@(Test|Before|After|Factory)(\\(.+)?", 
-//        true /*regexp*/ , 
-//        true /*casesensitive*/, 
-//        FileTextSearchScope.newSearchScope(scopeResources, getJavaLikeExtensions(), false));
-//    query.run(new NullProgressMonitor());
-//    FileSearchResult result= (FileSearchResult) query.getSearchResult(); 
-//    Object[] elements= result.getElements();
-//    
-//    return elements != null && elements.length > 0 ? TestNG.JDK_ANNOTATION_TYPE : TestNG.JAVADOC_ANNOTATION_TYPE;
-//  }
-  
-  private static String[] getJavaLikeExtensions() {
-    char[][] exts = Util.getJavaLikeExtensions();
-    if (exts != null && exts.length > 0) {
-      String[] extStrs = new String[exts.length];
-      for (int i = 0; i < exts.length; i++) {
-        extStrs[i] = "*." + String.valueOf(exts[i]);
-      }
-      return extStrs;
-    } else {
-      return new String[] {"*.java"};
-    }
   }
 
   public static ILaunchConfigurationWorkingCopy setFailedTestsJvmArg (String value, 
