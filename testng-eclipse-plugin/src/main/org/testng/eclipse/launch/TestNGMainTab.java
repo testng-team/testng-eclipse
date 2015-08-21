@@ -252,14 +252,13 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
    */
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
     ConfigurationHelper.updateLaunchConfiguration(configuration,
-        new ConfigurationHelper.LaunchInfo(m_projectText.getText(), 
-              m_typeOfTestRun, 
+        new ConfigurationHelper.LaunchInfo(m_projectText.getText(),
+              m_typeOfTestRun,
               StringUtils.stringToList(m_classSelector.getText().trim()),
               StringUtils.stringToList(m_packageSelector.getText().trim()),
-              m_classMethods, 
+              m_classMethods,
               m_groupSelector.getValueMap(),
               m_suiteSelector.getText(),
-              TestNGLaunchConfigurationConstants.JDK15_COMPLIANCE, 
               m_logLevelCombo.getText(),
               m_verboseBtn.getSelection(),
               m_debugBtn.getSelection(),

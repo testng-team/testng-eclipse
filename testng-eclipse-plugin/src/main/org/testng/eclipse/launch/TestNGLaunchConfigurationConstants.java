@@ -10,8 +10,6 @@ import org.testng.eclipse.TestNGPlugin;
  * @author cbeust
  */
 public abstract class TestNGLaunchConfigurationConstants {
-  public static final String JDK15_COMPLIANCE = "JDK";
-  
   public static final String ID_TESTNG_APPLICATION = "org.testng.eclipse.launchconfig"; //$NON-NLS-1$
   
   private static String make(String s) {
@@ -95,11 +93,9 @@ public abstract class TestNGLaunchConfigurationConstants {
   public static final String DEBUG = make("DEBUG");  //$NON-NLS-1$
   
   public static final String PROTOCOL = make("PROTOCOL");  //$NON-NLS-1$
-  
-//  public static final String TESTNG_COMPLIANCE_LEVEL_ATTR = make("COMPLIANCE_LEVEL"); //$NON-NLS-1$
-  
+
   public static final String VM_ENABLEASSERTION_OPTION = "-ea";
-  
+
   public static final String PRE_DEFINED_LISTENERS=
       make("PRE_DEFINED_LISTENERS");
   // What kind of run we are doing

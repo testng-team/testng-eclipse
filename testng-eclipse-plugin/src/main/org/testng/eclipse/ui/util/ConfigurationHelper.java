@@ -49,7 +49,6 @@ public class ConfigurationHelper {
     private Map<String, List<String>> m_classMethods;
     private String m_suiteName;
     private Map<String, List<String>> m_groupMap = Maps.newHashMap();
-    private String m_complianceLevel;
     private String m_logLevel;
     private boolean m_verbose;
     private boolean m_debug;
@@ -62,9 +61,8 @@ public class ConfigurationHelper {
                       Map<String, List<String>> classMethodsMap,
                       Map<String, List<String>> groupMap,
                       String suiteName,
-                      String complianceLevel,
                       String logLevel,
-                      boolean verbose, 
+                      boolean verbose,
                       boolean debug,
                       Protocols protocol) {
       m_projectName= projectName;
@@ -73,7 +71,6 @@ public class ConfigurationHelper {
       m_classMethods= classMethodsMap;
       m_groupMap= groupMap;
       m_suiteName= suiteName.trim();
-      m_complianceLevel= complianceLevel;
       m_logLevel= logLevel;
       m_packageNames = packageNames;
       m_verbose = verbose;
@@ -145,20 +142,6 @@ public class ConfigurationHelper {
     return getListAttribute(configuration, TestNGLaunchConfigurationConstants.METHOD_TEST_LIST);
   }
 
-//  public static String getComplianceLevel(ILaunchConfiguration configuration) {
-//    return getStringAttribute(configuration, TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR);
-//  }
-  
-//  public static String getComplianceLevel(IJavaProject ijproject, ILaunchConfiguration configuration) {
-//    String result = getStringAttribute(configuration, TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR);
-//    
-//    if(null == result) {
-//      result = JDTUtil.getProjectVMVersion(ijproject);
-//    }
-//    
-//    return result;
-//  }
-  
   private static String getProjectJvmArgs() {
     IPreferenceStore store = TestNGPlugin.getDefault().getPreferenceStore();
     String result = store.getString(TestNGPluginConstants.S_JVM_ARGS);
@@ -313,10 +296,8 @@ public class ConfigurationHelper {
                         projectName);
     config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
                         RemoteTestNG.class.getName());
-//    config.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
-//                        JDTUtil.getProjectVMVersion(javaProject));
     config.setAttribute(TestNGLaunchConfigurationConstants.TYPE, LaunchType.CLASS.ordinal());
-    config.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL, "2"); 
+    config.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL, "2");
   }
 
   private static String computeRelativePath(final String rootPath, final String sourcePath) {
@@ -360,14 +341,6 @@ public class ConfigurationHelper {
       packages= getListAttribute(configuration, TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST);
     }
 
-//    return createLaunchSuites(ijp.getProject().getName(),
-//                              packages,
-//                              getClassMethods(configuration),
-//                              groups,
-//                              parameters,
-//                              getComplianceLevel(ijp, configuration),
-//                              getLogLevel(configuration));
-    
     return createLaunchSuites(ijp.getProject().getName(),
                               packages,
                               testClasses, 
@@ -377,35 +350,6 @@ public class ConfigurationHelper {
                               getLogLevel(configuration)
            );      
   }
-
-//  /**
-//   * Suite generator based on TestNG core. It is overseeded by internal suite
-//   * generators that offer more control on the names.
-//   * @param projectName the project name
-//   * @param packages a list (possible empty) of package names
-//   * @param classMethods a map (possible empty) of classes and their corresponding methods
-//   * @param groups a list (possible empty) of group names
-//   * @param parameters the parameters required to run the test
-//   * @param annotationType
-//   * @param logLevel
-//   * @return
-//   */
-//  private static List createLaunchSuites(String projectName, 
-//                                         List packages, 
-//                                         Map classMethods, 
-//                                         List groups, 
-//                                         Map parameters, 
-//                                         String annotationType, 
-//                                         int logLevel) {
-//    return Arrays.asList(
-//        new Object[] {org.testng.xml.SuiteGenerator.createSuite(projectName,
-//                                                                packages,
-//                                                                classMethods, 
-//                                                                groups, 
-//                                                                parameters,
-//                                                                annotationType,
-//                                                                logLevel)});
-//  }
 
   public static Map<String, List<String>> getClassMethods(ILaunchConfiguration configuration) {
     Map<String, String> confResult =
@@ -595,8 +539,6 @@ public class ConfigurationHelper {
                                StringUtils.stringToNullList(launchInfo.m_suiteName));
     configuration.setAttribute(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
                                toClassMethodsMap(classMethods));
-//    configuration.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_COMPLIANCE_LEVEL_ATTR,
-//                               launchInfo.m_complianceLevel);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL,
                                launchInfo.m_logLevel);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.VERBOSE, launchInfo.m_verbose);
