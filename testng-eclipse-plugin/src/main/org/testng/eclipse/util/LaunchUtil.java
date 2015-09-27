@@ -45,6 +45,7 @@ import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
+import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.Protocols;
 import org.testng.eclipse.ui.RunInfo;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.util.JDTUtil.MethodDefinition;
@@ -415,8 +416,8 @@ public class LaunchUtil {
   }
 
   public static boolean useStringProtocol(ILaunchConfiguration configuration) {
-    String jvmArgs = ConfigurationHelper.getJvmArgs(configuration);
-     return jvmArgs.indexOf("-Dtestng.eclipse.stringprotocol") >= 0;
+    Protocols p = ConfigurationHelper.getProtocol(configuration);
+    return p == Protocols.STRING;
   }
 
   private static void launchTypeBasedConfiguration(IJavaProject javaProject, String confName,
