@@ -12,6 +12,8 @@ import org.testng.eclipse.TestNGPlugin;
 public abstract class TestNGLaunchConfigurationConstants {
   public static final String ID_TESTNG_APPLICATION = "org.testng.eclipse.launchconfig"; //$NON-NLS-1$
   
+  public static final String RESOLVED_JVM_ARGS = "resolvedJvmArgs";
+
   private static String make(String s) {
     return TestNGPlugin.PLUGIN_ID + "." + s;
   }
