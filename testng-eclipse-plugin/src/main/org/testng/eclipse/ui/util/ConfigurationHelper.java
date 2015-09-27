@@ -149,9 +149,26 @@ public class ConfigurationHelper {
   }
 
   /**
+   * Get the JVM args.<br/>
+   * <p>IMPL NOTES:<br/>
+   * It tries to see if there any resolved JVM args in the launch conf, otherwise, resolve it and save it in the launch conf.
+   * This sovles the issue #110 by resolve the variables once and only once.
+   * </p>
+   *
    * @return the JVM args from the configuration or, if not found, from the preferences.
    */
   public static String getJvmArgs(ILaunchConfiguration configuration) {
+    if (configuration != null) {
+      try {
+        String resolvedJvmArgs = configuration.getAttribute(TestNGLaunchConfigurationConstants.RESOLVED_JVM_ARGS, (String) null);
+        if (resolvedJvmArgs != null) {
+          return resolvedJvmArgs;
+        }
+      } catch (CoreException e) {
+        TestNGPlugin.log(e);
+      }
+    }
+
     String result = getProjectJvmArgs();
 
     // JVM args from the previous configuration take precedence over the preference
@@ -160,6 +177,10 @@ public class ConfigurationHelper {
   			result = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
   			    result);
   			result = VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(result);
+
+  			ILaunchConfigurationWorkingCopy launchConfCopy = configuration.getWorkingCopy();
+  			launchConfCopy.setAttribute(TestNGLaunchConfigurationConstants.RESOLVED_JVM_ARGS, result);
+  			launchConfCopy.doSave();
   		} catch (CoreException e) {
   			TestNGPlugin.log(e);
   		}
