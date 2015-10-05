@@ -134,18 +134,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     }
 
     // Program & VM args
-    StringBuilder vmArgs = new StringBuilder(ConfigurationHelper.getJvmArgs(configuration))
-        .append(" ")
-        .append(TestNGLaunchConfigurationConstants.VM_ENABLEASSERTION_OPTION); // $NON-NLS-1$
-    addDebugProperties(vmArgs, configuration);
-    switch (ConfigurationHelper.getProtocol(configuration)) {
-    case STRING:
-      vmArgs.append(" -Dtestng.eclipse.stringprotocol");
-      break;
-    default:
-      break;
-    }
-    ExecutionArguments execArgs = new ExecutionArguments(vmArgs.toString(), ""); //$NON-NLS-1$
+    ExecutionArguments execArgs = new ExecutionArguments(ConfigurationHelper.getJvmArgs(configuration), ""); //$NON-NLS-1$
     String[] envp = DebugPlugin.getDefault().getLaunchManager().getEnvironment(configuration);
 
     VMRunnerConfiguration runConfig = createVMRunner(configuration, launch, jproject, port, mode);
@@ -160,28 +149,6 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     runConfig.setBootClassPath(bootpath);
 
     return runConfig;
-  }
-
-  /**
-   * Pass the system properties we were called with to the RemoteTestNG process.
-   */
-  private void addDebugProperties(StringBuilder vmArgs, ILaunchConfiguration config) {
-    String[] debugProperties = new String[] {
-        RemoteTestNG.PROPERTY_DEBUG,
-        RemoteTestNG.PROPERTY_VERBOSE
-    };
-    for (String p : debugProperties) {
-      if (System.getProperty(p) != null) {
-        vmArgs.append(" -D").append(p);
-      }
-    }
-
-    if (ConfigurationHelper.getVerbose(config)) {
-      vmArgs.append(" -D" + RemoteTestNG.PROPERTY_VERBOSE);
-    }
-    if (ConfigurationHelper.getDebug(config)) {
-      vmArgs.append(" -D" + RemoteTestNG.PROPERTY_DEBUG);
-    }
   }
 
   @Override

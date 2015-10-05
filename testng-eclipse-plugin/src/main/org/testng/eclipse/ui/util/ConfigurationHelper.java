@@ -9,10 +9,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.ILaunch;
@@ -21,6 +30,7 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.testng.eclipse.TestNGPlugin;
@@ -33,6 +43,9 @@ import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.SuiteGenerator;
 import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Helper methods to store and retrieve values from a launch configuration.
@@ -152,6 +165,15 @@ public class ConfigurationHelper {
    * @return the JVM args from the configuration or, if not found, from the preferences.
    */
   public static String getJvmArgs(ILaunchConfiguration configuration) {
+    StringBuilder jvmArgs = new StringBuilder();
+    jvmArgs.append(TestNGLaunchConfigurationConstants.VM_ENABLEASSERTION_OPTION);
+
+    try {
+      jvmArgs.append(getVMArgsFromPom(configuration));
+    } catch (Exception e1) {
+      TestNGPlugin.log(e1);
+    }
+
     String result = getProjectJvmArgs();
 
     // JVM args from the previous configuration take precedence over the preference
@@ -165,9 +187,96 @@ public class ConfigurationHelper {
   		}
     }
 
-    return result;
-	}
-  
+    jvmArgs.append(" ").append(result);
+
+    addDebugProperties(jvmArgs, configuration);
+
+    switch (ConfigurationHelper.getProtocol(configuration)) {
+    case STRING:
+      jvmArgs.append(" -Dtestng.eclipse.stringprotocol");
+      break;
+    default:
+      break;
+    }
+
+    return jvmArgs.toString();
+  }
+
+  /**
+   * Get the JVM args from maven pom.xmll.
+   * <ul>
+   * Here is the return value of different cases:
+   * <li>no pom.xml -- return empty String</li>
+   * <li>pom.xml exists, but no maven-surefire-plugin or maven-safefail-plugin, in essential, no "argLine" element in the pom.xml -- return empty String</li>
+   * <li>there is one "argLine" element -- return the text content of the "argLine" element</li>
+   * <li>there are more then one "argLine" elements -- return the first "argLine"<profile></li>
+   * </ul>
+   * @param conf
+   * @return
+   * @throws Exception
+   */
+  private static String getVMArgsFromPom(ILaunchConfiguration conf) throws Exception {
+    StringBuilder vmArgs = new StringBuilder();
+    IJavaProject javaProject = getJavaProject(conf);
+    IFile pomFile = javaProject.getProject().getFile("pom.xml");
+    if (pomFile.exists()) {
+      DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+      documentBuilderFactory.setNamespaceAware(false);
+      DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+      Document doc = documentBuilder.parse(pomFile.getLocation().toFile());
+
+      XPathFactory xpathFactory = XPathFactory.newInstance();
+      XPath xpath = xpathFactory.newXPath();
+
+      XPathExpression expr = xpath.compile("//argLine");
+      NodeList argLineNodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+      if (argLineNodes.getLength() > 0) {
+        Node argLineNode = argLineNodes.item(0);
+        vmArgs.append(" ").append(argLineNode.getTextContent());
+      }
+    }
+    return vmArgs.toString();
+  }
+
+  /**
+   * Pass the system properties we were called with to the RemoteTestNG process.
+   */
+  private static void addDebugProperties(StringBuilder vmArgs, ILaunchConfiguration config) {
+    String[] debugProperties = new String[] {
+        RemoteTestNG.PROPERTY_DEBUG,
+        RemoteTestNG.PROPERTY_VERBOSE
+    };
+    for (String p : debugProperties) {
+      if (System.getProperty(p) != null) {
+        vmArgs.append(" -D").append(p);
+      }
+    }
+
+    if (ConfigurationHelper.getVerbose(config)) {
+      vmArgs.append(" -D" + RemoteTestNG.PROPERTY_VERBOSE);
+    }
+    if (ConfigurationHelper.getDebug(config)) {
+      vmArgs.append(" -D" + RemoteTestNG.PROPERTY_DEBUG);
+    }
+  }
+
+  public static IJavaProject getJavaProject(ILaunchConfiguration configuration)
+      throws CoreException {
+    String projectName = getProjectName(configuration);
+    if (projectName != null) {
+      projectName = projectName.trim();
+      if (projectName.length() > 0) {
+        IProject project = ResourcesPlugin.getWorkspace().getRoot()
+            .getProject(projectName);
+        IJavaProject javaProject = JavaCore.create(project);
+        if (javaProject != null && javaProject.exists()) {
+          return javaProject;
+        }
+      }
+    }
+    return null;
+  }
+
   public static ILaunchConfigurationWorkingCopy setJvmArgs(
 			ILaunchConfigurationWorkingCopy configuration, String args) {
 		configuration.setAttribute(
@@ -298,14 +407,6 @@ public class ConfigurationHelper {
                         RemoteTestNG.class.getName());
     config.setAttribute(TestNGLaunchConfigurationConstants.TYPE, LaunchType.CLASS.ordinal());
     config.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL, "2");
-  }
-
-  private static String computeRelativePath(final String rootPath, final String sourcePath) {
-    File rootFile = new File(rootPath);
-    String rootRelativeName = rootFile.getName();
-    
-    int idx = sourcePath.indexOf(rootPath);
-    return File.separator + rootRelativeName + sourcePath.substring(idx + rootPath.length());
   }
 
   /**
