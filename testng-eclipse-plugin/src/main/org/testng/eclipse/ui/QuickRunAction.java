@@ -76,8 +76,8 @@ public class QuickRunAction extends Action {
      * methods. 
      */
     ILaunchConfiguration config = m_previousRun.getLaunchConfiguration();
-    m_runInfo.setJvmArgs(ConfigurationHelper.getJvmArgs(config));
     try {
+      m_runInfo.setJvmArgs(ConfigurationHelper.getJvmArgs(config));
       m_runInfo.setEnvironmentVariables(config.getAttribute(
           ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, (Map<String, String>) null));
     } catch (CoreException e) {

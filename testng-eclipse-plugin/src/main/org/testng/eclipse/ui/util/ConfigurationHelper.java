@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -164,30 +165,15 @@ public class ConfigurationHelper {
   /**
    * @return the JVM args from the configuration or, if not found, from the preferences.
    */
-  public static String getJvmArgs(ILaunchConfiguration configuration) {
+  public static String getJvmArgs(ILaunchConfiguration configuration) throws CoreException {
     StringBuilder jvmArgs = new StringBuilder();
     jvmArgs.append(TestNGLaunchConfigurationConstants.VM_ENABLEASSERTION_OPTION);
 
-    try {
-      jvmArgs.append(getVMArgsFromPom(configuration));
-    } catch (Exception e1) {
-      TestNGPlugin.log(e1);
-    }
-
-    String result = getProjectJvmArgs();
+    jvmArgs.append(getVMArgsFromPom(configuration));
 
     // JVM args from the previous configuration take precedence over the preference
-    if (configuration != null) {
-  		try {
-  			result = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
-  			    result);
-  			result = VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(result);
-  		} catch (CoreException e) {
-  			TestNGPlugin.log(e);
-  		}
-    }
-
-    jvmArgs.append(" ").append(result);
+		jvmArgs.append(" ").append(configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
+		    getProjectJvmArgs()));
 
     addDebugProperties(jvmArgs, configuration);
 
@@ -199,7 +185,7 @@ public class ConfigurationHelper {
       break;
     }
 
-    return jvmArgs.toString();
+    return VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(jvmArgs.toString());
   }
 
   /**
@@ -215,24 +201,28 @@ public class ConfigurationHelper {
    * @return
    * @throws Exception
    */
-  private static String getVMArgsFromPom(ILaunchConfiguration conf) throws Exception {
+  private static String getVMArgsFromPom(ILaunchConfiguration conf) throws CoreException {
     StringBuilder vmArgs = new StringBuilder();
     IJavaProject javaProject = getJavaProject(conf);
     IFile pomFile = javaProject.getProject().getFile("pom.xml");
     if (pomFile.exists()) {
-      DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-      documentBuilderFactory.setNamespaceAware(false);
-      DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-      Document doc = documentBuilder.parse(pomFile.getLocation().toFile());
-
-      XPathFactory xpathFactory = XPathFactory.newInstance();
-      XPath xpath = xpathFactory.newXPath();
-
-      XPathExpression expr = xpath.compile("//argLine");
-      NodeList argLineNodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-      if (argLineNodes.getLength() > 0) {
-        Node argLineNode = argLineNodes.item(0);
-        vmArgs.append(" ").append(argLineNode.getTextContent());
+      try {
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        documentBuilderFactory.setNamespaceAware(false);
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        Document doc = documentBuilder.parse(pomFile.getLocation().toFile());
+  
+        XPathFactory xpathFactory = XPathFactory.newInstance();
+        XPath xpath = xpathFactory.newXPath();
+  
+        XPathExpression expr = xpath.compile("//argLine");
+        NodeList argLineNodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+        if (argLineNodes.getLength() > 0) {
+          Node argLineNode = argLineNodes.item(0);
+          vmArgs.append(" ").append(argLineNode.getTextContent());
+        }
+      } catch (Exception e) {
+        throw new CoreException(TestNGPlugin.createError(e));
       }
     }
     return vmArgs.toString();

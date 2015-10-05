@@ -138,7 +138,7 @@ public class LaunchUtil {
         configWC.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, previousEnv);
       }
     } catch (CoreException e) {
-      e.printStackTrace();
+      TestNGPlugin.log(e);
     }
 
     configWC.setAttribute(TestNGLaunchConfigurationConstants.SUITE_TEST_LIST,
@@ -148,18 +148,23 @@ public class LaunchUtil {
 
     // carry over jvm args from prevConfig
     // set failed test jvm args
-    String jargs = ConfigurationHelper.getJvmArgs(prevConfig);
-    if (jargs != null) ConfigurationHelper.setJvmArgs(configWC, jargs);
-    if (failureDescriptions != null && failureDescriptions.size() > 0) {
-    	Iterator it = failureDescriptions.iterator();
-    	StringBuffer buf = new StringBuffer();
-  		boolean first = true;
-  		while (it.hasNext()) {
-  			if (first) first = false;
-  			else buf.append(",");
-  			buf.append (it.next());
-  		}
-  		setFailedTestsJvmArg(buf.toString(), configWC);
+    try {
+      String jargs = ConfigurationHelper.getJvmArgs(prevConfig);
+      if (jargs != null) ConfigurationHelper.setJvmArgs(configWC, jargs);
+      if (failureDescriptions != null && failureDescriptions.size() > 0) {
+      	Iterator it = failureDescriptions.iterator();
+      	StringBuffer buf = new StringBuffer();
+    		boolean first = true;
+    		while (it.hasNext()) {
+    			if (first) first = false;
+    			else buf.append(",");
+    			buf.append (it.next());
+    		}
+    		setFailedTestsJvmArg(buf.toString(), configWC);
+      }
+    } catch (CoreException e) {
+      // TODO throw the exception rather than catch it
+      TestNGPlugin.log(e);
     }
     runConfig(configWC, mode);
   }

@@ -285,10 +285,6 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
     }
   }
 
-  private static void ppp(final Object message) {
-//    System.out.println("[TestNG]:- " + message);
-  }
-
   // Assume that all the controls that go through bold() have the same font, 
   // which is probably a safe assumption.  The BOLD font will be disposed
   // in the stop() method
@@ -347,5 +343,9 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
 
   public static boolean isDebug() {
     return RemoteTestNG.isDebug();
+  }
+
+  public static IStatus createError(Throwable e) {
+    return new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage(), e);
   }
 }
