@@ -169,10 +169,16 @@ public class ConfigurationHelper {
     StringBuilder jvmArgs = new StringBuilder();
     jvmArgs.append(TestNGLaunchConfigurationConstants.VM_ENABLEASSERTION_OPTION);
 
-    jvmArgs.append(getVMArgsFromPom(configuration));
+    try {
+      jvmArgs.append(getVMArgsFromPom(configuration));
+    } catch (Exception e) {
+      // log any exception when get JVM args from maven pom.xml,
+      // just let the process carry on
+      TestNGPlugin.log(e);
+    }
 
     // JVM args from the previous configuration take precedence over the preference
-		jvmArgs.append(" ").append(configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
+    jvmArgs.append(" ").append(configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
 		    getProjectJvmArgs()));
 
     addDebugProperties(jvmArgs, configuration);
@@ -201,28 +207,24 @@ public class ConfigurationHelper {
    * @return
    * @throws Exception
    */
-  private static String getVMArgsFromPom(ILaunchConfiguration conf) throws CoreException {
+  private static String getVMArgsFromPom(ILaunchConfiguration conf) throws Exception {
     StringBuilder vmArgs = new StringBuilder();
     IJavaProject javaProject = getJavaProject(conf);
     IFile pomFile = javaProject.getProject().getFile("pom.xml");
     if (pomFile.exists()) {
-      try {
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware(false);
-        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        Document doc = documentBuilder.parse(pomFile.getLocation().toFile());
-  
-        XPathFactory xpathFactory = XPathFactory.newInstance();
-        XPath xpath = xpathFactory.newXPath();
-  
-        XPathExpression expr = xpath.compile("//argLine");
-        NodeList argLineNodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-        if (argLineNodes.getLength() > 0) {
-          Node argLineNode = argLineNodes.item(0);
-          vmArgs.append(" ").append(argLineNode.getTextContent());
-        }
-      } catch (Exception e) {
-        throw new CoreException(TestNGPlugin.createError(e));
+      DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+      documentBuilderFactory.setNamespaceAware(false);
+      DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+      Document doc = documentBuilder.parse(pomFile.getLocation().toFile());
+
+      XPathFactory xpathFactory = XPathFactory.newInstance();
+      XPath xpath = xpathFactory.newXPath();
+
+      XPathExpression expr = xpath.compile("//argLine");
+      NodeList argLineNodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+      if (argLineNodes.getLength() > 0) {
+        Node argLineNode = argLineNodes.item(0);
+        vmArgs.append(" ").append(argLineNode.getTextContent());
       }
     }
     return vmArgs.toString();
