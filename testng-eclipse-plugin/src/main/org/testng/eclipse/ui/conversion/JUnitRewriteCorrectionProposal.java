@@ -29,6 +29,7 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditVisitor;
 import org.eclipse.text.edits.UndoEdit;
+import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.ui.Images;
 
 /**
@@ -111,7 +112,7 @@ public class JUnitRewriteCorrectionProposal implements IJavaCompletionProposal
         TextEdit edit= rewrite.rewriteAST();
         editRoot.addChild(edit);
       } catch (IllegalArgumentException e) {
-        throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
+        throw new CoreException(TestNGPlugin.createError(e));
       }
     }
 //    if (fImportRewrite != null) {

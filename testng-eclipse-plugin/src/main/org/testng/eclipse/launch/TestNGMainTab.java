@@ -94,6 +94,8 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
   private Button m_debugBtn;
 
   private ComboViewer m_protocolComboViewer;
+  
+  private Button m_prefixVmArgsFromPomBtn;
 
   private List <TestngTestSelector> m_launchSelectors = Lists.newArrayList();
   private Map<String, List<String>> m_classMethods;
@@ -220,6 +222,8 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
     m_protocolComboViewer.setSelection(new StructuredSelection(ConfigurationHelper.getProtocol(configuration)));
 
+    m_prefixVmArgsFromPomBtn.setSelection(ConfigurationHelper.isPrefixVmArgsFromPom(configuration));
+
     LaunchType type = ConfigurationHelper.getType(configuration);
     setType(type);
     m_classMethods = ConfigurationHelper.getClassMethods(configuration);
@@ -262,7 +266,9 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
               m_logLevelCombo.getText(),
               m_verboseBtn.getSelection(),
               m_debugBtn.getSelection(),
-              (Protocols) ((StructuredSelection) m_protocolComboViewer.getSelection()).getFirstElement()));
+              (Protocols) ((StructuredSelection) m_protocolComboViewer.getSelection()).getFirstElement(),
+              m_prefixVmArgsFromPomBtn.getSelection())
+        );
   }
 
   /**
@@ -536,6 +542,21 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
       }
     });
     m_protocolComboViewer.setInput(TestNGLaunchConfigurationConstants.SERIALIZATION_PROTOCOLS);
+
+
+    m_prefixVmArgsFromPomBtn = new Button(group, SWT.CHECK);
+    m_prefixVmArgsFromPomBtn.setText(ResourceUtil.getString("TestNGMainTab.testng.prefixVmArgsFromPom"));
+    m_prefixVmArgsFromPomBtn.setToolTipText(ResourceUtil.getString("TestNGMainTab.testng.prefixVmArgsFromPom.tooltip"));
+    GridDataFactory.fillDefaults().span(3, SWT.None).applyTo(m_prefixVmArgsFromPomBtn);
+    m_prefixVmArgsFromPomBtn.addSelectionListener(new SelectionListener() {
+      public void widgetSelected(SelectionEvent e) {
+        updateLaunchConfigurationDialog();
+      }
+
+      public void widgetDefaultSelected(SelectionEvent e) {
+      }
+    });
+
   }
 
   private void createProjectSelectionGroup(Composite comp) {
