@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -85,7 +86,9 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   private Map<String, ITreeItem> m_suites = Maps.newHashMap();
   private Map<String, ITreeItem> m_tests = Maps.newHashMap();
   private Map<String, ITreeItem> m_classes = Maps.newHashMap();
-  private Map<String, ITreeItem> m_methods = Maps.newHashMap();
+  // bug/167: use ArrayListMultimap which allows duplicate keys to store m_methods
+  //          since the instanceName (which is used as key) might be same
+  private ArrayListMultimap<String, ITreeItem> m_methods = ArrayListMultimap.create();
   // Don't forget to .clear() all these maps beween each run ^^
 
   @Override
@@ -292,11 +295,8 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
         m_classes.put(pathToClass, cls);
       }
       String pathToMethod = pathToClass + "#" + runInfo.getMethodName();
-      ITreeItem method = m_methods.get(pathToMethod);
-      if (method == null) {
-        method = new TestMethodTreeItem(cls.getTreeItem(), runInfo);
-        m_methods.put(pathToMethod, method);
-      }
+      ITreeItem method = new TestMethodTreeItem(cls.getTreeItem(), runInfo);
+      m_methods.put(pathToMethod, method);
 
       // Create a node for the parameter values, if applicable
       ITreeItem methodParam = null;
