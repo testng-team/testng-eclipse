@@ -4,8 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.Sets;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -37,6 +35,8 @@ import org.testng.xml.XmlPackage;
 import org.testng.xml.XmlSuite;
 import org.testng.xml.XmlTest;
 
+import com.google.common.collect.Sets;
+
 /**
  * The page in the refactoring wizard that lets the user configure the
  * generation of the testng.xml file.
@@ -52,6 +52,7 @@ public class TestNGXmlPage extends UserInputWizardPage {
   private Text m_testText;
 
   private final ModifyListener MODIFY_LISTENER = new ModifyListener() {
+    @Override
     public void modifyText(ModifyEvent e) {
       updateUi();
     }
@@ -90,6 +91,7 @@ public class TestNGXmlPage extends UserInputWizardPage {
     setTitle(TITLE);
   }
 
+  @Override
   public void createControl(Composite p) {
     p("createUI");
     createUi(p);
@@ -161,10 +163,12 @@ public class TestNGXmlPage extends UserInputWizardPage {
 
     m_generateBox.addSelectionListener(new SelectionListener() {
 
+      @Override
       public void widgetSelected(SelectionEvent e) {
         group.setEnabled(((Button) e.getSource()).getSelection());
       }
 
+      @Override
       public void widgetDefaultSelected(SelectionEvent e) {
       }
 
@@ -219,10 +223,10 @@ public class TestNGXmlPage extends UserInputWizardPage {
       Label l = new Label(horizontal, SWT.NONE);
       l.setText("Parallel mode:");
       m_parallelCombo = new Combo(horizontal, SWT.READ_ONLY);
-      m_parallelCombo.add(XmlSuite.PARALLEL_NONE);
-      m_parallelCombo.add(XmlSuite.PARALLEL_METHODS);
-      m_parallelCombo.add(XmlSuite.PARALLEL_CLASSES);
-      m_parallelCombo.add(XmlSuite.PARALLEL_TESTS);
+      m_parallelCombo.add(XmlSuite.ParallelMode.NONE.toString());
+      m_parallelCombo.add(XmlSuite.ParallelMode.METHODS.toString());
+      m_parallelCombo.add(XmlSuite.ParallelMode.CLASSES.toString());
+      m_parallelCombo.add(XmlSuite.ParallelMode.TESTS.toString());
       m_parallelCombo.select(0);
     }
 
@@ -281,11 +285,13 @@ public class TestNGXmlPage extends UserInputWizardPage {
       m_suiteMethodCombo.select(lastValue.ordinal());
       m_suiteMethodCombo.addSelectionListener(new SelectionListener() {
 
+        @Override
         public void widgetSelected(SelectionEvent e) {
           TestNGPlugin.getPluginPreferenceStore().storeSuiteMethodTreatement(
               m_suiteMethodCombo.getSelectionIndex());
         }
 
+        @Override
         public void widgetDefaultSelected(SelectionEvent e) {
         }
 
