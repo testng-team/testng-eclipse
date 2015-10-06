@@ -23,7 +23,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -67,6 +66,7 @@ public class ConfigurationHelper {
     private boolean m_verbose;
     private boolean m_debug;
     private Protocols m_protocol;
+    private boolean m_prefixVmArgsFromPom;
 
     public LaunchInfo(String projectName,
                       LaunchType launchType,
@@ -78,7 +78,8 @@ public class ConfigurationHelper {
                       String logLevel,
                       boolean verbose,
                       boolean debug,
-                      Protocols protocol) {
+                      Protocols protocol,
+                      boolean prefixVmArgsFromPom) {
       m_projectName= projectName;
       m_launchType= launchType;
       m_classNames= classNames;
@@ -90,6 +91,7 @@ public class ConfigurationHelper {
       m_verbose = verbose;
       m_debug = debug;
       m_protocol = protocol;
+      m_prefixVmArgsFromPom = prefixVmArgsFromPom;
     }
   }
 
@@ -114,6 +116,11 @@ public class ConfigurationHelper {
   public static Protocols getProtocol(ILaunchConfiguration config) {
     String stringResult = getStringAttribute(config, TestNGLaunchConfigurationConstants.PROTOCOL);
     return null == stringResult ? TestNGLaunchConfigurationConstants.DEFAULT_SERIALIZATION_PROTOCOL : Protocols.get(stringResult); 
+  }
+
+  public static boolean isPrefixVmArgsFromPom(ILaunchConfiguration config) {
+    return getBooleanAttribute(config, TestNGLaunchConfigurationConstants.PREFIX_VM_ARGS_FROM_POM, 
+        TestNGLaunchConfigurationConstants.DEFAULT_PREFIX_VM_ARGS_FROM_POM);
   }
 
   public static String getSourcePath(ILaunchConfiguration config) {
@@ -209,22 +216,24 @@ public class ConfigurationHelper {
    */
   private static String getVMArgsFromPom(ILaunchConfiguration conf) throws Exception {
     StringBuilder vmArgs = new StringBuilder();
-    IJavaProject javaProject = getJavaProject(conf);
-    IFile pomFile = javaProject.getProject().getFile("pom.xml");
-    if (pomFile.exists()) {
-      DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-      documentBuilderFactory.setNamespaceAware(false);
-      DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-      Document doc = documentBuilder.parse(pomFile.getLocation().toFile());
-
-      XPathFactory xpathFactory = XPathFactory.newInstance();
-      XPath xpath = xpathFactory.newXPath();
-
-      XPathExpression expr = xpath.compile("//argLine");
-      NodeList argLineNodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-      if (argLineNodes.getLength() > 0) {
-        Node argLineNode = argLineNodes.item(0);
-        vmArgs.append(" ").append(argLineNode.getTextContent());
+    if (isPrefixVmArgsFromPom(conf)) {
+      IJavaProject javaProject = getJavaProject(conf);
+      IFile pomFile = javaProject.getProject().getFile("pom.xml");
+      if (pomFile.exists()) {
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        documentBuilderFactory.setNamespaceAware(false);
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        Document doc = documentBuilder.parse(pomFile.getLocation().toFile());
+  
+        XPathFactory xpathFactory = XPathFactory.newInstance();
+        XPath xpath = xpathFactory.newXPath();
+  
+        XPathExpression expr = xpath.compile("//argLine");
+        NodeList argLineNodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+        if (argLineNodes.getLength() > 0) {
+          Node argLineNode = argLineNodes.item(0);
+          vmArgs.append(" ").append(argLineNode.getTextContent());
+        }
       }
     }
     return vmArgs.toString();
@@ -355,7 +364,11 @@ public class ConfigurationHelper {
   }
 
   private static boolean getBooleanAttribute(ILaunchConfiguration config, String attr) {
-    boolean result = false;
+    return getBooleanAttribute(config, attr, false);
+  }
+
+  private static boolean getBooleanAttribute(ILaunchConfiguration config, String attr, boolean defaultValue) {
+    boolean result = defaultValue;
     
     try {
       result = config.getAttribute(attr, result);
@@ -637,5 +650,6 @@ public class ConfigurationHelper {
     configuration.setAttribute(TestNGLaunchConfigurationConstants.VERBOSE, launchInfo.m_verbose);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.DEBUG, launchInfo.m_debug);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.PROTOCOL, launchInfo.m_protocol.toString());
+    configuration.setAttribute(TestNGLaunchConfigurationConstants.PREFIX_VM_ARGS_FROM_POM, launchInfo.m_prefixVmArgsFromPom);
   }
 }

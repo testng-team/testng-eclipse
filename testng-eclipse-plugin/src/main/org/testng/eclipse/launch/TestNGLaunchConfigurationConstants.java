@@ -94,6 +94,8 @@ public abstract class TestNGLaunchConfigurationConstants {
   
   public static final String PROTOCOL = make("PROTOCOL");  //$NON-NLS-1$
 
+  public static final String PREFIX_VM_ARGS_FROM_POM = make("PREFIX_VM_ARGS_FROM_POM");  //$NON-NLS-1$
+
   public static final String VM_ENABLEASSERTION_OPTION = "-ea";
 
   public static final String PRE_DEFINED_LISTENERS=
@@ -127,6 +129,8 @@ public abstract class TestNGLaunchConfigurationConstants {
   
   public static final Protocols[] SERIALIZATION_PROTOCOLS = {Protocols.OBJECT, Protocols.STRING};
   public static final Protocols DEFAULT_SERIALIZATION_PROTOCOL = SERIALIZATION_PROTOCOLS[0];
+
+  public static final boolean DEFAULT_PREFIX_VM_ARGS_FROM_POM = true;
 
   public static enum Protocols {
     OBJECT("object"),
