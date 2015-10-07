@@ -1,5 +1,5 @@
 UPDATE_SITE=$HOME/java/testng-eclipse/testng-eclipse-update-site/target/site
-TMP=/d/tmp
+TMP=$HOME/t
 
 if [ $1 == "-m" ]
 then
