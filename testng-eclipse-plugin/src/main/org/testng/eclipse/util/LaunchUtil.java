@@ -130,7 +130,7 @@ public class LaunchUtil {
       String suiteFilePath,
 		  String mode, ILaunchConfiguration prevConfig, Set failureDescriptions) {
     ILaunchConfigurationWorkingCopy configWC =
-        createLaunchConfiguration(project, fileConfName, null);
+        createLaunchConfiguration(project, project.getName() + "_" + fileConfName, null);
     try {
       if (prevConfig != null) {
         Map<String, String> previousEnv
