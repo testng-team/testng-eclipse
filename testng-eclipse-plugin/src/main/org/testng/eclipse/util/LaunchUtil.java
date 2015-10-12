@@ -149,7 +149,10 @@ public class LaunchUtil {
     // carry over jvm args from prevConfig
     // set failed test jvm args
     try {
-      String jargs = ConfigurationHelper.getJvmArgs(prevConfig);
+      String jargs = null;
+      if (prevConfig != null) {
+        jargs = ConfigurationHelper.getJvmArgs(prevConfig);
+      }
       if (jargs != null) ConfigurationHelper.setJvmArgs(configWC, jargs);
       if (failureDescriptions != null && failureDescriptions.size() > 0) {
       	Iterator it = failureDescriptions.iterator();
