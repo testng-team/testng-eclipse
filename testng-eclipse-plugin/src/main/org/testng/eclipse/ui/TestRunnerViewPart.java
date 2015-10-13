@@ -36,6 +36,8 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
@@ -710,18 +712,15 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     if (getWatchResultDirectory() != null) {
       updateResultThread();
     }
-    m_parentComposite = parent;
+    m_parentComposite = new Composite(parent, SWT.NONE);
 
-    GridLayout gridLayout = new GridLayout();
-    gridLayout.marginWidth = 0;
-    gridLayout.marginHeight = 0;
-    parent.setLayout(gridLayout);
+    GridLayoutFactory.fillDefaults().applyTo(m_parentComposite);
 
     configureToolBar();
 
-    createProgressCountPanel(parent);
+    createProgressCountPanel(m_parentComposite);
 
-    m_tabFolder = createTestRunTabs(parent);
+    m_tabFolder = createTestRunTabs(m_parentComposite);
 
     TestNGPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 
@@ -816,6 +815,10 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private void createProgressCountPanel(Composite parent) {
+    Composite c = new Composite(parent, SWT.NONE);
+    GridDataFactory.fillDefaults().grab(true, true).applyTo(c);
+    GridLayoutFactory.swtDefaults().applyTo(c);
+
     Display display= parent.getDisplay();
     fFailureColor= new Color(display, 159, 63, 63);
     fOKColor= new Color(display, 95, 191, 95);
@@ -824,21 +827,20 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       //
       // Progress bar
       //
-      m_counterComposite = new Composite(parent, SWT.NONE);
-      m_counterComposite.setLayoutData(
-          new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+      m_counterComposite = new Composite(c, SWT.NONE);
+      GridDataFactory.fillDefaults().grab(true, false).applyTo(m_counterComposite);
       GridLayout layout = new GridLayout();
-      m_counterComposite.setLayout(layout);
       setCounterColumns(layout);
+      GridLayoutFactory.createFrom(layout).margins(0, 0).spacing(5, 0).applyTo(m_counterComposite);
 
       fProgressBar = new ProgressBar(m_counterComposite);
-      fProgressBar.setLayoutData(
-          new GridData(GridData.GRAB_HORIZONTAL| GridData.HORIZONTAL_ALIGN_FILL));
+      GridDataFactory.fillDefaults().grab(true, false).applyTo(fProgressBar);
 
       //
       // Stop button (a toolbar, actually)
       //
       ToolBar toolBar = new ToolBar(m_counterComposite, SWT.FLAT);
+      GridDataFactory.swtDefaults().applyTo(toolBar);
       m_stopButton = new ToolItem(toolBar, SWT.PUSH);
       m_stopButton.setEnabled(false);
       m_stopButton.setImage(Images.getImage(Images.IMG_STOP));
@@ -857,21 +859,22 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       //
       // Search
       //
-      Composite line2 = new Composite(parent, SWT.NONE);
-      line2.setLayoutData(
-          new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
-      GridLayout layout = new GridLayout();
-      layout.numColumns = 3;
-      line2.setLayout(layout);
+      Composite line2 = new Composite(c, SWT.NONE);
+      GridDataFactory.fillDefaults().grab(true, false).applyTo(line2);
+      GridLayoutFactory.swtDefaults().margins(0, 0).spacing(5, 0).numColumns(3).applyTo(line2);
+
       new Label(line2, SWT.NONE).setText("Search:");
       m_searchText = new Text(line2, SWT.SINGLE | SWT.BORDER);
-      m_searchText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+      GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(m_searchText);
       m_searchText.addKeyListener(new KeyListener() {
 
         public void keyPressed(KeyEvent e) {
         }
 
         public void keyReleased(KeyEvent e) {
+          if (currentSuiteRunInfo == null) {
+            return;
+          }
           // Update the tree based on the search filter only if we don't have too many
           // results, otherwise, wait for at least n characters to be typed.
           String filter = "";

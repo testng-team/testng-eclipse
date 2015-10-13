@@ -1,7 +1,7 @@
 package org.testng.eclipse.ui;
 
 import org.testng.eclipse.TestNGPlugin;
-
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
@@ -52,20 +52,9 @@ public class CounterPanel extends Composite {
 
   public CounterPanel(Composite parent) {
     super(parent, SWT.WRAP);
-
-//    FillLayout fl = new FillLayout(SWT.VERTICAL);
-//    fl.marginWidth = 0;
-//    fl.marginHeight = 0;
-    GridLayout gl= new GridLayout(1, false);
-//    gl.marginWidth= 0;
-//    gl.marginHeight= 0;
-//    GridData gd= new GridData(GridData.FILL_BOTH);
-    setLayout(gl);
-//    setLayoutData(gd);
+    GridLayoutFactory.swtDefaults().margins(0, 0).spacing(0, 0).numColumns(3).applyTo(this);
 
     createReportUpperRow();
-
-//    createReportLowerRow();
 
     addDisposeListener(new DisposeListener() {
         public void widgetDisposed(DisposeEvent e) {
