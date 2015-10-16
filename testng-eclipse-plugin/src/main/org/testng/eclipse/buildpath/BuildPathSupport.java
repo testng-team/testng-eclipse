@@ -68,6 +68,11 @@ public class BuildPathSupport {
 
     return result.toArray(new IClasspathEntry[result.size()]);
   }
+  
+  public static String getRemoteTestNGLibPath() {
+    IPath jarLocation = getBundleLocation().append(ResourceUtil.getString("RemoteTestNG.library")); //$NON-NLS-1$
+    return jarLocation.toOSString();
+  }
 
   public static boolean projectContainsClasspathEntry(IJavaProject project, IClasspathEntry entry) throws JavaModelException {
     IClasspathEntry[] oldEntries = project.getRawClasspath();

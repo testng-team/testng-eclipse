@@ -296,21 +296,25 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
   public String[] getClasspath(ILaunchConfiguration configuration)
       throws CoreException {
     String[] originalClasspath = super.getClasspath(configuration);
+    // add remote testng jar file at the very begining to make sure this is loaded in prior of the user's testng.jar
+    String[] classpathArray = new String[originalClasspath.length + 1];
+    classpathArray[0] = BuildPathSupport.getRemoteTestNGLibPath();
+    System.arraycopy(originalClasspath, 0, classpathArray, 1, originalClasspath.length);
 
     String projectName = getJavaProjectName(configuration);
     boolean useProjectJar = TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(projectName);
     if (useProjectJar) {
-      return originalClasspath;
+      return classpathArray;
     }
     else {    // Add our own testng libraries unless this project is configured to use its own testng.jar
       IClasspathEntry[] cpEntries = BuildPathSupport.getTestNGLibraryEntries();
-      String[] allClasspath = new String[originalClasspath.length + cpEntries.length];
+      String[] allClasspath = new String[classpathArray.length + cpEntries.length];
       for (int i = 0; i < cpEntries.length; i++) {
         IPath jarPath = cpEntries[i].getPath();
         // insert the bundle embedded testng.jar on the front of the classpath
         allClasspath[i] = jarPath.toOSString();
       }
-      System.arraycopy(originalClasspath, 0, allClasspath, cpEntries.length, originalClasspath.length);
+      System.arraycopy(classpathArray, 0, allClasspath, cpEntries.length, classpathArray.length);
       return allClasspath;
     }
   }
