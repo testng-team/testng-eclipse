@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -76,7 +77,7 @@ public class TestNGQuickFixProcessor implements IQuickFixProcessor {
       if (maybeTestNGPackage(s)) { 
         proposals.add(new TestNGAddLibraryProposal(context, 11));
       }
-      if (maybeTestNGAnnotation(s) && isAnnotation(context)) { 
+      if (maybeTestNGAnnotation(s) && isAnnotation(context, location)) { 
         proposals.add(new TestNGAddLibraryProposal(context, 11, true));
       }
     }
@@ -104,7 +105,8 @@ public class TestNGQuickFixProcessor implements IQuickFixProcessor {
     return complianceLevel;
   }
 
-  private boolean isAnnotation(IInvocationContext context) {
-    return context.getCoveredNode().getParent().getNodeType() == ASTNode.MARKER_ANNOTATION;
+  private boolean isAnnotation(IInvocationContext context, IProblemLocation location) {
+    ASTNode node = location.getCoveredNode(context.getASTRoot());
+    return (node != null && node.getLocationInParent() == MarkerAnnotation.TYPE_NAME_PROPERTY);
   }
 }

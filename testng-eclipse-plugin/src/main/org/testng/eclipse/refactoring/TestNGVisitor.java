@@ -46,6 +46,9 @@ public class TestNGVisitor extends Visitor {
         if (m.isAnnotation()) {
           Annotation a = (Annotation) m;
           IAnnotationBinding ab = a.resolveAnnotationBinding();
+          if (ab == null) {
+            continue;
+          }
           String typeName = ab.getAnnotationType().getBinaryName();
           if (typeName.contains("org.testng")) {
             hasTestNGAnnotation = true;
