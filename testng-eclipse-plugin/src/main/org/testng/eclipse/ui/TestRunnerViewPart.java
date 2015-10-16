@@ -43,6 +43,8 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -250,6 +252,16 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
 
     computeOrientation();
+  }
+
+  private void addResizeListener(Composite parent) {
+    parent.addControlListener(new ControlListener() {
+      public void controlMoved(ControlEvent e) {
+      }
+      public void controlResized(ControlEvent e) {
+        computeOrientation();
+      }
+    });
   }
 
   void computeOrientation() {
@@ -709,10 +721,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   @Override
   public void createPartControl(Composite parent) {
+    m_parentComposite = parent;
+    addResizeListener(parent);
+
     if (getWatchResultDirectory() != null) {
       updateResultThread();
     }
-    m_parentComposite = new Composite(parent, SWT.NONE);
 
     GridLayoutFactory.fillDefaults().applyTo(m_parentComposite);
 
@@ -816,7 +830,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   private void createProgressCountPanel(Composite parent) {
     Composite c = new Composite(parent, SWT.NONE);
-    GridDataFactory.fillDefaults().grab(true, true).applyTo(c);
+    GridDataFactory.fillDefaults().grab(true, false).applyTo(c);
     GridLayoutFactory.swtDefaults().applyTo(c);
 
     Display display= parent.getDisplay();
