@@ -14,10 +14,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.components.Filters;
 
 /**
@@ -83,14 +85,14 @@ public class DependencyInfo {
                       IType methodType = method.getDeclaringType();
                       if (dependencies.getClass().isArray()) {
                         for (Object o : (Object[]) dependencies) {
-                          IMethod depMethod = JDTUtil.fuzzyFindMethodInTypeHierarchy(
-                              methodType, o.toString(), new String[0]);
-                          result.methodsByMethods.put(method, depMethod);
+                          fuzzyFindMethodInTypeHierarchy(javaProject, methodType,
+                              method, o.toString(),
+                              result.methodsByMethods);
                         }
                       } else {
-                        IMethod depMethod = JDTUtil.fuzzyFindMethodInTypeHierarchy(
-                            methodType, dependencies.toString(), new String[0]);
-                        result.methodsByMethods.put(method, depMethod);
+                        fuzzyFindMethodInTypeHierarchy(javaProject, methodType,
+                            method, dependencies.toString(),
+                            result.methodsByMethods);
                       }
                     }
                   }
@@ -99,7 +101,7 @@ public class DependencyInfo {
             }
           }
         } catch (CoreException e) {
-          e.printStackTrace();
+          TestNGPlugin.log(e);
         }
       }
 
@@ -110,14 +112,34 @@ public class DependencyInfo {
 
     try {
       dialog.run(true /* fork */, true /* cancelable */, runnable);
-    } catch (InvocationTargetException e) {
-      e.printStackTrace();
-    } catch (InterruptedException e) {
+    } catch (InvocationTargetException | InterruptedException e) {
       e.printStackTrace();
     }
 
     return result;
   }
 
+  private static void fuzzyFindMethodInTypeHierarchy(IJavaProject project,
+      IType methodType, IMethod currentMethod, String methodName,
+      Multimap<IMethod, IMethod> resultMap) throws JavaModelException {
+    int dotIdx = methodName.lastIndexOf('.');
+    if (dotIdx > 0) {
+      String typeName = methodName.substring(0, dotIdx);
+      methodType = project.findType(typeName);
+      methodName = methodName.substring(dotIdx + 1);
+    }
+    if (methodType == null) {
+      TestNGPlugin.log("Could not find the enclosed class for: " + methodName);
+      return;
+    }
+    IMethod depMethod = JDTUtil.fuzzyFindMethodInTypeHierarchy(methodType,
+        methodName, new String[0]);
+    if (depMethod == null) {
+      // just log the error only, since the testng core is responsible for print the true error message
+      TestNGPlugin.log("Could not find method: " + methodType.getFullyQualifiedName() + "." + methodName);
+    }
+    else {
+      resultMap.put(currentMethod, depMethod);
+    }
+  }
 }
-
