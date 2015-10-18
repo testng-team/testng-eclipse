@@ -403,6 +403,27 @@ public class JDTUtil {
     return (fuzzyResults.isEmpty() ? null : fuzzyResults.get(0) );
   }
   
+  public static IMethod fuzzyFindMethodInProject(IJavaProject project,
+      IType methodType, IMethod currentMethod, String methodName) throws JavaModelException {
+    int dotIdx = methodName.lastIndexOf('.');
+    if (dotIdx > 0) {
+      String fullyQualifiedName = methodName.substring(0, dotIdx);
+      methodType = project.findType(fullyQualifiedName);
+      methodName = methodName.substring(dotIdx + 1);
+    }
+    if (methodType == null) {
+      TestNGPlugin.log("Could not find the enclosed class for: " + methodName);
+      return null;
+    }
+    IMethod depMethod = fuzzyFindMethodInTypeHierarchy(methodType,
+        methodName, new String[0]);
+    if (depMethod == null) {
+      // just log the error only, since the testng core is responsible for print the true error message
+      TestNGPlugin.log("Could not find method: " + methodType.getFullyQualifiedName() + "." + methodName);
+    }
+    return depMethod;
+  }
+
   public static List<MethodDefinition> solveDependencies(IMethod method) {
     Set<String> parsedMethods = Sets.newHashSet();
     MethodDefinition md = new MethodDefinition(method);
