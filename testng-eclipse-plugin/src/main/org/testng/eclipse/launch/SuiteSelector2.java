@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.internal.resources.File;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -39,14 +39,12 @@ public class SuiteSelector2 extends MultiSelector {
     TestNGMainTab mainTab = getCallback();
     List<String> result = Lists.newArrayList();
     try {
-      File[] types = TestSearchEngine.findSuites(mainTab.getLaunchConfigurationDialog(),
+      IFile[] types = TestSearchEngine.findSuites(mainTab.getLaunchConfigurationDialog(),
           new Object[] {mainTab.getSelectedProject()});
-      for(File f : types) {
+      for(IFile f : types) {
         result.add(f.getProjectRelativePath().toString());
       }
-    } catch (InvocationTargetException e) {
-      e.printStackTrace();
-    } catch (InterruptedException e) {
+    } catch (InvocationTargetException | InterruptedException e) {
       e.printStackTrace();
     }
 
