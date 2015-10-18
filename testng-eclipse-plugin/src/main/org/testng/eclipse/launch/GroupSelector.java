@@ -63,8 +63,8 @@ public class GroupSelector extends MultiSelector {
       System.arraycopy(dependencies, 0, projects, 1, dependencies.length);
       Set<IType> types = new HashSet<>();
       for (IJavaProject project : projects) {
-        types.addAll(Arrays.asList(TestSearchEngine.findTests(getCallback().getLaunchConfigurationDialog(),
-          project, Filters.SINGLE_TEST)));
+        types.addAll(Arrays.asList(TestSearchEngine.findTestNGTests(getCallback().getLaunchConfigurationDialog(),
+          project)));
       }
 
       for (IType type : types) {
@@ -83,10 +83,7 @@ public class GroupSelector extends MultiSelector {
           }
       }
     }
-    catch(InvocationTargetException e) {
-      TestNGPlugin.log(e);
-    }
-    catch(InterruptedException e) {
+    catch(InvocationTargetException | InterruptedException e) {
       TestNGPlugin.log(e);
     }
 

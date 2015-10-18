@@ -369,8 +369,8 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
     try {
       switch(testngType) {
         case CLASS:
-          types = TestSearchEngine.findTests(getLaunchConfigurationDialog(),
-              m_selectedProject, Filters.SINGLE_TEST);
+          types = TestSearchEngine.findTestNGTests(getLaunchConfigurationDialog(),
+              m_selectedProject);
           dialog = TestSelectionDialog.createTestTypeSelectionDialog(getShell(), m_selectedProject,
               types, Filters.SINGLE_TEST);
           break;

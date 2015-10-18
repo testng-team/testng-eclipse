@@ -170,13 +170,13 @@ public class Utils {
           IRunnableContext context = new FindTestsRunnableContext();
           if (pf != null) {
             result.addAll(Arrays.asList(
-                TestSearchEngine.findTests(context, pf, filter)));
+                TestSearchEngine.findTests(context, new Object[] { pf }, filter)));
           } else if (pfr != null) {
             result.addAll(Arrays.asList(
-                TestSearchEngine.findTests(context, pfr, filter)));
+                TestSearchEngine.findTests(context, new Object[] { pfr }, filter)));
           } else {
             result.addAll(Arrays.asList(
-                TestSearchEngine.findTests(context, pp.getProject(), filter)));
+                TestSearchEngine.findTests(context, new Object[] { pp.getProject() }, filter)));
           }
         }
         catch(InvocationTargetException ex) {

@@ -47,6 +47,24 @@ import com.google.common.collect.Sets;
  */
 public class TestSearchEngine {
 
+  public static IType[] findTestNGTests(IRunnableContext context,
+      final IJavaElement element) throws InvocationTargetException, InterruptedException {
+    final Set<IType> result = Sets.newHashSet();
+    
+    IRunnableWithProgress runnable = new IRunnableWithProgress() {
+      public void run(IProgressMonitor pm) throws InterruptedException, InvocationTargetException {
+        try {
+          new TestFinder().findTestsInContainer(element, result, pm);
+        } catch (CoreException e) {
+          throw new InvocationTargetException(e);
+        }
+      }
+    };
+    context.run(true, true, runnable);
+    
+    return result.toArray(new IType[result.size()]);
+  }
+
   /**
    * Searches for TestNG test types.
    *
@@ -57,20 +75,18 @@ public class TestSearchEngine {
    * @throws InterruptedException
    */
   public static IType[] findTests(IRunnableContext context,
-                                  final IJavaElement element,
+                                  final Object[] elements,
                                   final Filters.ITypeFilter filter) throws InvocationTargetException, InterruptedException {
     final Set<IType> result = Sets.newHashSet();
 
-    IRunnableWithProgress runnable = new IRunnableWithProgress() {
-        public void run(IProgressMonitor pm) throws InterruptedException, InvocationTargetException {
-          try {
-            new TestFinder().findTestsInContainer(element, result, pm);
-          } catch (CoreException e) {
-            throw new InvocationTargetException(e);
+    if(elements.length != 0) {
+      IRunnableWithProgress runnable = new IRunnableWithProgress() {
+          public void run(IProgressMonitor pm) throws InterruptedException {
+            doFindTests(elements, result, pm, filter);
           }
-        }
-      };
-    context.run(true, true, runnable);
+        };
+      context.run(true, true, runnable);
+    }
 
     return result.toArray(new IType[result.size()]);
   }
