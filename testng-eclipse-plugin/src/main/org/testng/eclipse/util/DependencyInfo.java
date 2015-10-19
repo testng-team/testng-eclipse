@@ -18,6 +18,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.components.Filters;
 
 /**
@@ -83,14 +84,18 @@ public class DependencyInfo {
                       IType methodType = method.getDeclaringType();
                       if (dependencies.getClass().isArray()) {
                         for (Object o : (Object[]) dependencies) {
-                          IMethod depMethod = JDTUtil.fuzzyFindMethodInTypeHierarchy(
-                              methodType, o.toString(), new String[0]);
-                          result.methodsByMethods.put(method, depMethod);
+                          IMethod depMethod = JDTUtil.fuzzyFindMethodInProject(javaProject, methodType,
+                              method, o.toString());
+                          if (depMethod != null) {
+                            result.methodsByMethods.put(method, depMethod);
+                          }
                         }
                       } else {
-                        IMethod depMethod = JDTUtil.fuzzyFindMethodInTypeHierarchy(
-                            methodType, dependencies.toString(), new String[0]);
-                        result.methodsByMethods.put(method, depMethod);
+                        IMethod depMethod = JDTUtil.fuzzyFindMethodInProject(javaProject, methodType,
+                            method, dependencies.toString());
+                        if (depMethod != null) {
+                          result.methodsByMethods.put(method, depMethod);
+                        }
                       }
                     }
                   }
@@ -99,10 +104,9 @@ public class DependencyInfo {
             }
           }
         } catch (CoreException e) {
-          e.printStackTrace();
+          TestNGPlugin.log(e);
         }
       }
-
     };
 
     Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
@@ -110,14 +114,10 @@ public class DependencyInfo {
 
     try {
       dialog.run(true /* fork */, true /* cancelable */, runnable);
-    } catch (InvocationTargetException e) {
-      e.printStackTrace();
-    } catch (InterruptedException e) {
+    } catch (InvocationTargetException | InterruptedException e) {
       e.printStackTrace();
     }
 
     return result;
   }
-
 }
-
