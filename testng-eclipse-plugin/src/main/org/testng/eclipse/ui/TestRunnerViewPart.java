@@ -1,5 +1,7 @@
 package org.testng.eclipse.ui;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,10 +20,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugEvent;
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
@@ -117,6 +121,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
   /** The launched project */
   private IJavaProject m_workingProject;
+
+  private ILaunch m_launch;
 
   // view components
   private Composite   m_parentComposite;
@@ -315,6 +321,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       fTestRunnerClient.stopTest();
     }
     stopUpdateJobs();
+    stopProcess();
   }
 
   public void selectNextFailure() {
@@ -354,11 +361,45 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
   }
 
+  private void stopProcess() {
+    if (m_launch != null && !m_launch.isTerminated()) {
+      try {
+        if (Platform.OS_WIN32.equals(Platform.getOS())) {
+          m_launch.terminate();
+        }
+        else {
+          for (IProcess p : m_launch.getProcesses()) {
+            try {
+              Method m = p.getClass().getDeclaredMethod("getSystemProcess");
+              m.setAccessible(true);
+              Process proc = (Process) m.invoke(p);
+
+              Field f = proc.getClass().getDeclaredField("pid");
+              f.setAccessible(true);
+              int pid = (int) f.get(proc);
+
+              // force kill the process on OSX and Linux-like platform
+              // since on Linux the default behaviour of Process.destroy() is to gracefully shutdown
+              // which rarely can stop the busy process
+              Runtime rt = Runtime.getRuntime();
+              rt.exec("kill -9 " + pid);
+            } catch (Exception ex) {
+              TestNGPlugin.log(ex);
+            }
+          }
+        }
+      } catch (DebugException e) {
+        TestNGPlugin.log(e);
+      }
+    }
+  }
+
   public void startTestRunListening(final IJavaProject project,
                                     String subName,
                                     int port,
                                     final ILaunch launch) {
     m_workingProject = project;
+    m_launch = launch;
 
     aboutToLaunch(subName);
 
@@ -862,6 +903,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       m_stopButton.addSelectionListener(new SelectionListener() {
         public void widgetSelected(SelectionEvent e) {
           stopTest();
+          m_stopButton.setEnabled(false);
         }
 
         public void widgetDefaultSelected(SelectionEvent e) {
