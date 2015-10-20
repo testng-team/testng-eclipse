@@ -321,7 +321,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       fTestRunnerClient.stopTest();
     }
     stopUpdateJobs();
-    stopProcess();
   }
 
   public void selectNextFailure() {
@@ -903,6 +902,8 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       m_stopButton.addSelectionListener(new SelectionListener() {
         public void widgetSelected(SelectionEvent e) {
           stopTest();
+          // kill process only if people click the stop button
+          stopProcess();
           m_stopButton.setEnabled(false);
         }
 
