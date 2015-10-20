@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -41,6 +44,8 @@ import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
 
 public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigurationDelegate {
+
+  private static final Version minVer = new Version("6.5.1");
 
   /**
    * Launch RemoteTestNG (except if we're in debug mode).
@@ -171,6 +176,8 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       throws CoreException {
 
     String[] classPath = getClasspath(configuration);
+    verifyClasspath(classPath);
+
     String progArgs = getProgramArguments(configuration);
     VMRunnerConfiguration vmConfig =
         new VMRunnerConfiguration(getMainTypeName(configuration), classPath);
@@ -316,6 +323,40 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       }
       System.arraycopy(classpathArray, 0, allClasspath, cpEntries.length, classpathArray.length);
       return allClasspath;
+    }
+  }
+
+  private void verifyClasspath(String[] classpath) throws CoreException {
+    for (String cp : classpath) {
+      File f = new File(cp);
+      if (f.getName().startsWith("testng")) {
+        Version ver = null;
+        try (JarFile jarFile = new JarFile(f)) {
+          Manifest mf = jarFile.getManifest();
+          Attributes mainAttrs = mf.getMainAttributes();
+          String sn = mainAttrs.getValue("Bundle-SymbolicName");
+          if ("org.testng".equals(sn)) {
+            ver = new Version(mainAttrs.getValue("Bundle-Version"));
+          }
+          if (ver == null) {
+            String mc = mainAttrs.getValue("Main-Class");
+            if ("org.testng.TestNG".equals(mc)) {
+              ver = new Version(mainAttrs.getValue("Implementation-Version"));
+            }
+          }
+        } catch (Exception e) {
+          TestNGPlugin.log(e);
+        }
+
+        if (ver != null) {
+          if (ver.compareTo(minVer) < 0) {
+            throw new CoreException(TestNGPlugin.createError(
+                ResourceUtil.getString("TestNGLaunchConfigurationDelegate.error.testngVersionUnsupported")));
+          }
+          // break at first presence of testng.jar
+          break;
+        }
+      }
     }
   }
 

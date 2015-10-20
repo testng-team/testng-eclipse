@@ -348,4 +348,8 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
   public static IStatus createError(Throwable e) {
     return new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage(), e);
   }
+  
+  public static IStatus createError(String message) {
+    return new Status(IStatus.ERROR, PLUGIN_ID, message);
+  }
 }
