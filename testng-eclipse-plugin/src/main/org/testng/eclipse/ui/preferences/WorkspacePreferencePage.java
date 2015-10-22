@@ -32,6 +32,7 @@ public class WorkspacePreferencePage
   private BooleanFieldEditor2 m_absolutePath;
   private BooleanFieldEditor2 m_disabledDefaultListeners;
   private BooleanFieldEditor2 m_showViewWhenTestsComplete;
+  private BooleanFieldEditor2 m_showCaseNameOnViewTitle;
   private BooleanFieldEditor2 m_useProjectJar;
   private FileFieldEditor m_xmlTemplateFile;
   private StringFieldEditor m_excludedStackTraces;
@@ -80,6 +81,11 @@ public class WorkspacePreferencePage
         "Show view when tests complete", //$NON-NLS-1$ 
         SWT.NONE, parentComposite);
 
+    m_showCaseNameOnViewTitle = new BooleanFieldEditor2(
+        TestNGPluginConstants.S_VIEW_TITLE_SHOW_CASE_NAME,
+        "Show test name on view title when tests complete", //$NON-NLS-1$ 
+        SWT.NONE, parentComposite);
+
     m_useProjectJar = new BooleanFieldEditor2(
         TestNGPluginConstants.S_USEPROJECTJAR_GLOBAL, 
         ResourceUtil.getString("TestNGPropertyPage.useProjectTestNGJar"), SWT.NONE, parentComposite);
@@ -108,6 +114,7 @@ public class WorkspacePreferencePage
     addField(m_absolutePath);
     addField(m_disabledDefaultListeners);
     addField(m_showViewWhenTestsComplete);
+    addField(m_showCaseNameOnViewTitle);
     addField(m_useProjectJar);
     addField(m_xmlTemplateFile);
     addField(m_excludedStackTraces);
