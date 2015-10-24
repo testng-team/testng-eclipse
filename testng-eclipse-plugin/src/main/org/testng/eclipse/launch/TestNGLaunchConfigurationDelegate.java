@@ -1,6 +1,8 @@
 package org.testng.eclipse.launch;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +47,8 @@ import org.testng.xml.LaunchSuite;
 
 public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigurationDelegate {
 
-  private static final Version minVer = new Version("6.5.1");
+  private static final Version minTestNGVer = new Version("6.5.1"); //$NON-NLS-1$
+  private static final Version mimJvmVer = new Version("1.7.0"); //$NON-NLS-1$
 
   /**
    * Launch RemoteTestNG (except if we're in debug mode).
@@ -67,8 +70,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     }
     AbstractVMInstall vmi = (AbstractVMInstall) install;
     Version vmVer = new Version(vmi.getJavaVersion());
-    Version mimVer = new Version("1.7.0"); //$NON-NLS-1$
-    if (vmVer.compareTo(mimVer) < 0) {
+    if (compareVersion(vmVer, mimJvmVer) < 0) {
       abort(ResourceUtil.getFormattedString("TestNGLaunchConfigurationDelegate.error.incompatiblevmversion", //$NON-NLS-1$
           new String[] { vmi.getJavaVersion() }), null,
           TestNGPluginConstants.LAUNCH_ERROR_JVM_VER_NOT_COMPATIBLE);
@@ -329,6 +331,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
   private void verifyClasspath(String[] classpath) throws CoreException {
     for (String cp : classpath) {
       File f = new File(cp);
+      // only check jar file name starts with 'testng'
       if (f.getName().startsWith("testng")) {
         Version ver = null;
         try (JarFile jarFile = new JarFile(f)) {
@@ -349,7 +352,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
         }
 
         if (ver != null) {
-          if (ver.compareTo(minVer) < 0) {
+          if (compareVersion(ver, minTestNGVer) < 0) {
             throw new CoreException(TestNGPlugin.createError(
                 ResourceUtil.getString("TestNGLaunchConfigurationDelegate.error.testngVersionUnsupported")));
           }
@@ -379,4 +382,19 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     }
   }
 
+  private static int compareVersion(Version v1, Version v2) throws CoreException {
+    try {
+      // Works on Eclipse 3.7 or newer
+      return v1.compareTo(v2);
+    } catch (NoSuchMethodError e) {
+        // Works on Eclipse 3.6 and earlier
+      try {
+        Method compareToMethod = Version.class.getMethod("compareTo", Object.class);
+        return (int) compareToMethod.invoke(v1, v2);
+      } catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException
+          | InvocationTargetException e2) {
+        throw new CoreException(TestNGPlugin.createError(e2));
+      }
+    }
+  }
 }
