@@ -4,6 +4,8 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -178,7 +180,6 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       throws CoreException {
 
     String[] classPath = getClasspath(configuration);
-    verifyClasspath(classPath);
 
     String progArgs = getProgramArguments(configuration);
     VMRunnerConfiguration vmConfig =
@@ -304,31 +305,38 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
   @Override
   public String[] getClasspath(ILaunchConfiguration configuration)
       throws CoreException {
-    String[] originalClasspath = super.getClasspath(configuration);
-    // add remote testng jar file at the very begining to make sure this is loaded in prior of the user's testng.jar
-    String[] classpathArray = new String[originalClasspath.length + 1];
-    classpathArray[0] = BuildPathSupport.getRemoteTestNGLibPath();
-    System.arraycopy(originalClasspath, 0, classpathArray, 1, originalClasspath.length);
+    List<String> classpathList = new LinkedList<>(Arrays.asList(super.getClasspath(configuration)));
 
     String projectName = getJavaProjectName(configuration);
     boolean useProjectJar = TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(projectName);
-    if (useProjectJar) {
-      return classpathArray;
-    }
-    else {    // Add our own testng libraries unless this project is configured to use its own testng.jar
+    if (!useProjectJar) {
+      // Add plugin embedded testng libraries if user don't want to use their own
       IClasspathEntry[] cpEntries = BuildPathSupport.getTestNGLibraryEntries();
-      String[] allClasspath = new String[classpathArray.length + cpEntries.length];
       for (int i = 0; i < cpEntries.length; i++) {
         IPath jarPath = cpEntries[i].getPath();
         // insert the bundle embedded testng.jar on the front of the classpath
-        allClasspath[i] = jarPath.toOSString();
+        classpathList.add(0, jarPath.toOSString());
       }
-      System.arraycopy(classpathArray, 0, allClasspath, cpEntries.length, classpathArray.length);
-      return allClasspath;
     }
+
+    Version testngVer = getRuntimeTestNGVersion(classpathList);
+    if (testngVer != null) {
+      if (compareVersion(testngVer, minTestNGVer) < 0) {
+        throw new CoreException(TestNGPlugin.createError(
+            ResourceUtil.getString("TestNGLaunchConfigurationDelegate.error.testngVersionUnsupported")));
+      }
+      if (compareVersion(testngVer, new Version("6.9.0")) < 0) {
+        // add remote testng jar file at the very begining of classpath
+        // to make sure this is loaded in prior of the user's testng.jar,
+        // this applies for testng version prior to 6.9 only,
+        // since testng-remote does not compatible with 6.9.x yet
+        classpathList.add(0, BuildPathSupport.getRemoteTestNGLibPath());
+      }
+    }
+    return classpathList.toArray(new String[]{});
   }
 
-  private void verifyClasspath(String[] classpath) throws CoreException {
+  private Version getRuntimeTestNGVersion(List<String> classpath) throws CoreException {
     for (String cp : classpath) {
       File f = new File(cp);
       // only check jar file name starts with 'testng'
@@ -352,13 +360,19 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
         }
 
         if (ver != null) {
-          if (compareVersion(ver, minTestNGVer) < 0) {
-            throw new CoreException(TestNGPlugin.createError(
-                ResourceUtil.getString("TestNGLaunchConfigurationDelegate.error.testngVersionUnsupported")));
-          }
-          // break at first presence of testng.jar
-          break;
+          return ver;
         }
+      }
+    }
+    return null;
+  }
+
+  private void verifyClasspath(List<String> classpath) throws CoreException {
+    Version ver = getRuntimeTestNGVersion(classpath);
+    if (ver != null) {
+      if (compareVersion(ver, minTestNGVer) < 0) {
+        throw new CoreException(TestNGPlugin.createError(
+            ResourceUtil.getString("TestNGLaunchConfigurationDelegate.error.testngVersionUnsupported")));
       }
     }
   }
