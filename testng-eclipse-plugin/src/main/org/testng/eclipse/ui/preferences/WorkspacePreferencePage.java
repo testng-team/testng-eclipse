@@ -5,6 +5,7 @@ import java.io.File;
 
 import org.eclipse.debug.internal.ui.preferences.BooleanFieldEditor2;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
@@ -15,6 +16,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.testng.eclipse.TestNGPlugin;
@@ -36,6 +38,8 @@ public class WorkspacePreferencePage
   private FileFieldEditor m_xmlTemplateFile;
   private StringFieldEditor m_excludedStackTraces;
   private StringFieldEditor m_preDefinedListeners;
+  // maven group
+  private BooleanFieldEditor2 m_prefixVmArgsFromPom;
   
   public WorkspacePreferencePage() {
     super(GRID);
@@ -103,7 +107,14 @@ public class WorkspacePreferencePage
     m_preDefinedListeners = new StringFieldEditor(TestNGPluginConstants.S_PRE_DEFINED_LISTENERS,
         "Pre Defined Listeners", parentComposite);
     
-    
+    Group mavenGroup = new Group(parentComposite, SWT.BORDER);
+    GridDataFactory.fillDefaults().grab(true, false).span(3, SWT.DEFAULT).applyTo(mavenGroup);
+    GridLayoutFactory.fillDefaults().applyTo(mavenGroup);
+    mavenGroup.setText(ResourceUtil.getString("TestNGPropertyPage.group.maven"));
+    m_prefixVmArgsFromPom = new BooleanFieldEditor2(
+        TestNGPluginConstants.S_PREFIX_VM_ARGS_FROM_POM_GLOBAL, 
+        ResourceUtil.getString("TestNGPropertyPage.prefixVmArgsFromPom"), SWT.NONE, mavenGroup);
+
     addField(m_outputdir);
     addField(m_absolutePath);
     addField(m_disabledDefaultListeners);
@@ -112,6 +123,7 @@ public class WorkspacePreferencePage
     addField(m_xmlTemplateFile);
     addField(m_excludedStackTraces);
     addField(m_preDefinedListeners);
+    addField(m_prefixVmArgsFromPom);
   }
 
   /* (non-Javadoc)

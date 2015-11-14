@@ -39,6 +39,7 @@ import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.Protocols;
 import org.testng.eclipse.ui.RunInfo;
+import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.SuiteGenerator;
 import org.testng.remote.RemoteTestNG;
@@ -66,7 +67,6 @@ public class ConfigurationHelper {
     private boolean m_verbose;
     private boolean m_debug;
     private Protocols m_protocol;
-    private boolean m_prefixVmArgsFromPom;
 
     public LaunchInfo(String projectName,
                       LaunchType launchType,
@@ -78,8 +78,7 @@ public class ConfigurationHelper {
                       String logLevel,
                       boolean verbose,
                       boolean debug,
-                      Protocols protocol,
-                      boolean prefixVmArgsFromPom) {
+                      Protocols protocol) {
       m_projectName= projectName;
       m_launchType= launchType;
       m_classNames= classNames;
@@ -91,7 +90,6 @@ public class ConfigurationHelper {
       m_verbose = verbose;
       m_debug = debug;
       m_protocol = protocol;
-      m_prefixVmArgsFromPom = prefixVmArgsFromPom;
     }
   }
 
@@ -116,11 +114,6 @@ public class ConfigurationHelper {
   public static Protocols getProtocol(ILaunchConfiguration config) {
     String stringResult = getStringAttribute(config, TestNGLaunchConfigurationConstants.PROTOCOL);
     return null == stringResult ? TestNGLaunchConfigurationConstants.DEFAULT_SERIALIZATION_PROTOCOL : Protocols.get(stringResult); 
-  }
-
-  public static boolean isPrefixVmArgsFromPom(ILaunchConfiguration config) {
-    return getBooleanAttribute(config, TestNGLaunchConfigurationConstants.PREFIX_VM_ARGS_FROM_POM, 
-        TestNGLaunchConfigurationConstants.DEFAULT_PREFIX_VM_ARGS_FROM_POM);
   }
 
   public static String getSourcePath(ILaunchConfiguration config) {
@@ -216,8 +209,8 @@ public class ConfigurationHelper {
    */
   private static String getVMArgsFromPom(ILaunchConfiguration conf) throws Exception {
     StringBuilder vmArgs = new StringBuilder();
-    if (isPrefixVmArgsFromPom(conf)) {
-      IJavaProject javaProject = getJavaProject(conf);
+    IJavaProject javaProject = getJavaProject(conf);
+    if (TestNGPlugin.getPluginPreferenceStore().isPrefixVmArgsFromPom(javaProject.getProject().getName())) {
       IFile pomFile = javaProject.getProject().getFile("pom.xml");
       if (pomFile.exists()) {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -650,6 +643,5 @@ public class ConfigurationHelper {
     configuration.setAttribute(TestNGLaunchConfigurationConstants.VERBOSE, launchInfo.m_verbose);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.DEBUG, launchInfo.m_debug);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.PROTOCOL, launchInfo.m_protocol.toString());
-    configuration.setAttribute(TestNGLaunchConfigurationConstants.PREFIX_VM_ARGS_FROM_POM, launchInfo.m_prefixVmArgsFromPom);
   }
 }

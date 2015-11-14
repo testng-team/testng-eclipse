@@ -49,6 +49,15 @@ public class PreferenceStoreUtil {
     m_storage.setValue(projectName + TestNGPluginConstants.S_USEPROJECTJAR, strUsePrjJar);
   }
 
+  public void storePrefixVmArgsFromPom(String projectName, boolean selection) {
+    String strPrefixVmArgsFromPom = String.valueOf(selection);
+    // here store the string value rather than boolean is to prevent the value being removed from store,
+    // which cause it's hard to know wheter the value should read from global or project level
+    // now by explicitly set the value "true" or "false" to know it's at project level,
+    // otherwise, it comes from global level
+    m_storage.setValue(projectName + TestNGPluginConstants.S_PREFIX_VM_ARGS_FROM_POM, strPrefixVmArgsFromPom);
+  }
+
   public void storeXmlTemplateFile(String projectName, String xmlFile) {
     m_storage.setValue(projectName + TestNGPluginConstants.S_XML_TEMPLATE_FILE, xmlFile);
   }
@@ -162,6 +171,16 @@ public class PreferenceStoreUtil {
           .getBoolean(TestNGPluginConstants.S_USEPROJECTJAR_GLOBAL);
     }
     return Boolean.valueOf(strUsePrjJar).booleanValue();
+  }
+
+  public boolean isPrefixVmArgsFromPom(String projectName) {
+    String prefixVmArgsFromPom = m_storage.getString(projectName + TestNGPluginConstants.S_PREFIX_VM_ARGS_FROM_POM);
+    // if no project level setting, query from global
+    if (prefixVmArgsFromPom == null || prefixVmArgsFromPom.isEmpty()) {
+      return TestNGPlugin.getDefault().getPreferenceStore()
+          .getBoolean(TestNGPluginConstants.S_PREFIX_VM_ARGS_FROM_POM_GLOBAL);
+    }
+    return Boolean.valueOf(prefixVmArgsFromPom);
   }
 
   public boolean getWatchResults(String projectName) {
