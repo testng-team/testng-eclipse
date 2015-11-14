@@ -222,8 +222,6 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
     m_protocolComboViewer.setSelection(new StructuredSelection(ConfigurationHelper.getProtocol(configuration)));
 
-    m_prefixVmArgsFromPomBtn.setSelection(ConfigurationHelper.isPrefixVmArgsFromPom(configuration));
-
     LaunchType type = ConfigurationHelper.getType(configuration);
     setType(type);
     m_classMethods = ConfigurationHelper.getClassMethods(configuration);
@@ -266,8 +264,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
               m_logLevelCombo.getText(),
               m_verboseBtn.getSelection(),
               m_debugBtn.getSelection(),
-              (Protocols) ((StructuredSelection) m_protocolComboViewer.getSelection()).getFirstElement(),
-              m_prefixVmArgsFromPomBtn.getSelection())
+              (Protocols) ((StructuredSelection) m_protocolComboViewer.getSelection()).getFirstElement())
         );
   }
 

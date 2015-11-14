@@ -61,6 +61,8 @@ public class ProjectPropertyPage extends PropertyPage {
   private Button m_projectJar;
   private Text m_watchResultText;
   private Button m_watchResultRadio;
+  // maven group
+  private Button m_prefixVmArgsFromPom;
 
   public void createControl(Composite parent) {
     setDescription("Project TestNG settings");
@@ -175,11 +177,23 @@ public class ProjectPropertyPage extends PropertyPage {
       m_preDefinedListeners = w.text;
       m_preDefinedListeners.setToolTipText("Split multi listener using ;");
     }
+
+    //
+    // maven group
+    //
+    Group mavenGroup = new Group(parentComposite, SWT.BORDER);
+    GridDataFactory.fillDefaults().grab(true, false).applyTo(mavenGroup);
+    GridLayoutFactory.fillDefaults().applyTo(mavenGroup);
+    mavenGroup.setText(ResourceUtil.getString("TestNGPropertyPage.group.maven"));
+
+    m_prefixVmArgsFromPom = new Button(mavenGroup, SWT.CHECK);
+    m_prefixVmArgsFromPom.setText(ResourceUtil.getString("TestNGPropertyPage.prefixVmArgsFromPom"));
+    m_prefixVmArgsFromPom.setToolTipText(ResourceUtil.getString("TestNGPropertyPage.prefixVmArgsFromPom.tooltip"));
+
     loadDefaults();
 
     return parentComposite;
   }
-
   
   public void dispose() {
     m_projectJar.dispose();
@@ -188,7 +202,9 @@ public class ProjectPropertyPage extends PropertyPage {
     m_disabledDefaultListeners.dispose();
     m_xmlTemplateFile.dispose();
     m_preDefinedListeners.dispose();
-    
+
+    m_prefixVmArgsFromPom.dispose();
+
     super.dispose();
   }
 
@@ -207,6 +223,7 @@ public class ProjectPropertyPage extends PropertyPage {
     String dir = storage.getWatchResultDirectory(projectName);
     m_watchResultText.setText(dir);
     m_preDefinedListeners.setText(storage.getPreDefinedListeners(projectName, false));
+    m_prefixVmArgsFromPom.setSelection(storage.isPrefixVmArgsFromPom(projectName));
   }
 
   protected void performDefaults() {
@@ -224,6 +241,7 @@ public class ProjectPropertyPage extends PropertyPage {
     storage.storeUseProjectJar(projectName, m_projectJar.getSelection());
     storage.storeWatchResults(projectName, m_watchResultRadio.getSelection());
     storage.storeWatchResultLocation(projectName, m_watchResultText.getText());
+    storage.storePrefixVmArgsFromPom(projectName, m_prefixVmArgsFromPom.getSelection());
 
     if(super.performOk()) {
       setMessage("Project preferences are saved", INFORMATION);
