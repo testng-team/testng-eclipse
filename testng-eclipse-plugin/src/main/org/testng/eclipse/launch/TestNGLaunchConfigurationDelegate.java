@@ -15,8 +15,13 @@ import java.util.jar.Manifest;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -47,7 +52,10 @@ import org.testng.remote.RemoteArgs;
 import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
 
-public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigurationDelegate {
+import com.google.common.collect.Lists;
+
+public class TestNGLaunchConfigurationDelegate
+    extends AbstractJavaLaunchConfigurationDelegate {
 
   private static final Version minTestNGVer = new Version("6.5.1"); //$NON-NLS-1$
   private static final Version mimJvmVer = new Version("1.7.0"); //$NON-NLS-1$
@@ -55,36 +63,44 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
   /**
    * Launch RemoteTestNG (except if we're in debug mode).
    */
-  public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch,
-      IProgressMonitor monitor) throws CoreException {
+  public void launch(ILaunchConfiguration configuration, String mode,
+      ILaunch launch, IProgressMonitor monitor) throws CoreException {
     IJavaProject javaProject = getJavaProject(configuration);
     if ((javaProject == null) || !javaProject.exists()) {
-      abort(ResourceUtil.getString("TestNGLaunchConfigurationDelegate.error.invalidproject"), //$NON-NLS-1$
+      abort(
+          ResourceUtil.getString(
+              "TestNGLaunchConfigurationDelegate.error.invalidproject"), //$NON-NLS-1$
           null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT);
     }
 
     IVMInstall install = getVMInstall(configuration);
     IVMRunner runner = install.getVMRunner(mode);
     if (runner == null) {
-      abort(ResourceUtil.getFormattedString("TestNGLaunchConfigurationDelegate.error.novmrunner", //$NON-NLS-1$
-          new String[] { install.getId() }), null,
-          IJavaLaunchConfigurationConstants.ERR_VM_RUNNER_DOES_NOT_EXIST);
+      abort(
+          ResourceUtil.getFormattedString(
+              "TestNGLaunchConfigurationDelegate.error.novmrunner", //$NON-NLS-1$
+              new String[] { install.getId() }),
+          null, IJavaLaunchConfigurationConstants.ERR_VM_RUNNER_DOES_NOT_EXIST);
     }
     AbstractVMInstall vmi = (AbstractVMInstall) install;
     Version vmVer = new Version(vmi.getJavaVersion());
     if (compareVersion(vmVer, mimJvmVer) < 0) {
-      abort(ResourceUtil.getFormattedString("TestNGLaunchConfigurationDelegate.error.incompatiblevmversion", //$NON-NLS-1$
-          new String[] { vmi.getJavaVersion() }), null,
-          TestNGPluginConstants.LAUNCH_ERROR_JVM_VER_NOT_COMPATIBLE);
+      abort(
+          ResourceUtil.getFormattedString(
+              "TestNGLaunchConfigurationDelegate.error.incompatiblevmversion", //$NON-NLS-1$
+              new String[] { vmi.getJavaVersion() }),
+          null, TestNGPluginConstants.LAUNCH_ERROR_JVM_VER_NOT_COMPATIBLE);
     }
 
     int port = SocketUtil.findFreePort();
-    VMRunnerConfiguration runConfig = launchTypes(configuration, launch, javaProject, port, mode);
+    VMRunnerConfiguration runConfig = launchTypes(configuration, launch,
+        javaProject, port, mode);
     setDefaultSourceLocator(launch, configuration);
 
-    launch.setAttribute(TestNGLaunchConfigurationConstants.PORT, Integer.toString(port));
-    launch.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, javaProject
-        .getElementName());
+    launch.setAttribute(TestNGLaunchConfigurationConstants.PORT,
+        Integer.toString(port));
+    launch.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+        javaProject.getElementName());
     launch.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_RUN_NAME_ATTR,
         getRunNameAttr(configuration));
 
@@ -92,7 +108,8 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     for (String arg : runConfig.getProgramArguments()) {
       sb.append(arg).append(" ");
     }
-    TestNGPlugin.log("[TestNGLaunchConfigurationDelegate] " + debugConfig(runConfig));
+    TestNGPlugin
+        .log("[TestNGLaunchConfigurationDelegate] " + debugConfig(runConfig));
     runner.run(runConfig, launch, monitor);
   }
 
@@ -103,7 +120,8 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
   private static String join(String[] strings, String sep) {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < strings.length; i++) {
-      if (i > 0) sb.append(sep);
+      if (i > 0)
+        sb.append(sep);
       sb.append(strings[i]);
     }
     return sb.toString();
@@ -117,10 +135,8 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     sb.append("\n  Args:      " + join(config.getProgramArguments()));
     sb.append("\n");
 
-    sb.append("java "
-        + join(config.getVMArguments())
-        + " -classpath " + join(config.getClassPath(), ":")
-        + " " + config.getClassToLaunch()
+    sb.append("java " + join(config.getVMArguments()) + " -classpath "
+        + join(config.getClassPath(), ":") + " " + config.getClassToLaunch()
         + " " + join(config.getProgramArguments()));
 
     return sb.toString();
@@ -132,9 +148,10 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     }
   }
 
-  protected VMRunnerConfiguration launchTypes(final ILaunchConfiguration configuration,
-      ILaunch launch, final IJavaProject jproject, final int port, final String mode)
-      throws CoreException {
+  protected VMRunnerConfiguration launchTypes(
+      final ILaunchConfiguration configuration, ILaunch launch,
+      final IJavaProject jproject, final int port, final String mode)
+          throws CoreException {
 
     File workingDir = verifyWorkingDirectory(configuration);
     String workingDirName = null;
@@ -143,15 +160,17 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     }
 
     // Program & VM args
-    ExecutionArguments execArgs = new ExecutionArguments(ConfigurationHelper.getJvmArgs(configuration), ""); //$NON-NLS-1$
-    String[] envp = DebugPlugin.getDefault().getLaunchManager().getEnvironment(configuration);
+    ExecutionArguments execArgs = new ExecutionArguments(
+        getVMArguments(configuration), ""); //$NON-NLS-1$
 
-    VMRunnerConfiguration runConfig = createVMRunner(configuration, launch, jproject, port, mode);
+    VMRunnerConfiguration runConfig = createVMRunner(configuration, launch,
+        jproject, port, mode);
     runConfig.setVMArguments(execArgs.getVMArgumentsArray());
     runConfig.setWorkingDirectory(workingDirName);
-    runConfig.setEnvironment(envp);
+    runConfig.setEnvironment(getEnvironment(configuration));
 
-    Map<String, Object> vmAttributesMap = getVMSpecificAttributesMap(configuration);
+    Map<String, Object> vmAttributesMap = getVMSpecificAttributesMap(
+        configuration);
     runConfig.setVMSpecificAttributesMap(vmAttributesMap);
 
     String[] bootpath = getBootpath(configuration);
@@ -168,22 +187,23 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
   }
 
   /**
-   * This class creates the parameters to launch RemoteTestNG with the
-   * correct parameters.
+   * This class creates the parameters to launch RemoteTestNG with the correct
+   * parameters.
    *
    * Add a VMRunner with a class path that includes org.eclipse.jdt.junit
    * plugin. In addition it adds the port for the RemoteTestRunner as an
    * argument.
    */
-  protected VMRunnerConfiguration createVMRunner(final ILaunchConfiguration configuration,
-      ILaunch launch, final IJavaProject jproject, final int port, final String runMode)
-      throws CoreException {
+  protected VMRunnerConfiguration createVMRunner(
+      final ILaunchConfiguration configuration, ILaunch launch,
+      final IJavaProject jproject, final int port, final String runMode)
+          throws CoreException {
 
     String[] classPath = getClasspath(configuration);
 
     String progArgs = getProgramArguments(configuration);
-    VMRunnerConfiguration vmConfig =
-        new VMRunnerConfiguration(getMainTypeName(configuration), classPath);
+    VMRunnerConfiguration vmConfig = new VMRunnerConfiguration(
+        getMainTypeName(configuration), classPath);
 
     // insert the program arguments
     Vector<String> argv = new Vector<String>(10);
@@ -206,29 +226,28 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
 
     IProject project = jproject.getProject();
 
-//    if (!isJDK15(javaVersion)) {
-//      List<File> sourceDirs = JDTUtil.getSourceDirFileList(jproject);
-//      if (null != sourceDirs) {
-//        argv.add(TestNGCommandLineArgs.SRC_COMMAND_OPT);
-//        argv.add(Utils.toSinglePath(sourceDirs, ";")); //$NON-NLS-1$
-//      }
-//    }
+    // if (!isJDK15(javaVersion)) {
+    // List<File> sourceDirs = JDTUtil.getSourceDirFileList(jproject);
+    // if (null != sourceDirs) {
+    // argv.add(TestNGCommandLineArgs.SRC_COMMAND_OPT);
+    // argv.add(Utils.toSinglePath(sourceDirs, ";")); //$NON-NLS-1$
+    // }
+    // }
 
-    
     PreferenceStoreUtil storage = TestNGPlugin.getPluginPreferenceStore();
     argv.add(CommandLineArgs.OUTPUT_DIRECTORY);
     argv.add(storage.getOutputAbsolutePath(jproject).toOSString());
 
-    
-//    String reporters = storage.getReporters(project.getName(), false);
-//    if (null != reporters && !"".equals(reporters)) {
-//      argv.add(TestNGCommandLineArgs.LISTENER_COMMAND_OPT);
-//      argv.add(reporters.replace(' ', ';'));
-//    }
-    
-    String preDefinedListeners = configuration.getAttribute(TestNGLaunchConfigurationConstants.PRE_DEFINED_LISTENERS,"");
-    
-    if (!preDefinedListeners.trim().equals("")){
+    // String reporters = storage.getReporters(project.getName(), false);
+    // if (null != reporters && !"".equals(reporters)) {
+    // argv.add(TestNGCommandLineArgs.LISTENER_COMMAND_OPT);
+    // argv.add(reporters.replace(' ', ';'));
+    // }
+
+    String preDefinedListeners = configuration.getAttribute(
+        TestNGLaunchConfigurationConstants.PRE_DEFINED_LISTENERS, "");
+
+    if (!preDefinedListeners.trim().equals("")) {
       if (!argv.contains(CommandLineArgs.LISTENER)) {
         argv.add(CommandLineArgs.LISTENER);
         argv.add(preDefinedListeners);
@@ -239,8 +258,8 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       }
     }
 
-    
-    List<ITestNGListener> contributors = ListenerContributorUtil.findReporterContributors();
+    List<ITestNGListener> contributors = ListenerContributorUtil
+        .findReporterContributors();
     contributors.addAll(ListenerContributorUtil.findTestContributors());
     StringBuffer reportersContributors = new StringBuffer();
     boolean isFirst = true;
@@ -263,19 +282,21 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
       }
     }
 
-    boolean disabledReporters = storage.hasDisabledListeners(project.getName(), false);
+    boolean disabledReporters = storage.hasDisabledListeners(project.getName(),
+        false);
     if (disabledReporters) {
       argv.add(CommandLineArgs.USE_DEFAULT_LISTENERS);
       argv.add("false");
     }
 
-    List<LaunchSuite> launchSuiteList =
-        ConfigurationHelper.getLaunchSuites(jproject, configuration);
+    List<LaunchSuite> launchSuiteList = ConfigurationHelper
+        .getLaunchSuites(jproject, configuration);
     List<String> suiteList = new ArrayList<String>();
     List<String> tempSuites = new ArrayList<String>();
 
     // Regular mode: generate a new random suite path
-    File suiteDir = TestNGPlugin.isDebug() ? new File(RemoteTestNG.DEBUG_SUITE_DIRECTORY)
+    File suiteDir = TestNGPlugin.isDebug()
+        ? new File(RemoteTestNG.DEBUG_SUITE_DIRECTORY)
         : TestNGPlugin.getPluginPreferenceStore().getTemporaryDirectory();
     for (LaunchSuite launchSuite : launchSuiteList) {
       File suiteFile = launchSuite.save(suiteDir);
@@ -293,7 +314,7 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
         argv.add(suite);
       }
 
-      launch.setAttribute(TestNGLaunchConfigurationConstants.TEMP_SUITE_LIST, 
+      launch.setAttribute(TestNGLaunchConfigurationConstants.TEMP_SUITE_LIST,
           StringUtils.listToString(tempSuites));
     }
 
@@ -305,12 +326,15 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
   @Override
   public String[] getClasspath(ILaunchConfiguration configuration)
       throws CoreException {
-    List<String> classpathList = new LinkedList<>(Arrays.asList(super.getClasspath(configuration)));
+    List<String> classpathList = new LinkedList<>(
+        Arrays.asList(super.getClasspath(configuration)));
 
     String projectName = getJavaProjectName(configuration);
-    boolean useProjectJar = TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(projectName);
+    boolean useProjectJar = TestNGPlugin.getPluginPreferenceStore()
+        .getUseProjectJar(projectName);
     if (!useProjectJar) {
-      // Add plugin embedded testng libraries if user don't want to use their own
+      // Add plugin embedded testng libraries if user don't want to use their
+      // own
       IClasspathEntry[] cpEntries = BuildPathSupport.getTestNGLibraryEntries();
       for (int i = 0; i < cpEntries.length; i++) {
         IPath jarPath = cpEntries[i].getPath();
@@ -322,8 +346,8 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     Version testngVer = getRuntimeTestNGVersion(classpathList);
     if (testngVer != null) {
       if (compareVersion(testngVer, minTestNGVer) < 0) {
-        throw new CoreException(TestNGPlugin.createError(
-            ResourceUtil.getString("TestNGLaunchConfigurationDelegate.error.testngVersionUnsupported")));
+        throw new CoreException(TestNGPlugin.createError(ResourceUtil.getString(
+            "TestNGLaunchConfigurationDelegate.error.testngVersionUnsupported")));
       }
       if (compareVersion(testngVer, new Version("6.9.0")) < 0) {
         // add remote testng jar file at the very begining of classpath
@@ -333,10 +357,49 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
         classpathList.add(0, BuildPathSupport.getRemoteTestNGLibPath());
       }
     }
-    return classpathList.toArray(new String[]{});
+    return classpathList.toArray(new String[] {});
   }
 
-  private Version getRuntimeTestNGVersion(List<String> classpath) throws CoreException {
+  @Override
+  public String getVMArguments(ILaunchConfiguration configuration)
+      throws CoreException {
+    StringBuilder vmArgs = new StringBuilder();
+    vmArgs.append(super.getVMArguments(configuration));
+
+    for (ITestNGLaunchConfigurationProvider lcp : getLaunchConfigurationProviders()) {
+      String args = lcp.getVmArguments(configuration);
+      if (args != null && !args.isEmpty()) {
+        vmArgs.append(" ").append(args);
+      }
+    }
+
+    vmArgs.append(" ");
+    vmArgs.append(ConfigurationHelper.getJvmArgs(configuration));
+
+    return vmArgs.toString();
+  }
+
+  @Override
+  public String[] getEnvironment(ILaunchConfiguration configuration)
+      throws CoreException {
+    List<String> result = Lists.newArrayList();
+    String[] base = super.getEnvironment(configuration);
+    if (base != null && base.length > 0) {
+      result.addAll(Arrays.asList(base));
+    }
+
+    for (ITestNGLaunchConfigurationProvider lcp : getLaunchConfigurationProviders()) {
+      List<String> environs = lcp.getEnvironment(configuration);
+      if (environs != null) {
+        result.addAll(environs);
+      }
+    }
+
+    return result.toArray(new String[] {});
+  }
+
+  private Version getRuntimeTestNGVersion(List<String> classpath)
+      throws CoreException {
     for (String cp : classpath) {
       File f = new File(cp);
       // only check jar file name starts with 'testng'
@@ -371,8 +434,8 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     Version ver = getRuntimeTestNGVersion(classpath);
     if (ver != null) {
       if (compareVersion(ver, minTestNGVer) < 0) {
-        throw new CoreException(TestNGPlugin.createError(
-            ResourceUtil.getString("TestNGLaunchConfigurationDelegate.error.testngVersionUnsupported")));
+        throw new CoreException(TestNGPlugin.createError(ResourceUtil.getString(
+            "TestNGLaunchConfigurationDelegate.error.testngVersionUnsupported")));
       }
     }
   }
@@ -396,19 +459,39 @@ public class TestNGLaunchConfigurationDelegate extends AbstractJavaLaunchConfigu
     }
   }
 
-  private static int compareVersion(Version v1, Version v2) throws CoreException {
+  private static int compareVersion(Version v1, Version v2)
+      throws CoreException {
     try {
       // Works on Eclipse 3.7 or newer
       return v1.compareTo(v2);
     } catch (NoSuchMethodError e) {
-        // Works on Eclipse 3.6 and earlier
+      // Works on Eclipse 3.6 and earlier
       try {
-        Method compareToMethod = Version.class.getMethod("compareTo", Object.class);
+        Method compareToMethod = Version.class.getMethod("compareTo",
+            Object.class);
         return (int) compareToMethod.invoke(v1, v2);
-      } catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException
-          | InvocationTargetException e2) {
+      } catch (NoSuchMethodException | IllegalAccessException
+          | IllegalArgumentException | InvocationTargetException e2) {
         throw new CoreException(TestNGPlugin.createError(e2));
       }
     }
+  }
+
+  private static List<ITestNGLaunchConfigurationProvider> getLaunchConfigurationProviders() throws CoreException {
+    List<ITestNGLaunchConfigurationProvider> result = Lists.newArrayList();
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    IExtensionPoint extensionPoint = registry
+        .getExtensionPoint("org.testng.eclipse.launchConfigurationProvider");
+    IExtension extensions[] = extensionPoint.getExtensions();
+    for (IExtension ext : extensions) {
+      IConfigurationElement elements[] = ext.getConfigurationElements();
+      for (IConfigurationElement element : elements) {
+        ITestNGLaunchConfigurationProvider provider = (ITestNGLaunchConfigurationProvider) element
+            .createExecutableExtension("class");
+        result.add(provider);
+      }
+    }
+
+    return result;
   }
 }

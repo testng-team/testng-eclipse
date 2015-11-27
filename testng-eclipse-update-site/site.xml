@@ -3,5 +3,8 @@
    <feature url="features/org.testng.eclipse_6.9.9.qualifier.jar" id="org.testng.eclipse" version="6.9.9.qualifier">
       <category name="org.testng.eclipse"/>
    </feature>
+   <feature url="features/org.testng.eclipse.maven.feature_6.9.9.qualifier.jar" id="org.testng.eclipse.maven.feature" version="6.9.9.qualifier">
+      <category name="org.testng.eclipse"/>
+   </feature>
    <category-def name="org.testng.eclipse" label="TestNG"/>
 </site>
