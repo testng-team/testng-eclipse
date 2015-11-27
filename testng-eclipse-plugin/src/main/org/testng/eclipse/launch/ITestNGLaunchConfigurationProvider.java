@@ -2,6 +2,7 @@ package org.testng.eclipse.launch;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 
 public interface ITestNGLaunchConfigurationProvider {
@@ -12,15 +13,19 @@ public interface ITestNGLaunchConfigurationProvider {
    * 
    * @param configuration
    * @return
+   * @throws CoreException
    */
-  String getVmArguments(ILaunchConfiguration configuration);
+  String getVmArguments(ILaunchConfiguration configuration)
+      throws CoreException;
 
   /**
-   * Returns a list of environment variables to be used when launching the
-   * given configuration or null if unspecified.
+   * Returns a list of environment variables to be used when launching the given
+   * configuration or null if unspecified.
    * 
    * @param configuration
    * @return
+   * @throws CoreException
    */
-  List<String> getEnvironment(ILaunchConfiguration configuration);
+  List<String> getEnvironment(ILaunchConfiguration configuration)
+      throws CoreException;
 }

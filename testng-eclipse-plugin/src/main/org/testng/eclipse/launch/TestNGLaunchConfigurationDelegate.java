@@ -367,7 +367,10 @@ public class TestNGLaunchConfigurationDelegate
     vmArgs.append(super.getVMArguments(configuration));
 
     for (ITestNGLaunchConfigurationProvider lcp : getLaunchConfigurationProviders()) {
-      vmArgs.append(" ").append(lcp.getVmArguments(configuration));
+      String args = lcp.getVmArguments(configuration);
+      if (args != null && !args.isEmpty()) {
+        vmArgs.append(" ").append(args);
+      }
     }
 
     vmArgs.append(" ");

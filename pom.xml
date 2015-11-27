@@ -15,6 +15,8 @@
     <modules>
         <module>testng-eclipse-plugin</module>
         <module>testng-eclipse-feature</module>
+        <module>testng-maven-eclipse-plugin</module>
+        <module>testng-maven-eclipse-feature</module>
         <module>testng-eclipse-update-site</module>
     </modules>
 

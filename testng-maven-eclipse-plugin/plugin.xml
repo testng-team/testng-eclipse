@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+    <extension point="org.eclipse.core.variables.dynamicVariables">
+        <variable
+              description="%org.testng.eclipse.maven.varResolver"
+              name="settings.localRepository"
+              resolver="org.testng.eclipse.maven.MavenPropertiesResolver"
+              supportsArgument="false">
+        </variable>
+     </extension>
+
+    <extension
+          point="org.testng.eclipse.launchConfigurationProvider">
+       <launchConfigurationProvider
+             class="org.testng.eclipse.maven.MavenTestNGLaunchConfigurationProvider"
+             id="org.testng.eclipse.maven.launchConfigurationProvider"
+             name="%org.testng.eclipse.maven.launchConfigurationProvider">
+       </launchConfigurationProvider>
+    </extension>
+
+</plugin>
