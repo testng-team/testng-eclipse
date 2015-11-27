@@ -66,7 +66,6 @@ public class ConfigurationHelper {
     private boolean m_verbose;
     private boolean m_debug;
     private Protocols m_protocol;
-    private boolean m_prefixVmArgsFromPom;
 
     public LaunchInfo(String projectName,
                       LaunchType launchType,
@@ -78,8 +77,7 @@ public class ConfigurationHelper {
                       String logLevel,
                       boolean verbose,
                       boolean debug,
-                      Protocols protocol,
-                      boolean prefixVmArgsFromPom) {
+                      Protocols protocol) {
       m_projectName= projectName;
       m_launchType= launchType;
       m_classNames= classNames;
@@ -91,7 +89,6 @@ public class ConfigurationHelper {
       m_verbose = verbose;
       m_debug = debug;
       m_protocol = protocol;
-      m_prefixVmArgsFromPom = prefixVmArgsFromPom;
     }
   }
 
@@ -116,11 +113,6 @@ public class ConfigurationHelper {
   public static Protocols getProtocol(ILaunchConfiguration config) {
     String stringResult = getStringAttribute(config, TestNGLaunchConfigurationConstants.PROTOCOL);
     return null == stringResult ? TestNGLaunchConfigurationConstants.DEFAULT_SERIALIZATION_PROTOCOL : Protocols.get(stringResult); 
-  }
-
-  public static boolean isPrefixVmArgsFromPom(ILaunchConfiguration config) {
-    return getBooleanAttribute(config, TestNGLaunchConfigurationConstants.PREFIX_VM_ARGS_FROM_POM, 
-        TestNGLaunchConfigurationConstants.DEFAULT_PREFIX_VM_ARGS_FROM_POM);
   }
 
   public static String getSourcePath(ILaunchConfiguration config) {
@@ -176,14 +168,6 @@ public class ConfigurationHelper {
     StringBuilder jvmArgs = new StringBuilder();
     jvmArgs.append(TestNGLaunchConfigurationConstants.VM_ENABLEASSERTION_OPTION);
 
-    try {
-      jvmArgs.append(getVMArgsFromPom(configuration));
-    } catch (Exception e) {
-      // log any exception when get JVM args from maven pom.xml,
-      // just let the process carry on
-      TestNGPlugin.log(e);
-    }
-
     // JVM args from the previous configuration take precedence over the preference
     jvmArgs.append(" ").append(configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
 		    getProjectJvmArgs()));
@@ -199,44 +183,6 @@ public class ConfigurationHelper {
     }
 
     return VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(jvmArgs.toString());
-  }
-
-  /**
-   * Get the JVM args from maven pom.xmll.
-   * <ul>
-   * Here is the return value of different cases:
-   * <li>no pom.xml -- return empty String</li>
-   * <li>pom.xml exists, but no maven-surefire-plugin or maven-safefail-plugin, in essential, no "argLine" element in the pom.xml -- return empty String</li>
-   * <li>there is one "argLine" element -- return the text content of the "argLine" element</li>
-   * <li>there are more then one "argLine" elements -- return the first "argLine"<profile></li>
-   * </ul>
-   * @param conf
-   * @return
-   * @throws Exception
-   */
-  private static String getVMArgsFromPom(ILaunchConfiguration conf) throws Exception {
-    StringBuilder vmArgs = new StringBuilder();
-    if (isPrefixVmArgsFromPom(conf)) {
-      IJavaProject javaProject = getJavaProject(conf);
-      IFile pomFile = javaProject.getProject().getFile("pom.xml");
-      if (pomFile.exists()) {
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware(false);
-        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        Document doc = documentBuilder.parse(pomFile.getLocation().toFile());
-  
-        XPathFactory xpathFactory = XPathFactory.newInstance();
-        XPath xpath = xpathFactory.newXPath();
-  
-        XPathExpression expr = xpath.compile("//argLine");
-        NodeList argLineNodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-        if (argLineNodes.getLength() > 0) {
-          Node argLineNode = argLineNodes.item(0);
-          vmArgs.append(" ").append(argLineNode.getTextContent());
-        }
-      }
-    }
-    return vmArgs.toString();
   }
 
   /**
@@ -650,6 +596,5 @@ public class ConfigurationHelper {
     configuration.setAttribute(TestNGLaunchConfigurationConstants.VERBOSE, launchInfo.m_verbose);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.DEBUG, launchInfo.m_debug);
     configuration.setAttribute(TestNGLaunchConfigurationConstants.PROTOCOL, launchInfo.m_protocol.toString());
-    configuration.setAttribute(TestNGLaunchConfigurationConstants.PREFIX_VM_ARGS_FROM_POM, launchInfo.m_prefixVmArgsFromPom);
   }
 }
