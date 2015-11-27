@@ -25,13 +25,19 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
 
   @Override
   public String getVmArguments(ILaunchConfiguration configuration) throws CoreException {
-    String vmArgs;
+    String vmArgs = null;
     try {
-      vmArgs = getVMArgsFromPom(configuration);
+      if (PreferenceUtils.getBoolean(Activator.PREF_ARGLINE)) {
+        vmArgs = getVMArgsFromPom(configuration);
+      }
     } catch (Exception e) {
       throw new CoreException(TestNGPlugin.createError(e));
     }
-    return VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(vmArgs);
+
+    if (vmArgs != null) {
+      vmArgs = VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(vmArgs);
+    }
+    return vmArgs;
   }
 
   @Override

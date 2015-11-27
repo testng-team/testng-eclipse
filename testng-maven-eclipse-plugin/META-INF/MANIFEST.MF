@@ -15,6 +15,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.debug.core,
  org.eclipse.debug.ui,
  org.testng.eclipse;bundle-version="6.9.9",
- org.eclipse.jdt.core
+ org.eclipse.jdt.core,
+ org.eclipse.jdt.ui
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

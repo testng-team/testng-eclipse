@@ -18,5 +18,20 @@
              name="%org.testng.eclipse.maven.launchConfigurationProvider">
        </launchConfigurationProvider>
     </extension>
+    <extension
+          point="org.eclipse.ui.preferencePages">
+       <page
+             category="org.testng.eclipse.ui.preferences.PreferencePage"
+             class="org.testng.eclipse.maven.MavenTestNGPreferencePage"
+             id="org.testng.eclipse.maven.pref"
+             name="%org.testng.eclipse.maven.pref.name">
+       </page>
+    </extension>
+    <extension
+          point="org.eclipse.core.runtime.preferences">
+       <initializer
+             class="org.testng.eclipse.maven.MavenTestNGPreferenceInitializer">
+       </initializer>
+    </extension>
 
 </plugin>

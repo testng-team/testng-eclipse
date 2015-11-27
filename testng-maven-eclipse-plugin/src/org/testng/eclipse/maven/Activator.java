@@ -12,6 +12,10 @@ public class Activator extends AbstractUIPlugin {
 
     // The plug-in ID
     public static final String PLUGIN_ID = "org.testng.eclipse.maven";
+    
+    public static final String PREF_ARGLINE = PLUGIN_ID + ".argline";
+    public static final String PREF_ENVIRON = PLUGIN_ID + ".environ";
+    public static final String PREF_SYSPROPERTIES = PLUGIN_ID + ".sysproperties";
 
     // The shared instance
     private static Activator plugin;
@@ -54,9 +58,9 @@ public class Activator extends AbstractUIPlugin {
     public static String getId() {
         return PLUGIN_ID;
     }
-
-    public static void log(Throwable e) {
-      log(new Status(IStatus.ERROR, getId(), IStatus.ERROR, "Error", e)); //$NON-NLS-1$
+    
+    public static void log(String msg, Throwable e) {
+      log(new Status(IStatus.ERROR, getId(), IStatus.ERROR, msg, e));
     }
 
     public static void log(IStatus status) {
