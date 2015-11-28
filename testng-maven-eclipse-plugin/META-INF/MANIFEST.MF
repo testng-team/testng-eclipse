@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Localization: plugin
 Bundle-Name: %bundle.name
 Bundle-SymbolicName: org.testng.eclipse.maven;singleton:=true
-Bundle-Version: 6.9.9.qualifier
+Bundle-Version: 6.9.10.qualifier
 Bundle-Activator: org.testng.eclipse.maven.Activator
 Bundle-Vendor: %bundler.provider
 Require-Bundle: org.eclipse.ui,
