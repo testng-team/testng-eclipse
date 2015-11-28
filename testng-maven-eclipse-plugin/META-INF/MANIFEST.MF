@@ -9,12 +9,14 @@ Bundle-Vendor: %bundler.provider
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
- org.eclipse.m2e.core,
+ org.eclipse.m2e.core;bundle-version="1.5.0",
+ org.eclipse.m2e.maven.runtime;bundle-version="1.5.0",
+ org.eclipse.m2e.profiles.core;bundle-version="1.5.0",
  org.eclipse.core.variables,
  org.eclipse.ui.console,
  org.eclipse.debug.core,
  org.eclipse.debug.ui,
- org.testng.eclipse;bundle-version="6.9.9",
+ org.testng.eclipse;bundle-version="6.9.10",
  org.eclipse.jdt.core,
  org.eclipse.jdt.ui
 Bundle-ActivationPolicy: lazy

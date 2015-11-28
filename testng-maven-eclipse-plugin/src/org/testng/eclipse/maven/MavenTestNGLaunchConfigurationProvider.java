@@ -1,89 +1,294 @@
 package org.testng.eclipse.maven;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
-
-import org.eclipse.core.resources.IFile;
+import org.apache.maven.model.BuildBase;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
+import org.apache.maven.model.PluginExecution;
+import org.apache.maven.model.PluginManagement;
+import org.apache.maven.model.Profile;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
-import org.testng.eclipse.TestNGPlugin;
+import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.profiles.core.internal.IProfileManager;
+import org.eclipse.m2e.profiles.core.internal.MavenProfilesCoreActivator;
+import org.eclipse.m2e.profiles.core.internal.ProfileData;
+import org.eclipse.m2e.profiles.core.internal.ProfileState;
 import org.testng.eclipse.launch.ITestNGLaunchConfigurationProvider;
 import org.testng.eclipse.launch.LaunchConfigurationHelper;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConfigurationProvider {
 
-  @Override
-  public String getVmArguments(ILaunchConfiguration configuration) throws CoreException {
-    String vmArgs = null;
-    try {
-      if (PreferenceUtils.getBoolean(Activator.PREF_ARGLINE)) {
-        vmArgs = getVMArgsFromPom(configuration);
-      }
-    } catch (Exception e) {
-      throw new CoreException(TestNGPlugin.createError(e));
-    }
+  public static final Pattern PATTERN = Pattern.compile("\\$\\{([^}]+)\\}");
 
-    if (vmArgs != null) {
-      vmArgs = VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(vmArgs);
+  @Override
+  public String getVmArguments(ILaunchConfiguration launchConf) throws CoreException {
+    if (PreferenceUtils.getBoolean(Activator.PREF_ARGLINE)
+        || PreferenceUtils.getBoolean(Activator.PREF_SYSPROPERTIES)) {
+      String vmArgs = getVMArgsFromPom(launchConf);
+
+      if (vmArgs != null) {
+        vmArgs = VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(vmArgs);
+      }
+      return vmArgs;
     }
-    return vmArgs;
+    return null;
   }
 
   @Override
-  public List<String> getEnvironment(ILaunchConfiguration configuration) throws CoreException {
+  public List<String> getEnvironment(ILaunchConfiguration launchConf) throws CoreException {
+    IJavaProject javaProject = LaunchConfigurationHelper.getProject(launchConf);
+    IMavenProjectFacade prjFecade = MavenPlugin.getMavenProjectRegistry().getProject(javaProject.getProject());
+    IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
+
+    List<ProfileData> profiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
+
+    Model model = MavenPlugin.getMavenModelManager().readMavenModel(prjFecade.getPom());
+    Xpp3Dom confDom = findPluginConfiguration(model, profiles);
+    if (confDom != null) {
+      if (PreferenceUtils.getBoolean(Activator.PREF_ENVIRON)) {
+        Xpp3Dom envDom = confDom.getChild("environmentVariables");
+        List<String> environList = new ArrayList<>(envDom.getChildCount());
+        for (Xpp3Dom varDom : envDom.getChildren()) {
+          environList.add(varDom.getName() + "=" + varDom.getValue());
+        }
+        return environList;
+      }
+    }
+    return null;
+  }
+
+  @SuppressWarnings("restriction")
+  private String getVMArgsFromPom(ILaunchConfiguration launchConf) throws CoreException {
+    IJavaProject javaProject = LaunchConfigurationHelper.getProject(launchConf);
+    IMavenProjectFacade prjFecade = MavenPlugin.getMavenProjectRegistry().getProject(javaProject.getProject());
+    IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
+
+    List<ProfileData> selectedProfiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
+
+    Model model = MavenPlugin.getMavenModelManager().readMavenModel(prjFecade.getPom());
+    Xpp3Dom confDom = findPluginConfiguration(model, selectedProfiles);
+    if (confDom != null) {
+      StringBuilder sb = new StringBuilder();
+      if (PreferenceUtils.getBoolean(Activator.PREF_ARGLINE)) {
+        Xpp3Dom argDom = confDom.getChild("argLine");
+        if (argDom != null) {
+          sb.append(argDom.getValue());
+        }
+      }
+
+      if (PreferenceUtils.getBoolean(Activator.PREF_SYSPROPERTIES)) {
+        Xpp3Dom propDom = confDom.getChild("systemPropertyVariables");
+        if (propDom != null) {
+          for (Xpp3Dom pDom : propDom.getChildren()) {
+            sb.append(" -D").append(pDom.getName()).append("=").append(pDom.getValue());
+          }
+        }
+      }
+
+      String vmArgs = sb.toString();
+      vmArgs = resolve(vmArgs, collectionProperties(model, selectedProfiles, prjFecade));
+      return vmArgs;
+    }
     return null;
   }
 
   /**
-   * Get the JVM args from maven pom.xmll.
-   * <ul>
-   * Here is the return value of different cases:
-   * <li>no pom.xml -- return empty String</li>
-   * <li>pom.xml exists, but no maven-surefire-plugin or maven-safefail-plugin,
-   * in essential, no "argLine" element in the pom.xml -- return empty String
-   * </li>
-   * <li>there is one "argLine" element -- return the text content of the
-   * "argLine" element</li>
-   * <li>there are more then one "argLine" elements -- return the first
-   * "argLine"<profile></li>
-   * </ul>
+   * find the configuration of maven-surefire-plugin and/or
+   * maven-failsafe-plugin.
    * 
-   * @param conf
-   * @return
-   * @throws Exception
+   * @param model
+   *          the Maven POM model
+   * @return {@code null} if not found
    */
-  private static String getVMArgsFromPom(ILaunchConfiguration conf) throws Exception {
-    StringBuilder vmArgs = new StringBuilder();
-    IJavaProject javaProject = LaunchConfigurationHelper.getProject(conf);
-    IFile pomFile = javaProject.getProject().getFile("pom.xml");
-    if (pomFile.exists()) {
-      DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-      documentBuilderFactory.setNamespaceAware(false);
-      DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-      Document doc = documentBuilder.parse(pomFile.getLocation().toFile());
+  @SuppressWarnings("restriction")
+  private Xpp3Dom findPluginConfiguration(Model model, List<ProfileData> selectedProfiles) {
+    Xpp3Dom pluginConf = null;
 
-      XPathFactory xpathFactory = XPathFactory.newInstance();
-      XPath xpath = xpathFactory.newXPath();
-
-      XPathExpression expr = xpath.compile("//argLine");
-      NodeList argLineNodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-      if (argLineNodes.getLength() > 0) {
-        Node argLineNode = argLineNodes.item(0);
-        vmArgs.append(" ").append(argLineNode.getTextContent());
+    // found from selected profiles first, if anyone matched, use and return it.
+    if (selectedProfiles != null) {
+      for (ProfileData pd : selectedProfiles) {
+        if (pd.getActivationState() == ProfileState.Active) {
+          List<Profile> profiles = model.getProfiles();
+          if (profiles != null) {
+            for (Profile profile : profiles) {
+              if (pd.getId().equals(profile.getId())) {
+                pluginConf = findPluginConfiguration(profile.getBuild());
+                if (pluginConf != null) {
+                  return pluginConf;
+                }
+              }
+            }
+          }
+        }
       }
     }
-    return vmArgs.toString();
+
+    // otherwise, found from project build base
+    pluginConf = findPluginConfiguration(model.getBuild());
+
+    return pluginConf;
   }
 
+  private Xpp3Dom findPluginConfiguration(BuildBase build) {
+    List<Plugin> plugins;
+    Xpp3Dom pluginConf = null;
+    PluginManagement pluginMgnt = build.getPluginManagement();
+    if (pluginMgnt != null) {
+      plugins = pluginMgnt.getPlugins();
+      pluginConf = findPluginConfiguration(plugins);
+    }
+    if (pluginConf == null) {
+      plugins = build.getPlugins();
+      pluginConf = findPluginConfiguration(plugins);
+    }
+    return pluginConf;
+  }
+
+  private Xpp3Dom findPluginConfiguration(List<Plugin> plugins) {
+    if (plugins != null) {
+      for (Plugin plugin : plugins) {
+        if ("maven-surefire-plugin".equals(plugin.getArtifactId())
+            || "maven-failsafe-plugin".equals(plugin.getArtifactId())) {
+          Object mvnPlugConf = plugin.getConfiguration();
+          if (isTargetConfiguration(mvnPlugConf)) {
+            return (Xpp3Dom) mvnPlugConf;
+          } else {
+            List<PluginExecution> pexecs = plugin.getExecutions();
+            if (pexecs != null) {
+              for (PluginExecution pexec : pexecs) {
+                mvnPlugConf = pexec.getConfiguration();
+                if (isTargetConfiguration(mvnPlugConf)) {
+                  return (Xpp3Dom) mvnPlugConf;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * the configuration node is trade as target one if one of the condition
+   * satisfied:
+   * <ul>
+   * <li>if it has argLine and it's not empty</li>
+   * <li>or, if it has systemPropertyVariables and it contains children</li>
+   * <li>or, if it has environmentVariables and it contains children</li> </ul
+   * 
+   * @param configuration
+   * @return {@code true} if found
+   */
+  private boolean isTargetConfiguration(Object configuration) {
+    if (configuration != null && configuration instanceof Xpp3Dom) {
+      Xpp3Dom dom = ((Xpp3Dom) configuration);
+      Xpp3Dom d = dom.getChild("argLine");
+      if (d != null && !d.getValue().trim().isEmpty()) {
+        return true;
+      }
+
+      d = dom.getChild("systemPropertyVariables");
+      if (d != null && d.getChildCount() > 0) {
+        return true;
+      }
+
+      d = dom.getChild("environmentVariables");
+      if (d != null && d.getChildCount() > 0) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  @SuppressWarnings("restriction")
+  private Map<String, String> collectionProperties(Model model, List<ProfileData> selectedProfiles,
+      IMavenProjectFacade project) {
+    Map<String, String> result = new HashMap<>();
+
+    result.put("settings.localRepository", MavenPlugin.getMaven().getLocalRepositoryPath());
+    result.put("basedir", project.getFullPath().toOSString());
+
+    collectProperties(model.getProperties(), result);
+
+    if (selectedProfiles != null) {
+      for (ProfileData pd : selectedProfiles) {
+        if (pd.getActivationState() == ProfileState.Active) {
+          List<Profile> profiles = model.getProfiles();
+          if (profiles != null) {
+            for (Profile profile : profiles) {
+              if (pd.getId().equals(profile.getId())) {
+                collectProperties(profile.getProperties(), result);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return result;
+  }
+
+  private void collectProperties(Properties props, Map<String, String> result) {
+    if (props != null) {
+      for (Object key : props.keySet()) {
+        result.put((String) key, (String) props.getProperty((String) key));
+      }
+    }
+  }
+
+  private String resolve(String str, Map<String, String> properties) {
+    Matcher matcher = PATTERN.matcher(str);
+
+    StringBuffer buff = new StringBuffer();
+    while (matcher.find()) {
+      String propText = matcher.group();
+      String propName = matcher.group(1);
+
+      String resolved = doResolveProperty(propName, properties);
+      if (resolved == null) {
+        resolved = propText;
+      }
+      matcher.appendReplacement(buff, Matcher.quoteReplacement(resolved));
+    }
+    matcher.appendTail(buff);
+
+    return buff.toString();
+  }
+
+  private String doResolveProperty(String propName, Map<String, String> properties) {
+    String result = System.getProperty(propName);
+    if (result != null) {
+      return result;
+    }
+
+    if (propName.startsWith("project.") || propName.startsWith("pom.")) {
+      if (propName.startsWith("pom.")) {
+        propName = propName.substring("pom.".length());
+      } else {
+        propName = propName.substring("project.".length());
+      }
+    }
+
+    result = properties.get(propName);
+    if (result != null) {
+      return result;
+    }
+
+    return null;
+  }
 }
