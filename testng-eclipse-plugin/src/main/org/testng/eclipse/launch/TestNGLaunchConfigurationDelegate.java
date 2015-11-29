@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -336,8 +335,8 @@ public class TestNGLaunchConfigurationDelegate
       // Add plugin embedded testng libraries if user don't want to use their
       // own
       IClasspathEntry[] cpEntries = BuildPathSupport.getTestNGLibraryEntries();
-      for (int i = 0; i < cpEntries.length; i++) {
-        IPath jarPath = cpEntries[i].getPath();
+      for (IClasspathEntry cpEntry : cpEntries) {
+        IPath jarPath = cpEntry.getPath();
         // insert the bundle embedded testng.jar on the front of the classpath
         classpathList.add(0, jarPath.toOSString());
       }
@@ -428,16 +427,6 @@ public class TestNGLaunchConfigurationDelegate
       }
     }
     return null;
-  }
-
-  private void verifyClasspath(List<String> classpath) throws CoreException {
-    Version ver = getRuntimeTestNGVersion(classpath);
-    if (ver != null) {
-      if (compareVersion(ver, minTestNGVer) < 0) {
-        throw new CoreException(TestNGPlugin.createError(ResourceUtil.getString(
-            "TestNGLaunchConfigurationDelegate.error.testngVersionUnsupported")));
-      }
-    }
   }
 
   private String getRunNameAttr(ILaunchConfiguration configuration) {
