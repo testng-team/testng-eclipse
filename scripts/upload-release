@@ -10,7 +10,7 @@ fi
 
 cd $UPDATE_SITE/plugins
 
-number=`ls *jar|cut -d '.' -f 3,4,5,6`
+number=`ls -l org.testng.eclipse_*|cut -d '.' -f 3,4,5,6`
 jarName=$number
 jar=$UPDATE_SITE/plugins/org.testng.$number.jar
 
