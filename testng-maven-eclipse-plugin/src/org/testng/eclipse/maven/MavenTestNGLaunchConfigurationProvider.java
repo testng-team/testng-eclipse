@@ -17,7 +17,6 @@ import org.apache.maven.model.Profile;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.m2e.core.MavenPlugin;
@@ -38,10 +37,6 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     if (PreferenceUtils.getBoolean(Activator.PREF_ARGLINE)
         || PreferenceUtils.getBoolean(Activator.PREF_SYSPROPERTIES)) {
       String vmArgs = getVMArgsFromPom(launchConf);
-
-      if (vmArgs != null) {
-        vmArgs = VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(vmArgs);
-      }
       return vmArgs;
     }
     return null;
@@ -143,8 +138,13 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
   }
 
   private Xpp3Dom findPluginConfiguration(BuildBase build) {
-    List<Plugin> plugins;
+    if (build == null) {
+      return null;
+    }
+
     Xpp3Dom pluginConf = null;
+    List<Plugin> plugins;
+
     PluginManagement pluginMgnt = build.getPluginManagement();
     if (pluginMgnt != null) {
       plugins = pluginMgnt.getPlugins();
