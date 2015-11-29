@@ -49,7 +49,6 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
 
     List<ProfileData> profiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
-
     Model model = MavenPlugin.getMavenModelManager().readMavenModel(prjFecade.getPom());
     Xpp3Dom confDom = findPluginConfiguration(model, profiles);
     if (confDom != null) {
@@ -72,7 +71,6 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
 
     List<ProfileData> selectedProfiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
-
     Model model = MavenPlugin.getMavenModelManager().readMavenModel(prjFecade.getPom());
     Xpp3Dom confDom = findPluginConfiguration(model, selectedProfiles);
     if (confDom != null) {
@@ -94,7 +92,7 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
       }
 
       String vmArgs = sb.toString();
-      vmArgs = resolve(vmArgs, collectionProperties(model, selectedProfiles, prjFecade));
+      vmArgs = resolve(vmArgs, collectProperties(model, selectedProfiles, prjFecade));
       return vmArgs;
     }
     return null;
@@ -216,15 +214,18 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
   }
 
   @SuppressWarnings("restriction")
-  private Map<String, String> collectionProperties(Model model, List<ProfileData> selectedProfiles,
+  private Map<String, String> collectProperties(Model model, List<ProfileData> selectedProfiles,
       IMavenProjectFacade project) {
     Map<String, String> result = new HashMap<>();
 
+    // basic properties
     result.put("settings.localRepository", MavenPlugin.getMaven().getLocalRepositoryPath());
     result.put("basedir", project.getFullPath().toOSString());
 
+    // project base properties
     collectProperties(model.getProperties(), result);
 
+    // profile base properties, could override the project level properties if there's any
     if (selectedProfiles != null) {
       for (ProfileData pd : selectedProfiles) {
         if (pd.getActivationState() == ProfileState.Active) {
