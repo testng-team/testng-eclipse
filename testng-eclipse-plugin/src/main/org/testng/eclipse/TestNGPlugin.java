@@ -1,5 +1,10 @@
 package org.testng.eclipse;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -22,6 +27,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
+import org.testng.eclipse.launch.ITestNGLaunchConfigurationProvider;
 import org.testng.eclipse.ui.TestRunnerViewPart;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.util.JDTUtil;
@@ -29,10 +35,13 @@ import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.SWTUtil;
 import org.testng.remote.RemoteTestNG;
 
+import com.google.common.collect.Lists;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.AbstractSet;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * The plug-in runtime class for the TestNG plug-in.
@@ -351,5 +360,24 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
   
   public static IStatus createError(String message) {
     return new Status(IStatus.ERROR, PLUGIN_ID, message);
+  }
+
+  public static List<ITestNGLaunchConfigurationProvider> getLaunchConfigurationProviders()
+      throws CoreException {
+    List<ITestNGLaunchConfigurationProvider> result = Lists.newArrayList();
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    IExtensionPoint extensionPoint = registry
+        .getExtensionPoint("org.testng.eclipse.launchConfigurationProvider");
+    IExtension extensions[] = extensionPoint.getExtensions();
+    for (IExtension ext : extensions) {
+      IConfigurationElement elements[] = ext.getConfigurationElements();
+      for (IConfigurationElement element : elements) {
+        ITestNGLaunchConfigurationProvider provider = (ITestNGLaunchConfigurationProvider) element
+            .createExecutableExtension("class");
+        result.add(provider);
+      }
+    }
+
+    return result;
   }
 }

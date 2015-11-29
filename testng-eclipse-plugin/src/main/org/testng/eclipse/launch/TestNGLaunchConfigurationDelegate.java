@@ -15,13 +15,8 @@ import java.util.jar.Manifest;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -365,13 +360,6 @@ public class TestNGLaunchConfigurationDelegate
     StringBuilder vmArgs = new StringBuilder();
     vmArgs.append(super.getVMArguments(configuration));
 
-    for (ITestNGLaunchConfigurationProvider lcp : getLaunchConfigurationProviders()) {
-      String args = lcp.getVmArguments(configuration);
-      if (args != null && !args.isEmpty()) {
-        vmArgs.append(" ").append(args);
-      }
-    }
-
     vmArgs.append(" ");
     vmArgs.append(ConfigurationHelper.getJvmArgs(configuration));
 
@@ -387,7 +375,8 @@ public class TestNGLaunchConfigurationDelegate
       result.addAll(Arrays.asList(base));
     }
 
-    for (ITestNGLaunchConfigurationProvider lcp : getLaunchConfigurationProviders()) {
+    for (ITestNGLaunchConfigurationProvider lcp : TestNGPlugin
+        .getLaunchConfigurationProviders()) {
       List<String> environs = lcp.getEnvironment(configuration);
       if (environs != null) {
         result.addAll(environs);
@@ -464,23 +453,5 @@ public class TestNGLaunchConfigurationDelegate
         throw new CoreException(TestNGPlugin.createError(e2));
       }
     }
-  }
-
-  private static List<ITestNGLaunchConfigurationProvider> getLaunchConfigurationProviders() throws CoreException {
-    List<ITestNGLaunchConfigurationProvider> result = Lists.newArrayList();
-    IExtensionRegistry registry = Platform.getExtensionRegistry();
-    IExtensionPoint extensionPoint = registry
-        .getExtensionPoint("org.testng.eclipse.launchConfigurationProvider");
-    IExtension extensions[] = extensionPoint.getExtensions();
-    for (IExtension ext : extensions) {
-      IConfigurationElement elements[] = ext.getConfigurationElements();
-      for (IConfigurationElement element : elements) {
-        ITestNGLaunchConfigurationProvider provider = (ITestNGLaunchConfigurationProvider) element
-            .createExecutableExtension("class");
-        result.add(provider);
-      }
-    }
-
-    return result;
   }
 }

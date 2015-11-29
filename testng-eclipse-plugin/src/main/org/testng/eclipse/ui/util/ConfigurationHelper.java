@@ -9,17 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -35,6 +24,7 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
+import org.testng.eclipse.launch.ITestNGLaunchConfigurationProvider;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.Protocols;
@@ -43,9 +33,9 @@ import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.SuiteGenerator;
 import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * Helper methods to store and retrieve values from a launch configuration.
@@ -172,6 +162,13 @@ public class ConfigurationHelper {
     jvmArgs.append(" ").append(configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
 		    getProjectJvmArgs()));
 
+    for (ITestNGLaunchConfigurationProvider lcp : TestNGPlugin.getLaunchConfigurationProviders()) {
+      String args = lcp.getVmArguments(configuration);
+      if (args != null && !args.isEmpty()) {
+        jvmArgs.append(" ").append(args);
+      }
+    }
+
     addDebugProperties(jvmArgs, configuration);
 
     switch (ConfigurationHelper.getProtocol(configuration)) {
@@ -182,7 +179,8 @@ public class ConfigurationHelper {
       break;
     }
 
-    return VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(jvmArgs.toString());
+    return VariablesPlugin.getDefault().getStringVariableManager()
+        .performStringSubstitution(jvmArgs.toString());
   }
 
   /**
