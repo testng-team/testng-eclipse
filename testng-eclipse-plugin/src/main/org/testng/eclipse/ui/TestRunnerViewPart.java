@@ -540,10 +540,14 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private void aboutToLaunch(final String message) {
-    String msg =
-      ResourceUtil.getFormattedString("TestRunnerViewPart.message.launching", message); //$NON-NLS-1$
-    setPartName(msg);
-    firePropertyChange(IWorkbenchPart.PROP_TITLE);
+    boolean showCaseName = TestNGPlugin.getDefault().getPreferenceStore()
+        .getBoolean(TestNGPluginConstants.S_VIEW_TITLE_SHOW_CASE_NAME);
+    if (showCaseName) {
+      String msg =
+        ResourceUtil.getFormattedString("TestRunnerViewPart.message.launching", message); //$NON-NLS-1$
+      setPartName(msg);
+      firePropertyChange(IWorkbenchPart.PROP_TITLE);
+    }
   }
 
   @Override
