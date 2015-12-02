@@ -378,12 +378,17 @@ public class TestNGLaunchConfigurationDelegate
     for (ITestNGLaunchConfigurationProvider lcp : TestNGPlugin
         .getLaunchConfigurationProviders()) {
       List<String> environs = lcp.getEnvironment(configuration);
-      if (environs != null) {
+      if (environs != null && environs.size() > 0) {
         result.addAll(environs);
       }
     }
 
-    return result.toArray(new String[] {});
+    if (result.isEmpty()) {
+      // fixed #198, return null rather than empty array
+      // see also: https://bugs.openjdk.java.net/browse/JDK-4902796
+      return null;
+    }
+    return result.toArray(new String[result.size()]);
   }
 
   private Version getRuntimeTestNGVersion(List<String> classpath)
