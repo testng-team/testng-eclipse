@@ -21,7 +21,7 @@ public class MavenTestNGOptionsConfigurationBlock extends OptionsConfigurationBl
   private Button syspropsBtn;
 
   protected MavenTestNGOptionsConfigurationBlock(IProject project) {
-    super(project, getKeys());
+    super(project);
   }
 
   @Override
@@ -29,7 +29,7 @@ public class MavenTestNGOptionsConfigurationBlock extends OptionsConfigurationBl
     Composite composite = new Composite(parent, SWT.NONE);
     GridLayoutFactory.fillDefaults().applyTo(composite);
 
-    Group mavenGroup = new Group(composite, SWT.BORDER);
+    Group mavenGroup = new Group(composite, SWT.NONE);
     GridDataFactory.fillDefaults().grab(true, false).applyTo(mavenGroup);
     GridLayoutFactory.fillDefaults().applyTo(mavenGroup);
     mavenGroup.setText(Messages.prefPrefixFromPomGroupName);

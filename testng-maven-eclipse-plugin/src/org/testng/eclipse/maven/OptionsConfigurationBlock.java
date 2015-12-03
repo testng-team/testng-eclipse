@@ -2,7 +2,6 @@ package org.testng.eclipse.maven;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
@@ -73,11 +72,9 @@ public abstract class OptionsConfigurationBlock {
   private IScopeContext[] fLookupOrder;
 
   protected final IProject fProject;
-  protected final Key[] fAllKeys;
 
-  protected OptionsConfigurationBlock(IProject project, Key[] allKeys) {
+  protected OptionsConfigurationBlock(IProject project) {
     fProject = project;
-    fAllKeys = allKeys;
 
     if (fProject != null) {
       fLookupOrder = new IScopeContext[] { new ProjectScope(fProject), InstanceScope.INSTANCE, DefaultScope.INSTANCE };
@@ -110,17 +107,19 @@ public abstract class OptionsConfigurationBlock {
 
   public boolean hasProjectSpecificOptions(IProject project) {
     if (project != null) {
-      IScopeContext projectContext = new ProjectScope(project);
-      Key[] allKeys = fAllKeys;
-      Assert.isNotNull(allKeys);
-
-      for (int i = 0; i < allKeys.length; i++) {
-        if (allKeys[i].getStoredValue(projectContext) != null) {
-          return true;
-        }
+      String val = getValue(getKey(Activator.PREF_USE_PROJECT_SETTINGS));
+      if (val != null) {
+        return Boolean.parseBoolean(val);
       }
+      return false;
     }
     return false;
+  }
+
+  public void useProjectSpecificSettings(boolean useProjectSpecificSettings) {
+    if (fProject != null) {
+      setValue(getKey(Activator.PREF_USE_PROJECT_SETTINGS), useProjectSpecificSettings);
+    }
   }
 
   protected abstract Control createContents(Composite parent);
