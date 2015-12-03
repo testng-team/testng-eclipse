@@ -7,8 +7,8 @@ import org.eclipse.swt.widgets.Control;
 
 public class MavenTestNGPreferencePage extends PropertyAndPreferencePage {
 
-  private static final String PREF_ID = "org.testng.eclipse.maven.preferencePage"; //$NON-NLS-1$
-  private static final String PROP_ID = "org.testng.eclipse.maven.propertyPage"; //$NON-NLS-1$
+  private static final String PREF_ID = "org.testng.eclipse.maven.pref"; //$NON-NLS-1$
+  private static final String PROP_ID = "org.testng.eclipse.maven.prop"; //$NON-NLS-1$
 
   private MavenTestNGOptionsConfigurationBlock configBlock;
 
@@ -30,7 +30,15 @@ public class MavenTestNGPreferencePage extends PropertyAndPreferencePage {
 
   @Override
   protected boolean hasProjectSpecificOptions(IProject project) {
-    return false;
+    return configBlock.hasProjectSpecificOptions(project);
+  }
+
+  @Override
+  protected void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
+    super.enableProjectSpecificSettings(useProjectSpecificSettings);
+    if (configBlock != null) {
+      configBlock.useProjectSpecificSettings(useProjectSpecificSettings);
+    }
   }
 
   @Override

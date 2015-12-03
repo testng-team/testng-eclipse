@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,6 +16,7 @@ import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.PluginManagement;
 import org.apache.maven.model.Profile;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -34,8 +36,10 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
 
   @Override
   public String getVmArguments(ILaunchConfiguration launchConf) throws CoreException {
-    if (PreferenceUtils.getBoolean(Activator.PREF_ARGLINE)
-        || PreferenceUtils.getBoolean(Activator.PREF_SYSPROPERTIES)) {
+    IJavaProject javaProject = LaunchConfigurationHelper.getProject(launchConf);
+    IProject project = javaProject.getProject();
+    if (PreferenceUtils.getBoolean(project, Activator.PREF_ARGLINE)
+        || PreferenceUtils.getBoolean(project, Activator.PREF_SYSPROPERTIES)) {
       String vmArgs = getVMArgsFromPom(launchConf);
       return vmArgs;
     }
@@ -45,14 +49,15 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
   @Override
   public List<String> getEnvironment(ILaunchConfiguration launchConf) throws CoreException {
     IJavaProject javaProject = LaunchConfigurationHelper.getProject(launchConf);
-    IMavenProjectFacade prjFecade = MavenPlugin.getMavenProjectRegistry().getProject(javaProject.getProject());
+    IProject project = javaProject.getProject();
+    IMavenProjectFacade prjFecade = MavenPlugin.getMavenProjectRegistry().getProject(project);
     IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
 
     List<ProfileData> profiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
     Model model = MavenPlugin.getMavenModelManager().readMavenModel(prjFecade.getPom());
     Xpp3Dom confDom = findPluginConfiguration(model, profiles);
     if (confDom != null) {
-      if (PreferenceUtils.getBoolean(Activator.PREF_ENVIRON)) {
+      if (PreferenceUtils.getBoolean(project, Activator.PREF_ENVIRON)) {
         Xpp3Dom envDom = confDom.getChild("environmentVariables");
         List<String> environList = new ArrayList<>(envDom.getChildCount());
         for (Xpp3Dom varDom : envDom.getChildren()) {
@@ -67,7 +72,8 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
   @SuppressWarnings("restriction")
   private String getVMArgsFromPom(ILaunchConfiguration launchConf) throws CoreException {
     IJavaProject javaProject = LaunchConfigurationHelper.getProject(launchConf);
-    IMavenProjectFacade prjFecade = MavenPlugin.getMavenProjectRegistry().getProject(javaProject.getProject());
+    IProject project = javaProject.getProject();
+    IMavenProjectFacade prjFecade = MavenPlugin.getMavenProjectRegistry().getProject(project);
     IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
 
     List<ProfileData> selectedProfiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
@@ -75,14 +81,14 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     Xpp3Dom confDom = findPluginConfiguration(model, selectedProfiles);
     if (confDom != null) {
       StringBuilder sb = new StringBuilder();
-      if (PreferenceUtils.getBoolean(Activator.PREF_ARGLINE)) {
+      if (PreferenceUtils.getBoolean(project, Activator.PREF_ARGLINE)) {
         Xpp3Dom argDom = confDom.getChild("argLine");
         if (argDom != null) {
           sb.append(argDom.getValue());
         }
       }
 
-      if (PreferenceUtils.getBoolean(Activator.PREF_SYSPROPERTIES)) {
+      if (PreferenceUtils.getBoolean(project, Activator.PREF_SYSPROPERTIES)) {
         Xpp3Dom propDom = confDom.getChild("systemPropertyVariables");
         if (propDom != null) {
           for (Xpp3Dom pDom : propDom.getChildren()) {
@@ -225,7 +231,8 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     // project base properties
     collectProperties(model.getProperties(), result);
 
-    // profile base properties, could override the project level properties if there's any
+    // profile base properties could override the project level properties
+    // if there's any
     if (selectedProfiles != null) {
       for (ProfileData pd : selectedProfiles) {
         if (pd.getActivationState() == ProfileState.Active) {
@@ -246,8 +253,8 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
 
   private void collectProperties(Properties props, Map<String, String> result) {
     if (props != null) {
-      for (Object key : props.keySet()) {
-        result.put((String) key, (String) props.getProperty((String) key));
+      for (Entry<Object, Object> entry : props.entrySet()) {
+        result.put((String) entry.getKey(), (String) entry.getValue());
       }
     }
   }

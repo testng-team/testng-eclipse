@@ -12,7 +12,8 @@ public class Activator extends AbstractUIPlugin {
 
     // The plug-in ID
     public static final String PLUGIN_ID = "org.testng.eclipse.maven";
-    
+
+    public static final String PREF_USE_PROJECT_SETTINGS = "userprojectsettings";
     public static final String PREF_ARGLINE = PLUGIN_ID + ".argline";
     public static final String PREF_ENVIRON = PLUGIN_ID + ".environ";
     public static final String PREF_SYSPROPERTIES = PLUGIN_ID + ".sysproperties";

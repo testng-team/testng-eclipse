@@ -24,5 +24,14 @@
              class="org.testng.eclipse.maven.MavenTestNGPreferenceInitializer">
        </initializer>
     </extension>
+    <extension
+          point="org.eclipse.ui.propertyPages">
+       <page
+             category="org.testng.eclipse.properties.propertyPage1"
+             class="org.testng.eclipse.maven.MavenTestNGPreferencePage"
+             id="org.testng.eclipse.maven.prop"
+             name="%org.testng.eclipse.maven.pref.name">
+       </page>
+    </extension>
 
 </plugin>
