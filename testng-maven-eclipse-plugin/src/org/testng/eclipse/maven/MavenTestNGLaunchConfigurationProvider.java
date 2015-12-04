@@ -1,12 +1,9 @@
 package org.testng.eclipse.maven;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.maven.model.BuildBase;
@@ -15,6 +12,11 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.PluginManagement;
 import org.apache.maven.model.Profile;
+import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.interpolation.InterpolationException;
+import org.codehaus.plexus.interpolation.PrefixedObjectValueSource;
+import org.codehaus.plexus.interpolation.PropertiesBasedValueSource;
+import org.codehaus.plexus.interpolation.RegexBasedInterpolator;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -90,9 +92,10 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
       throw new CoreException(Activator.createError(project.getName() + " is not in Maven project registry."));
     }
 
+    MavenProject mvnProject = prjFecade.getMavenProject(new NullProgressMonitor());
     IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
     List<ProfileData> selectedProfiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
-    Model model = MavenPlugin.getMavenModelManager().readMavenModel(prjFecade.getPom());
+    Model model = mvnProject.getModel();
     Xpp3Dom confDom = findPluginConfiguration(model, selectedProfiles);
     if (confDom != null) {
       StringBuilder sb = new StringBuilder();
@@ -113,7 +116,7 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
       }
 
       String vmArgs = sb.toString();
-      vmArgs = resolve(vmArgs, collectProperties(model, selectedProfiles, prjFecade));
+      vmArgs = resolve(vmArgs, mvnProject, selectedProfiles, prjFecade);
       return vmArgs;
     }
     return null;
@@ -234,20 +237,55 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     return false;
   }
 
-  @SuppressWarnings("restriction")
-  private Map<String, String> collectProperties(Model model, List<ProfileData> selectedProfiles,
-      IMavenProjectFacade project) {
-    Map<String, String> result = new HashMap<>();
+  private String resolve(String text, MavenProject mvnProject, List<ProfileData> selectedProfiles,
+      IMavenProjectFacade prjFecade) throws CoreException {
+    if (text == null) {
+      return text;
+    }
+    if (!text.contains("${")) {
+      return text;
+    }
 
+    RegexBasedInterpolator inter = new RegexBasedInterpolator();
+    Model model = mvnProject.getModel();
+    Properties profileProperties = collectProperties(model, selectedProfiles, prjFecade);
+    inter.addValueSource(new PropertiesBasedValueSource(profileProperties));
+    inter.addValueSource(new PrefixedObjectValueSource(Arrays.asList(new String[] { "pom.", "project." }), //$NON-NLS-1$ //$NON-NLS-2$
+        model, false));
+    inter.addValueSource(new PrefixedObjectValueSource("settings.", MavenPlugin.getMaven().getSettings()));
+    try {
+      text = inter.interpolate(text);
+    } catch (InterpolationException e) {
+      Activator.log("interpolate [" + text + "] failed.", e);
+    }
+    return text;
+  }
+
+  @SuppressWarnings("restriction")
+  private Properties collectProperties(Model model, List<ProfileData> selectedProfiles, IMavenProjectFacade project) {
+    Properties result = new Properties();
+
+    //
     // basic properties
+    //
+
+    // sometimes we don't have 'localRepository' defined in ~/.m2/settings.xml,
+    // so we trade it as a special case.
     result.put("settings.localRepository", MavenPlugin.getMaven().getLocalRepositoryPath());
     result.put("basedir", project.getFullPath().toOSString());
 
+    //
     // project base properties
-    collectProperties(model.getProperties(), result);
+    //
 
-    // profile base properties could override the project level properties
-    // if there's any
+    // actually we don't really need this since Maven model already 
+    // resolves the property placehoder at project level. 
+    result.putAll(model.getProperties());
+
+    //
+    // profile base properties could override the project level properties/
+    //
+
     if (selectedProfiles != null) {
       for (ProfileData pd : selectedProfiles) {
         if (pd.getActivationState() == ProfileState.Active) {
@@ -255,7 +293,7 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
           if (profiles != null) {
             for (Profile profile : profiles) {
               if (pd.getId().equals(profile.getId())) {
-                collectProperties(profile.getProperties(), result);
+                result.putAll(profile.getProperties());
               }
             }
           }
@@ -264,54 +302,5 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     }
 
     return result;
-  }
-
-  private void collectProperties(Properties props, Map<String, String> result) {
-    if (props != null) {
-      for (Entry<Object, Object> entry : props.entrySet()) {
-        result.put((String) entry.getKey(), (String) entry.getValue());
-      }
-    }
-  }
-
-  private String resolve(String str, Map<String, String> properties) {
-    Matcher matcher = PATTERN.matcher(str);
-
-    StringBuffer buff = new StringBuffer();
-    while (matcher.find()) {
-      String propText = matcher.group();
-      String propName = matcher.group(1);
-
-      String resolved = doResolveProperty(propName, properties);
-      if (resolved == null) {
-        resolved = propText;
-      }
-      matcher.appendReplacement(buff, Matcher.quoteReplacement(resolved));
-    }
-    matcher.appendTail(buff);
-
-    return buff.toString();
-  }
-
-  private String doResolveProperty(String propName, Map<String, String> properties) {
-    String result = System.getProperty(propName);
-    if (result != null) {
-      return result;
-    }
-
-    if (propName.startsWith("project.") || propName.startsWith("pom.")) {
-      if (propName.startsWith("pom.")) {
-        propName = propName.substring("pom.".length());
-      } else {
-        propName = propName.substring("project.".length());
-      }
-    }
-
-    result = properties.get(propName);
-    if (result != null) {
-      return result;
-    }
-
-    return null;
   }
 }
