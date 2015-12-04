@@ -59,9 +59,17 @@ public class Activator extends AbstractUIPlugin {
     public static String getId() {
         return PLUGIN_ID;
     }
-    
+
+    public static IStatus createError(String message) {
+      return new Status(IStatus.ERROR, getId(), message);
+    }
+
+    public static IStatus createError(String msg, Throwable e) {
+      return new Status(IStatus.ERROR, getId(), IStatus.ERROR, msg, e);
+    }
+
     public static void log(String msg, Throwable e) {
-      log(new Status(IStatus.ERROR, getId(), IStatus.ERROR, msg, e));
+      log(createError(msg, e));
     }
 
     public static void log(IStatus status) {

@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.profiles.core.internal.IProfileManager;
 import org.eclipse.m2e.profiles.core.internal.MavenProfilesCoreActivator;
@@ -50,9 +51,16 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
   public List<String> getEnvironment(ILaunchConfiguration launchConf) throws CoreException {
     IJavaProject javaProject = LaunchConfigurationHelper.getProject(launchConf);
     IProject project = javaProject.getProject();
-    IMavenProjectFacade prjFecade = MavenPlugin.getMavenProjectRegistry().getProject(project);
-    IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
+    if (!project.hasNature(IMavenConstants.NATURE_ID)) {
+      return null;
+    }
 
+    IMavenProjectFacade prjFecade = MavenPlugin.getMavenProjectRegistry().getProject(project);
+    if (prjFecade == null) {
+      throw new CoreException(Activator.createError(project.getName() + " is not in Maven project registry."));
+    }
+
+    IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
     List<ProfileData> profiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
     Model model = MavenPlugin.getMavenModelManager().readMavenModel(prjFecade.getPom());
     Xpp3Dom confDom = findPluginConfiguration(model, profiles);
@@ -73,9 +81,16 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
   private String getVMArgsFromPom(ILaunchConfiguration launchConf) throws CoreException {
     IJavaProject javaProject = LaunchConfigurationHelper.getProject(launchConf);
     IProject project = javaProject.getProject();
-    IMavenProjectFacade prjFecade = MavenPlugin.getMavenProjectRegistry().getProject(project);
-    IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
+    if (!project.hasNature(IMavenConstants.NATURE_ID)) {
+      return null;
+    }
 
+    IMavenProjectFacade prjFecade = MavenPlugin.getMavenProjectRegistry().getProject(project);
+    if (prjFecade == null) {
+      throw new CoreException(Activator.createError(project.getName() + " is not in Maven project registry."));
+    }
+
+    IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
     List<ProfileData> selectedProfiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
     Model model = MavenPlugin.getMavenModelManager().readMavenModel(prjFecade.getPom());
     Xpp3Dom confDom = findPluginConfiguration(model, selectedProfiles);
