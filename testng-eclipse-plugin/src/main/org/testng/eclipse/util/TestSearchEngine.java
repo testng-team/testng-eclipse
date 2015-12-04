@@ -7,9 +7,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.Sets;
-
-import org.eclipse.core.internal.resources.File;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -33,9 +30,12 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.launch.TestFinder;
 import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.launch.components.ITestContent;
 import org.testng.eclipse.ui.util.TypeParser;
+
+import com.google.common.collect.Sets;
 
 /**
  * Search engine for TestNG related elements.
@@ -46,6 +46,24 @@ import org.testng.eclipse.ui.util.TypeParser;
  * @author cedric
  */
 public class TestSearchEngine {
+
+  public static IType[] findTestNGTests(IRunnableContext context,
+      final IJavaElement element) throws InvocationTargetException, InterruptedException {
+    final Set<IType> result = Sets.newHashSet();
+    
+    IRunnableWithProgress runnable = new IRunnableWithProgress() {
+      public void run(IProgressMonitor pm) throws InterruptedException, InvocationTargetException {
+        try {
+          new TestFinder().findTestsInContainer(element, result, pm);
+        } catch (CoreException e) {
+          throw new InvocationTargetException(e);
+        }
+      }
+    };
+    context.run(true, true, runnable);
+    
+    return result.toArray(new IType[result.size()]);
+  }
 
   /**
    * Searches for TestNG test types.
@@ -94,7 +112,7 @@ public class TestSearchEngine {
   public static String[] findMethods(IRunnableContext context,
 			final Object[] elements, final String className)
 			throws InvocationTargetException, InterruptedException {
-		final Set result = new HashSet();
+		final Set<String> result = new HashSet<>();
 
 		if (elements.length != 0) {
 			IRunnableWithProgress runnable = new IRunnableWithProgress() {
@@ -106,12 +124,12 @@ public class TestSearchEngine {
 			context.run(true, true, runnable);
 		}
 
-		return (String[])result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
-  public static File[] findSuites(IRunnableContext context,
+  public static IFile[] findSuites(IRunnableContext context,
                                   final Object[] elements) throws InvocationTargetException, InterruptedException {
-    final Set result = new HashSet();
+    final Set<IFile> result = new HashSet<>();
 
     if(elements.length != 0) {
       IRunnableWithProgress runnable = new IRunnableWithProgress() {
@@ -122,12 +140,12 @@ public class TestSearchEngine {
       context.run(true, true, runnable);
     }
 
-    return (File[]) result.toArray(new File[result.size()]);
+    return result.toArray(new IFile[result.size()]);
   }
 
   public static IFile[] findSuites(final Object[] elements) throws InterruptedException,
                                                                    InvocationTargetException {
-    final Set result = new HashSet();
+    final Set<IFile> result = new HashSet<>();
 
     if(elements.length > 0) {
       IRunnableWithProgress runnable = new IRunnableWithProgress() {
@@ -138,12 +156,12 @@ public class TestSearchEngine {
       PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runnable);
     }
 
-    return (IFile[]) result.toArray(new IFile[result.size()]);
+    return result.toArray(new IFile[result.size()]);
   }
 
   public static IType[] findTests(final Object[] elements, final Filters.ITypeFilter filter)
   throws InvocationTargetException, InterruptedException {
-    final Set result = new HashSet();
+    final Set<IType> result = new HashSet<>();
 
     if(elements.length > 0) {
       IRunnableWithProgress runnable = new IRunnableWithProgress() {
@@ -154,12 +172,12 @@ public class TestSearchEngine {
       PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runnable);
     }
 
-    return (IType[]) result.toArray(new IType[result.size()]);
+    return result.toArray(new IType[result.size()]);
   }
   
   public static IType[] findPackages(final Object[] elements)
   throws InvocationTargetException, InterruptedException {
-    final Set result = new HashSet();
+    final Set<IType> result = new HashSet<>();
 
     if(elements.length > 0) {
       IRunnableWithProgress runnable = new IRunnableWithProgress() {
@@ -170,7 +188,7 @@ public class TestSearchEngine {
       PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runnable);
     }
 
-    return (IType[]) result.toArray(new IType[result.size()]);
+    return result.toArray(new IType[result.size()]);
   }
   
 
@@ -316,7 +334,7 @@ public class TestSearchEngine {
     return false;
   }
 
-  private static void doFindSuites(Object[] elements, Set result,
+  private static void doFindSuites(Object[] elements, Set<IFile> result,
                                    IProgressMonitor pm) 
   throws InterruptedException 
 {
@@ -339,21 +357,21 @@ public class TestSearchEngine {
     
   }
 
-  private static void findSuites(IContainer ires, Set results) {
+  private static void findSuites(IContainer ires, Set<IFile> results) {
     if(null == ires) {
       return;
     }
 
     try {
       IResource[] children = ires.members();
-      for(int i = 0; i < children.length; i++) {
-        if(children[i] instanceof IFile) {
-          if(isTestNgXmlFile((IFile) children[i])) {
-            results.add(children[i]);
+      for(IResource res : children) {
+        if(res instanceof IFile) {
+          if(isTestNgXmlFile((IFile) res)) {
+            results.add((IFile) res);
           }
         }
         else {
-          findSuites((IContainer) children[i], results);
+          findSuites((IContainer) res, results);
         }
       }
     }

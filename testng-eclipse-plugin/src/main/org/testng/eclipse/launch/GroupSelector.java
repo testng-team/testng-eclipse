@@ -3,9 +3,12 @@ package org.testng.eclipse.launch;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.Maps;
 
@@ -55,16 +58,16 @@ public class GroupSelector extends MultiSelector {
         ; // ignore for the moment
       }
 
-      Object[] projects = new Object[1 + dependencies.length];
+      IJavaProject[] projects = new IJavaProject[1 + dependencies.length];
       projects[0] = selectedProject;
       System.arraycopy(dependencies, 0, projects, 1, dependencies.length);
-      Object[] types = TestSearchEngine.findTests(getCallback().getLaunchConfigurationDialog(),
-          projects, Filters.SINGLE_TEST);
+      Set<IType> types = new HashSet<>();
+      for (IJavaProject project : projects) {
+        types.addAll(Arrays.asList(TestSearchEngine.findTestNGTests(getCallback().getLaunchConfigurationDialog(),
+          project)));
+      }
 
-      for(int i = 0; i < types.length; i++) {
-        Object t = types[i];
-        if(t instanceof IType) {
-          IType type = (IType) t;
+      for (IType type : types) {
           ITestContent content = TypeParser.parseType(type);
           Collection<String> groupNames = content.getGroups();
           if(!groupNames.isEmpty()) {
@@ -78,13 +81,9 @@ public class GroupSelector extends MultiSelector {
               rtypes.add(type.getFullyQualifiedName());
             }
           }
-        }
       }
     }
-    catch(InvocationTargetException e) {
-      TestNGPlugin.log(e);
-    }
-    catch(InterruptedException e) {
+    catch(InvocationTargetException | InterruptedException e) {
       TestNGPlugin.log(e);
     }
 
