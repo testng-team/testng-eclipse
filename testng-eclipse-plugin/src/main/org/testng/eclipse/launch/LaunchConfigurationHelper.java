@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -19,11 +20,16 @@ import org.eclipse.jdt.core.IJavaProject;
 
 
 public class LaunchConfigurationHelper {
-  public static IJavaProject getProject(final ILaunchConfiguration conf) throws CoreException {
+  public static IJavaProject getJavaProject(final ILaunchConfiguration conf) throws CoreException {
     String projectName = ConfigurationHelper.getProjectName(conf);
     return JDTUtil.getJavaProject(projectName);
   }
-  
+
+  public static IProject getProject(final ILaunchConfiguration conf) throws CoreException {
+    String projectName = ConfigurationHelper.getProjectName(conf);
+    return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+  }
+
   public static IResource[] findTestResources(final ILaunchConfiguration conf) throws CoreException {
     Set resources = new HashSet();
 

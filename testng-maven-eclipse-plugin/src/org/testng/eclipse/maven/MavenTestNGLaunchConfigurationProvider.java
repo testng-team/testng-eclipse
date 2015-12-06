@@ -22,7 +22,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -39,8 +38,7 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
 
   @Override
   public String getVmArguments(ILaunchConfiguration launchConf) throws CoreException {
-    IJavaProject javaProject = LaunchConfigurationHelper.getProject(launchConf);
-    IProject project = javaProject.getProject();
+    IProject project = LaunchConfigurationHelper.getProject(launchConf);
     if (PreferenceUtils.getBoolean(project, Activator.PREF_ARGLINE)
         || PreferenceUtils.getBoolean(project, Activator.PREF_SYSPROPERTIES)) {
       String vmArgs = getVMArgsFromPom(launchConf);
@@ -51,9 +49,8 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
 
   @Override
   public List<String> getEnvironment(ILaunchConfiguration launchConf) throws CoreException {
-    IJavaProject javaProject = LaunchConfigurationHelper.getProject(launchConf);
-    IProject project = javaProject.getProject();
-    if (!project.hasNature(IMavenConstants.NATURE_ID)) {
+    IProject project = LaunchConfigurationHelper.getProject(launchConf);
+    if (project == null || !project.hasNature(IMavenConstants.NATURE_ID)) {
       return null;
     }
 
@@ -81,9 +78,8 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
 
   @SuppressWarnings("restriction")
   private String getVMArgsFromPom(ILaunchConfiguration launchConf) throws CoreException {
-    IJavaProject javaProject = LaunchConfigurationHelper.getProject(launchConf);
-    IProject project = javaProject.getProject();
-    if (!project.hasNature(IMavenConstants.NATURE_ID)) {
+    IProject project = LaunchConfigurationHelper.getProject(launchConf);
+    if (project == null || !project.hasNature(IMavenConstants.NATURE_ID)) {
       return null;
     }
 
