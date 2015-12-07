@@ -160,18 +160,19 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
       return null;
     }
 
-    Xpp3Dom pluginConf = null;
-    List<Plugin> plugins;
+    // first, find from project plugins
+    List<Plugin> plugins = build.getPlugins();
+    Xpp3Dom pluginConf = findPluginConfiguration(plugins);
 
-    PluginManagement pluginMgnt = build.getPluginManagement();
-    if (pluginMgnt != null) {
-      plugins = pluginMgnt.getPlugins();
-      pluginConf = findPluginConfiguration(plugins);
-    }
+    // otherwise, find from project pluginManagement
     if (pluginConf == null) {
-      plugins = build.getPlugins();
-      pluginConf = findPluginConfiguration(plugins);
+      PluginManagement pluginMgnt = build.getPluginManagement();
+      if (pluginMgnt != null) {
+        plugins = pluginMgnt.getPlugins();
+        pluginConf = findPluginConfiguration(plugins);
+      }
     }
+
     return pluginConf;
   }
 
