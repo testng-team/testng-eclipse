@@ -155,7 +155,7 @@ public class TestNGLaunchConfigurationDelegate
 
     // Program & VM args
     ExecutionArguments execArgs = new ExecutionArguments(
-        getVMArguments(configuration), ""); //$NON-NLS-1$
+        ConfigurationHelper.getJvmArgs(configuration), ""); //$NON-NLS-1$
 
     VMRunnerConfiguration runConfig = createVMRunner(configuration, launch,
         jproject, port, mode);
@@ -352,18 +352,6 @@ public class TestNGLaunchConfigurationDelegate
       }
     }
     return classpathList.toArray(new String[] {});
-  }
-
-  @Override
-  public String getVMArguments(ILaunchConfiguration configuration)
-      throws CoreException {
-    StringBuilder vmArgs = new StringBuilder();
-    vmArgs.append(super.getVMArguments(configuration));
-
-    vmArgs.append(" ");
-    vmArgs.append(ConfigurationHelper.getJvmArgs(configuration));
-
-    return vmArgs.toString();
   }
 
   @Override
