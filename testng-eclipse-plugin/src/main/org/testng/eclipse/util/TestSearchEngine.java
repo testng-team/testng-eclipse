@@ -251,7 +251,26 @@ public class TestSearchEngine {
   
   private static boolean doIsTest(IType iType) {
     ITestContent testContent = TypeParser.parseType(iType);
-    return testContent.hasTestMethods();
+    if (testContent.hasTestMethods()) {
+      return true;
+    }
+
+    // Check if super-type contains tests.
+    IType[] superclasses;
+    try {
+      superclasses = iType.newSupertypeHierarchy(null).getAllSuperclasses(iType);
+    } catch (JavaModelException e) {
+      TestNGPlugin.log("Could not resolve supertype of "+iType.getFullyQualifiedName());
+      return false;
+    }
+
+    for (IType superclass : superclasses) {
+      ITestContent superContent = TypeParser.parseType(superclass);
+      if (superContent.hasTestMethods()) {
+        return true;
+      }
+    }
+    return false;
   }
   
   private static void doFindTests(Object[] elements,
