@@ -204,50 +204,54 @@ public class TestSearchEngine {
       return true;
     }
     
-    boolean result= false;
-    IType[] types = null;
+    boolean result;
     
     if(IJavaElement.METHOD == ije.getElementType()) {
-      IMethod iMethod = (IMethod) ije;
-      ITestContent content = TypeParser.parseType(iMethod.getDeclaringType());
-      if(content.hasTestMethods()) {
-        result= content.isTestMethod(iMethod);
-        if(result) {
-          s_isTestCache.put(ije, Boolean.TRUE);
-        }
-        return result;
-      }
-      
-      return false;
+      result = doIsTest((IMethod) ije);
     }
-    
-    if(IJavaElement.COMPILATION_UNIT == ije.getElementType()) {
-      try {
-        types = ((ICompilationUnit) ije).getAllTypes();
-      }
-      catch(JavaModelException jme) {
-        TestNGPlugin.log(jme);
-      }
+    else if(IJavaElement.COMPILATION_UNIT == ije.getElementType()) {
+      result = doIsTest((ICompilationUnit) ije);
     } 
     else if(IJavaElement.TYPE == ije.getElementType()) {
-      types = new IType[] {(IType) ije};
-    } 
+      result = doIsTest((IType) ije);
+    }
     else {
-      return false;
+      result = false;
     }
     
-    if(null != types) {
-      for(int i = 0; i < types.length; i++) {
-        ITestContent testContent = TypeParser.parseType(types[i]);
-        
-        if(testContent.hasTestMethods()) {
-          s_isTestCache.put(ije, Boolean.TRUE);
+    if(result) {
+      s_isTestCache.put(ije, Boolean.TRUE);
+    }
+
+    return result;
+  }
+  
+  private static boolean doIsTest(IMethod iMethod) {
+    ITestContent content = TypeParser.parseType(iMethod.getDeclaringType());
+    if(content.hasTestMethods()) {
+      return content.isTestMethod(iMethod);
+    }
+    return false;
+  }
+  
+  private static boolean doIsTest(ICompilationUnit iCompilationUnit) {
+    try {
+      IType[] types = iCompilationUnit.getAllTypes();
+      for (IType type : types) {
+        if (doIsTest(type)) {
           return true;
         }
       }
     }
-    
+    catch(JavaModelException jme) {
+      TestNGPlugin.log(jme);
+    }
     return false;
+  }
+  
+  private static boolean doIsTest(IType iType) {
+    ITestContent testContent = TypeParser.parseType(iType);
+    return testContent.hasTestMethods();
   }
   
   private static void doFindTests(Object[] elements,
