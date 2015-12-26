@@ -10,6 +10,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.Action;
 import org.testng.eclipse.TestNGPlugin;
@@ -58,8 +59,10 @@ public class QuickRunAction extends Action {
   
   @Override
   public void run() {
+    IType itype= null;
     IMethod imethod= null;  
     try {
+      itype = m_javaProject.findType(m_runInfo.getClassName());
       imethod= (IMethod) JDTUtil.findElement(m_javaProject, m_runInfo); 
     }
     catch(JavaModelException jmex) {
@@ -84,7 +87,7 @@ public class QuickRunAction extends Action {
       TestNGPlugin.log(e);
     }
     LaunchUtil.launchMethodConfiguration(m_javaProject, 
-        imethod, 
+        itype, imethod, 
         m_runMode, m_runInfo);    
   }
   

@@ -284,19 +284,30 @@ public class LaunchUtil {
           IMethod iMethod,
           String runMode,
           RunInfo runInfo) {
+    launchMethodConfiguration(javaProject, iMethod.getDeclaringType(), iMethod, runMode, runInfo);
+  }
+  
+  public static void launchMethodConfiguration(IJavaProject javaProject,
+          IType iType,
+          IMethod iMethod,
+          String runMode,
+          RunInfo runInfo) {
 
-    Set<IMethod> methods = Sets.newHashSet(iMethod);
+    Set<TypeAndMethod> typeAndMethods = Sets.newHashSet(new TypeAndMethod(iType, iMethod));
 
     try {
       if (methodHasDependencies(iMethod)) {
         DependencyInfo groupInfo = DependencyInfo.createDependencyInfo(javaProject);
-        methods.addAll(findMethodTransitiveClosure(iMethod, groupInfo));
+        Set<IMethod> transitiveMethods = findMethodTransitiveClosure(iMethod, groupInfo);
+        for (IMethod transitiveMethod : transitiveMethods) {
+          typeAndMethods.add(new TypeAndMethod(iType, transitiveMethod));
+        }
       }
     } catch (JavaModelException e) {
       TestNGPlugin.log(e);
     }
 
-    launchMethodBasedConfiguration(javaProject, methods.toArray(new IMethod[methods.size()]),
+    launchMethodBasedConfiguration(javaProject, typeAndMethods.toArray(new TypeAndMethod[typeAndMethods.size()]),
         runMode, runInfo);
   }
  
@@ -316,19 +327,20 @@ public class LaunchUtil {
 
 
   private static void launchMethodBasedConfiguration(IJavaProject ijp,
-		  IMethod[] methods, String runMode, RunInfo runInfo) {
+          TypeAndMethod[] typeAndMethods, String runMode, RunInfo runInfo) {
     List<String> methodNames = Lists.newArrayList();
+    IMethod[] methods = new IMethod[typeAndMethods.length];
     Multimap<String, String> classMethods = ArrayListMultimap.create();
-    for (IMethod method : methods) {
+    Set<IType> typesSet = new HashSet<IType>();
+    for (int i = 0; i < typeAndMethods.length; i++) {
+      IMethod method = typeAndMethods[i].getMethod();
+      IType type = typeAndMethods[i].getType();
+      methods[i] = method;
       methodNames.add(method.getElementName());
-      classMethods.put(method.getDeclaringType().getFullyQualifiedName(),
-          method.getElementName());
+      classMethods.put(type.getFullyQualifiedName(), method.getElementName());
+      typesSet.add(type);
     }
 
-    final Set<IType> typesSet= new HashSet<IType>();
-    for (IMethod method : methods) {
-      typesSet.add(method.getDeclaringType());
-    }
     final IType[] types= typesSet.toArray(new IType[typesSet.size()]);
 
     List<String> typeNames = new ArrayList<String>();
