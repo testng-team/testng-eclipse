@@ -36,6 +36,7 @@ import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.buildpath.BuildPathSupport;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
+import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.Protocols;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.util.LaunchUtil;
 import org.testng.eclipse.util.ListenerContributorUtil;
@@ -209,14 +210,23 @@ public class TestNGLaunchConfigurationDelegate
 
     // Use -serPort (serialized protocol) or -port (string protocol) based on
     // a system property
-    if (LaunchUtil.useStringProtocol(configuration)) {
+    Protocols protocol = ConfigurationHelper.getProtocol(configuration);
+    switch (protocol) {
+    case STRING:
       p("Using the string protocol");
       argv.add(CommandLineArgs.PORT);
-    } else {
-      p("Using the serialized protocol");
+      break;
+    case OBJECT:
+      p("Using the object serialization protocol");
+    case JSON:
+      p("Using the json serialization protocol");
       argv.add(RemoteArgs.PORT);
+      break;
     }
     argv.add(Integer.toString(port));
+
+    argv.add(RemoteArgs.PROTOCOL);
+    argv.add(protocol.toString());
 
     IProject project = jproject.getProject();
 

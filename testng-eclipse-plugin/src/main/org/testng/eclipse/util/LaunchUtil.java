@@ -423,11 +423,6 @@ public class LaunchUtil {
         types.toArray(new IType[types.size()]), mode);
   }
 
-  public static boolean useStringProtocol(ILaunchConfiguration configuration) {
-    Protocols p = ConfigurationHelper.getProtocol(configuration);
-    return p == Protocols.STRING;
-  }
-
   private static void launchTypeBasedConfiguration(IJavaProject javaProject, String confName,
       IType[] types, String mode) {
     
