@@ -89,6 +89,7 @@ import org.testng.ITestResult;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.ui.summary.SummaryTab;
+import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.util.CustomSuite;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.LaunchUtil;
@@ -99,6 +100,7 @@ import org.testng.remote.strprotocol.GenericMessage;
 import org.testng.remote.strprotocol.IMessageSender;
 import org.testng.remote.strprotocol.IRemoteSuiteListener;
 import org.testng.remote.strprotocol.IRemoteTestListener;
+import org.testng.remote.strprotocol.JsonMessageSender;
 import org.testng.remote.strprotocol.SerializedMessageSender;
 import org.testng.remote.strprotocol.StringMessageSender;
 import org.testng.remote.strprotocol.SuiteMessage;
@@ -406,9 +408,21 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 //      stopTest();
 //    }
     fTestRunnerClient = new EclipseTestRunnerClient();
-    final IMessageSender messageMarshaller = LaunchUtil.useStringProtocol(launch.getLaunchConfiguration())
-        ? new StringMessageSender("localhost", port)
-        : new SerializedMessageSender("localhost", port);
+    final IMessageSender messageMarshaller;
+    switch (ConfigurationHelper.getProtocol(launch.getLaunchConfiguration())) {
+    case STRING:
+      messageMarshaller = new StringMessageSender("localhost", port);
+      break;
+    case OBJECT:
+      messageMarshaller = new SerializedMessageSender("localhost", port);
+      break;
+    case JSON:
+      messageMarshaller = new JsonMessageSender("localhost", port);
+      break;
+    default:
+        throw new IllegalStateException("unrecoginzed protocol: " 
+                + ConfigurationHelper.getProtocol(launch.getLaunchConfiguration()));
+    }
 
         String jobName = ResourceUtil.getString("TestRunnerViewPart.message.startTestRunListening");
         final Job testRunListeningJob = new Job(jobName) {

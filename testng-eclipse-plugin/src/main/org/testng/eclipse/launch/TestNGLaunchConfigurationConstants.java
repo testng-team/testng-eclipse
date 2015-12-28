@@ -124,14 +124,15 @@ public abstract class TestNGLaunchConfigurationConstants {
   }
 
   public static final String PARAMS = make("PARAMETERS");
-  
-  public static final Protocols[] SERIALIZATION_PROTOCOLS = {Protocols.OBJECT, Protocols.STRING};
+
+  public static final Protocols[] SERIALIZATION_PROTOCOLS = {Protocols.JSON, Protocols.OBJECT, Protocols.STRING};
   public static final Protocols DEFAULT_SERIALIZATION_PROTOCOL = SERIALIZATION_PROTOCOLS[0];
 
   public static enum Protocols {
     OBJECT("object"),
-    STRING("string");
-    
+    STRING("string"),
+    JSON("json");
+
     private final String text;
 
     /**
@@ -140,13 +141,15 @@ public abstract class TestNGLaunchConfigurationConstants {
     private Protocols(final String text) {
         this.text = text;
     }
-    
+
     public static Protocols get(String text) {
       switch (text) {
       case "object":
         return OBJECT;
       case "string":
         return STRING;
+      case "json":
+        return JSON;
       default:
         throw new IllegalArgumentException("Unrecognized protocol: " + text);
       }

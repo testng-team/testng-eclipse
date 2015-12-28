@@ -36,8 +36,8 @@ import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.buildpath.BuildPathSupport;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
+import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.Protocols;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
-import org.testng.eclipse.util.LaunchUtil;
 import org.testng.eclipse.util.ListenerContributorUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.ResourceUtil;
@@ -47,6 +47,8 @@ import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
 
 import com.google.common.collect.Lists;
+
+import static org.testng.eclipse.buildpath.BuildPathSupport.getBundleFile;
 
 public class TestNGLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
@@ -176,8 +178,7 @@ public class TestNGLaunchConfigurationDelegate
   @Override
   public String getMainTypeName(ILaunchConfiguration configuration)
       throws CoreException {
-    return TestNGPlugin.isDebug() ? EmptyRemoteTestNG.class.getName()
-        : RemoteTestNG.class.getName();
+    return "org.testng.remote.RemoteTestNG";
   }
 
   /**
@@ -209,14 +210,23 @@ public class TestNGLaunchConfigurationDelegate
 
     // Use -serPort (serialized protocol) or -port (string protocol) based on
     // a system property
-    if (LaunchUtil.useStringProtocol(configuration)) {
+    Protocols protocol = ConfigurationHelper.getProtocol(configuration);
+    switch (protocol) {
+    case STRING:
       p("Using the string protocol");
       argv.add(CommandLineArgs.PORT);
-    } else {
-      p("Using the serialized protocol");
+      break;
+    case OBJECT:
+      p("Using the object serialization protocol");
+    case JSON:
+      p("Using the json serialization protocol");
       argv.add(RemoteArgs.PORT);
+      break;
     }
     argv.add(Integer.toString(port));
+
+    argv.add(RemoteArgs.PROTOCOL);
+    argv.add(protocol.toString());
 
     IProject project = jproject.getProject();
 
@@ -338,19 +348,24 @@ public class TestNGLaunchConfigurationDelegate
     }
 
     Version testngVer = getRuntimeTestNGVersion(classpathList);
-    if (testngVer != null) {
-      if (compareVersion(testngVer, minTestNGVer) < 0) {
-        throw new CoreException(TestNGPlugin.createError(ResourceUtil.getString(
-            "TestNGLaunchConfigurationDelegate.error.testngVersionUnsupported")));
-      }
-      if (compareVersion(testngVer, new Version("6.9.0")) < 0) {
-        // add remote testng jar file at the very begining of classpath
-        // to make sure this is loaded in prior of the user's testng.jar,
-        // this applies for testng version prior to 6.9 only,
-        // since testng-remote does not compatible with 6.9.x yet
-        classpathList.add(0, BuildPathSupport.getRemoteTestNGLibPath());
-      }
+    if (testngVer == null) {
+      throw new CoreException(TestNGPlugin.createError("Can't recognize runtime TestNG version"));
     }
+    if (compareVersion(testngVer, minTestNGVer) < 0) {
+      throw new CoreException(TestNGPlugin.createError(ResourceUtil.getString(
+          "TestNGLaunchConfigurationDelegate.error.testngVersionUnsupported")));
+    }
+    if (compareVersion(testngVer, new Version("6.9.7")) < 0) {
+      classpathList.add(0, getBundleFile("lib/testng-remote6_5.jar").toOSString());
+    }
+    else if (compareVersion(testngVer, new Version("6.9.10")) < 0) {
+      classpathList.add(0, getBundleFile("lib/testng-remote6_9_7.jar").toOSString());
+    }
+    else {
+      classpathList.add(0, getBundleFile("lib/testng-remote6_9_10.jar").toOSString());
+    }
+    classpathList.add(0, getBundleFile("lib/testng-remote-common.jar").toOSString());
+
     return classpathList.toArray(new String[] {});
   }
 
