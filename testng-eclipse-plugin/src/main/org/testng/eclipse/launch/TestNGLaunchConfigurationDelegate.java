@@ -355,8 +355,11 @@ public class TestNGLaunchConfigurationDelegate
       throw new CoreException(TestNGPlugin.createError(ResourceUtil.getString(
           "TestNGLaunchConfigurationDelegate.error.testngVersionUnsupported")));
     }
-    if (compareVersion(testngVer, new Version("6.9.7")) < 0) {
+    if (compareVersion(testngVer, new Version("6.8.1")) < 0) {
       classpathList.add(0, getBundleFile("lib/testng-remote6_5.jar").toOSString());
+    }
+    else if (compareVersion(testngVer, new Version("6.9.7")) < 0) {
+      classpathList.add(0, getBundleFile("lib/testng-remote6_8.jar").toOSString());
     }
     else if (compareVersion(testngVer, new Version("6.9.10")) < 0) {
       classpathList.add(0, getBundleFile("lib/testng-remote6_9_7.jar").toOSString());
