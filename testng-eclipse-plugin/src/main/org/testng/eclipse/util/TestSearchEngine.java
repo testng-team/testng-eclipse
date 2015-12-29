@@ -13,6 +13,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -204,49 +205,76 @@ public class TestSearchEngine {
       return true;
     }
     
-    boolean result= false;
-    IType[] types = null;
+    boolean result;
     
-    if(IJavaElement.METHOD == ije.getElementType()) {
-      IMethod iMethod = (IMethod) ije;
-      ITestContent content = TypeParser.parseType(iMethod.getDeclaringType());
-      if(content.hasTestMethods()) {
-        result= content.isTestMethod(iMethod);
-        if(result) {
-          s_isTestCache.put(ije, Boolean.TRUE);
-        }
-        return result;
+    try {
+      if(IJavaElement.METHOD == ije.getElementType()) {
+        result = doIsTest((IMethod) ije);
       }
-      
+      else if(IJavaElement.COMPILATION_UNIT == ije.getElementType()) {
+        result = doIsTest((ICompilationUnit) ije);
+      } 
+      else if(IJavaElement.TYPE == ije.getElementType()) {
+        result = doIsTest((IType) ije);
+      }
+      else {
+        result = false;
+      }
+    }
+    catch(JavaModelException jme) {
+      TestNGPlugin.log(jme);
       return false;
     }
     
-    if(IJavaElement.COMPILATION_UNIT == ije.getElementType()) {
-      try {
-        types = ((ICompilationUnit) ije).getAllTypes();
+    if(result) {
+      s_isTestCache.put(ije, Boolean.TRUE);
+    }
+
+    return result;
+  }
+  
+  private static boolean doIsTest(IMethod iMethod) {
+    ITestContent content = TypeParser.parseType(iMethod.getDeclaringType());
+    if(content.hasTestMethods()) {
+      return content.isTestMethod(iMethod);
+    }
+    return false;
+  }
+  
+  private static boolean doIsTest(ICompilationUnit iCompilationUnit) throws JavaModelException {
+    IType[] types = iCompilationUnit.getAllTypes();
+    for (IType type : types) {
+      if (doIsTest(type)) {
+        return true;
       }
-      catch(JavaModelException jme) {
-        TestNGPlugin.log(jme);
-      }
-    } 
-    else if(IJavaElement.TYPE == ije.getElementType()) {
-      types = new IType[] {(IType) ije};
-    } 
-    else {
+    }
+    return false;
+  }
+  
+  private static boolean doIsTest(IType iType) throws JavaModelException {
+    if (Flags.isAbstract(iType.getFlags())) {
       return false;
     }
-    
-    if(null != types) {
-      for(int i = 0; i < types.length; i++) {
-        ITestContent testContent = TypeParser.parseType(types[i]);
-        
-        if(testContent.hasTestMethods()) {
-          s_isTestCache.put(ije, Boolean.TRUE);
-          return true;
-        }
+    ITestContent testContent = TypeParser.parseType(iType);
+    if (testContent.hasTestMethods()) {
+      return true;
+    }
+
+    // Check if super-type contains tests.
+    IType[] superclasses;
+    try {
+      superclasses = iType.newSupertypeHierarchy(null).getAllSuperclasses(iType);
+    } catch (JavaModelException e) {
+      TestNGPlugin.log("Could not resolve supertype of "+iType.getFullyQualifiedName());
+      return false;
+    }
+
+    for (IType superclass : superclasses) {
+      ITestContent superContent = TypeParser.parseType(superclass);
+      if (superContent.hasTestMethods()) {
+        return true;
       }
     }
-    
     return false;
   }
   
