@@ -13,6 +13,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -206,17 +207,23 @@ public class TestSearchEngine {
     
     boolean result;
     
-    if(IJavaElement.METHOD == ije.getElementType()) {
-      result = doIsTest((IMethod) ije);
+    try {
+      if(IJavaElement.METHOD == ije.getElementType()) {
+        result = doIsTest((IMethod) ije);
+      }
+      else if(IJavaElement.COMPILATION_UNIT == ije.getElementType()) {
+        result = doIsTest((ICompilationUnit) ije);
+      } 
+      else if(IJavaElement.TYPE == ije.getElementType()) {
+        result = doIsTest((IType) ije);
+      }
+      else {
+        result = false;
+      }
     }
-    else if(IJavaElement.COMPILATION_UNIT == ije.getElementType()) {
-      result = doIsTest((ICompilationUnit) ije);
-    } 
-    else if(IJavaElement.TYPE == ije.getElementType()) {
-      result = doIsTest((IType) ije);
-    }
-    else {
-      result = false;
+    catch(JavaModelException jme) {
+      TestNGPlugin.log(jme);
+      return false;
     }
     
     if(result) {
@@ -234,22 +241,20 @@ public class TestSearchEngine {
     return false;
   }
   
-  private static boolean doIsTest(ICompilationUnit iCompilationUnit) {
-    try {
-      IType[] types = iCompilationUnit.getAllTypes();
-      for (IType type : types) {
-        if (doIsTest(type)) {
-          return true;
-        }
+  private static boolean doIsTest(ICompilationUnit iCompilationUnit) throws JavaModelException {
+    IType[] types = iCompilationUnit.getAllTypes();
+    for (IType type : types) {
+      if (doIsTest(type)) {
+        return true;
       }
-    }
-    catch(JavaModelException jme) {
-      TestNGPlugin.log(jme);
     }
     return false;
   }
   
-  private static boolean doIsTest(IType iType) {
+  private static boolean doIsTest(IType iType) throws JavaModelException {
+    if (Flags.isAbstract(iType.getFlags())) {
+      return false;
+    }
     ITestContent testContent = TypeParser.parseType(iType);
     if (testContent.hasTestMethods()) {
       return true;
