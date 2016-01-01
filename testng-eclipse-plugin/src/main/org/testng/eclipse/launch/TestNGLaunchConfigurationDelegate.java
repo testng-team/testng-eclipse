@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
@@ -49,6 +50,7 @@ import org.testng.xml.LaunchSuite;
 import com.google.common.collect.Lists;
 
 import static org.testng.eclipse.buildpath.BuildPathSupport.getBundleFile;
+import static org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.RUNTIME_TESTNG_VERSION;
 
 public class TestNGLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
@@ -228,6 +230,13 @@ public class TestNGLaunchConfigurationDelegate
     argv.add(RemoteArgs.PROTOCOL);
     argv.add(protocol.toString());
 
+    argv.add(RemoteArgs.VERSION);
+    String testngVer = configuration.getAttribute(RUNTIME_TESTNG_VERSION, (String) null);
+    if (testngVer == null) {
+      throw new CoreException(TestNGPlugin.createError("Can't recognize runtime testng version"));
+    }
+    argv.add(testngVer);
+
     IProject project = jproject.getProject();
 
     // if (!isJDK15(javaVersion)) {
@@ -355,19 +364,12 @@ public class TestNGLaunchConfigurationDelegate
       throw new CoreException(TestNGPlugin.createError(ResourceUtil.getString(
           "TestNGLaunchConfigurationDelegate.error.testngVersionUnsupported")));
     }
-    if (compareVersion(testngVer, new Version("6.8.1")) < 0) {
-      classpathList.add(0, getBundleFile("lib/testng-remote6_5.jar").toOSString());
-    }
-    else if (compareVersion(testngVer, new Version("6.9.7")) < 0) {
-      classpathList.add(0, getBundleFile("lib/testng-remote6_8.jar").toOSString());
-    }
-    else if (compareVersion(testngVer, new Version("6.9.10")) < 0) {
-      classpathList.add(0, getBundleFile("lib/testng-remote6_9_7.jar").toOSString());
-    }
-    else {
-      classpathList.add(0, getBundleFile("lib/testng-remote6_9_10.jar").toOSString());
-    }
-    classpathList.add(0, getBundleFile("lib/testng-remote-common.jar").toOSString());
+
+    classpathList.add(0, getBundleFile("lib/testng-remote.jar").toOSString());
+
+    ILaunchConfigurationWorkingCopy wc = configuration.getWorkingCopy();
+    wc.setAttribute(RUNTIME_TESTNG_VERSION, testngVer.toString());
+    wc.doSave();
 
     return classpathList.toArray(new String[] {});
   }
@@ -402,7 +404,7 @@ public class TestNGLaunchConfigurationDelegate
     for (String cp : classpath) {
       File f = new File(cp);
       // only check jar file name starts with 'testng'
-      if (f.getName().startsWith("testng")) {
+      if (f.isFile() && f.getName().startsWith("testng")) {
         Version ver = null;
         try (JarFile jarFile = new JarFile(f)) {
           Manifest mf = jarFile.getManifest();
@@ -411,10 +413,18 @@ public class TestNGLaunchConfigurationDelegate
           if ("org.testng".equals(sn)) {
             ver = new Version(mainAttrs.getValue("Bundle-Version"));
           }
+
           if (ver == null) {
             String mc = mainAttrs.getValue("Main-Class");
             if ("org.testng.TestNG".equals(mc)) {
               ver = new Version(mainAttrs.getValue("Implementation-Version"));
+            }
+          }
+
+          if (ver == null) {
+            String st = mainAttrs.getValue("Specification-Title");
+            if ("testng".equals(st)) {
+              ver = new Version(mainAttrs.getValue("Specification-Version"));
             }
           }
         } catch (Exception e) {
