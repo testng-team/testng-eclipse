@@ -56,12 +56,12 @@ public class BaseVisitor extends ASTVisitor implements ITestContent {
   protected void addGroup(String groupNames) {
     groupNames = Utils.stripDoubleQuotes(groupNames);
     final String[] names = Utils.split(groupNames, ",");
-    for(int i = 0; i < names.length; i++) {
+    for(String name : names) {
 //      ppp("    FOUND GROUP:" + names[i]);
-      m_groups.add(names[i]);
+      m_groups.add(name);
     }
   }
-  
+
   protected void addTestMethod(MethodDeclaration md, String annotationType) {
     if(md.isConstructor()) {
       return; // constructors cannot be marked as test methods

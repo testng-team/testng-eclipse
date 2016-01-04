@@ -8,10 +8,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.testng.eclipse.ui.util.TypeParser;
@@ -26,8 +26,8 @@ public class Filters {
   public static final ViewerFilter SOURCE_DIRECTORY_FILTER = new SourceDirectoryFilter();
 
   public static final ViewerFilter createProjectContentFilter(IJavaProject ijp) {
-    IProject[] allProjects = JavaPlugin.getWorkspace().getRoot().getProjects();
-    List rejectedElements = new ArrayList(allProjects.length);
+    IProject[] allProjects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+    List<IProject> rejectedElements = new ArrayList<>(allProjects.length);
     IProject iproject = ijp.getProject();
     
     for (int i= 0; i < allProjects.length; i++) {
@@ -40,9 +40,9 @@ public class Filters {
   }
   
   private static class ProjectContentFilter extends ViewerFilter {
-    private List m_rejectedEntries;
+    private List<IProject> m_rejectedEntries;
     
-    private ProjectContentFilter(final List rejectedEntries) {
+    private ProjectContentFilter(final List<IProject> rejectedEntries) {
       m_rejectedEntries = rejectedEntries;
     }
     
@@ -52,12 +52,12 @@ public class Filters {
         return true;
       }
       
-      for(int i = 0; i < m_rejectedEntries.size(); i++) {
-        if(element.equals(m_rejectedEntries.get(i))) {
+      for (IProject prj : m_rejectedEntries) {
+        if(element.equals(prj)) {
           return false;
         }
       }
-      
+
       return true;
     }
   }
@@ -96,18 +96,15 @@ public class Filters {
     try {
       IResource[] children = folder.members();
       
-      for(int i = 0; i < children.length; i++) {
-        if(children[i] instanceof IFile) {
-          if(isTest((IFile) children[i])) {
+      for(IResource res : children) {
+        if(res instanceof IFile) {
+          if(isTest((IFile) res)) {
             return true;
           }
-        }
-      }
-      
-      for(int i = 0; i < children.length; i++) {
-        if(children[i] instanceof IFolder) {
-          if(hasTests((IContainer) children[i])) {
-            return true;
+          else if (res instanceof IFolder) {
+            if(hasTests((IContainer) res)) {
+              return true;
+            }
           }
         }
       }
@@ -132,17 +129,14 @@ public class Filters {
     try {
       IResource[] children = folder.members();
       
-      for(int i = 0; i < children.length; i++) {
-        if(children[i] instanceof IFile) {
-          if(isSource((IFile) children[i])) {
+      for(IResource res : children) {
+        if(res instanceof IFile) {
+          if(isSource((IFile) res)) {
             return true;
           }
         }
-      }
-      
-      for(int i = 0; i < children.length; i++) {
-        if(children[i] instanceof IFolder) {
-          if(hasSources((IContainer) children[i])) {
+        else if (res instanceof IFolder) {
+          if(hasSources((IContainer) res)) {
             return true;
           }
         }
@@ -214,8 +208,4 @@ public class Filters {
   
 }
 
-
 /////
-
-
-

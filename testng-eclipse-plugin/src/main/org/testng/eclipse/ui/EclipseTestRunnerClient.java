@@ -47,8 +47,7 @@ public class EclipseTestRunnerClient extends AbstractRemoteTestRunnerClient {
   
   @Override
   protected void notifyStart(final GenericMessage genericMessage) {
-    for(int i = 0; i < m_suiteListeners.length; i++) {
-      final IRemoteSuiteListener listener = m_suiteListeners[i];
+    for(final IRemoteSuiteListener listener : m_suiteListeners) {
       SafeRunner.run(new ListenerSafeRunnable() {
         public void run() {
           listener.onInitialization(genericMessage);
@@ -59,8 +58,7 @@ public class EclipseTestRunnerClient extends AbstractRemoteTestRunnerClient {
 
   @Override
   protected void notifySuiteEvents(final SuiteMessage suiteMessage) {
-    for(int i = 0; i < m_suiteListeners.length; i++) {
-      final IRemoteSuiteListener listener = m_suiteListeners[i];
+    for(final IRemoteSuiteListener listener : m_suiteListeners) {
       SafeRunner.run(new ListenerSafeRunnable() {
         public void run() {
           if(suiteMessage.isMessageOnStart()) {
@@ -76,8 +74,7 @@ public class EclipseTestRunnerClient extends AbstractRemoteTestRunnerClient {
 
   @Override
   protected void notifyTestEvents(final TestMessage testMessage) {
-    for(int i = 0; i < m_testListeners.length; i++) {
-      final IRemoteTestListener listener = m_testListeners[i];
+    for(final IRemoteTestListener listener : m_testListeners) {
       SafeRunner.run(new ListenerSafeRunnable() {
         public void run() {
           if(testMessage.isMessageOnStart()) {
@@ -93,8 +90,7 @@ public class EclipseTestRunnerClient extends AbstractRemoteTestRunnerClient {
 
   @Override
   protected void notifyResultEvents(final TestResultMessage testResultMessage) {
-    for(int i = 0; i < m_testListeners.length; i++) {
-      final IRemoteTestListener listener = m_testListeners[i];
+    for(final IRemoteTestListener listener : m_testListeners) {
       SafeRunner.run(new ListenerSafeRunnable() {
         public void run() {
           switch(testResultMessage.getResult()) {

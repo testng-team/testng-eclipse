@@ -64,7 +64,7 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
    * so that we only attach a TestRunner once to a launch.
    * Once a test runner is connected it is removed from the set.
    */
-  private AbstractSet n_trackedLaunches = new HashSet(20);
+  private AbstractSet<ILaunch> n_trackedLaunches = new HashSet<>(20);
 
   private BundleContext m_context;
   private PreferenceStoreUtil m_preferenceUtil;
@@ -329,11 +329,7 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
         return bundles[0];
     return null;
   }
-  
-  public static boolean isEmtpy(String string) {
-    return null == string || "".equals(string.trim());
-  } 
-  
+
   /**
    * Returns a String that can be used as an identifying key for 
    * a system property set when tests fail. The value of the property
@@ -380,4 +376,5 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
 
     return result;
   }
+
 }

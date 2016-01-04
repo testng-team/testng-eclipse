@@ -317,7 +317,7 @@ abstract public class CustomSuite extends LaunchSuite {
    * An utility method that generates the groups element using the passed in 
    * collection of names (order of group names ia not important).
    */
-  protected void generateDefaultGroupsElement(XMLStringBuffer suiteBuffer, Collection /*<String>*/ groupNames) {
+  protected void generateDefaultGroupsElement(XMLStringBuffer suiteBuffer, Collection<String> groupNames) {
     if((null == groupNames) || groupNames.isEmpty()) {
       return;
     }
@@ -325,8 +325,7 @@ abstract public class CustomSuite extends LaunchSuite {
     suiteBuffer.push("groups");
     suiteBuffer.push("run");
 
-    for(Iterator it= groupNames.iterator(); it.hasNext();) {
-      String groupName= (String) it.next();
+    for(String groupName : groupNames) {
       Properties includeAttrs= new Properties();
       includeAttrs.setProperty("name", groupName);
       suiteBuffer.addEmptyElement("include", includeAttrs);
