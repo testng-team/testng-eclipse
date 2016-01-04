@@ -300,9 +300,9 @@ public class JDTUtil {
       paramTypes= new String[0];
     }
     List<String> params= new ArrayList<String>(paramTypes.length);
-    for(int i= 0; i < paramTypes.length; i++) {
-      int idx= paramTypes[i].lastIndexOf('.');
-      String typeName= idx == -1 ? paramTypes[i] : paramTypes[i].substring(idx + 1);
+    for(String paramType : paramTypes) {
+      int idx= paramType.lastIndexOf('.');
+      String typeName= idx == -1 ? paramType : paramType.substring(idx + 1);
       params.add(Signature.createTypeSignature(typeName, false));
     }
     IMethod method= findMethodInTypeHierarchy(type, methodName,
@@ -364,8 +364,8 @@ public class JDTUtil {
 
     ITypeHierarchy typeHierarchy = type.newSupertypeHierarchy(null);
     IType[] types = typeHierarchy.getAllSuperclasses(type);
-    for(int i = 0; i < types.length; i++) {
-      method = types[i].getMethod(methodName, paramTypes);
+    for(IType t : types) {
+      method = t.getMethod(methodName, paramTypes);
       if((method != null) && method.exists()) {
         return method;
       }
@@ -378,24 +378,24 @@ public class JDTUtil {
       String[] paramTypes) throws JavaModelException {
     List<IMethod> fuzzyResults= new ArrayList<IMethod>();
     IMethod[] methods = type.getMethods();
-    for(int i = 0; i < methods.length; i++) {
-      if(methodName.equals(methods[i].getElementName()) && methods[i].exists()) {
-        if(methods[i].getNumberOfParameters() == paramTypes.length) {
-          return methods[i];
+    for(IMethod m : methods) {
+      if(methodName.equals(m.getElementName()) && m.exists()) {
+        if(m.getNumberOfParameters() == paramTypes.length) {
+          return m;
         }
         else {
-          fuzzyResults.add(methods[i]);
+          fuzzyResults.add(m);
         }
       }
     }
 
     ITypeHierarchy typeHierarchy = type.newSupertypeHierarchy(null);
     IType[] types = typeHierarchy.getAllSuperclasses(type);
-    for(int i = 0; i < types.length; i++) {
-      methods = types[i].getMethods();
-      for(int j = 0; j < methods.length; j++) {
-        if(methodName.equals(methods[j].getElementName()) && methods[j].exists()) {
-          return methods[j];
+    for(IType t : types) {
+      methods = t.getMethods();
+      for(IMethod m : methods) {
+        if(methodName.equals(m.getElementName()) && m.exists()) {
+          return m;
         }
       }
     }
@@ -449,8 +449,7 @@ public class JDTUtil {
     List<String> dependsOnMethods = dv.getDependsOnMethods();
     
     if(!dependsOnMethods.isEmpty()) {
-      for(int i= 0; i < dependsOnMethods.size(); i++) {
-        String methodName= dependsOnMethods.get(i);
+      for(String methodName : dependsOnMethods) {
         if(!parsedMethods.contains(methodName)) {
           IMethod meth= solveMethod(methodDef.getMethod().getDeclaringType(), methodName);
           if(null != meth) {
@@ -488,20 +487,20 @@ public class JDTUtil {
     try {
       IMethod[] typemethods= type.getMethods();
       
-      for(int i=0; i < typemethods.length; i++) {
-        if(methodName.equals(typemethods[i].getElementName())) {
-          return typemethods[i];
+      for(IMethod m : typemethods) {
+        if(methodName.equals(m.getElementName())) {
+          return m;
         }
       }
       
       ITypeHierarchy typeHierarchy= type.newSupertypeHierarchy(null);
       IType[] superTypes= typeHierarchy.getAllSuperclasses(type);
-      for(int i= 0; i < superTypes.length; i++) {
-        IMethod[] methods= superTypes[i].getMethods();
+      for(IType t : superTypes) {
+        IMethod[] methods= t.getMethods();
         
-        for(int j=0; j < methods.length; j++) {
-          if(methodName.equals(methods[j].getElementName())) {
-            return methods[j];
+        for(IMethod m : methods) {
+          if(methodName.equals(m.getElementName())) {
+            return m;
           }
         }
       }

@@ -31,7 +31,7 @@ public class LaunchConfigurationHelper {
   }
 
   public static IResource[] findTestResources(final ILaunchConfiguration conf) throws CoreException {
-    Set resources = new HashSet();
+    Set<IResource> resources = new HashSet<>();
 
     resources.addAll(Arrays.asList(findResources(conf, 
         TestNGLaunchConfigurationConstants.DIRECTORY_TEST_LIST)));
@@ -47,19 +47,18 @@ public class LaunchConfigurationHelper {
   
   public static IResource[] findResources(final ILaunchConfiguration conf, 
                                    final String key) throws CoreException {
-    List resources = new ArrayList();
-    List containerPaths = conf.getAttribute(key, Collections.EMPTY_LIST);
+    List<IResource> resources = new ArrayList<>();
+    List<String> containerPaths = conf.getAttribute(key, Collections.<String> emptyList());
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     
-    for(int i = 0; i < containerPaths.size(); i++) {
-      String resPath = (String) containerPaths.get(i);
+    for(String resPath : containerPaths) {
       IResource res = root.findMember(resPath);
-      
+
       if(null != res) {
         resources.add(res);
       }
     }
-    
+
     return (IResource[]) resources.toArray(new IResource[resources.size()]);
   }
 }

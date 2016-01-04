@@ -7,9 +7,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -27,7 +27,7 @@ public class BuildPathSupport {
     }
     URL local;
     try {
-      local = getLocalURL(bundle.getEntry("/")); //$NON-NLS-1$
+      local = FileLocator.toFileURL(bundle.getEntry("/")); //$NON-NLS-1$
     }
     catch (IOException e) {
       return null;
@@ -35,11 +35,6 @@ public class BuildPathSupport {
     String fullPath = new File(local.getPath()).getAbsolutePath();
 
     return Path.fromOSString(fullPath);
-  }
-
-  private static URL getLocalURL(URL url) throws IOException {
-    // 3.2 only: FileLocator.toFileURL(url);
-    return Platform.asLocalURL(url);
   }
 
   public static IClasspathEntry getTestNGClasspathEntry() {
@@ -75,8 +70,8 @@ public class BuildPathSupport {
 
   public static boolean projectContainsClasspathEntry(IJavaProject project, IClasspathEntry entry) throws JavaModelException {
     IClasspathEntry[] oldEntries = project.getRawClasspath();
-    for (int i = 0; i < oldEntries.length; i++) {
-      if (oldEntries[i].equals(entry)) {
+    for (IClasspathEntry oldEntry : oldEntries) {
+      if (oldEntry.equals(entry)) {
         return true;
       }
     }

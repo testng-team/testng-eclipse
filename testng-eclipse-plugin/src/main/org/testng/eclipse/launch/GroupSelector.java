@@ -100,8 +100,8 @@ public class GroupSelector extends MultiSelector {
     List<String> groupClassNames = ConfigurationHelper.getGroupClasses(configuration);
     groupNames = ConfigurationHelper.getGroups(configuration);
     if(null != groupNames) {
-      for(int i = 0; i < groupNames.size(); i++) {
-        m_groupMap.put(groupNames.get(i), groupClassNames);
+      for(String groupName : groupNames) {
+        m_groupMap.put(groupName, groupClassNames);
       }
       getValueMap().putAll(m_groupMap);
     }
@@ -110,8 +110,8 @@ public class GroupSelector extends MultiSelector {
   @Override
   public Map<String, List<String>> onSelect(String[] selectedValues) {
     Map<String, List<String>> result = Maps.newHashMap();
-    for(int i = 0; i < selectedValues.length; i++) {
-      result.put(selectedValues[i], m_groupMap.get(selectedValues[i]));
+    for(String value : selectedValues) {
+      result.put(value, m_groupMap.get(value));
     }
 
     return result;

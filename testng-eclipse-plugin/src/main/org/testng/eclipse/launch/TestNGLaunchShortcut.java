@@ -3,8 +3,6 @@ package org.testng.eclipse.launch;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
@@ -14,14 +12,11 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.JavaProject;
-import org.eclipse.jdt.internal.core.PackageFragment;
-import org.eclipse.jdt.internal.core.PackageFragmentRoot;
-import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.text.ITextSelection;
@@ -32,6 +27,8 @@ import org.eclipse.ui.IEditorPart;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.tester.JavaTypeExtender;
 import org.testng.eclipse.util.LaunchUtil;
+
+import com.google.common.collect.Lists;
 
 /**
  * Right-click launcher.
@@ -93,28 +90,34 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
       throws JavaModelException {
     p("Examining Java element:" + element);
     if (element != null) {
-      if (element instanceof JavaProject) {
-        JavaProject p = (JavaProject) element;
+      switch (element.getElementType()) {
+      case IJavaElement.JAVA_PROJECT:
+        IJavaProject p = (IJavaProject) element;
         for (IJavaElement e : p.getChildren()) {
           maybeAddJavaElement(e, units);
         }
-      } else if (element instanceof SourceType) {
-        units.add((SourceType) element);
-      } else if (element instanceof ICompilationUnit) {
+        break;
+      case IJavaElement.TYPE:
+        units.add((IType) element);
+        break;
+      case IJavaElement.COMPILATION_UNIT:
         units.addAll(Arrays.asList(((ICompilationUnit) element).getTypes()));
-      } else if (element instanceof PackageFragment) {
-        PackageFragment p = (PackageFragment) element;
-        for (ICompilationUnit icu : p.getCompilationUnits()) {
+        break;
+      case IJavaElement.PACKAGE_FRAGMENT:
+        IPackageFragment pf = (IPackageFragment) element;
+        for (ICompilationUnit icu : pf.getCompilationUnits()) {
           units.addAll(Arrays.asList(icu.getTypes()));
         }
-      } else if (element instanceof PackageFragmentRoot) {
-        PackageFragmentRoot pfr = (PackageFragmentRoot) element;
+        break;
+      case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+        IPackageFragmentRoot pfr = (IPackageFragmentRoot) element;
         for (IJavaElement e : pfr.getChildren()) {
           if (JavaTypeExtender.isTest(e)) {
             maybeAddJavaElement(e, units);
           }
         }
-      } else {
+        break;
+      default:
         p("Ignoring non compilation unit selection: " + element);
       }
     }
@@ -122,7 +125,6 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
 
   private static void p(String s) {
     TestNGPlugin.log("[TestNGLaunchShortcut] " + s);
-//    System.out.println("[TestNGLaunchShortcut] " + s);
   }
 
   public void launch(IEditorPart editor, String mode) {

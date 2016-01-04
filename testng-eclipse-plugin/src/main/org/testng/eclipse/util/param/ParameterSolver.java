@@ -53,13 +53,13 @@ public class ParameterSolver {
     
     Map paramNames= new HashMap();
     try {
-      for(int i= 0; i < javaElements.length; i++) {
-        Map params= getParameterNames(javaElements[i]);
+      for(IJavaElement javaElement : javaElements) {
+        Map params= getParameterNames(javaElement);
         if(null != params) {
           paramNames.putAll(params);
         }
       }
-      
+
       if(paramNames.isEmpty()) {
         return null;
       }
@@ -121,8 +121,8 @@ public class ParameterSolver {
   }
   
   protected static Map parseParameterNames(ICompilationUnit[] units, TestNGMethodParameterVisitor visitor) {
-    for(int i= 0; i < units.length; i++) {
-      ASTNode node= getParserNode(units[i]);
+    for(ICompilationUnit unit : units) {
+      ASTNode node= getParserNode(unit);
       node.accept(visitor);
     }
     
