@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.testng.eclipse.ui.util;
 
-import org.eclipse.core.internal.resources.File;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
@@ -55,7 +54,7 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 			Image result = null;
 			if (element instanceof IType) {
 				result = super.getImage(((IType) element).getPackageFragment());
-			} else if (element instanceof File) {
+			} else if (element instanceof IFile) {
 				result = super.getImage(element);
 			}
 
@@ -66,8 +65,8 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 			String result = element.toString();
 			if (element instanceof IType) {
 				result = super.getText(((IType) element).getPackageFragment());
-			} else if (element instanceof File) {
-				result = ((File) element).getName();
+			} else if (element instanceof IFile) {
+				result = ((IFile) element).getName();
 			}
 
 			return result;

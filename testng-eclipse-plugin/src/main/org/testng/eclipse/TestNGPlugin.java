@@ -23,10 +23,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.testng.eclipse.launch.ITestNGLaunchConfigurationProvider;
 import org.testng.eclipse.ui.TestRunnerViewPart;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
@@ -315,20 +312,6 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
     
     label.setFont(bold ? BOLD_FONT : REGULAR_FONT);
   }
-  
-  public Bundle getBundle(String bundleName) {
-    Bundle bundle= Platform.getBundle(bundleName);
-    if (bundle != null)
-        return bundle;
-    
-    // Accessing unresolved bundle
-    ServiceReference serviceRef= m_context.getServiceReference(PackageAdmin.class.getName());
-    PackageAdmin admin= (PackageAdmin) m_context.getService(serviceRef);
-    Bundle[] bundles= admin.getBundles(bundleName, null);
-    if (bundles != null && bundles.length > 0)
-        return bundles[0];
-    return null;
-  }
 
   /**
    * Returns a String that can be used as an identifying key for 
@@ -356,6 +339,10 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
   
   public static IStatus createError(String message) {
     return new Status(IStatus.ERROR, PLUGIN_ID, message);
+  }
+
+  public static IStatus createStatus(int severity, String message) {
+    return new Status(severity, PLUGIN_ID, message);
   }
 
   public static List<ITestNGLaunchConfigurationProvider> getLaunchConfigurationProviders()

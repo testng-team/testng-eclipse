@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.swt.widgets.Composite;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
-import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.launch.components.ITestContent;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.ui.util.TypeParser;

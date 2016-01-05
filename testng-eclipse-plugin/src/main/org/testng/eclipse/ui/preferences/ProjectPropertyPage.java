@@ -2,6 +2,7 @@ package org.testng.eclipse.ui.preferences;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -10,7 +11,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.debug.internal.ui.actions.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.FolderSelectionDialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -180,7 +180,6 @@ public class ProjectPropertyPage extends PropertyPage {
     return parentComposite;
   }
 
-  
   public void dispose() {
     m_projectJar.dispose();
     m_outputdir.dispose();
@@ -238,24 +237,24 @@ public class ProjectPropertyPage extends PropertyPage {
     ISelectionStatusValidator validator = new ISelectionStatusValidator() {
         public IStatus validate(Object[] selection) {
           if ((null == selection) || (selection.length == 0)) {
-            return new StatusInfo(IStatus.ERROR, "empty selection is not allowed");
+            return TestNGPlugin.createError("empty selection is not allowed");
           }
 
           if (selection.length > 1) {
-            return new StatusInfo(IStatus.ERROR, "multiple selection is not allowed");
+            return TestNGPlugin.createError("multiple selection is not allowed");
           }
 
           if (IFolder.class.isInstance(selection[0]) || IProject.class.isInstance(selection[0])) {
-            return new StatusInfo();
+            return TestNGPlugin.createStatus(IStatus.OK, "");
           }
 
-          return new StatusInfo(IStatus.ERROR, "not accepted type");
+          return TestNGPlugin.createError("not accepted type");
         }
       };
 
     IWorkspaceRoot workspaceRoot = JDTUtil.getWorkspaceRoot();
     IProject[] allProjects = workspaceRoot.getProjects();
-    ArrayList rejectedElements = new ArrayList(allProjects.length);
+    List<IProject> rejectedElements = new ArrayList<>(allProjects.length);
     IProject currProject = m_workingProject.getProject();
     for (int i = 0; i < allProjects.length; i++) {
       if (!allProjects[i].equals(currProject)) {
