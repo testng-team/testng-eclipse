@@ -378,13 +378,6 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     return true;
   }
 
-  private void p(String string) {
-    if (false) {
-      System.out.println("[AbstractTab] " + string);
-    }
-  }
-
-
   @Override
   public void aboutToStart() {
     reset();
