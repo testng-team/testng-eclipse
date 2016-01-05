@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 
@@ -104,12 +103,11 @@ public class SuiteBuilder {
     if(!content.hasTestMethods()) {
       return;
     }
-    
-    Set testMethods = content.getTestMethods();
+
+    Set<IMethodDescriptor> testMethods = content.getTestMethods();
     IMethodDescriptor testMethodDescriptor = new MethodDescriptor((IMethod) ije);
     Properties methodAttrs = new Properties(); 
-    for(Iterator it = testMethods.iterator(); it.hasNext(); ) {
-      IMethodDescriptor imd = (IMethodDescriptor) it.next();
+    for(IMethodDescriptor imd : testMethods) {
       if(imd.equals(testMethodDescriptor)) {
 //        attrs.setProperty("annotations", convert(imd.getAnnotationType()));
         methodAttrs.setProperty("name", imd.getName());

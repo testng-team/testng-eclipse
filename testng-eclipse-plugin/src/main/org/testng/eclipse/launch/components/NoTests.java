@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.jdt.core.IMethod;
+import org.testng.eclipse.util.signature.IMethodDescriptor;
 
 /**
  * @author Andrew Eisenberg
@@ -33,12 +34,12 @@ public class NoTests implements ITestContent {
         return "";
     }
 
-    public Collection getGroups() {
-        return Collections.EMPTY_LIST;
+    public Collection<String> getGroups() {
+        return Collections.emptyList();
     }
 
-    public Set getTestMethods() {
-        return Collections.EMPTY_SET;
+    public Set<IMethodDescriptor> getTestMethods() {
+        return Collections.emptySet();
     }
 
     public boolean hasTestMethods() {

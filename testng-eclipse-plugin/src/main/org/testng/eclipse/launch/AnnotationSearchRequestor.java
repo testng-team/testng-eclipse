@@ -13,10 +13,10 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 
 public class AnnotationSearchRequestor extends SearchRequestor {
 
-  private final Collection fResult;
+  private final Collection<IType> fResult;
   private final ITypeHierarchy fHierarchy;
 
-  public AnnotationSearchRequestor(ITypeHierarchy hierarchy, Collection result) {
+  public AnnotationSearchRequestor(ITypeHierarchy hierarchy, Collection<IType> result) {
     fHierarchy= hierarchy;
     fResult= result;
   }
