@@ -76,8 +76,4 @@ public class JUnitConverterQuickAssistProcessor
     return vResult.toArray(new IJavaCompletionProposal[vResult.size()]);
   }
 
-  private static void ppp(String s) {
-    System.out.println("[JUnitConverterQuickAssistProcessor] " + s);
-  }
-
 }

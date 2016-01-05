@@ -59,7 +59,7 @@ public class TestFinder {
       IType[] allClasses= hierarchy.getAllClasses();
 
       // search for all types with references to RunWith and Test and all subclasses
-      HashSet<IType> candidates= new HashSet<>(allClasses.length);
+      Set<IType> candidates= new HashSet<>(allClasses.length);
       SearchRequestor requestor= new AnnotationSearchRequestor(hierarchy, candidates);
 
       IJavaSearchScope scope= SearchEngine.createJavaSearchScope(allClasses, IJavaSearchScope.SOURCES);

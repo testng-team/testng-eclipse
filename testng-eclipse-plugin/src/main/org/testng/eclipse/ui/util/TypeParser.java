@@ -30,13 +30,8 @@ public class TypeParser {
       parser.setProject(type.getJavaProject());
       parser.setUnitName(compilationUnit.getPath().toString());
       CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-//      ppp("===== VISITING " + type.getFullyQualifiedName());
       cu.accept(result);
-//      ppp("===== DONE VISITING " + type.getFullyQualifiedName());
       return result;
   }
-  
-  public static void ppp(String s) {
-    System.out.println("[TypeParser] " + s);
-  }
+
 }

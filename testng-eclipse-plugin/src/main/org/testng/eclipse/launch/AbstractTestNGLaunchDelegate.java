@@ -35,11 +35,10 @@ public abstract class AbstractTestNGLaunchDelegate implements IEditorActionDeleg
   
   private IProject m_project;
   private ICompilationUnit m_compilationUnit;
-  private Map m_launchAttributes= new HashMap();
+  private Map<String, Object> m_launchAttributes= new HashMap<>();
   private String m_configName;
   
   private String m_actionText= "";
-  private boolean m_isSuite= false;
   private boolean m_enabled= false;
   
   protected abstract String getLaunchMode();
