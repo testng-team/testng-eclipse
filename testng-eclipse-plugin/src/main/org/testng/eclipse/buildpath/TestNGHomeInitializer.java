@@ -7,6 +7,7 @@ import java.net.URL;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.ClasspathVariableInitializer;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -25,7 +26,7 @@ public class TestNGHomeInitializer extends ClasspathVariableInitializer {
    */
   public void initialize(String variable) {
     try {
-        Bundle bundle= TestNGPlugin.getDefault().getBundle(TestNGPlugin.PLUGIN_ID);
+        Bundle bundle= Platform.getBundle(TestNGPlugin.PLUGIN_ID);
         if (bundle == null) {
           clearVariable();
           return;

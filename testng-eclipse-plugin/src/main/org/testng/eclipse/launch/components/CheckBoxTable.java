@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -27,6 +26,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 import org.eclipse.ui.internal.misc.StringMatcher;
+import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.util.ResourceUtil;
 
 import com.google.common.collect.Lists;
@@ -158,17 +158,17 @@ public class CheckBoxTable extends SelectionStatusDialog {
     super.create();
     pattern.setFocus();
   }
-  
+
   protected void updateOKStatus() {
     computeResult();
 
     if(null != getResult()) {
-      updateStatus(new StatusInfo());
+      updateStatus(TestNGPlugin.createStatus(IStatus.OK, "")); //$NON-NLS-1$
     } else {
-      updateStatus(new StatusInfo(IStatus.ERROR, "")); //$NON-NLS-1$
+      updateStatus(TestNGPlugin.createStatus(IStatus.ERROR, "")); //$NON-NLS-1$
     }
   }
-  
+
   public String[] getSelectedElements() {
     return m_selection.toArray(new String[m_selection.size()]);
   }

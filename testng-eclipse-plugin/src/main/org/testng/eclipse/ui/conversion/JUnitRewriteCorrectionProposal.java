@@ -1,13 +1,10 @@
 package org.testng.eclipse.ui.conversion;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -199,7 +196,7 @@ public class JUnitRewriteCorrectionProposal implements IJavaCompletionProposal
       // Final pre-existing region
       ea.unchangedUntil(previewContent.getLength());
     } catch (CoreException e) {
-      JavaPlugin.log(e);
+      TestNGPlugin.log(e);
     }
     return buf.toString();
   }
