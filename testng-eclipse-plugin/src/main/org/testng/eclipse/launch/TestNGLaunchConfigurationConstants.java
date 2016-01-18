@@ -94,6 +94,8 @@ public abstract class TestNGLaunchConfigurationConstants {
   
   public static final String PROTOCOL = make("PROTOCOL");  //$NON-NLS-1$
 
+  public static final String RUNTIME_TESTNG_VERSION = make("RUNTIME_TESTNG_VERSION");  //$NON-NLS-1$
+
   public static final String VM_ENABLEASSERTION_OPTION = "-ea";
 
   public static final String PRE_DEFINED_LISTENERS=

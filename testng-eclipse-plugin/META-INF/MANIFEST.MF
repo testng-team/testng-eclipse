@@ -33,7 +33,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/guava-base-r03.jar,
  lib/guava-collections-r03.jar,
- lib/testng-remote-common.jar,
+ lib/testng-remote.jar,
  lib/testng.jar,
  lib/testng-sources.jar,
  lib/jcommander.jar,
