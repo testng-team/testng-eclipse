@@ -1,3 +1,48 @@
+CHANGELOG
+====
+
+## 6.9.11
+
+* PR #218: use the new [testng-remote](https://github.com/testng-team/testng-remote)
+  The new testng-remote supports json protocol to be communicating between variant version of testng.
+  This should fix issue #91 thoroughly.
+* Issue #98: Rerun test method (declared in superclass) should use same class as before. (@aledsage)
+* Fix issue 70: isTest looks at superclass methods. (@aledsage)
+
+## 6.9.10
+
+* Feature #188: Add M2E integrtion support
+* Fixed issue #211 jvm args are appended two times
+* Fixed issue #206: lauching test is failing with non maven projects
+* Fixed issue #41: improve the speed when browse Tests with JDT Search Engine
+* testng #912: update testng-remote jar with serialVersionUUID explicitly set
+* [travis] Preserve Maven/Tycho cache between builds
+* Fixed issue #198: can't find phantomjs on Windows
+* issue #42: option to disable/enable show the TestNG part name as the test suite name
+
+## 6.9.9
+
+* feature #168: running TestNG with the 'argLine' of maven-surefire-plugin from pom.xml by default
+* Fixed issue #60: Stop-button is not working
+* Fixed issue #32 "dependsOnMethods" not resolved when using fully qualified method name
+* Fixed issue #19: TestRunner not remembering view orientation
+
+## 6.9.8
+
+* issue #91: SocketException: Software caused connection abort
+* issue #42: Save space in TestNG panel
+* PR #174: fixed testng issue #820 "After getting update tesng (6.9) in my eclipse IDE, Not able to run testng.xml"
+* issue #167: Distinguish test class instances when using Factory
+
+## 6.9.5
+
+* Issue/155: Timeout while trying to contact RemoteTestNG
+* PR #128: fix bug: eclipse throw MalformedByteSequenceException when excute method. (@liefdiy)
+
+
+
+## 5.9.0 and OLDER
+
 TESTNG-239  	 Copy Exception Message
     Added MessageCopyAction, refactoring TraceCopyAction so both are minor variations on AbstractTraceAction, 
     so that a right click on the failure trace offers the option of copying only the trace.
@@ -23,7 +68,3 @@ Rev.101
   
 Rev.104
   Dan Fabulich's patches for testng184 and testng233  
- 
-  
-  
-
