@@ -2,7 +2,7 @@
 <feature
       id="org.testng.eclipse.maven.feature"
       label="%feature.name"
-      version="6.9.10.qualifier"
+      version="6.9.11.qualifier"
       provider-name="%feature.provider">
 
    <description url="http://testng.org">
