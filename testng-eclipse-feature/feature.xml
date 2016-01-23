@@ -2,7 +2,7 @@
 <feature
       id="org.testng.eclipse"
       label="TestNG"
-      version="6.9.10.qualifier"
+      version="6.9.11.qualifier"
       provider-name="Cedric Beust">
 
    <description url="http://testng.org">
