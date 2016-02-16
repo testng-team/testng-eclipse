@@ -19,7 +19,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
-import org.testng.eclipse.util.ResourceUtil;
 
 /**
  * Workspace wide preferences for TestNG.
@@ -33,7 +32,6 @@ public class WorkspacePreferencePage
   private BooleanFieldEditor2 m_disabledDefaultListeners;
   private BooleanFieldEditor2 m_showViewWhenTestsComplete;
   private BooleanFieldEditor2 m_showCaseNameOnViewTitle;
-  private BooleanFieldEditor2 m_useProjectJar;
   private FileFieldEditor m_xmlTemplateFile;
   private StringFieldEditor m_excludedStackTraces;
   private StringFieldEditor m_preDefinedListeners;
@@ -86,10 +84,6 @@ public class WorkspacePreferencePage
         "Show test name on view title when tests complete", //$NON-NLS-1$ 
         SWT.NONE, parentComposite);
 
-    m_useProjectJar = new BooleanFieldEditor2(
-        TestNGPluginConstants.S_USEPROJECTJAR_GLOBAL, 
-        ResourceUtil.getString("TestNGPropertyPage.useProjectTestNGJar"), SWT.NONE, parentComposite);
-    
     // XML template
     m_xmlTemplateFile = new FileFieldEditor(TestNGPluginConstants.S_XML_TEMPLATE_FILE,
         "Template XML file:", false /* no absolute */,
@@ -115,7 +109,6 @@ public class WorkspacePreferencePage
     addField(m_disabledDefaultListeners);
     addField(m_showViewWhenTestsComplete);
     addField(m_showCaseNameOnViewTitle);
-    addField(m_useProjectJar);
     addField(m_xmlTemplateFile);
     addField(m_excludedStackTraces);
     addField(m_preDefinedListeners);

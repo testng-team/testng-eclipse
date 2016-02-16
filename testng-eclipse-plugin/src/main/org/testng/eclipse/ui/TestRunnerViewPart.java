@@ -449,11 +449,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
               TestNGPlugin.log(ex);
               postSyncRunnable(new Runnable() {
                 public void run() {
-                  boolean useProjectJar =
-                      TestNGPlugin.getPluginPreferenceStore().getUseProjectJar(project.getProject().getName());
-                  String suggestion = useProjectJar
-                      ? ResourceUtil.getString("TestRunnerViewPart.message.suggestion1")
-                      : ResourceUtil.getString("TestRunnerViewPart.message.suggestion2");
+                  String suggestion = ResourceUtil.getString("TestRunnerViewPart.message.suggestion2");
                    new ErrorDialog(m_counterComposite.getShell(),
                        "Couldn't launch TestNG", suggestion,
                        new Status(IStatus.ERROR, TestNGPlugin.PLUGIN_ID,
