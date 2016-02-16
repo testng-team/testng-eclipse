@@ -29,7 +29,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         true);
     store.setDefault(TestNGPluginConstants.S_VIEW_TITLE_SHOW_CASE_NAME,
         true);
-    store.setDefault(TestNGPluginConstants.S_USEPROJECTJAR_GLOBAL, true);
   }
 
 }

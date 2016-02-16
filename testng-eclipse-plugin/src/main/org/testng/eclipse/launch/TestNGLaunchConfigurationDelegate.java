@@ -342,20 +342,6 @@ public class TestNGLaunchConfigurationDelegate
     List<String> classpathList = new LinkedList<>(
         Arrays.asList(super.getClasspath(configuration)));
 
-    String projectName = getJavaProjectName(configuration);
-    boolean useProjectJar = TestNGPlugin.getPluginPreferenceStore()
-        .getUseProjectJar(projectName);
-    if (!useProjectJar) {
-      // Add plugin embedded testng libraries if user don't want to use their
-      // own
-      IClasspathEntry[] cpEntries = BuildPathSupport.getTestNGLibraryEntries();
-      for (IClasspathEntry cpEntry : cpEntries) {
-        IPath jarPath = cpEntry.getPath();
-        // insert the bundle embedded testng.jar on the front of the classpath
-        classpathList.add(0, jarPath.toOSString());
-      }
-    }
-
     Version testngVer = getRuntimeTestNGVersion(classpathList);
     if (testngVer == null) {
       throw new CoreException(TestNGPlugin.createError("Can't recognize runtime TestNG version"));

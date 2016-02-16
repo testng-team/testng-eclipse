@@ -3,6 +3,7 @@ CHANGELOG
 
 ## 6.9.11
 
+* Feature #224: remove option "Use Project TestNG jar", to always use Project TestNG
 * PR #218: use the new [testng-remote](https://github.com/testng-team/testng-remote)
   The new testng-remote supports json protocol to be communicating between variant version of testng.
   This should fix issue #91 thoroughly.

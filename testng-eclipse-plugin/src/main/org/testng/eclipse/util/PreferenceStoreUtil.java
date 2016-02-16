@@ -40,15 +40,6 @@ public class PreferenceStoreUtil {
     m_storage.setValue(projectName + ".disabledListeners", selection);
   }
 
-  public void storeUseProjectJar(String projectName, boolean selection) {
-    String strUsePrjJar = String.valueOf(selection);
-    // here store the string value rather than boolean is to prevent the value being removed from store,
-    // which cause it's hard to know wheter the value should read from global or project level
-    // now by explicitly set the value "true" or "false" to know it's at project level,
-    // otherwise, it comes from global level
-    m_storage.setValue(projectName + TestNGPluginConstants.S_USEPROJECTJAR, strUsePrjJar);
-  }
-
   public void storeXmlTemplateFile(String projectName, String xmlFile) {
     m_storage.setValue(projectName + TestNGPluginConstants.S_XML_TEMPLATE_FILE, xmlFile);
   }
@@ -152,16 +143,6 @@ public class PreferenceStoreUtil {
     else {
       return m_storage.getBoolean(TestNGPluginConstants.S_DISABLEDLISTENERS);
     }
-  }
-
-  public boolean getUseProjectJar(String projectName) {
-    String strUsePrjJar = m_storage.getString(projectName + TestNGPluginConstants.S_USEPROJECTJAR);
-    // if no project level setting, query from global
-    if (strUsePrjJar == null || strUsePrjJar.isEmpty()) {
-      return TestNGPlugin.getDefault().getPreferenceStore()
-          .getBoolean(TestNGPluginConstants.S_USEPROJECTJAR_GLOBAL);
-    }
-    return Boolean.valueOf(strUsePrjJar).booleanValue();
   }
 
   public boolean getWatchResults(String projectName) {
