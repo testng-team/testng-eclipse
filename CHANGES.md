@@ -3,6 +3,14 @@ CHANGELOG
 
 ## 6.9.11
 
+Supported Metrics:
+
+| Plugin | Dependency |
+| ------------- | ------------- |
+| TestNG for Eclipse | Eclipse Juno (4.2) or above |
+| TestNG M2E Integration (Optional) | M2E 1.5 or above |
+*NOTE: Technically, 'TestNG for Eclipse' still work on Eclipse Helio and above, but since this version, we're dropping support for Eclipse 3.x.*
+
 * Feature #224: remove option "Use Project TestNG jar", to always use Project TestNG
 * PR #218: use the new [testng-remote](https://github.com/testng-team/testng-remote)
   The new testng-remote supports json protocol to be communicating between variant version of testng.
@@ -11,6 +19,13 @@ CHANGELOG
 * Fix issue 70: isTest looks at superclass methods. (@aledsage)
 
 ## 6.9.10
+
+Supported Metrics:
+
+| Plugin | Dependency |
+| ------------- | ------------- |
+| TestNG for Eclipse | Eclipse Helio (3.6) or above |
+| TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
 * Feature #188: Add M2E integrtion support
 * Fixed issue #211 jvm args are appended two times
@@ -23,6 +38,12 @@ CHANGELOG
 
 ## 6.9.9
 
+Supported Metrics:
+
+| Plugin | Dependency |
+| ------------- | ------------- |
+| TestNG for Eclipse | Eclipse Helio (3.6) or above |
+
 * feature #168: running TestNG with the 'argLine' of maven-surefire-plugin from pom.xml by default
 * Fixed issue #60: Stop-button is not working
 * Fixed issue #32 "dependsOnMethods" not resolved when using fully qualified method name
@@ -30,12 +51,24 @@ CHANGELOG
 
 ## 6.9.8
 
+Supported Metrics:
+
+| Plugin | Dependency |
+| ------------- | ------------- |
+| TestNG for Eclipse | Eclipse Helio (3.6) or above |
+
 * issue #91: SocketException: Software caused connection abort
 * issue #42: Save space in TestNG panel
 * PR #174: fixed testng issue #820 "After getting update tesng (6.9) in my eclipse IDE, Not able to run testng.xml"
 * issue #167: Distinguish test class instances when using Factory
 
 ## 6.9.5
+
+Supported Metrics:
+
+| Plugin | Dependency |
+| ------------- | ------------- |
+| TestNG for Eclipse | Eclipse Helio (3.6) or above |
 
 * Issue/155: Timeout while trying to contact RemoteTestNG
 * PR #128: fix bug: eclipse throw MalformedByteSequenceException when excute method. (@liefdiy)
