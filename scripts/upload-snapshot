@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# please don't share `~/.bintray.conf` to VCS since it must contain credentials as below:
+# BINTRAY_USER=xxx
+# BINTRAY_API_KEY=###
+if [ -f ~/.bintray.conf ]; then
+  . ~/.bintray.conf
+fi
+
+BINTRAY_USER=${BINTRAY_USER:?bintray user is not defined}
+BINTRAY_API_KEY=${BINTRAY_API_KEY:?bintray api key is not defined}
+BINTRAY_OWNER=${BINTRAY_OWNER:="testng-team"}
+BINTRAY_REPO=${BINTRAY_REPO:="testng-eclipse"}
+PCK_NAME=${PCK_NAME:="updatesite-beta"}
+PCK_VERSION=${PCK_VERSION:="latest"}
+
+base_dir=$(cd `dirname $0` && pwd)
+PATH_TO_REPOSITORY=$base_dir/../testng-eclipse-update-site/target/site
+
+if [ ! -d $PATH_TO_REPOSITORY ]; then
+  echo "the testng-eclipse update site $PATH_TO_REPOSITORY does not exist"
+  exit 1
+fi
+
+$base_dir/pushToBintray.sh "$BINTRAY_USER" "$BINTRAY_API_KEY" "$BINTRAY_OWNER" "$BINTRAY_REPO" "$PCK_NAME" "$PCK_VERSION" "$PATH_TO_REPOSITORY"
