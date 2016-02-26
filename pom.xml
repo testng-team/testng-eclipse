@@ -10,6 +10,11 @@
 
     <properties>
         <tycho.version>0.23.0</tycho.version>
+        <enforcer.maven.version>3.1.1</enforcer.maven.version>
+        <enforcer.java.version>1.7</enforcer.java.version>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <modules>
@@ -33,9 +38,6 @@
                 <artifactId>tycho-compiler-plugin</artifactId>
                 <version>${tycho.version}</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                    <encoding>UTF-8</encoding>
                     <!-- http://dev.eclipse.org/mhonarc/lists/tycho-user/msg02782.html -->
                     <!-- http://stackoverflow.com/a/28812963 -->
                     <compilerArgument>-warn:none</compilerArgument>
@@ -54,6 +56,31 @@
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-versions-plugin</artifactId>
                 <version>${tycho.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <id>enforce-versions</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[${enforcer.maven.version},)</version>
+                                    <message>Maven version: ${enforcer.maven.version} or above is required</message>
+                                </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>[${enforcer.java.version},)</version>
+                                    <message>Java version: ${enforcer.java.version} is required</message>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
         <pluginManagement>
