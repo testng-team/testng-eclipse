@@ -17,6 +17,7 @@ Supported Metrics:
   This should fix issue #91 thoroughly.
 * Issue #98: Rerun test method (declared in superclass) should use same class as before. (@aledsage)
 * Fix issue 70: isTest looks at superclass methods. (@aledsage)
+* Feature #232: show the git revision info the plugin being build against, for future diagnose purpose
 
 ## 6.9.10
 

@@ -405,5 +405,13 @@ public void ${testName}() throws Exception {
        </pattern>
     </template>
  </extension>
+ <extension
+       point="org.eclipse.ui.systemSummarySections">
+    <section
+          class="org.testng.eclipse.SystemSummarySection"
+          id="org.testng.eclipse.SystemSummarySection"
+          sectionTitle="TestNG for Eclipse Details">
+    </section>
+ </extension>
 
 </plugin>
