@@ -1,3 +1,25 @@
+# Installation
+
+## Install Release
+
+<a href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=1549" class="drag" title="Drag to your running Eclipse workspace to install TestNG for Eclipse"><img class="img-responsive" src="https://marketplace.eclipse.org/sites/all/themes/solstice/_themes/solstice_marketplace/public/images/btn-install.png" alt="Drag to your running Eclipse workspace to install TestNG for Eclipse" /></a>
+
+see more at http://testng.org/doc/download.html
+
+## Install Snapshot
+
+Here is the update site http://testng.org/eclipse-beta for snapshot bits, which contains the latest changes but not yet released.
+Please install it if you want to experiment with the new features or verify the bug fixes, and please report back if you encounter any issue: https://github.com/cbeust/testng-eclipse/issues
+
+To install it:
+* Click "Help -> Install New Software..." on top level menu
+* Paste the url http://testng.org/eclipse-beta to `Work with: ` text field and press enter.
+* Select the plugins
+* Click "Next" button and accept the license to complete the installation.
+* Restart Eclipse
+
+Enjoy.
+
 # User documentation
 
 The documentation for this plug-in can be found at http://testng.org/doc/eclipse.html
