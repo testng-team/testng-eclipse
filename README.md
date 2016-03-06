@@ -8,8 +8,11 @@ see more at http://testng.org/doc/download.html
 
 ## Install Snapshot
 
-Here is the update site http://testng.org/eclipse-beta for snapshot bits, which contains the latest changes but not yet released.
-Please install it if you want to experiment with the new features or verify the bug fixes, and please report back if you encounter any issue: https://github.com/cbeust/testng-eclipse/issues
+The update site to install snapshot versions of the TestNG is:
+
+`http://testng.org/eclipse-beta`
+
+Use it if you want to experiment with the new features or verify the bug fixes, and please [report back if you encounter any issues](https://github.com/cbeust/testng-eclipse/issues).
 
 To install it:
 * Click "Help -> Install New Software..." on top level menu
