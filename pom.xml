@@ -9,7 +9,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <tycho.version>0.23.0</tycho.version>
+        <tycho.version>0.24.0</tycho.version>
         <enforcer.maven.version>3.1.1</enforcer.maven.version>
         <enforcer.java.version>1.7</enforcer.java.version>
         <maven.compiler.source>1.7</maven.compiler.source>
@@ -56,6 +56,14 @@
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-versions-plugin</artifactId>
                 <version>${tycho.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-packaging-plugin</artifactId>
+                <version>${tycho.version}</version>
+                <configuration>
+                    <archiveSite>true</archiveSite>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
