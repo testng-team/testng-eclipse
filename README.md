@@ -8,7 +8,7 @@ see more at http://testng.org/doc/download.html
 
 ## Install Snapshot
 
-The update site to install snapshot versions of the TestNG is:
+The update site to install snapshot versions of the TestNG Eclipse plug-in is:
 
 `http://testng.org/eclipse-beta`
 
