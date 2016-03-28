@@ -14,6 +14,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.testng.eclipse.TestNGPlugin;
 
 /**
  * Action that displays the test run history. It can:
@@ -33,10 +34,10 @@ public class RunHistoryAction extends Action implements IMenuCreator {
   private SuiteRunInfo currentlyDisplayedRun;
 
   public RunHistoryAction(TestRunnerViewPart testRunnerViewPart) {
-    super("", IAction.AS_DROP_DOWN_MENU);
     this.testRunnerViewPart = testRunnerViewPart;
 
     setToolTipText("Test Run History...");
+    setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/history_list.gif")); //$NON-NLS-1$
     setMenuCreator(this);
   }
 
