@@ -894,6 +894,43 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 
     {
       //
+      // Search
+      //
+      Composite m_searchComposite = new Composite(progressAndSearchComposite, SWT.NONE);
+      GridDataFactory.fillDefaults().grab(true, false).applyTo(m_searchComposite);
+      GridLayoutFactory.swtDefaults().numColumns(3).applyTo(m_searchComposite);
+
+      new Label(m_searchComposite, SWT.NONE).setText("Search:");
+      m_searchText = new Text(m_searchComposite, SWT.SINGLE | SWT.BORDER);
+      GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(m_searchText);
+      m_searchText.addKeyListener(new KeyListener() {
+
+        public void keyPressed(KeyEvent e) {
+        }
+
+        public void keyReleased(KeyEvent e) {
+          if (currentSuiteRunInfo == null) {
+            return;
+          }
+          // Update the tree based on the search filter only if we don't have too many
+          // results, otherwise, wait for at least n characters to be typed.
+          String filter = "";
+          if (currentSuiteRunInfo.getNbResults() < MAX_RESULTS_THRESHOLD
+              || currentSuiteRunInfo.getNbResults() >= MAX_RESULTS_THRESHOLD
+              && m_searchText.getText().length() >= MAX_TEXT_SIZE_THRESHOLD) {
+            filter = m_searchText.getText();
+          }
+
+          for (TestRunTab tab : ALL_TABS) {
+            tab.updateSearchFilter(filter);
+          }
+        }
+
+      });
+    }
+
+    {
+      //
       // Progress bar
       //
       m_progressComposite = new Composite(progressAndSearchComposite, SWT.NONE);
@@ -929,43 +966,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     // Counter panel
     //
     m_counterPanel = new CounterPanel(progressAndSearchComposite);
-
-    {
-      //
-      // Search
-      //
-      Composite m_searchComposite = new Composite(progressAndSearchComposite, SWT.NONE);
-      GridDataFactory.fillDefaults().grab(true, false).applyTo(m_searchComposite);
-      GridLayoutFactory.swtDefaults().numColumns(3).applyTo(m_searchComposite);
-
-      new Label(m_searchComposite, SWT.NONE).setText("Search:");
-      m_searchText = new Text(m_searchComposite, SWT.SINGLE | SWT.BORDER);
-      GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(m_searchText);
-      m_searchText.addKeyListener(new KeyListener() {
-
-        public void keyPressed(KeyEvent e) {
-        }
-
-        public void keyReleased(KeyEvent e) {
-          if (currentSuiteRunInfo == null) {
-            return;
-          }
-          // Update the tree based on the search filter only if we don't have too many
-          // results, otherwise, wait for at least n characters to be typed.
-          String filter = "";
-          if (currentSuiteRunInfo.getNbResults() < MAX_RESULTS_THRESHOLD
-              || currentSuiteRunInfo.getNbResults() >= MAX_RESULTS_THRESHOLD
-              && m_searchText.getText().length() >= MAX_TEXT_SIZE_THRESHOLD) {
-            filter = m_searchText.getText();
-          }
-
-          for (TestRunTab tab : ALL_TABS) {
-            tab.updateSearchFilter(filter);
-          }
-        }
-
-      });
-    }
   }
 
   public IJavaProject getLaunchedProject() {
