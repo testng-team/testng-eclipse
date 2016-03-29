@@ -150,8 +150,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
    */
   private int fCurrentOrientation;
 
+  private Composite progressAndSearchComposite;
   private CounterPanel m_counterPanel;
-  private Composite m_counterComposite;
+  private Composite m_progressComposite;
 
   private final Image m_viewIcon = TestNGPlugin.getImageDescriptor("main16/testng_noshadow.gif").createImage();//$NON-NLS-1$
 
@@ -303,7 +304,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     }
     fCurrentOrientation = orientation;
 
-    GridLayout layout = (GridLayout) m_counterComposite.getLayout();
+    GridLayout layout = (GridLayout) progressAndSearchComposite.getLayout();
 //    layout.numColumns = 1;
     setCounterColumns(layout);
 
@@ -450,7 +451,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
               postSyncRunnable(new Runnable() {
                 public void run() {
                   String suggestion = ResourceUtil.getString("TestRunnerViewPart.message.suggestion2");
-                   new ErrorDialog(m_counterComposite.getShell(),
+                   new ErrorDialog(m_progressComposite.getShell(),
                        "Couldn't launch TestNG", suggestion,
                        new Status(IStatus.ERROR, TestNGPlugin.PLUGIN_ID,
                            ResourceUtil.getString("TestRunnerViewPart.message.reason")),
@@ -883,9 +884,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private void createProgressCountPanel(Composite parent) {
-    Composite c = new Composite(parent, SWT.NONE);
-    GridDataFactory.fillDefaults().grab(true, false).applyTo(c);
-    GridLayoutFactory.swtDefaults().applyTo(c);
+    progressAndSearchComposite = new Composite(parent, SWT.NONE);
+    GridDataFactory.fillDefaults().grab(true, false).applyTo(progressAndSearchComposite);
+    GridLayoutFactory.swtDefaults().margins(0, 0).spacing(0, 0).applyTo(progressAndSearchComposite);
 
     Display display= parent.getDisplay();
     fFailureColor= new Color(display, 159, 63, 63);
@@ -895,19 +896,17 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       //
       // Progress bar
       //
-      m_counterComposite = new Composite(c, SWT.NONE);
-      GridDataFactory.fillDefaults().grab(true, false).applyTo(m_counterComposite);
-      GridLayout layout = new GridLayout();
-      setCounterColumns(layout);
-      GridLayoutFactory.createFrom(layout).margins(0, 0).spacing(5, 0).applyTo(m_counterComposite);
+      m_progressComposite = new Composite(progressAndSearchComposite, SWT.NONE);
+      GridDataFactory.fillDefaults().grab(true, false).applyTo(m_progressComposite);
+      GridLayoutFactory.swtDefaults().numColumns(2).applyTo(m_progressComposite);
 
-      fProgressBar = new ProgressBar(m_counterComposite);
+      fProgressBar = new ProgressBar(m_progressComposite);
       GridDataFactory.fillDefaults().grab(true, false).applyTo(fProgressBar);
 
       //
       // Stop button (a toolbar, actually)
       //
-      ToolBar toolBar = new ToolBar(m_counterComposite, SWT.FLAT);
+      ToolBar toolBar = new ToolBar(m_progressComposite, SWT.FLAT);
       GridDataFactory.swtDefaults().applyTo(toolBar);
       m_stopButton = new ToolItem(toolBar, SWT.PUSH);
       m_stopButton.setEnabled(false);
@@ -926,16 +925,21 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       });
     }
 
+    //
+    // Counter panel
+    //
+    m_counterPanel = new CounterPanel(progressAndSearchComposite);
+
     {
       //
       // Search
       //
-      Composite line2 = new Composite(c, SWT.NONE);
-      GridDataFactory.fillDefaults().grab(true, false).applyTo(line2);
-      GridLayoutFactory.swtDefaults().margins(0, 0).spacing(5, 0).numColumns(3).applyTo(line2);
+      Composite m_searchComposite = new Composite(progressAndSearchComposite, SWT.NONE);
+      GridDataFactory.fillDefaults().grab(true, false).applyTo(m_searchComposite);
+      GridLayoutFactory.swtDefaults().numColumns(3).applyTo(m_searchComposite);
 
-      new Label(line2, SWT.NONE).setText("Search:");
-      m_searchText = new Text(line2, SWT.SINGLE | SWT.BORDER);
+      new Label(m_searchComposite, SWT.NONE).setText("Search:");
+      m_searchText = new Text(m_searchComposite, SWT.SINGLE | SWT.BORDER);
       GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(m_searchText);
       m_searchText.addKeyListener(new KeyListener() {
 
@@ -961,11 +965,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         }
 
       });
-
-      //
-      // Counter panel
-      //
-      m_counterPanel = new CounterPanel(line2);
     }
   }
 
@@ -1014,7 +1013,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       layout.numColumns = 3;
     }
     else {
-      layout.numColumns = 2;
+      layout.numColumns = 1;
     }
   }
 
