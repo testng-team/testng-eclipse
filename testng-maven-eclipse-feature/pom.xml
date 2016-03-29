@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.testng.eclipse</groupId>
         <artifactId>org.testng.eclipse.parent</artifactId>
-        <version>6.9.11-SNAPSHOT</version>
+        <version>6.9.12-SNAPSHOT</version>
     </parent>
     <groupId>org.testng.eclipse.features</groupId>
     <artifactId>org.testng.eclipse.maven.feature</artifactId>
