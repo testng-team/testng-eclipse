@@ -929,6 +929,11 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       });
     }
 
+    //
+    // Counter panel
+    //
+    m_counterPanel = new CounterPanel(progressAndSearchComposite);
+
     {
       //
       // Progress bar
@@ -962,10 +967,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       });
     }
 
-    //
-    // Counter panel
-    //
-    m_counterPanel = new CounterPanel(progressAndSearchComposite);
   }
 
   public IJavaProject getLaunchedProject() {
