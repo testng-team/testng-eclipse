@@ -15,12 +15,10 @@ import java.util.jar.Manifest;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.AbstractVMInstall;
@@ -35,7 +33,6 @@ import org.testng.CommandLineArgs;
 import org.testng.ITestNGListener;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
-import org.testng.eclipse.buildpath.BuildPathSupport;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.Protocols;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
@@ -233,7 +230,7 @@ public class TestNGLaunchConfigurationDelegate
     argv.add(RemoteArgs.VERSION);
     String testngVer = configuration.getAttribute(RUNTIME_TESTNG_VERSION, (String) null);
     if (testngVer == null) {
-      throw new CoreException(TestNGPlugin.createError("Can't recognize runtime testng version"));
+      throw new CoreException(TestNGPlugin.createError("No runtime testng version in launch configuration."));
     }
     argv.add(testngVer);
 
@@ -344,6 +341,8 @@ public class TestNGLaunchConfigurationDelegate
 
     Version testngVer = getRuntimeTestNGVersion(classpathList);
     if (testngVer == null) {
+      TestNGPlugin.log(TestNGPlugin.createError("Can't recognize runtime TestNG version from classpath: " 
+                                                + join(classpathList.toArray(new String[0]))));
       throw new CoreException(TestNGPlugin.createError("Can't recognize runtime TestNG version"));
     }
     if (compareVersion(testngVer, minTestNGVer) < 0) {
@@ -391,35 +390,25 @@ public class TestNGLaunchConfigurationDelegate
       File f = new File(cp);
       // only check jar file name starts with 'testng'
       if (f.isFile() && f.getName().startsWith("testng")) {
-        Version ver = null;
         try (JarFile jarFile = new JarFile(f)) {
           Manifest mf = jarFile.getManifest();
           Attributes mainAttrs = mf.getMainAttributes();
-          String sn = mainAttrs.getValue("Bundle-SymbolicName");
-          if ("org.testng".equals(sn)) {
-            ver = new Version(mainAttrs.getValue("Bundle-Version"));
+          if ("org.testng".equals(mainAttrs.getValue("Bundle-SymbolicName"))) {
+            return new Version(mainAttrs.getValue("Bundle-Version"));
           }
 
-          if (ver == null) {
-            String mc = mainAttrs.getValue("Main-Class");
-            if ("org.testng.TestNG".equals(mc)) {
-              ver = new Version(mainAttrs.getValue("Implementation-Version"));
-            }
+          if ("org.testng.TestNG".equals(mainAttrs.getValue("Main-Class"))) {
+            return new Version(mainAttrs.getValue("Implementation-Version"));
           }
 
-          if (ver == null) {
-            String st = mainAttrs.getValue("Specification-Title");
-            if ("testng".equals(st)) {
-              ver = new Version(mainAttrs.getValue("Specification-Version"));
-            }
+          if ("testng".equals(mainAttrs.getValue("Specification-Title"))) {
+            return new Version(mainAttrs.getValue("Specification-Version"));
           }
         } catch (Exception e) {
           TestNGPlugin.log(e);
         }
 
-        if (ver != null) {
-          return ver;
-        }
+        TestNGPlugin.log(cp + " was the potential target, but no canonical version found in MANIFEST.MF");
       }
     }
     return null;
