@@ -1,5 +1,7 @@
 # Installation
 
+[![Join the chat at https://gitter.im/cbeust/testng-eclipse](https://badges.gitter.im/cbeust/testng-eclipse.svg)](https://gitter.im/cbeust/testng-eclipse?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ## Install Release
 
 <a href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=1549" class="drag" title="Drag to your running Eclipse workspace to install TestNG for Eclipse"><img class="img-responsive" src="https://marketplace.eclipse.org/sites/all/themes/solstice/_themes/solstice_marketplace/public/images/btn-install.png" alt="Drag to your running Eclipse workspace to install TestNG for Eclipse" /></a>
