@@ -22,6 +22,7 @@ Supported Metrics:
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 *NOTE: Technically, 'TestNG for Eclipse' still work on Eclipse Helio and above, but since this version, we're dropping support for Eclipse 3.x.*
 
+* Fix issue #243: Eclipse: Can't recognize runtime TestNG version
 * Feature #224: remove option "Use Project TestNG jar", to always use Project TestNG
 * PR #218: use the new [testng-remote](https://github.com/testng-team/testng-remote)
   The new testng-remote supports json protocol to be communicating between variant version of testng.
