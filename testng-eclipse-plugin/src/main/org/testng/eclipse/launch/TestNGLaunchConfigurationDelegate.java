@@ -5,20 +5,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-import java.util.jar.Attributes;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.AbstractVMInstall;
@@ -47,12 +42,10 @@ import org.testng.xml.LaunchSuite;
 import com.google.common.collect.Lists;
 
 import static org.testng.eclipse.buildpath.BuildPathSupport.getBundleFile;
-import static org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.RUNTIME_TESTNG_VERSION;
 
 public class TestNGLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
 
-  private static final Version minTestNGVer = new Version("6.5.1"); //$NON-NLS-1$
   private static final Version mimJvmVer = new Version("1.7.0"); //$NON-NLS-1$
 
   /**
@@ -227,13 +220,6 @@ public class TestNGLaunchConfigurationDelegate
     argv.add(RemoteArgs.PROTOCOL);
     argv.add(protocol.toString());
 
-    argv.add(RemoteArgs.VERSION);
-    String testngVer = configuration.getAttribute(RUNTIME_TESTNG_VERSION, (String) null);
-    if (testngVer == null) {
-      throw new CoreException(TestNGPlugin.createError("No runtime testng version in launch configuration."));
-    }
-    argv.add(testngVer);
-
     IProject project = jproject.getProject();
 
     // if (!isJDK15(javaVersion)) {
@@ -336,27 +322,12 @@ public class TestNGLaunchConfigurationDelegate
   @Override
   public String[] getClasspath(ILaunchConfiguration configuration)
       throws CoreException {
-    List<String> classpathList = new LinkedList<>(
-        Arrays.asList(super.getClasspath(configuration)));
+    String[] cp = super.getClasspath(configuration);
+    String[] allCp = new String[cp.length + 1];
+    allCp[0] = getBundleFile("lib/testng-remote.jar").toOSString();
+    System.arraycopy(cp, 0, allCp, 1, cp.length);
 
-    Version testngVer = getRuntimeTestNGVersion(classpathList);
-    if (testngVer == null) {
-      TestNGPlugin.log(TestNGPlugin.createError("Can't recognize runtime TestNG version from classpath: " 
-                                                + join(classpathList.toArray(new String[0]))));
-      throw new CoreException(TestNGPlugin.createError("Can't recognize runtime TestNG version"));
-    }
-    if (compareVersion(testngVer, minTestNGVer) < 0) {
-      throw new CoreException(TestNGPlugin.createError(ResourceUtil.getString(
-          "TestNGLaunchConfigurationDelegate.error.testngVersionUnsupported")));
-    }
-
-    classpathList.add(0, getBundleFile("lib/testng-remote.jar").toOSString());
-
-    ILaunchConfigurationWorkingCopy wc = configuration.getWorkingCopy();
-    wc.setAttribute(RUNTIME_TESTNG_VERSION, testngVer.toString());
-    wc.doSave();
-
-    return classpathList.toArray(new String[] {});
+    return allCp;
   }
 
   @Override
@@ -382,36 +353,6 @@ public class TestNGLaunchConfigurationDelegate
       return null;
     }
     return result.toArray(new String[result.size()]);
-  }
-
-  private Version getRuntimeTestNGVersion(List<String> classpath)
-      throws CoreException {
-    for (String cp : classpath) {
-      File f = new File(cp);
-      // only check jar file name starts with 'testng'
-      if (f.isFile() && f.getName().startsWith("testng")) {
-        try (JarFile jarFile = new JarFile(f)) {
-          Manifest mf = jarFile.getManifest();
-          Attributes mainAttrs = mf.getMainAttributes();
-          if ("org.testng".equals(mainAttrs.getValue("Bundle-SymbolicName"))) {
-            return new Version(mainAttrs.getValue("Bundle-Version"));
-          }
-
-          if ("org.testng.TestNG".equals(mainAttrs.getValue("Main-Class"))) {
-            return new Version(mainAttrs.getValue("Implementation-Version"));
-          }
-
-          if ("testng".equals(mainAttrs.getValue("Specification-Title"))) {
-            return new Version(mainAttrs.getValue("Specification-Version"));
-          }
-        } catch (Exception e) {
-          TestNGPlugin.log(e);
-        }
-
-        TestNGPlugin.log(cp + " was the potential target, but no canonical version found in MANIFEST.MF");
-      }
-    }
-    return null;
   }
 
   private String getRunNameAttr(ILaunchConfiguration configuration) {
