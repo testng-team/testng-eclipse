@@ -1,14 +1,18 @@
-# Installation
+TestNG for Eclipse Plugin
+====
 
+[![Build Status](http://img.shields.io/travis/cbeust/testng-eclipse.svg)](https://travis-ci.org/cbeust/testng-eclipse)
 [![Join the chat at https://gitter.im/cbeust/testng-eclipse](https://badges.gitter.im/cbeust/testng-eclipse.svg)](https://gitter.im/cbeust/testng-eclipse?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-## Install Release
+## Installation
+
+### Install Release
 
 <a href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=1549" class="drag" title="Drag to your running Eclipse workspace to install TestNG for Eclipse"><img class="img-responsive" src="https://marketplace.eclipse.org/sites/all/themes/solstice/_themes/solstice_marketplace/public/images/btn-install.png" alt="Drag to your running Eclipse workspace to install TestNG for Eclipse" /></a>
 
 see more at http://testng.org/doc/download.html
 
-## Install Snapshot
+### Install Snapshot
 
 The update site to install snapshot versions of the TestNG Eclipse plug-in is:
 
@@ -25,13 +29,13 @@ To install it:
 
 Enjoy.
 
-# User documentation
+## User documentation
 
 The documentation for this plug-in can be found at http://testng.org/doc/eclipse.html
 
-# Build
+## Build
 
-## Version number
+### Version number
 
 Set the version number with `scripts/set-version`, e.g.:
 
@@ -41,7 +45,7 @@ scripts/set-version 6.8.22-SNAPSHOT
 
 Using `SNAPSHOT` version numbers will generate UTC timestamped plugin-numbers, e.g. 6.8.22.201505030200 so you should only increase the version number if you are including a higher version of `testng.jar`.
 
-## Building
+### Building
 
 Once the version is correct, build the Eclipse plug-in as follows:
 
@@ -51,7 +55,7 @@ mvn -e clean package
 
 The update site package will be generated at `testng-eclipse-update-site/target/site.zip`
 
-# Developer
+## Developer
 
 In Eclipse, select _Import / Existing Project_ and point the dialog to
 this directory. Then you can just create a new Eclipse application
