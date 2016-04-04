@@ -10,6 +10,7 @@ Supported Metrics:
 | TestNG for Eclipse | Eclipse Juno (4.2) or above |
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
+* enhancement #241: give more space to the testng result tree
 * issue #238: fixed the toolbar position on Eclipse Neon
 
 ## 6.9.11

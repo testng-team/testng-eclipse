@@ -51,8 +51,8 @@ public class CounterPanel extends Composite {
   protected int  m_methodCount = 0;
 
   public CounterPanel(Composite parent) {
-    super(parent, SWT.WRAP);
-    GridLayoutFactory.swtDefaults().margins(0, 0).spacing(0, 0).numColumns(3).applyTo(this);
+    super(parent, SWT.NONE);
+    GridLayoutFactory.swtDefaults().margins(0, 0).spacing(0, 0).applyTo(this);
 
     createReportUpperRow();
 
@@ -77,7 +77,7 @@ public class CounterPanel extends Composite {
     gridLayout.makeColumnsEqualWidth = true;
     gridLayout.marginWidth = 0;
     gridLayout.verticalSpacing= 0;
-    gridLayout.horizontalSpacing= 5;
+//    gridLayout.horizontalSpacing= 5;
     upperRow.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     upperRow.setLayout(gridLayout);
 
