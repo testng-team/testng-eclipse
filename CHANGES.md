@@ -12,6 +12,7 @@ Supported Metrics:
 
 * enhancement #241: give more space to the testng result tree
 * issue #238: fixed the toolbar position on Eclipse Neon
+* fixed issue #157: NPE in TestRunnerViewPart
 
 ## 6.9.11
 
