@@ -229,9 +229,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     if(progressService != null) {
       progressService.showBusyForFamily(TestRunnerViewPart.FAMILY_RUN);
     }
-
-    // Start the watcher thread, if applicable
-    updateResultThread();
   }
 
   private IWorkbenchSiteProgressService getProgressService() {
@@ -779,10 +776,6 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_parentComposite = parent;
     addResizeListener(parent);
 
-    if (getWatchResultDirectory() != null) {
-      updateResultThread();
-    }
-
     GridLayoutFactory.fillDefaults().applyTo(m_parentComposite);
 
     configureToolBar();
@@ -797,6 +790,10 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       restoreLayoutState(m_stateMemento);
     }
     m_stateMemento = null;
+
+    if (getWatchResultDirectory() != null) {
+      updateResultThread();
+    }
   }
 
   @Override
