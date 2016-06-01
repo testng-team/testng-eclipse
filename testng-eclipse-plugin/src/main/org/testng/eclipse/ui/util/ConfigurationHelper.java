@@ -355,7 +355,7 @@ public class ConfigurationHelper {
     config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
                         RemoteTestNG.class.getName());
     config.setAttribute(TestNGLaunchConfigurationConstants.TYPE, LaunchType.CLASS.ordinal());
-    config.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL, "2");
+    config.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL, "0"); // default log level for nothing
   }
 
   /**
