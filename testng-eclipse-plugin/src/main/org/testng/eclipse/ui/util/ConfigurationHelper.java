@@ -184,23 +184,13 @@ public class ConfigurationHelper {
   }
 
   /**
-   * Pass the system properties we were called with to the RemoteTestNG process.
+   * Add the debug and/or verbose properties of RemoteTestNG if user specified
    */
   private static void addDebugProperties(StringBuilder vmArgs, ILaunchConfiguration config) {
-    String[] debugProperties = new String[] {
-        RemoteTestNG.PROPERTY_DEBUG,
-        RemoteTestNG.PROPERTY_VERBOSE
-    };
-    for (String p : debugProperties) {
-      if (System.getProperty(p) != null) {
-        vmArgs.append(" -D").append(p);
-      }
-    }
-
-    if (ConfigurationHelper.getVerbose(config)) {
+    if (getVerbose(config)) {
       vmArgs.append(" -D" + RemoteTestNG.PROPERTY_VERBOSE);
     }
-    if (ConfigurationHelper.getDebug(config)) {
+    if (getDebug(config)) {
       vmArgs.append(" -D" + RemoteTestNG.PROPERTY_DEBUG);
     }
   }
