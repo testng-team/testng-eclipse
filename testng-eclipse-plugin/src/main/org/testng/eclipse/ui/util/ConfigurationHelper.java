@@ -171,14 +171,6 @@ public class ConfigurationHelper {
 
     addDebugProperties(jvmArgs, configuration);
 
-    switch (ConfigurationHelper.getProtocol(configuration)) {
-    case STRING:
-      jvmArgs.append(" -Dtestng.eclipse.stringprotocol");
-      break;
-    default:
-      break;
-    }
-
     return VariablesPlugin.getDefault().getStringVariableManager()
         .performStringSubstitution(jvmArgs.toString());
   }
