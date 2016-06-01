@@ -171,36 +171,18 @@ public class ConfigurationHelper {
 
     addDebugProperties(jvmArgs, configuration);
 
-    switch (ConfigurationHelper.getProtocol(configuration)) {
-    case STRING:
-      jvmArgs.append(" -Dtestng.eclipse.stringprotocol");
-      break;
-    default:
-      break;
-    }
-
     return VariablesPlugin.getDefault().getStringVariableManager()
         .performStringSubstitution(jvmArgs.toString());
   }
 
   /**
-   * Pass the system properties we were called with to the RemoteTestNG process.
+   * Add the debug and/or verbose properties of RemoteTestNG if user specified
    */
   private static void addDebugProperties(StringBuilder vmArgs, ILaunchConfiguration config) {
-    String[] debugProperties = new String[] {
-        RemoteTestNG.PROPERTY_DEBUG,
-        RemoteTestNG.PROPERTY_VERBOSE
-    };
-    for (String p : debugProperties) {
-      if (System.getProperty(p) != null) {
-        vmArgs.append(" -D").append(p);
-      }
-    }
-
-    if (ConfigurationHelper.getVerbose(config)) {
+    if (getVerbose(config)) {
       vmArgs.append(" -D" + RemoteTestNG.PROPERTY_VERBOSE);
     }
-    if (ConfigurationHelper.getDebug(config)) {
+    if (getDebug(config)) {
       vmArgs.append(" -D" + RemoteTestNG.PROPERTY_DEBUG);
     }
   }
@@ -355,7 +337,7 @@ public class ConfigurationHelper {
     config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
                         RemoteTestNG.class.getName());
     config.setAttribute(TestNGLaunchConfigurationConstants.TYPE, LaunchType.CLASS.ordinal());
-    config.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL, "2");
+    config.setAttribute(TestNGLaunchConfigurationConstants.LOG_LEVEL, "0"); // default log level for nothing
   }
 
   /**
