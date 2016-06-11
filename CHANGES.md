@@ -43,6 +43,8 @@ Supported Metrics:
 | TestNG for Eclipse | Eclipse Helio (3.6) or above |
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
+**IMPORTANT:** TestNG versions below 6.5.1 are not supported since this version.
+
 * Feature #188: Add M2E integrtion support
 * Fixed issue #211 jvm args are appended two times
 * Fixed issue #206: lauching test is failing with non maven projects
