@@ -67,16 +67,24 @@ public class TestNGLaunchConfigurationDelegate
       abort(
           ResourceUtil.getFormattedString(
               "TestNGLaunchConfigurationDelegate.error.novmrunner", //$NON-NLS-1$
-              new String[] { install.getId() }),
+              new String[] { install.getName() }),
           null, IJavaLaunchConfigurationConstants.ERR_VM_RUNNER_DOES_NOT_EXIST);
     }
     AbstractVMInstall vmi = (AbstractVMInstall) install;
-    Version vmVer = new Version(vmi.getJavaVersion());
+    String jreVer = vmi.getJavaVersion();
+    if (jreVer == null) {
+      abort(
+          ResourceUtil.getFormattedString(
+              "TestNGLaunchConfigurationDelegate.error.unknownjre", //$NON-NLS-1$
+              new String[] { install.getName() }), 
+          null, TestNGPluginConstants.LAUNCH_ERROR_JVM_VER_UNKNOWN);
+    }
+    Version vmVer = new Version(jreVer);
     if (compareVersion(vmVer, mimJvmVer) < 0) {
       abort(
           ResourceUtil.getFormattedString(
               "TestNGLaunchConfigurationDelegate.error.incompatiblevmversion", //$NON-NLS-1$
-              new String[] { vmi.getJavaVersion() }),
+              new String[] { jreVer }),
           null, TestNGPluginConstants.LAUNCH_ERROR_JVM_VER_NOT_COMPATIBLE);
     }
 

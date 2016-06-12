@@ -8,6 +8,7 @@ import org.testng.remote.RemoteTestNG;
 public abstract class TestNGPluginConstants {
   public static final int LAUNCH_ERROR = 1001;
   public static final int LAUNCH_ERROR_JVM_VER_NOT_COMPATIBLE = 1002;
+  public static final int LAUNCH_ERROR_JVM_VER_UNKNOWN = 1003;
 
   public static final String TESTNG_HOME= "TESTNG_HOME"; //$NON-NLS-1$
   public static final String MAIN_RUNNER = RemoteTestNG.class.getName();
