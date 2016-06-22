@@ -14,6 +14,8 @@ Supported Metrics:
 * issue #238: fixed the toolbar position on Eclipse Neon
 * fixed issue #157: NPE in TestRunnerViewPart
 * fixed #251: Classes from WAR project exported with `<attachClasses>true</attachClasses>` are not visible
+* fixed #248: run test failed with snapshot version of testng, with error of `java.lang.AbstractMethodError`
+* #253: default log level to 0 for nothing
 
 ## 6.9.11
 
