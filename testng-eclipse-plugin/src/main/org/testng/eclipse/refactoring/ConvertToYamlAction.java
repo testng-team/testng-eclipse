@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.util.Utils;
 import org.testng.internal.Yaml;
 import org.testng.xml.Parser;
@@ -60,14 +61,10 @@ public class ConvertToYamlAction extends AbstractHandler {
             yamlFile.create(is, true /* force */, new NullProgressMonitor());
             Utils.openFile(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
                 yamlFile, new NullProgressMonitor());
-          } catch (ParserConfigurationException e1) {
-            e1.printStackTrace();
-          } catch (SAXException e1) {
-            e1.printStackTrace();
           } catch (IOException e1) {
-            e1.printStackTrace();
+            TestNGPlugin.log(e1);
           } catch (CoreException e) {
-            e.printStackTrace();
+            TestNGPlugin.log(e);
           }
         }
       }
