@@ -215,12 +215,6 @@ abstract public class CustomSuite extends LaunchSuite {
           suiteBuffer.pop("method-selectors");
         }
       }
-    } catch (FileNotFoundException e) {
-      throw new TestNGException(e);
-    } catch (ParserConfigurationException e) {
-      throw new TestNGException(e);
-    } catch (SAXException e) {
-      throw new TestNGException(e);
     } catch (IOException e) {
       throw new TestNGException(e);
     }
