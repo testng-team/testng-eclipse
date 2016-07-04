@@ -11,6 +11,11 @@
     <artifactId>org.testng.eclipse</artifactId>
     <packaging>eclipse-plugin</packaging>
 
+    <properties>
+        <testng.version>6.9.12</testng.version>
+        <testng.remote.version>1.0.0-SNAPSHOT</testng.remote.version>
+    </properties>
+
     <build>
         <resources>
             <resource>
@@ -36,6 +41,46 @@
                 <configuration>
                     <verbose>true</verbose>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.testng</groupId>
+                                    <artifactId>testng</artifactId>
+                                    <version>${testng.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.testng</groupId>
+                                    <artifactId>testng</artifactId>
+                                    <version>${testng.version}</version>
+                                    <classifier>sources</classifier>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.testng.testng-remote</groupId>
+                                    <artifactId>testng-remote-dist</artifactId>
+                                    <version>${testng.remote.version}</version>
+                                    <classifier>shaded</classifier>
+                                    <destFileName>testng-remote.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>lib</outputDirectory>
+                            <stripVersion>true</stripVersion>
+                            <overWriteReleases>true</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                            <excludeTransitive>true</excludeTransitive>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -122,6 +122,11 @@
                     <artifactId>git-commit-id-plugin</artifactId>
                     <version>2.2.0</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>2.10</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -131,6 +136,17 @@
             <id>luna</id>
             <layout>p2</layout>
             <url>http://download.eclipse.org/releases/luna</url>
+        </repository>
+        <repository>
+            <id>jcenter</id>
+            <name>bintray</name>
+            <url>http://jcenter.bintray.com</url>
+        </repository>
+        <repository>
+            <snapshots />
+            <id>ojo-snapshots</id>
+            <name>libs-snapshot</name>
+            <url>https://oss.jfrog.org/artifactory/libs-snapshot</url>
         </repository>
     </repositories>
 </project>
