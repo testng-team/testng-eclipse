@@ -13,7 +13,7 @@
 
     <properties>
         <testng.version>6.9.12</testng.version>
-        <testng.remote.version>1.0.0-SNAPSHOT</testng.remote.version>
+        <testng.remote.version>1.0.0</testng.remote.version>
     </properties>
 
     <build>
