@@ -1,6 +1,17 @@
 CHANGELOG
 ====
 
+## 6.9.13
+
+Supported Metrics:
+
+| Plugin | Dependency |
+| ------------- | ------------- |
+| TestNG for Eclipse | Eclipse Juno (4.2) or above |
+| TestNG M2E Integration (Optional) | M2E 1.5 or above |
+
+* #253: 2nd take on fixing default log level to 0 for nothing
+
 ## 6.9.12
 
 Supported Metrics:
