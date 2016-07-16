@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -201,7 +200,7 @@ public class TestNGLaunchConfigurationDelegate
         getMainTypeName(configuration), classPath);
 
     // insert the program arguments
-    Vector<String> argv = new Vector<String>(10);
+    List<String> argv = new ArrayList<>(10);
     ExecutionArguments execArgs = new ExecutionArguments("", progArgs); //$NON-NLS-1$
     String[] pa = execArgs.getProgramArgumentsArray();
     for (String element : pa) {
