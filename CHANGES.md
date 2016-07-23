@@ -11,6 +11,7 @@ Supported Metrics:
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
 * #253: 2nd take on fixing default log level to 0 for nothing
+* #268: Add a rerun test key command/shortcut
 
 ## 6.9.12
 
