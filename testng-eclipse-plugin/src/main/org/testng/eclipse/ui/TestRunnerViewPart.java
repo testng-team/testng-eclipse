@@ -10,6 +10,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -80,6 +84,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.handlers.IHandlerActivation;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.ViewPart;
@@ -114,6 +120,9 @@ import org.testng.remote.strprotocol.TestResultMessage;
  */
 public class TestRunnerViewPart extends ViewPart
 implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
+
+  private static final String RERUN_LAST_COMMAND = "org.testng.eclipse.shortcut.rerunLast"; //$NON-NLS-1$
+  private static final String RERUN_FAILED_COMMAND = "org.testng.eclipse.shortcut.rerunFailed"; //$NON-NLS-1$
 
   /** used by IWorkbenchSiteProgressService */
   private static final Object FAMILY_RUN = new Object();
@@ -163,7 +172,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   private Action fPrevAction;
   private ToggleOrientationAction[] fToggleOrientationActions;
   private Action m_rerunAction;
+  private IHandlerActivation m_rerunActivation;
   private Action m_rerunFailedAction;
+  private IHandlerActivation m_rerunFailedActivation;
   private RunHistoryAction m_runHistoryAction;
   private Action m_openReportAction;
 
@@ -563,6 +574,10 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     m_isDisposed = true;
     stopTest();
 
+    IHandlerService handlerService= (IHandlerService) getSite().getWorkbenchWindow().getService(IHandlerService.class);
+    handlerService.deactivateHandler(m_rerunActivation);
+    handlerService.deactivateHandler(m_rerunFailedActivation);
+
     TestNGPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
     m_viewIcon.dispose();
     fOKColor.dispose();
@@ -820,7 +835,32 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     fNextAction = new ShowNextFailureAction(this);
     fPrevAction = new ShowPreviousFailureAction(this);
     m_rerunAction= new RerunAction();
+    IHandlerService handlerService = (IHandlerService) getSite().getWorkbenchWindow().getService(IHandlerService.class);
+    IHandler rerunLastHandler = new AbstractHandler() {
+      public Object execute(ExecutionEvent event) throws ExecutionException {
+        m_rerunAction.run();
+        return null;
+      }
+      @Override
+      public boolean isEnabled() {
+        return m_rerunAction.isEnabled();
+      }
+    };
+    m_rerunActivation = handlerService.activateHandler(RERUN_LAST_COMMAND, rerunLastHandler);
+
     m_rerunFailedAction= new RerunFailedAction();
+    IHandler rerunFailedHandler = new AbstractHandler() {
+      public Object execute(ExecutionEvent event) throws ExecutionException {
+        m_rerunFailedAction.run();
+        return null;
+      }
+      @Override
+      public boolean isEnabled() {
+        return m_rerunFailedAction.isEnabled();
+      }
+    };
+    m_rerunFailedActivation = handlerService.activateHandler(RERUN_FAILED_COMMAND, rerunFailedHandler);
+
     m_runHistoryAction = new RunHistoryAction(this);
     m_openReportAction= new OpenReportAction();
 
@@ -1161,6 +1201,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       setDisabledImageDescriptor(TestNGPlugin.getImageDescriptor("dlcl16/relaunch.gif")); //$NON-NLS-1$
       setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
       setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
+      setActionDefinitionId(RERUN_LAST_COMMAND);
     }
 
     @Override
@@ -1247,6 +1288,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       setDisabledImageDescriptor(TestNGPlugin.getImageDescriptor("dlcl16/relaunchf.gif")); //$NON-NLS-1$
       setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunchf.gif")); //$NON-NLS-1$
       setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunchf.gif")); //$NON-NLS-1$
+      setActionDefinitionId(RERUN_FAILED_COMMAND);
     }
 
     @Override

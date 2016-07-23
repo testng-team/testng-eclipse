@@ -190,27 +190,39 @@
             id="org.testng.eclipse.shortcut.testngSuite.debug">
       </command>
       <command
-            name="Convert to TestNG"
-            description="Convert the selection to TestNG"
+            name="%TestNGCommand.convertToTestNG.label"
+            description="%TestNGCommand.convertToTestNG.desc"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.testng.eclipse.convertAction"
             defaultHandler="org.testng.eclipse.refactoring.ConvertFromJUnitAction"
             >
       </command>
       <command
-            name="Create TestNG class"
-            description="Create a TestNG class to test this class"
+            name="%TestNGCommand.createTestNGClass.label"
+            description="%TestNGCommand.createTestNGClass.desc"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.testng.eclipse.createClassAction"
             defaultHandler="org.testng.eclipse.refactoring.CreateClassAction"
             >
       </command>
       <command
-            name="Convert to YAML"
-            description="Convert the XML file to YAML"
+            name="%TestNGCommand.convertToYaml.label"
+            description="%TestNGCommand.convertToYaml.desc"
             id="org.testng.eclipse.convertToYamlAction"
             defaultHandler="org.testng.eclipse.refactoring.ConvertToYamlAction"
             >
+      </command>
+      <command
+            name="%TestNGCommand.shortcut.rerunLast.label"
+            description="%TestNGCommand.shortcut.rerunLast.desc"
+            categoryId="org.eclipse.debug.ui.category.run"
+            id="org.testng.eclipse.shortcut.rerunLast">
+      </command>
+      <command
+            name="%TestNGCommand.shortcut.rerunFailed.label"
+            description="%TestNGCommand.shortcut.rerunFailed.desc"
+            categoryId="org.eclipse.debug.ui.category.run"
+            id="org.testng.eclipse.shortcut.rerunFailed">
       </command>
   </extension>
 
@@ -235,7 +247,7 @@
             commandId="org.testng.eclipse.shortcut.testngSuite.run"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
   </extension>
-   
+
   <extension
          point="org.eclipse.jdt.ui.quickAssistProcessors">
           <quickAssistProcessor
