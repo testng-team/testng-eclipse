@@ -12,6 +12,7 @@ Supported Metrics:
 
 * #253: 2nd take on fixing default log level to 0 for nothing
 * #268: Add a rerun test key command/shortcut
+* fixed issue #129: Results View not synchronizing properly
 
 ## 6.9.12
 

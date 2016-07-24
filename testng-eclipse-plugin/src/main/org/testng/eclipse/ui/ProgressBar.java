@@ -115,9 +115,10 @@ public class ProgressBar extends Canvas {
   }
 
   private String getCurrentMessage() {
-    return "Tests: " + m_testCounter + "/" + m_totalTestsCounter + "  Methods: " + m_methodsCounter
-//      + (m_testName != null ? "   Current test:" + m_testName : "")
-      + m_timeMessage;
+    StringBuilder buf = new StringBuilder();
+    buf.append("Tests: ").append(m_testCounter).append('/').append(m_totalTestsCounter)
+        .append("  Methods: ").append(m_methodsCounter).append(m_timeMessage);
+    return buf.toString();
   }
 
   private void paintStep(int startX, int endX) {
@@ -250,10 +251,6 @@ public class ProgressBar extends Canvas {
     m_error = status;
     m_timeMessage= msg;
     redraw();
-  }
-
-  private static void ppp(Object msg) {
-//    System.out.println("[JUP]: " + msg);
   }
 
 }
