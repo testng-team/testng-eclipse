@@ -113,7 +113,7 @@ public class SuiteRunInfo implements IRemoteSuiteListener, IRemoteTestListener {
   }
 
   public void onFinish(TestMessage tm) {
-    m_testCount++;
+//    m_testCount++;
 
     // The method count is more accurate than m_methodTotalCount since it also
     // takes data providers and other dynamic invocations into account.
@@ -177,7 +177,7 @@ public class SuiteRunInfo implements IRemoteSuiteListener, IRemoteTestListener {
   }
 
   public int getNewMax() {
-    return (m_methodTotalCount * m_testsTotalCount) / (m_testCount + 1);
+    return (m_methodTotalCount * m_testsTotalCount + 1) / (m_testCount + 1);
   }
 
   public int getMethodCount() {
