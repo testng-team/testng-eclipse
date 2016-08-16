@@ -43,7 +43,7 @@ import com.google.common.collect.Maps;
  * @author cbeust
  */
 public class ConfigurationHelper {
-  
+
   public static class LaunchInfo {
     private String m_projectName;
     private  LaunchType m_launchType;
@@ -91,7 +91,7 @@ public class ConfigurationHelper {
       return Integer.parseInt(stringResult);
     }
   }
-  
+
   public static boolean getVerbose(ILaunchConfiguration config) {
     return getBooleanAttribute(config, TestNGLaunchConfigurationConstants.VERBOSE);
   }
@@ -116,15 +116,15 @@ public class ConfigurationHelper {
   public static List<String> getGroupClasses(ILaunchConfiguration config) {
     return getListAttribute(config, TestNGLaunchConfigurationConstants.GROUP_CLASS_LIST);
   }
-  
+
   public static List<String> getClasses(ILaunchConfiguration config) {
     return getListAttribute(config, TestNGLaunchConfigurationConstants.CLASS_TEST_LIST);
   }
-  
+
   public static List<String> getPackages(ILaunchConfiguration config) {
 	    return getListAttribute(config, TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST);
-	  }
-  
+  }
+
   public static List<String> getSuites(ILaunchConfiguration config) {
     return getListAttribute(config, TestNGLaunchConfigurationConstants.SUITE_TEST_LIST);
   }
@@ -136,11 +136,11 @@ public class ConfigurationHelper {
   public static String getProjectName(ILaunchConfiguration config) {
     return getStringAttribute(config, IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME);
   }
-  
+
   public static String getMain(ILaunchConfiguration configuration) {
     return getStringAttribute(configuration, IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME);
   }
-  
+
   public static List<String> getMethods(ILaunchConfiguration configuration) {
     return getListAttribute(configuration, TestNGLaunchConfigurationConstants.METHOD_TEST_LIST);
   }
@@ -210,17 +210,17 @@ public class ConfigurationHelper {
 				IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, args);
 
 		return configuration;
-	}
-  
+  }
+
   public static LaunchType getType(ILaunchConfiguration configuration) {
     int result = getIntAttribute(configuration, TestNGLaunchConfigurationConstants.TYPE);
     return LaunchType.fromInt(result);
   }
-  
+
   public static String getProjectName(ILaunch launch) {
     return launch.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME);
   }
-  
+
   public static int getPort(ILaunch launch) {
     try {
       return Integer.parseInt(launch.getAttribute(TestNGLaunchConfigurationConstants.PORT));
@@ -229,7 +229,7 @@ public class ConfigurationHelper {
       return 0;
     }
   }
-  
+
   public static String getSubName(ILaunch launch) {
     return launch.getAttribute(TestNGLaunchConfigurationConstants.TESTNG_RUN_NAME_ATTR);
   }
@@ -237,55 +237,55 @@ public class ConfigurationHelper {
   ///////////////////// 
   private static Map<String, String> getMapAttribute(ILaunchConfiguration config, String attr) {
     Map<String, String> result = null;
-    
+
     try {
       result = config.getAttribute(attr, result);
     }
     catch(CoreException cex) {
       TestNGPlugin.log(cex);
     }
-    
+
     return result;
   }
-  
+
   private static List<String> getListAttribute(ILaunchConfiguration config, String attr) {
     List<String> result = null;
-    
+
     try {
       result = config.getAttribute(attr, result);
     }
     catch (CoreException e) {
       TestNGPlugin.log(e);
     }
-    
+
     return result;
-    
+
   }
-  
+
   private static String getStringAttribute(ILaunchConfiguration config, String attr) {
     String result = null;
-    
+
     try {
       result = config.getAttribute(attr, result);
     }
     catch (CoreException e) {
       TestNGPlugin.log(e);
     }
-    
+
     return result;
-    
+
   }
 
   private static int getIntAttribute(ILaunchConfiguration config, String attr) {
     int result = 0;
-    
+
     try {
       result = config.getAttribute(attr, result);
     }
     catch (CoreException e) {
       TestNGPlugin.log(e);
     }
-    
+
     return result;
   }
 
@@ -295,14 +295,14 @@ public class ConfigurationHelper {
 
   private static boolean getBooleanAttribute(ILaunchConfiguration config, String attr, boolean defaultValue) {
     boolean result = defaultValue;
-    
+
     try {
       result = config.getAttribute(attr, result);
     }
     catch (CoreException e) {
       TestNGPlugin.log(e);
     }
-    
+
     return result;
   }
 
@@ -310,7 +310,7 @@ public class ConfigurationHelper {
                                                                          final IProject project,
                                                                          final String confName) {
     ILaunchConfigurationWorkingCopy wConf = null;
-    
+
     try {
       ILaunchConfigurationType configurationType = launchManager.getLaunchConfigurationType(TestNGLaunchConfigurationConstants.ID_TESTNG_APPLICATION);
       wConf = configurationType.newInstance(null /*project*/, confName); // launchManager.generateUniqueLaunchConfigurationNameFrom(confName));
@@ -322,16 +322,16 @@ public class ConfigurationHelper {
     catch(CoreException ce) {
       TestNGPlugin.log(ce);
     }
-    
+
     return wConf;
   }
-  
+
   /**
    * @param selectedProject
    */
   public static void createBasicConfiguration(IJavaProject javaProject, ILaunchConfigurationWorkingCopy config) {
     final String projectName = (javaProject == null) ? "" : javaProject.getElementName();
-    
+
     config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
                         projectName);
     config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
@@ -347,18 +347,17 @@ public class ConfigurationHelper {
   public static List<LaunchSuite> getLaunchSuites(IJavaProject ijp,
       ILaunchConfiguration configuration) {
     LaunchType type = ConfigurationHelper.getType(configuration);
-    
+
     List<String> packages= null;
     List<String> testClasses = null;
     List<String> groups = null;
     Map<String, List<String>> classMethods= null;
-    Map<String, String> parameters= null;
-    
-    parameters= getMapAttribute(configuration, TestNGLaunchConfigurationConstants.PARAMS);
+    Map<String, String> parameters= getMapAttribute(configuration, TestNGLaunchConfigurationConstants.PARAMS);
+
     if (type == LaunchType.SUITE) {
       return createLaunchSuites(ijp.getProject(), getSuites(configuration));
     }
-    
+
     if (type == LaunchType.GROUP) {
       groups = getGroups(configuration);
       testClasses = getGroupClasses(configuration);
@@ -381,21 +380,21 @@ public class ConfigurationHelper {
                               groups,
                               parameters,
                               getLogLevel(configuration)
-           );      
+           );
   }
 
   public static Map<String, List<String>> getClassMethods(ILaunchConfiguration configuration) {
     Map<String, String> confResult =
         getMapAttribute(configuration, TestNGLaunchConfigurationConstants.ALL_METHODS_LIST);
     if(null == confResult) return null;
-    
+
     Map<String, List<String>> results= new HashMap<String, List<String>>();
     for (Map.Entry<String, String> entry : confResult.entrySet()) {
       String className= entry.getKey();
       String methodNames= entry.getValue();
       results.put(className, Arrays.asList(methodNames.split(";")));
     }
-    
+
     return results;
   }
 
@@ -412,13 +411,13 @@ public class ConfigurationHelper {
       else {
         suiteFile= project.getFile(suitePath).getLocation().toFile();
       }
-      
+
       result.add(SuiteGenerator.createProxiedXmlSuite(suiteFile));
     }
-    
+
     return result;
   }
-    
+
   /**
    * Custom Eclipse plugin suite generator. Instead of using TestNG core
    * suite generator, we are using a set of custom generators that allow 
@@ -434,7 +433,7 @@ public class ConfigurationHelper {
                 classMethods, groupNames, parameters, logLevel)
         });
   }
-  
+
   /**
    * Looks for an available configuration that matches the project and confName parameters.
    * If the defaultConfiguration is not null, it is used. The
@@ -496,11 +495,11 @@ public class ConfigurationHelper {
 						}// else if
 						// TODO: else complain about no reference parameters
 					}// if
-				}	// for			   
+				}	// for
 		} catch (CoreException ce) {
 			; // IGNORE
 		}
-		
+
 		return resultConf;
 	}
 
@@ -516,10 +515,10 @@ public class ConfigurationHelper {
         if (i++ > 0) strMethods.append(";");
         strMethods.append(method);
       }
-      
+
       result.put(clsName, strMethods.toString());
     }
-    
+
     return result;
   }
 
@@ -549,11 +548,11 @@ public class ConfigurationHelper {
     List<String> packageList = new ArrayList<String>();
     if (launchInfo.m_packageNames != null) {
     	packageList.addAll(launchInfo.m_packageNames);
-    }    
+    }
     if(null != launchInfo.m_classMethods) {
       classMethods.putAll(launchInfo.m_classMethods);
     }
-    
+
     configuration.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
         launchInfo.m_launchType.ordinal());
     configuration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,

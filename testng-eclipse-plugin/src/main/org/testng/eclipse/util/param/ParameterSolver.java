@@ -50,7 +50,7 @@ public class ParameterSolver {
    */
   public static Map solveParameters(IJavaElement[] javaElements) {
     if(null == javaElements || javaElements.length == 0) return null;
-    
+
     Map paramNames= new HashMap();
     try {
       for(IJavaElement javaElement : javaElements) {
@@ -63,13 +63,13 @@ public class ParameterSolver {
       if(paramNames.isEmpty()) {
         return null;
       }
-      
+
       return findParameterValues(javaElements[0].getAncestor(IJavaElement.JAVA_PROJECT).getCorrespondingResource(), paramNames);
     }
     catch(JavaModelException jmex) {
       TestNGPlugin.log(jmex);
     }
-    
+
     return paramNames;
   }
 
@@ -79,72 +79,72 @@ public class ParameterSolver {
       {
         return solveParameters((IPackageFragment) javaElement);
       }
-      
+
       case IJavaElement.COMPILATION_UNIT:
       {
         return solveParameters((ICompilationUnit) javaElement);
       }
-      
+
       case IJavaElement.TYPE:
       {
         return solveParameters((IType) javaElement);
       }
-      
+
       case IJavaElement.METHOD:
       {
         return solveParameters((IMethod) javaElement);
       }
-      
+
       default:
         return null;
     }
   }
-  
+
   private static Map solveParameters(IPackageFragment packageFragment) throws JavaModelException {
     return parseParameterNames(packageFragment.getCompilationUnits(), new TestNGMethodParameterVisitor());
   }
-  
+
   private static Map solveParameters(ICompilationUnit compilationUnit) throws JavaModelException {
     return parseParameterNames(new ICompilationUnit[] {compilationUnit}, new TestNGMethodParameterVisitor());
   }
-  
+
   private static Map solveParameters(IType type) {
     return parseParameterNames(new ICompilationUnit[] {type.getCompilationUnit()}, new TestNGMethodParameterVisitor(type));
   }
-  
+
   private static Map solveParameters(IMethod method) throws JavaModelException {
     if(method.getNumberOfParameters() > 0) {
       return parseParameterNames(new ICompilationUnit[] {method.getCompilationUnit()}, new TestNGMethodParameterVisitor(method));
     }
-    
+
     return null;
   }
-  
+
   protected static Map parseParameterNames(ICompilationUnit[] units, TestNGMethodParameterVisitor visitor) {
     for(ICompilationUnit unit : units) {
       ASTNode node= getParserNode(unit);
       node.accept(visitor);
     }
-    
+
     return visitor.hasParameters() ? visitor.getParametersMap() : null;
   }
-  
+
   protected static ASTNode getParserNode(ICompilationUnit unit) {
     ASTParser parser = ASTParser.newParser(AST.JLS3);
     parser.setSource(unit);
     return parser.createAST(null);
   }
-  
+
   private static Map findParameterValues(IResource projectRes, Map parameters) {
     IResource[] suiteFiles= searchSuites(new IResource[] {projectRes});
     IFile selectedSuite= null;
-    
+
     if (suiteFiles.length == 0) {
     	// No parameters.  If they're all @Optional, this will work anyway.
     	// Otherwise, this will ultimately cause the test to fail with a clear error.
     	return new HashMap();
-    }   
-    
+    }
+
     if(suiteFiles.length > 1) {
       selectedSuite= showSelectionDialog(suiteFiles);
     }
@@ -156,7 +156,7 @@ public class ParameterSolver {
         ? extractParameterValues(selectedSuite, parameters)
         : Collections.emptyMap();
   }
-  
+
   private static Map extractParameterValues(IFile file, Map parameters) {
     try {
       InputStream is= file.getContents();
@@ -175,31 +175,22 @@ public class ParameterSolver {
           TestNGPlugin.log(ex2);
         }
       }
-      
+
       if(null == spf) {
         return null;
       }
-      
+
       spf.setValidating(true);
       SAXParser saxParser = spf.newSAXParser();
       saxParser.parse(is, pvch);
     }
-    catch(CoreException cex) {
-      TestNGPlugin.log(cex);
+    catch(ParserConfigurationException | SAXException | IOException | CoreException ex) {
+      TestNGPlugin.log(ex);
     }
-    catch(ParserConfigurationException pcex) {
-      TestNGPlugin.log(pcex);
-    }
-    catch(SAXException saxex) {
-      TestNGPlugin.log(saxex);
-    }
-    catch(IOException ioex) {
-      TestNGPlugin.log(ioex);
-    }
-    
+
     return parameters;
   }
-  
+
   protected static IFile showSelectionDialog(IResource[] choices) {
     final IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
     if (window == null) {
@@ -221,7 +212,7 @@ public class ParameterSolver {
 
     return (IFile) result[0];
   }
-  
+
   protected static IResource[] searchSuites(IResource[] scopeResources) {
     ISearchQuery query= new FileSearchQuery("<!DOCTYPE suite SYSTEM \"http://testng.org/testng-1.0.dtd\" >", 
                                             false /*regexp*/ , 
@@ -234,17 +225,17 @@ public class ParameterSolver {
     for(int i= 0; i < elements.length; i++) {
       resources[i]= (IResource) elements[i];
     }
-    
+
     return resources;
   }
-  
+
   static class ParameterValuesContentHandler extends DefaultHandler {
     private Map m_params;
-    
+
     public ParameterValuesContentHandler(Map parameters) {
       m_params= parameters;
     }
-    
+
     @Override
     public InputSource resolveEntity(String systemId, String publicId) throws SAXException {
       InputSource result = null;
@@ -280,7 +271,7 @@ public class ParameterSolver {
 
       return result;
     }
-    
+
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
       String name = attributes.getValue("name");
