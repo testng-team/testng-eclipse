@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -18,8 +19,12 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.testng.eclipse.TestNGPlugin;
@@ -31,6 +36,7 @@ import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.Protocols;
 import org.testng.eclipse.ui.RunInfo;
 import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.SuiteGenerator;
+import org.testng.eclipse.util.param.ParameterSolver;
 import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
 
@@ -343,16 +349,16 @@ public class ConfigurationHelper {
 
   /**
    * @return List<LaunchSuite>
+   * @throws JavaModelException 
    */
   public static List<LaunchSuite> getLaunchSuites(IJavaProject ijp,
-      ILaunchConfiguration configuration) {
+      ILaunchConfiguration configuration) throws JavaModelException {
     LaunchType type = ConfigurationHelper.getType(configuration);
 
     List<String> packages= null;
     List<String> testClasses = null;
     List<String> groups = null;
     Map<String, List<String>> classMethods= null;
-    Map<String, String> parameters= getMapAttribute(configuration, TestNGLaunchConfigurationConstants.PARAMS);
 
     if (type == LaunchType.SUITE) {
       return createLaunchSuites(ijp.getProject(), getSuites(configuration));
@@ -372,6 +378,42 @@ public class ConfigurationHelper {
     else if (type == LaunchType.PACKAGE) {
       packages= getListAttribute(configuration, TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST);
     }
+
+    // ~~
+    // collect test parameters
+    //
+
+    List<IJavaElement> je = Lists.newArrayList();
+    if (packages != null) {
+      for (String pkg : packages) {
+        for (IPackageFragment pf : ijp.getPackageFragments()) {
+          if (pf.getElementName().equals(pkg)) {
+            je.add(pf);
+            break;
+          }
+        }
+      }
+    }
+    if (testClasses != null) {
+      for (String clz : testClasses) {
+        IType t = ijp.findType(clz);
+        if (t != null) {
+          je.add(t);
+        }
+      }
+    }
+    if (classMethods != null) {
+      for (Entry<String, List<String>> entry : classMethods.entrySet()) {
+        IType t = ijp.findType(entry.getKey());
+        for (String mthd : entry.getValue()) {
+          je.add(t.getMethod(mthd, null));
+        }
+      }
+    }
+
+    Map<String, String> parameters= ParameterSolver.solveParameters(je.toArray(new IJavaElement[je.size()]));
+
+    // ~~
 
     return createLaunchSuites(ijp.getProject().getName(),
                               packages,
@@ -449,7 +491,7 @@ public class ConfigurationHelper {
    */
   public static ILaunchConfiguration findConfiguration(ILaunchManager launchManager, 
 		  IProject project, String confName, RunInfo runInfo) {
- 
+
 	    ILaunchConfiguration resultConf = null;
 		try {
 				ILaunchConfigurationType confType = launchManager

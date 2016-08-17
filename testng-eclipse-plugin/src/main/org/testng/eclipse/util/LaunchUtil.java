@@ -186,11 +186,6 @@ public class LaunchUtil {
       TestNGPlugin.log(ce);
     }
 
-    if(null != compilationUnit) {
-      Map params= solveParameters(compilationUnit);
-      launchAttributes.put(TestNGLaunchConfigurationConstants.PARAMS, params);
-    }
-
     workingCopy.setAttributes(launchAttributes);
 
     runConfig(workingCopy, launchMode);
@@ -219,7 +214,7 @@ public class LaunchUtil {
 
     return attrs;
   }
-  
+
   public static void launchPackageConfiguration(IJavaProject ijp, IPackageFragment ipf, String mode) {
     List<String> packageNames= new ArrayList<String>();
     packageNames.add(ipf.getElementName());
@@ -232,7 +227,7 @@ public class LaunchUtil {
     catch(JavaModelException jmex) {
       ; // this should never happen but who knows
     }
-    
+
     ILaunchConfigurationWorkingCopy workingCopy= createLaunchConfiguration(ijp.getProject(), "package " + ipf.getElementName(), null);
 
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
@@ -245,18 +240,16 @@ public class LaunchUtil {
         LaunchType.PACKAGE.ordinal());
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
         ConfigurationHelper.toClassMethodsMap(new HashMap<String, Collection<String>>()));
-    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
-                             solveParameters(ipf));
 
     String projectName= ijp.getProject().getName();
-    
+
     PreferenceStoreUtil storage = TestNGPlugin.getPluginPreferenceStore();
     String preDefinedListeners = storage.getPreDefinedListeners(projectName, false);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PRE_DEFINED_LISTENERS, preDefinedListeners.toString().trim());
 
     runConfig(workingCopy, mode);
   }
-  
+
   public static void launchMethodConfiguration(IJavaProject javaProject,
           IMethod imethod,
           String runMode) {
@@ -360,17 +353,15 @@ public class LaunchUtil {
         LaunchType.METHOD.ordinal());
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
                              ConfigurationHelper.toClassMethodsMap(classMethods.asMap()));
-    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
-                             solveParameters(methods));
     String projectName= ijp.getProject().getName();
-    
+
     PreferenceStoreUtil storage = TestNGPlugin.getPluginPreferenceStore();
     String preDefinedListeners = storage.getPreDefinedListeners(projectName, false);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PRE_DEFINED_LISTENERS, preDefinedListeners.toString().trim());
 
     if (runInfo != null) {
     	// set the class and method
-    	
+
     	// set any jvm args
     	String jargs = runInfo.getJvmArgs();
     	if (jargs != null) workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
@@ -383,7 +374,7 @@ public class LaunchUtil {
     }
     runConfig(workingCopy, runMode);
   }
-  
+
   /**
    * Launch a type-based test.
    */
@@ -437,7 +428,6 @@ public class LaunchUtil {
 
   private static void launchTypeBasedConfiguration(IJavaProject javaProject, String confName,
       IType[] types, String mode) {
-    
     Multimap<String, String> classMethods = ArrayListMultimap.create();
     List<String> typeNames = Lists.newArrayList();
     Set<IType> allTypes = Sets.newHashSet();
@@ -474,19 +464,16 @@ public class LaunchUtil {
                              ConfigurationHelper.toClassMethodsMap(classMethods.asMap()));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
                              typeNames);
-    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PARAMS,
-                             solveParameters(allTypes.toArray(new IType[allTypes.size()])));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.METHOD_TEST_LIST,
         methodNames);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST,
                              EMPTY_ARRAY_PARAM);
-    
+
     String projectName= javaProject.getProject().getName();
-    
+
     PreferenceStoreUtil storage = TestNGPlugin.getPluginPreferenceStore();
     String preDefinedListeners = storage.getPreDefinedListeners(projectName, false);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PRE_DEFINED_LISTENERS, preDefinedListeners.toString().trim());
-
 
     runConfig(workingCopy, mode);
   }

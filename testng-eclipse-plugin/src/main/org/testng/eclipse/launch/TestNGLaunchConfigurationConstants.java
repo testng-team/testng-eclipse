@@ -115,8 +115,6 @@ public abstract class TestNGLaunchConfigurationConstants {
     }
   }
 
-  public static final String PARAMS = make("PARAMETERS");
-
   public static final Protocols[] SERIALIZATION_PROTOCOLS = {Protocols.JSON, Protocols.OBJECT, Protocols.STRING};
   public static final Protocols DEFAULT_SERIALIZATION_PROTOCOL = SERIALIZATION_PROTOCOLS[0];
 
