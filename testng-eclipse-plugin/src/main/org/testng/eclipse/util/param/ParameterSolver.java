@@ -2,8 +2,6 @@ package org.testng.eclipse.util.param;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.parsers.FactoryConfigurationError;
@@ -39,6 +37,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.google.common.collect.Maps;
+
 
 /**
  * @author <a href='mailto:the_mindstorm[at]evolva[dot]ro'>Alexandru Popescu</a>
@@ -48,20 +48,21 @@ public class ParameterSolver {
    * TODO: this method searches only for parameters of the current <code>javaElement</code>
    * and not all the dependencies.
    */
-  public static Map solveParameters(IJavaElement[] javaElements) {
-    if(null == javaElements || javaElements.length == 0) return null;
+  public static Map<String, String> solveParameters(IJavaElement[] javaElements) {
+    Map<String, String> paramNames = Maps.newHashMap();
 
-    Map paramNames= new HashMap();
+    if (null == javaElements || javaElements.length == 0) {
+      return paramNames;
+    }
+
     try {
       for(IJavaElement javaElement : javaElements) {
-        Map params= getParameterNames(javaElement);
-        if(null != params) {
-          paramNames.putAll(params);
-        }
+        Map<String, String> params = getParameterNames(javaElement);
+        paramNames.putAll(params);
       }
 
       if(paramNames.isEmpty()) {
-        return null;
+        return paramNames;
       }
 
       return findParameterValues(javaElements[0].getAncestor(IJavaElement.JAVA_PROJECT).getCorrespondingResource(), paramNames);
@@ -73,7 +74,7 @@ public class ParameterSolver {
     return paramNames;
   }
 
-  private static Map getParameterNames(IJavaElement javaElement) throws JavaModelException {
+  private static Map<String, String> getParameterNames(IJavaElement javaElement) throws JavaModelException {
     switch(javaElement.getElementType()) {
       case IJavaElement.PACKAGE_FRAGMENT:
       {
@@ -96,37 +97,37 @@ public class ParameterSolver {
       }
 
       default:
-        return null;
+        return Maps.newHashMap();
     }
   }
 
-  private static Map solveParameters(IPackageFragment packageFragment) throws JavaModelException {
+  private static Map<String, String> solveParameters(IPackageFragment packageFragment) throws JavaModelException {
     return parseParameterNames(packageFragment.getCompilationUnits(), new TestNGMethodParameterVisitor());
   }
 
-  private static Map solveParameters(ICompilationUnit compilationUnit) throws JavaModelException {
+  private static Map<String, String> solveParameters(ICompilationUnit compilationUnit) throws JavaModelException {
     return parseParameterNames(new ICompilationUnit[] {compilationUnit}, new TestNGMethodParameterVisitor());
   }
 
-  private static Map solveParameters(IType type) {
+  private static Map<String, String> solveParameters(IType type) {
     return parseParameterNames(new ICompilationUnit[] {type.getCompilationUnit()}, new TestNGMethodParameterVisitor(type));
   }
 
-  private static Map solveParameters(IMethod method) throws JavaModelException {
+  private static Map<String, String> solveParameters(IMethod method) throws JavaModelException {
     if(method.getNumberOfParameters() > 0) {
       return parseParameterNames(new ICompilationUnit[] {method.getCompilationUnit()}, new TestNGMethodParameterVisitor(method));
     }
 
-    return null;
+    return Maps.newHashMap();
   }
 
-  protected static Map parseParameterNames(ICompilationUnit[] units, TestNGMethodParameterVisitor visitor) {
+  protected static Map<String, String> parseParameterNames(ICompilationUnit[] units, TestNGMethodParameterVisitor visitor) {
     for(ICompilationUnit unit : units) {
       ASTNode node= getParserNode(unit);
       node.accept(visitor);
     }
 
-    return visitor.hasParameters() ? visitor.getParametersMap() : null;
+    return visitor.getParametersMap();
   }
 
   protected static ASTNode getParserNode(ICompilationUnit unit) {
@@ -135,14 +136,14 @@ public class ParameterSolver {
     return parser.createAST(null);
   }
 
-  private static Map findParameterValues(IResource projectRes, Map parameters) {
+  private static Map<String, String> findParameterValues(IResource projectRes, Map<String, String> parameters) {
     IResource[] suiteFiles= searchSuites(new IResource[] {projectRes});
     IFile selectedSuite= null;
 
     if (suiteFiles.length == 0) {
     	// No parameters.  If they're all @Optional, this will work anyway.
     	// Otherwise, this will ultimately cause the test to fail with a clear error.
-    	return new HashMap();
+    	return Maps.newHashMap();
     }
 
     if(suiteFiles.length > 1) {
@@ -152,12 +153,13 @@ public class ParameterSolver {
       selectedSuite= (IFile) suiteFiles[0];
     }
 
-    return selectedSuite != null
-        ? extractParameterValues(selectedSuite, parameters)
-        : Collections.emptyMap();
+    if (selectedSuite == null) {
+      return Maps.newHashMap();
+    }
+    return extractParameterValues(selectedSuite, parameters);
   }
 
-  private static Map extractParameterValues(IFile file, Map parameters) {
+  private static Map<String, String> extractParameterValues(IFile file, Map<String, String> parameters) {
     try {
       InputStream is= file.getContents();
       ParameterValuesContentHandler pvch= new ParameterValuesContentHandler(parameters);
@@ -176,8 +178,8 @@ public class ParameterSolver {
         }
       }
 
-      if(null == spf) {
-        return null;
+      if (null == spf) {
+        return parameters;
       }
 
       spf.setValidating(true);
@@ -230,9 +232,9 @@ public class ParameterSolver {
   }
 
   static class ParameterValuesContentHandler extends DefaultHandler {
-    private Map m_params;
+    private Map<String, String> m_params;
 
-    public ParameterValuesContentHandler(Map parameters) {
+    public ParameterValuesContentHandler(Map<String, String> parameters) {
       m_params= parameters;
     }
 
