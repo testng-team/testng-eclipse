@@ -213,23 +213,24 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
           + "  }\n");
     }
 
-    String contents =
-	      "package " + m_page.getPackage() + ";\n\n"
-	      + imports
-	      + "\n"
-	      + "public class " + className + " {\n"
-	      ;
-
-    if (testMethods.size() == 0 || ! StringUtils.isEmptyString(dataProvider)) {
-      contents +=
-          "  @Test" + dataProvider + "\n"
-  	      + "  public void f" + signature + " {\n"
-  	      + "  }\n";
+    StringBuilder contents = new StringBuilder();
+    if (!StringUtils.isEmptyString(m_page.getPackageName())) {
+      contents.append("package " + m_page.getPackageName() + ";\n\n");
     }
 
-    contents += methods + "}\n";
+    contents.append(imports).append("\n");
+    contents.append("public class " + className + " {\n");
 
-	  return new ByteArrayInputStream(contents.getBytes());
+    if (testMethods.size() == 0 || ! StringUtils.isEmptyString(dataProvider)) {
+      contents.append(
+          "  @Test" + dataProvider + "\n"
+  	      + "  public void f" + signature + " {\n"
+  	      + "  }\n");
+    }
+
+    contents.append(methods + "}\n");
+
+	  return new ByteArrayInputStream(contents.toString().getBytes());
 	}
 
 	/**
