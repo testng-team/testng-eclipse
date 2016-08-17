@@ -3,6 +3,7 @@ package org.testng.eclipse.util.param;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
@@ -17,8 +18,10 @@ import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.testng.collections.Lists;
 
 /**
  * Visitor for TestNG methods.
@@ -31,18 +34,19 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
   private static final String CONFIGURATION_ANNOTATION_FQN = ANNOTATION_PACKAGE + CONFIGURATION_ANNOTATION;
   private static final String TEST_ANNOTATION = "Test";
   private static final String TEST_ANNOTATION_FQN = ANNOTATION_PACKAGE + TEST_ANNOTATION;
-  
+  private static final String DEFAULT_PARAM_VALUE = "not-found";
+
   private Map<MethodDeclaration, List<String>> m_parameters = Maps.newHashMap();
   private IType m_typeFilter;
   private IMethod m_methodFilter;
 
   public TestNGMethodParameterVisitor() {
   }
-  
+
   public TestNGMethodParameterVisitor(IMethod methodOnly) {
     m_methodFilter= methodOnly;
   }
-  
+
   public TestNGMethodParameterVisitor(IType typeOnly) {
     m_typeFilter= typeOnly;
   }
@@ -56,7 +60,7 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
       return true;
     }
   }
-  
+
   @Override
   public boolean visit(MethodDeclaration node) {
     if(null != m_methodFilter) {
@@ -82,9 +86,9 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
     if(!isKnownAnnotation(annotation.getTypeName().getFullyQualifiedName())) {
       return false;
     }
-    
+
     List<?> values= annotation.values();
-    
+
     if(null != values && !values.isEmpty()) {
       for(int i= 0; i < values.size(); i++) {
         MemberValuePair pair= (MemberValuePair) values.get(i);
@@ -98,7 +102,7 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
         }
       }
     }
-    
+
     return false;
   }
 
@@ -117,7 +121,7 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
         record((MethodDeclaration) annotation.getParent(), (StringLiteral) paramValues);
       }
     }
-    
+
     return false;
   }
 
@@ -136,7 +140,7 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
       record(method, paramNames);
     }
   }
-  
+
   /**
    * 
    * @param method the known TestNG annotation with required parameters
@@ -152,11 +156,11 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
 
     record(method, paramNames);
   }
-  
+
   protected boolean isParameterAnnotation(String annotationType) {
     return PARAMETER_ANNOTATION.equals(annotationType) || PARAMETER_ANNOTATION_FQN.equals(annotationType);
   }
-  
+
   protected boolean isKnownAnnotation(String annotationType) {
     return CONFIGURATION_ANNOTATION.equals(annotationType)
            || CONFIGURATION_ANNOTATION_FQN.equals(annotationType)
@@ -165,16 +169,41 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
   }
 
   /**
-   * @return
+   * @return the parameter name/value map
    */
   public Map<String, String> getParametersMap() {
     Map<String, String> parameterMap = Maps.newHashMap();
-    for (List<String> paramNames : m_parameters.values()) {
-      for(int i= 0; i < paramNames.size(); i++) { 
-        parameterMap.put(paramNames.get(i), "not-found");
+    for (Entry<MethodDeclaration, List<String>> paramEntry : m_parameters.entrySet()) {
+      // get all '@Optional' value, as the default value for the parameters
+      List<String> optionals = Lists.newArrayList();
+      for (Object p : paramEntry.getKey().parameters()) {
+        SingleVariableDeclaration paramDecl = (SingleVariableDeclaration) p;
+        for (Object pm : paramDecl.modifiers()) {
+          SingleMemberAnnotation paramAnn = (SingleMemberAnnotation) pm;
+          if ("Optional".equals(paramAnn.getTypeName().toString())) {
+            optionals.add(paramAnn.getValue().toString());
+          }
+        };
+      };
+
+      List<String> paramNames = paramEntry.getValue();
+      for(int i = 0; i < paramNames.size(); i++) {
+        String val = DEFAULT_PARAM_VALUE;
+        // the user is responsible for making sure the order of the @Optional parameters follow the order in @Parameters
+        if (i < optionals.size() && optionals.get(i) != null) {
+          val = optionals.get(i);
+        }
+
+        String paramName = paramNames.get(i);
+
+        if (parameterMap.containsKey(paramName) && !DEFAULT_PARAM_VALUE.equals(parameterMap.get(paramName))) {
+          continue;
+        }
+
+        parameterMap.put(paramName, val);
       }
     }
-    
+
     return parameterMap;
   }
 }
