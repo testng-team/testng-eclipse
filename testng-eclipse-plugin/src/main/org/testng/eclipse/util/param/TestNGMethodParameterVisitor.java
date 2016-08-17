@@ -169,7 +169,7 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
   }
 
   /**
-   * @return the parameter name/value map
+   * @return the non-null parameter name/value map
    */
   public Map<String, String> getParametersMap() {
     Map<String, String> parameterMap = Maps.newHashMap();
