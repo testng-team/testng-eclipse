@@ -9,7 +9,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <tycho.version>0.24.0</tycho.version>
+        <tycho.version>0.25.0</tycho.version>
         <enforcer.maven.version>3.1.1</enforcer.maven.version>
         <enforcer.java.version>1.7</enforcer.java.version>
         <maven.compiler.source>1.7</maven.compiler.source>
