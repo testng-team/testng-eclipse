@@ -15,6 +15,7 @@ Supported Metrics:
 * fixed issue #129: Results View not synchronizing properly
 * https://github.com/testng-team/testng-remote/issues/33: add support for TestNG versions in [6.0, 6.5.1)
 * fixed https://github.com/cbeust/testng/issues/455: Optional parameter is not initialized properly
+* fixed #273: Not able to create a test with the default package
 
 ## 6.9.12
 

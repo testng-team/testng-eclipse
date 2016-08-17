@@ -35,6 +35,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * TODO refactor by extending org.eclipse.jdt.ui.wizards.NewTypeWizardPage, 
+ *      see org.eclipse.jdt.junit.wizards.NewTestCaseWizardPageOne
+ * 
+ *
  * Generate a new TestNG class and optionally, the corresponding XML suite file.
  */
 public class NewTestNGClassWizardPage extends WizardPage {
@@ -232,11 +236,11 @@ public class NewTestNGClassWizardPage extends WizardPage {
     if (container.getProject() == null || container.getProject().getName() == null || container.getProject().getName().length() == 0) {
       updateStatus("The source folder of an existing project must be specified.");
       return;
-    }    
-    if (getPackageName().length() == 0) {
-      updateStatus("The package must be specified");
-      return;
     }
+//    if (getPackageName().length() == 0) {
+//      updateStatus("The package must be specified");
+//      return;
+//    }
     if (container != null && !container.isAccessible()) {
       updateStatus("Project must be writable");
       return;
@@ -285,9 +289,5 @@ public class NewTestNGClassWizardPage extends WizardPage {
   public boolean containsAnnotation(String annotation) {
     Button b = m_annotations.get(annotation);
     return b.getSelection();
-  }
-
-  public String getPackage() {
-    return m_packageNameText.getText();
   }
 }
