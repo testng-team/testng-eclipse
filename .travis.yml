@@ -10,6 +10,6 @@ jdk:
 before_install: echo "MAVEN_OPTS='-Xmx1024m -XX:MaxPermSize=512m'" > ~/.mavenrc
 
 script:
-  - mvn -e -U clean install
+  - mvn -e -U -Dci clean install
 
 after_success: test "${TRAVIS_PULL_REQUEST}" == "false" && test ${TRAVIS_BRANCH} == "master" && ./scripts/upload-snapshot
