@@ -16,6 +16,7 @@ Supported Metrics:
 * https://github.com/testng-team/testng-remote/issues/33: add support for TestNG versions in [6.0, 6.5.1)
 * fixed https://github.com/cbeust/testng/issues/455: Optional parameter is not initialized properly
 * fixed #273: Not able to create a test with the default package
+* https://github.com/testng-team/testng-remote/issues/36: Support DEV-SNAPSHOT version
 
 ## 6.9.12
 
