@@ -66,11 +66,13 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     if (confDom != null) {
       if (PreferenceUtils.getBoolean(project, Activator.PREF_ENVIRON)) {
         Xpp3Dom envDom = confDom.getChild("environmentVariables");
-        List<String> environList = new ArrayList<>(envDom.getChildCount());
-        for (Xpp3Dom varDom : envDom.getChildren()) {
-          environList.add(varDom.getName() + "=" + varDom.getValue());
+        if (envDom != null) {
+          List<String> environList = new ArrayList<>(envDom.getChildCount());
+          for (Xpp3Dom varDom : envDom.getChildren()) {
+            environList.add(varDom.getName() + "=" + varDom.getValue());
+          }
+          return environList;
         }
-        return environList;
       }
     }
     return null;
