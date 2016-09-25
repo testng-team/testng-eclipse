@@ -405,8 +405,10 @@ public class ConfigurationHelper {
     if (classMethods != null) {
       for (Entry<String, List<String>> entry : classMethods.entrySet()) {
         IType t = ijp.findType(entry.getKey());
-        for (String mthd : entry.getValue()) {
-          je.add(t.getMethod(mthd, null));
+        if (t != null) {
+          for (String mthd : entry.getValue()) {
+            je.add(t.getMethod(mthd, null));
+          }
         }
       }
     }
