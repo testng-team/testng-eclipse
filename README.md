@@ -29,6 +29,10 @@ To install it:
 
 Enjoy.
 
+## Change Logs
+
+The full changelog is [here](CHANGES.md)
+
 ## User documentation
 
 The documentation for this plug-in can be found at http://testng.org/doc/eclipse.html
@@ -55,7 +59,7 @@ mvn -e -U -Dci clean install
 
 The update site package will be generated at `testng-eclipse-update-site/target/site.zip`
 
-## Developer
+## For Plugin Developer
 
 In Eclipse, select _Import / Existing Project_ and point the dialog to
 this directory. Then you can just create a new Eclipse application
@@ -81,12 +85,12 @@ be found in the ```strprotocol``` package.
 The plug-in understands two system properties, which you can define as
 VM arguments in the launch dialog:
 
-   -Dtestng.eclipse.verbose
+   `-Dtestng.eclipse.verbose`
 
 This will cause both the Eclipse client and RemoteTestNG to issue a
 more verbose output.
 
-   -Dtestng.eclipse.debug
+   `-Dtestng.eclipse.debug`
 
 Use this flag if you need to debug and break into RemoteTestNG. In
 this case, you need to start the RemoteTestNG process youself as a
@@ -94,13 +98,13 @@ regular Java application and with the "-debug" flag. Then start the
 Eclipse client with this system property, and then the two processes
 will communicate on a hardcoded port, 12345 (as opposed to the random
 port which they usually use) and through a hardcoded XML file
-(```"${java.io.tmpdir}/testng-customsuite.xml"```).
+(`"${java.io.tmpdir}/testng-customsuite.xml"`).
 
 Now that you launched both processes yourself, you can set up break
 point and inspect variables on either.
 
 
-# Protocol
+### Protocol
 
 When a new run is launched, TestNGLaunchConfigurationDelegate creates
 a VMRunnerConfigurationClient that launches RemoteTestNG with a host,
@@ -116,10 +120,12 @@ Whenever a new message is received, AbstractRemoteTestRunnerClient
 looks up the type of the message and then calls the subclass's
 corresponding method:
 
-```SUITE -> notifyStart(GenericMessage)
+```
+SUITE -> notifyStart(GenericMessage)
 TEST -> notifySuiteEvents(SuiteMessage)
 TEST_RESULT -> notifyTestEvents(TestMessage)
-other -> notifyResultEvents(TestResultMessage)```
+other -> notifyResultEvents(TestResultMessage)
+```
 
 RemoteTestNG starts by opening a connection to the port passed on the
 command line and when it succeeds, runs the suites and uses listeners
