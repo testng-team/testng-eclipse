@@ -17,6 +17,7 @@ Supported Metrics:
 * fixed #273: Not able to create a test with the default package
 * https://github.com/testng-team/testng-remote/issues/36: Support DEV-SNAPSHOT version
 * #284: for m2e integration, enable parsing systemProperties and environmentVariables by default. and fix a potential NPE if 'environmentVariables' not present in pom.xml
+* fixed #288: Missing failed assert details in the console. Now set the default log level to 2, which means reverted change for #253
 
 ## 6.9.12
 
