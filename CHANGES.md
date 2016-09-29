@@ -10,7 +10,6 @@ Supported Metrics:
 | TestNG for Eclipse | Eclipse Juno (4.2) or above |
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
-* #253: 2nd take on fixing default log level to 0 for nothing
 * #268: Add a rerun test key command/shortcut
 * fixed issue #129: Results View not synchronizing properly
 * https://github.com/testng-team/testng-remote/issues/33: add support for TestNG versions in [6.0, 6.5.1)
