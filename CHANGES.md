@@ -1,4 +1,4 @@
-CHANGELOG
+Change Log
 ====
 
 ## 6.9.13
@@ -17,7 +17,7 @@ Supported Metrics:
 * fixed https://github.com/cbeust/testng/issues/455: Optional parameter is not initialized properly
 * fixed #273: Not able to create a test with the default package
 * https://github.com/testng-team/testng-remote/issues/36: Support DEV-SNAPSHOT version
-* #284: for 2e integration, enable parsing systemProperties and environmentVariables by default. and fix a potential NPE if 'environmentVariables' not present in pom.xml
+* #284: for m2e integration, enable parsing systemProperties and environmentVariables by default. and fix a potential NPE if 'environmentVariables' not present in pom.xml
 
 ## 6.9.12
 
