@@ -1,5 +1,6 @@
 package org.testng.eclipse.maven;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.PluginManagement;
 import org.apache.maven.model.Profile;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.interpolation.EnvarBasedValueSource;
 import org.codehaus.plexus.interpolation.InterpolationException;
 import org.codehaus.plexus.interpolation.PrefixedObjectValueSource;
 import org.codehaus.plexus.interpolation.PropertiesBasedValueSource;
@@ -248,14 +250,16 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     RegexBasedInterpolator inter = new RegexBasedInterpolator();
     Model model = mvnProject.getModel();
     Properties profileProperties = collectProperties(model, selectedProfiles, prjFecade);
-    inter.addValueSource(new PropertiesBasedValueSource(profileProperties));
-    inter.addValueSource(new PrefixedObjectValueSource(Arrays.asList(new String[] { "pom.", "project." }), //$NON-NLS-1$ //$NON-NLS-2$
-        model, false));
-    inter.addValueSource(new PrefixedObjectValueSource("settings.", MavenPlugin.getMaven().getSettings()));
     try {
+      inter.addValueSource(new PropertiesBasedValueSource(profileProperties));
+      inter.addValueSource(new EnvarBasedValueSource());
+      inter.addValueSource(new PrefixedObjectValueSource(Arrays.asList(new String[] { "pom.", "project." }), //$NON-NLS-1$ //$NON-NLS-2$
+          model, false));
+      inter.addValueSource(new PrefixedObjectValueSource("settings.", MavenPlugin.getMaven().getSettings()));
+
       text = inter.interpolate(text);
-    } catch (InterpolationException e) {
-      Activator.log("interpolate [" + text + "] failed.", e);
+    } catch (IOException | InterpolationException e) {
+      Activator.log("interpolate [" + text + "] failed: " + e.getMessage(), e);
     }
     return text;
   }
