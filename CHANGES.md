@@ -1,6 +1,17 @@
 Change Log
 ====
 
+## 6.9.14-SNAPSHOT
+
+Supported Metrics:
+
+| Plugin | Dependency |
+| ------------- | ------------- |
+| TestNG for Eclipse | Eclipse Juno (4.2) or above |
+| TestNG M2E Integration (Optional) | M2E 1.5 or above |
+
+* fixed #284: Reference to undefined variable env.DOMAIN_PATH when launch the test.
+
 ## 6.9.13
 
 Supported Metrics:
