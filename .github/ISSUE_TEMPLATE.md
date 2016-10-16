@@ -1,16 +1,27 @@
+### Plugin Version
+> 'Eclipse -> About Eclipse -> Installation Details -> Locate the TestNG plugin'
+
+> Or, optional, provide the git revision of plugin: "About Eclipse -> 'Installation Details' at left bottom -> 'Configuration' tab -> scroll down to '*** TestNG for Eclipse Details:' portion ")
+
 ### Expected behaviour
-Tell us what should happen
+
 
 ### Actual behaviour
-Tell us what happens instead
 
-### Steps to reproduce
-1. 
-2. 
-3. 
 
-### Running Configuration
-* Plugin Version: 
-* (Optional) Plugin Git Revision: 
-  (Since 6.9.11, you can get the plugin git revision via navigating "About Eclipse -> 'Installation Details' at left bottom -> 'Configuration' tab -> scroll down to '*** TestNG for Eclipse Details:' portion ")
-* (Optional) Operating System: 
+### Any relate message in "Error Log" view
+> "Windows -> Show View -> Others -> Error Log" 
+
+
+### The Dependency Management tool for your project
+
+- [ ] Maven
+- [ ] Gradle
+- [ ] Ant
+- [ ] Eclipse Buildpath
+
+### Operating System
+
+- [ ] Windows
+- [ ] Linux
+- [ ] OSX
