@@ -18,7 +18,7 @@
 - [ ] Maven
 - [ ] Gradle
 - [ ] Ant
-- [ ] Eclipse Buildpath
+- [ ] Eclipse Buildpath (aka. Use "TestNG Library" for your project in Eclipse)
 
 ### Operating System
 
