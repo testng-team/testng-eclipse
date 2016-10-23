@@ -2,9 +2,6 @@ buildscript {
     repositories {
         mavenLocal()
         jcenter()
-        maven {
-            url 'https://dl.bintray.com/missedone/gradle-plugins/'
-        }
     }
     dependencies {
         classpath 'com.github.missedone:gradle-bintray-p2-plugin:1.0.2'
