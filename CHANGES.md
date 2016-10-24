@@ -11,6 +11,7 @@ Supported Metrics:
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
 * fixed #284: Reference to undefined variable env.DOMAIN_PATH when launch the test.
+* fixed https://github.com/cbeust/testng/issues/1209: revert PR #252; for issue #251, please install [m2e-wtp](https://www.eclipse.org/m2e-wtp/) plugin. 
 
 ## 6.9.13
 
