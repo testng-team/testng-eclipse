@@ -33,13 +33,5 @@
              name="%org.testng.eclipse.maven.pref.name">
        </page>
     </extension>
-    <extension
-          point="org.eclipse.m2e.jdt.classifierClasspathProviders">
-       <classifierClasspathProvider
-             class="org.testng.eclipse.maven.WarClassesClassifierClasspathProvider"
-             id="org.testng.eclipse.maven.WarClassesClassifierClasspathProvider"
-             name="WarClassesClassifierClasspathProvider">
-       </classifierClasspathProvider>
-    </extension>
 
 </plugin>
