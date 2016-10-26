@@ -12,6 +12,7 @@ Supported Metrics:
 
 * fixed #284: Reference to undefined variable env.DOMAIN_PATH when launch the test.
 * fixed https://github.com/cbeust/testng/issues/1209: revert PR #252 for issue #251; to support `<attachClasses>true</attachClasses>`, please install '[Eclipse IDE for Java EE Developers](http://www.eclipse.org/downloads/packages/)' package, or the [m2e-wtp](https://www.eclipse.org/m2e-wtp/) plugin to be more specific. 
+* fixed #294: Unable to launch TestNG Test - ClassCastException: org.eclipse.jdt.core.dom.MarkerAnnotation cannot be cast to org.eclipse.jdt.core.dom.SingleMemberAnnotation
 
 ## 6.9.13
 
