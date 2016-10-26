@@ -34,7 +34,7 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
   private static final String CONFIGURATION_ANNOTATION_FQN = ANNOTATION_PACKAGE + CONFIGURATION_ANNOTATION;
   private static final String TEST_ANNOTATION = "Test";
   private static final String TEST_ANNOTATION_FQN = ANNOTATION_PACKAGE + TEST_ANNOTATION;
-  private static final String DEFAULT_PARAM_VALUE = "not-found";
+  private static final String DEFAULT_PARAM_VALUE = "param-val-not-found";
 
   private Map<MethodDeclaration, List<String>> m_parameters = Maps.newHashMap();
   private IType m_typeFilter;
