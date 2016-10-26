@@ -179,9 +179,11 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
       for (Object p : paramEntry.getKey().parameters()) {
         SingleVariableDeclaration paramDecl = (SingleVariableDeclaration) p;
         for (Object pm : paramDecl.modifiers()) {
-          SingleMemberAnnotation paramAnn = (SingleMemberAnnotation) pm;
-          if ("Optional".equals(paramAnn.getTypeName().toString())) {
-            optionals.add(paramAnn.getValue().toString());
+          if (pm instanceof SingleMemberAnnotation) {
+            SingleMemberAnnotation paramAnn = (SingleMemberAnnotation) pm;
+            if ("Optional".equals(paramAnn.getTypeName().toString())) {
+              optionals.add(paramAnn.getValue().toString());
+            }
           }
         };
       };
