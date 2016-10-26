@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -21,6 +22,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -34,6 +36,7 @@ import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.Protocols;
 import org.testng.eclipse.ui.RunInfo;
+import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.SuiteGenerator;
 import org.testng.eclipse.util.param.ParameterSolver;
@@ -407,7 +410,12 @@ public class ConfigurationHelper {
         IType t = ijp.findType(entry.getKey());
         if (t != null) {
           for (String mthd : entry.getValue()) {
-            je.add(t.getMethod(mthd, null));
+            IMethod m = JDTUtil.solveMethod(t, mthd);
+            if (m == null) {
+              throw new JavaModelException(new CoreException(TestNGPlugin.createError(
+                          "no test method [" + mthd + "] was found")));
+            }
+            je.add(m);
           }
         }
       }

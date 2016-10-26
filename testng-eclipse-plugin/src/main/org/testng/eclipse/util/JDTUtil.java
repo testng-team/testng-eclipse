@@ -483,7 +483,7 @@ public class JDTUtil {
     return dv;
   }
   
-  private static IMethod solveMethod(IType type, String methodName) {
+  public static IMethod solveMethod(IType type, String methodName) {
     try {
       IMethod[] typemethods= type.getMethods();
       
