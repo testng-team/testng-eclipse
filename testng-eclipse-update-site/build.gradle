@@ -4,7 +4,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.github.missedone:gradle-bintray-p2-plugin:1.0.2'
+        classpath 'com.github.missedone:gradle-bintray-p2-plugin:1.1.0'
     }
 }
 
@@ -16,6 +16,7 @@ publishP2Repo {
     repoOwner = 'testng-team'
     repoName = 'testng-eclipse'
     compositePackage = ''
+    subCompositeStrategy = 'MICRO'
     repoDir = new File("target/site")
     zippedRepoFile = new File("target/site_assembly.zip")
 }
