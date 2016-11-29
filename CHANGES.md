@@ -1,7 +1,7 @@
 Change Log
 ====
 
-## 6.9.14-SNAPSHOT
+## 6.10
 
 Supported Metrics:
 
