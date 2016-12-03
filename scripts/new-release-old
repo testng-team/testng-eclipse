@@ -1,0 +1,24 @@
+
+TESTNG_DIR=../testng/build/libs
+
+TESTNG_JAR=`ls -ltr ${TESTNG_DIR}/testng*jar|grep -v source|grep -v javadoc|awk '{print $9}'`
+cp -f ${TESTNG_JAR} testng-eclipse-plugin/lib/testng.jar
+TESTNG_SRC_JAR=`ls -ltr ${TESTNG_DIR}/testng*-sources.jar|awk '{print $9}'`
+cp -f ${TESTNG_SRC_JAR} testng-eclipse-plugin/lib/testng-sources.jar
+
+#scripts/set-version $1
+mvn clean package
+
+VER=$(echo $(basename `ls testng-eclipse-update-site/target/site/features/org.testng.eclipse_*.jar`) | cut -d'_' -f2 | rev | cut -f 2- -d '.' | rev)
+echo "Created version: $VER"
+
+if [ $# -eq 1 ]
+then
+  echo "Uploading..."
+  ./upload-release -m $2
+
+  git tag -a $VER -m "release $VER"
+  git push origin $VER
+else
+  echo "No message supplied, not uploading"
+fi

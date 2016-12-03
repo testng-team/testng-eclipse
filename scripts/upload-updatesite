@@ -10,11 +10,15 @@ fi
 BINTRAY_USER=${BINTRAY_USER:?bintray user is not defined}
 BINTRAY_API_KEY=${BINTRAY_API_KEY:?bintray api key is not defined}
 
+BUILD_MODE=$1
+
 base_dir=$(cd `dirname $0` && pwd)
 site_dir=$base_dir/../testng-eclipse-update-site/
 
 export BINTRAY_USER
 export BINTRAY_API_KEY
+export BUILD_MODE
+
 cd $site_dir
 ./gradlew --stacktrace
 cd -

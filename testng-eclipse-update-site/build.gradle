@@ -14,7 +14,7 @@ defaultTasks 'publishP2Repo'
 
 publishP2Repo {
     repoOwner = 'testng-team'
-    repoName = 'testng-eclipse'
+    repoName = System.getenv('BUILD_MODE') == 'release' ? 'testng-eclipse-release' : 'testng-eclipse'
     compositePackage = ''
     subCompositeStrategy = 'MICRO'
     repoDir = new File("target/site")
