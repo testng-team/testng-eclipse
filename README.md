@@ -43,6 +43,7 @@ latest                    | [release](http://beust.com/eclipse) , [beta](http://
 6.9.10.201512240000       | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.10/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.10.201512240000/site_assembly.zip)
 6.9.5.201505251947        | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.5/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.5.201505251947/site_assembly.zip)
 
+(NOTE: it's always recommended to install from the 'latest' release updatesite. the version specific updatesites are for cases that you want to stay on old version.)
 
 ## Change Logs
 
