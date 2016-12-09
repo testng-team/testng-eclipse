@@ -23,6 +23,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
@@ -76,6 +79,8 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   private TestRunnerViewPart m_testRunnerPart;
   private SashForm m_sashForm;
   private Composite m_parentComposite;
+
+  private Clipboard fClipboard;
 
   //
   // Keeping track of what's in the tree
@@ -163,6 +168,8 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
     addListeners();
 
     m_parentComposite = result;
+
+    fClipboard= new Clipboard(parent.getDisplay());
 
     return result;
   }
@@ -252,6 +259,7 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
       TreeItem treeItem = m_tree.getSelection()[0];
       RunInfo testInfo = BaseTreeItem.getTreeItem(treeItem).getRunInfo();
 
+      manager.add(new CopyAction(treeItem));
       manager.add(new OpenTestAction(m_testRunnerPart, testInfo));
       manager.add(new Separator());
       manager.add(new QuickRunAction(m_testRunnerPart.getLaunchedProject(), 
@@ -395,6 +403,21 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   @Override
   public void setFocus() {
     m_tree.setFocus();
+  }
+
+  private class CopyAction extends Action {
+    private TreeItem treeItem;
+    public CopyAction(TreeItem treeItem) {
+      this.treeItem = treeItem;
+      setText(ResourceUtil.getString("CopyAction.text")); //$NON-NLS-1$
+    }
+
+    @Override
+    public void run() {
+      fClipboard.setContents(
+          new String[]{ treeItem.getText() }, 
+          new Transfer[]{ TextTransfer.getInstance() });
+    }
   }
 
   /**

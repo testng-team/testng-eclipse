@@ -11,6 +11,7 @@ Supported Metrics:
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
 * fixed #301: UI typo: Serilization -> Serialization
+* feature #300: testng eclipse plugin results view should allow the user to copy the test data that is displayed for test iterations
 
 ## 6.10
 
