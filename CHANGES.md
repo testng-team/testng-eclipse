@@ -12,6 +12,7 @@ Supported Metrics:
 
 * fixed #301: UI typo: Serilization -> Serialization
 * feature #300: testng eclipse plugin results view should allow the user to copy the test data that is displayed for test iterations
+* fixed #279: java.lang.SecurityException: class "org.osgi.framework.BundleException"'s signer information does not match signer information of other classes in the same package
 
 ## 6.10
 
