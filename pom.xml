@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.testng.eclipse</groupId>
     <artifactId>org.testng.eclipse.parent</artifactId>
-    <version>6.10.0-SNAPSHOT</version>
+    <version>6.10.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -169,8 +169,14 @@
         </repository>
         <repository>
             <snapshots />
-            <id>ojo-snapshots</id>
-            <name>libs-snapshot</name>
+            <id>sonatype-snapshots</id>
+            <name>Sonatype Snapshot</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
+        <repository>
+            <snapshots />
+            <id>jfrog-snapshots</id>
+            <name>jFrog Snapshot</name>
             <url>https://oss.jfrog.org/artifactory/libs-snapshot</url>
         </repository>
     </repositories>
