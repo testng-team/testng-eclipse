@@ -42,6 +42,7 @@ import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.ui.util.Utils.Widgets;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
+import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SWTUtil;
 import org.testng.reporters.XMLReporter;
 
@@ -152,7 +153,7 @@ public class ProjectPropertyPage extends PropertyPage {
     // Disable default listeners
     //
     m_disabledDefaultListeners = new Button(parentComposite, SWT.CHECK);
-    m_disabledDefaultListeners.setText("Disable default listeners");
+    m_disabledDefaultListeners.setText(ResourceUtil.getString("TestNGPropertyPage.disableDefaultListeners"));
 //    m_disabledDefaultListeners.setLayoutData(SWTUtil.createGridData());//new GridData(SWT.FILL, SWT.NONE, true, false, 4, 1));
 //    m_disabledDefaultListeners.setBackground(new Color(parent.getDisplay(), 0xcc, 0, 0));
 
@@ -161,7 +162,7 @@ public class ProjectPropertyPage extends PropertyPage {
     {
       Widgets w = Utils.createStringEditorControl(parentComposite, "TestNGPropertyPage.preDefinedListeners", null, true);
       m_preDefinedListeners = w.text;
-      m_preDefinedListeners.setToolTipText("Split multi listener using ;");
+      m_preDefinedListeners.setToolTipText(ResourceUtil.getString("TestNGPropertyPage.disableDefaultListeners.tips"));
     }
     loadDefaults();
 

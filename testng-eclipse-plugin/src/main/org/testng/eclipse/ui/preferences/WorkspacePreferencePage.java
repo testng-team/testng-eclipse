@@ -15,10 +15,12 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
+import org.testng.eclipse.util.ResourceUtil;
 
 /**
  * Workspace wide preferences for TestNG.
@@ -69,24 +71,9 @@ public class WorkspacePreferencePage
         parentComposite); 
     m_outputdir.setAbsolutePathVerifier(m_absolutePath);
 
-    m_disabledDefaultListeners= new BooleanFieldEditor2(TestNGPluginConstants.S_DISABLEDLISTENERS, 
-        "Disable default listeners", //$NON-NLS-1$ 
-        SWT.NONE, 
-        parentComposite);
-
-    m_showViewWhenTestsComplete = new BooleanFieldEditor2(
-        TestNGPluginConstants.S_SHOW_VIEW_WHEN_TESTS_COMPLETE,
-        "Show view when tests complete", //$NON-NLS-1$ 
-        SWT.NONE, parentComposite);
-
-    m_showCaseNameOnViewTitle = new BooleanFieldEditor2(
-        TestNGPluginConstants.S_VIEW_TITLE_SHOW_CASE_NAME,
-        "Show test name on view title when tests complete", //$NON-NLS-1$ 
-        SWT.NONE, parentComposite);
-
     // XML template
     m_xmlTemplateFile = new FileFieldEditor(TestNGPluginConstants.S_XML_TEMPLATE_FILE,
-        "Template XML file:", false /* no absolute */,
+        ResourceUtil.getString("TestNGPropertyPage.templateXml"), false /* no absolute */,
         StringButtonFieldEditor.VALIDATE_ON_FOCUS_LOST,
         parentComposite);
     m_xmlTemplateFile.setEmptyStringAllowed(true);
@@ -100,10 +87,30 @@ public class WorkspacePreferencePage
         .hint(convertWidthInCharsToPixels(36), SWT.DEFAULT)
         .applyTo(m_excludedStackTraces.getTextControl(parentComposite));
 
+
+    m_disabledDefaultListeners= new BooleanFieldEditor2(TestNGPluginConstants.S_DISABLEDLISTENERS, 
+        ResourceUtil.getString("TestNGPropertyPage.disableDefaultListeners"), //$NON-NLS-1$ 
+        SWT.NONE, 
+        parentComposite);
+
     m_preDefinedListeners = new StringFieldEditor(TestNGPluginConstants.S_PRE_DEFINED_LISTENERS,
-        "Pre Defined Listeners", parentComposite);
-    
-    
+        ResourceUtil.getString("TestNGPropertyPage.preDefinedListeners"), parentComposite);
+
+
+    Label sepLabel = new Label(parentComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
+    GridDataFactory.fillDefaults().span(3, SWT.DEFAULT).applyTo(sepLabel);
+
+    m_showViewWhenTestsComplete = new BooleanFieldEditor2(
+        TestNGPluginConstants.S_SHOW_VIEW_WHEN_TESTS_COMPLETE,
+        "Show view when tests complete", //$NON-NLS-1$ 
+        SWT.NONE, parentComposite);
+
+    m_showCaseNameOnViewTitle = new BooleanFieldEditor2(
+        TestNGPluginConstants.S_VIEW_TITLE_SHOW_CASE_NAME,
+        "Show test name on view title when tests complete", //$NON-NLS-1$ 
+        SWT.NONE, parentComposite);
+
+
     addField(m_outputdir);
     addField(m_absolutePath);
     addField(m_disabledDefaultListeners);
