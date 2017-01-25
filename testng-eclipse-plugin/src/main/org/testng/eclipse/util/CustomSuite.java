@@ -3,7 +3,6 @@ package org.testng.eclipse.util;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -16,8 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.xml.parsers.ParserConfigurationException;
-
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.variables.IStringVariableManager;
+import org.eclipse.core.variables.VariablesPlugin;
 import org.testng.TestNGException;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.internal.Utils;
@@ -27,7 +27,6 @@ import org.testng.xml.LaunchSuite;
 import org.testng.xml.Parser;
 import org.testng.xml.XmlMethodSelector;
 import org.testng.xml.XmlSuite;
-import org.xml.sax.SAXException;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -106,7 +105,11 @@ abstract public class CustomSuite extends LaunchSuite {
     suiteBuffer.setDocType("suite SYSTEM \"" + Parser.TESTNG_DTD_URL + "\"");
 
     if (hasEclipseXmlFile) {
-      createXmlFileFromTemplate(suiteBuffer, xmlFile);
+      try {
+        createXmlFileFromTemplate(suiteBuffer, xmlFile);
+      } catch (CoreException e) {
+        TestNGPlugin.log(e);
+      }
     } else {
       createXmlFileFromParameters(suiteBuffer);
     }
@@ -148,10 +151,13 @@ abstract public class CustomSuite extends LaunchSuite {
 
   /**
    * Fill the top of the XML suiteBuffer with the top of the XML template file
+   * @throws CoreException 
    */
-  private void createXmlFileFromTemplate(XMLStringBuffer suiteBuffer, String fileName) {
+  private void createXmlFileFromTemplate(XMLStringBuffer suiteBuffer, String fileName) throws CoreException {
     try {
-      Parser parser = new Parser(fileName);
+      IStringVariableManager manager = VariablesPlugin.getDefault().getStringVariableManager();
+      String resolvedFileName = manager.performStringSubstitution(fileName);
+      Parser parser = new Parser(resolvedFileName);
       parser.setLoadClasses(false); // we don't want to load the classes from the template file
       Collection<XmlSuite> suites = parser.parse();
       if (suites.size() > 0) {
