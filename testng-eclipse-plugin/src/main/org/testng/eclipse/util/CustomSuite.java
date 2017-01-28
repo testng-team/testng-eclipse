@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.variables.IStringVariableManager;
 import org.eclipse.core.variables.VariablesPlugin;
 import org.testng.TestNGException;
@@ -53,6 +54,7 @@ abstract public class CustomSuite extends LaunchSuite {
   protected String m_suiteName;
   protected Map<String, String> m_parameters;
   protected int m_logLevel;
+  private String workingDir;
 
   private XMLStringBuffer m_suiteBuffer;
 //  private List<String> m_suiteFiles;
@@ -66,10 +68,12 @@ abstract public class CustomSuite extends LaunchSuite {
   public CustomSuite(final String projectName,
                      final String suiteName,
                      final Map<String, String> parameters,
-                     final int logLevel) {
+                     final int logLevel,
+                     final String workingDir) {
     super(true);
     init(Collections.<String>emptyList(), projectName, suiteName, parameters,
         logLevel);
+    this.workingDir = workingDir;
   }
 
   private void init(List<String> suiteFiles, String projectName,
@@ -106,7 +110,13 @@ abstract public class CustomSuite extends LaunchSuite {
 
     if (hasEclipseXmlFile) {
       try {
-        createXmlFileFromTemplate(suiteBuffer, xmlFile);
+        IStringVariableManager manager = VariablesPlugin.getDefault().getStringVariableManager();
+        String resolvedXmlFile = manager.performStringSubstitution(xmlFile);
+        if (!(new Path(resolvedXmlFile).isAbsolute()) && !Utils.isStringEmpty(workingDir)) {
+          resolvedXmlFile = workingDir + "/" + resolvedXmlFile;
+        }
+
+        createXmlFileFromTemplate(suiteBuffer, resolvedXmlFile);
       } catch (CoreException e) {
         TestNGPlugin.log(e);
       }
@@ -155,9 +165,7 @@ abstract public class CustomSuite extends LaunchSuite {
    */
   private void createXmlFileFromTemplate(XMLStringBuffer suiteBuffer, String fileName) throws CoreException {
     try {
-      IStringVariableManager manager = VariablesPlugin.getDefault().getStringVariableManager();
-      String resolvedFileName = manager.performStringSubstitution(fileName);
-      Parser parser = new Parser(resolvedFileName);
+      Parser parser = new Parser(fileName);
       parser.setLoadClasses(false); // we don't want to load the classes from the template file
       Collection<XmlSuite> suites = parser.parse();
       if (suites.size() > 0) {
@@ -383,8 +391,9 @@ class ClassMethodsSuite extends CustomSuite {
                            final List<String> classNames,
                            final Map<String, List<String>> classMethods,
                            final Map<String, String> parameters,
-                           final int logLevel) {
-    super(projectName, DEFAULT_SUITE_TAG_NAME, parameters, logLevel);
+                           final int logLevel,
+                           final String workingDir) {
+    super(projectName, DEFAULT_SUITE_TAG_NAME, parameters, logLevel, workingDir);
     m_classNames = classNames;
     m_classMethods = classMethods != null ? sanitize(classMethods): classMethods;
     if(m_useMethods) {
@@ -478,8 +487,9 @@ class GroupListSuite extends CustomSuite {
                         final List<String> classNames,
                         final List<String> groupNames,
                         final Map<String, String> parameters,
-                        final int logLevel) {
-    super(projectName, projectName + " by groups", parameters, logLevel);
+                        final int logLevel,
+                        final String workingDir) {
+    super(projectName, projectName + " by groups", parameters, logLevel, workingDir);
 
     m_packageNames= packageNames;
     m_classNames= classNames;
@@ -523,8 +533,9 @@ class PackageSuite extends CustomSuite {
   public PackageSuite(final String projectName,
                       final List<String> packageNames,
                       final Map<String, String> parameters,
-                      final int logLevel) {
-    super(projectName, projectName + " by packages", parameters, logLevel);
+                      final int logLevel,
+                      final String workingDir) {
+    super(projectName, projectName + " by packages", parameters, logLevel, workingDir);
     m_packageNames= packageNames;
   }
 
