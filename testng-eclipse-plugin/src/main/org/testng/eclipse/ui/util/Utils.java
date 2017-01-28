@@ -34,7 +34,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -220,7 +219,7 @@ public class Utils {
             }
           }
           else if (obj instanceof IFile) {
-            if (((IFile) obj).getFileExtension().equalsIgnoreCase(extension)) {
+            if (extension.equalsIgnoreCase(((IFile) obj).getFileExtension())) {
               elements.add(obj);
             }
           }
