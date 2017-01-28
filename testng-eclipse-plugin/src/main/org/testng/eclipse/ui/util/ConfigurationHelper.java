@@ -13,7 +13,8 @@ import java.util.Map.Entry;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -352,10 +353,10 @@ public class ConfigurationHelper {
 
   /**
    * @return List<LaunchSuite>
-   * @throws JavaModelException 
+   * @throws CoreException 
    */
   public static List<LaunchSuite> getLaunchSuites(IJavaProject ijp,
-      ILaunchConfiguration configuration) throws JavaModelException {
+      ILaunchConfiguration configuration) throws CoreException {
     LaunchType type = ConfigurationHelper.getType(configuration);
 
     List<String> packages= null;
@@ -425,14 +426,46 @@ public class ConfigurationHelper {
 
     // ~~
 
+    IPath workingDirectory = getWorkingDirectoryPath(configuration);
+    String workingDir;
+    if (workingDirectory == null) {
+      workingDir = getDefaultWorkingDirectory(configuration).getAbsolutePath();
+    }
+    else {
+      workingDir = workingDirectory.toOSString();
+    }
     return createLaunchSuites(ijp.getProject().getName(),
                               packages,
                               testClasses, 
                               classMethods, 
                               groups,
                               parameters,
-                              getLogLevel(configuration)
+                              getLogLevel(configuration),
+                              workingDir
            );
+  }
+
+  public static IPath getWorkingDirectoryPath(ILaunchConfiguration configuration) throws CoreException {
+    String path = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY,
+                                              (String) null);
+    if (path != null) {
+      path = VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(path);
+      return new Path(path);
+    }
+    return null;
+  }
+
+  protected static File getDefaultWorkingDirectory(ILaunchConfiguration configuration) throws CoreException {
+    // default working directory is the project if this config has a project
+    IJavaProject jp = getJavaProject(configuration);
+    if (jp != null) {
+      IProject p = jp.getProject();
+      // p.getLocation() will be null in the case where the location is relative to an undefined workspace path variable.
+      if (p.getLocation() != null) {
+        return p.getLocation().toFile();
+      }
+    }
+    return null;
   }
 
   public static Map<String, List<String>> getClassMethods(ILaunchConfiguration configuration) {
@@ -477,12 +510,12 @@ public class ConfigurationHelper {
    */
   private static List<LaunchSuite> createLaunchSuites(String projectName, List<String> packages,
       List<String> classNames, Map<String, List<String>> classMethods, List<String> groupNames,
-      Map<String, String> parameters, final int logLevel) 
+      Map<String, String> parameters, final int logLevel, final String workingDir) 
   {
     return Arrays.asList(
         new LaunchSuite[] {
             SuiteGenerator.createCustomizedSuite(projectName, packages, classNames, 
-                classMethods, groupNames, parameters, logLevel)
+                classMethods, groupNames, parameters, logLevel, workingDir)
         });
   }
 

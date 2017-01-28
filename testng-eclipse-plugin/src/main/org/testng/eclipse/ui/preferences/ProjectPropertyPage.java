@@ -30,8 +30,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.PropertyPage;
@@ -42,6 +42,7 @@ import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.ui.util.Utils.Widgets;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
+import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SWTUtil;
 import org.testng.reporters.XMLReporter;
 
@@ -99,6 +100,44 @@ public class ProjectPropertyPage extends PropertyPage {
     }
 
     //
+    // XML template file
+    //
+
+    {
+      SelectionAdapter buttonListener = new SelectionAdapter() {
+        public void widgetSelected(SelectionEvent evt) {
+          String result = Utils.selectTemplateFile(getShell());
+          if (result != null) {
+            m_xmlTemplateFile.setText(result);
+          }
+        }
+      };
+      Widgets w = Utils.createTextBrowseControl(parentComposite, null,
+          "TestNGPropertyPage.templateXml", buttonListener, null, null, true);
+      m_xmlTemplateFile = w.text;
+
+    }
+
+    //
+    // Disable default listeners
+    //
+    m_disabledDefaultListeners = new Button(parentComposite, SWT.CHECK);
+    m_disabledDefaultListeners.setText(ResourceUtil.getString("TestNGPropertyPage.disableDefaultListeners"));
+//    m_disabledDefaultListeners.setLayoutData(SWTUtil.createGridData());//new GridData(SWT.FILL, SWT.NONE, true, false, 4, 1));
+//    m_disabledDefaultListeners.setBackground(new Color(parent.getDisplay(), 0xcc, 0, 0));
+
+
+    //Create a string editor control: A label and a text area
+    {
+      Widgets w = Utils.createStringEditorControl(parentComposite, "TestNGPropertyPage.preDefinedListeners", null, true);
+      m_preDefinedListeners = w.text;
+      m_preDefinedListeners.setToolTipText(ResourceUtil.getString("TestNGPropertyPage.disableDefaultListeners.tips"));
+    }
+
+    Label sepLabel = new Label(parentComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
+    GridDataFactory.fillDefaults().applyTo(sepLabel);
+
+    //
     // Watch testng-results.xml
     //
     {
@@ -127,42 +166,6 @@ public class ProjectPropertyPage extends PropertyPage {
       m_watchResultRadio = w.radio;
     }
 
-    //
-    // XML template file
-    //
-
-    {
-      SelectionAdapter buttonListener = new SelectionAdapter() {
-        public void widgetSelected(SelectionEvent evt) {
-          FileDialog dlg= new FileDialog(m_xmlTemplateFile.getShell());
-          dlg.setText("Select Template XML file");
-          String[] filterExt = {"*.xml"};
-          dlg.setFilterExtensions(filterExt);
-          String selectedFile= dlg.open();
-          m_xmlTemplateFile.setText(selectedFile != null ? selectedFile : "");
-        }
-      };
-      Widgets w = Utils.createTextBrowseControl(parentComposite, null,
-          "TestNGPropertyPage.templateXml", buttonListener, null, null, true);
-      m_xmlTemplateFile = w.text;
-
-    }
-
-    //
-    // Disable default listeners
-    //
-    m_disabledDefaultListeners = new Button(parentComposite, SWT.CHECK);
-    m_disabledDefaultListeners.setText("Disable default listeners");
-//    m_disabledDefaultListeners.setLayoutData(SWTUtil.createGridData());//new GridData(SWT.FILL, SWT.NONE, true, false, 4, 1));
-//    m_disabledDefaultListeners.setBackground(new Color(parent.getDisplay(), 0xcc, 0, 0));
-
-    
-    //Create a string editor control: A label and a text area
-    {
-      Widgets w = Utils.createStringEditorControl(parentComposite, "TestNGPropertyPage.preDefinedListeners", null, true);
-      m_preDefinedListeners = w.text;
-      m_preDefinedListeners.setToolTipText("Split multi listener using ;");
-    }
     loadDefaults();
 
     return parentComposite;

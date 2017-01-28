@@ -4,10 +4,13 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
@@ -20,6 +23,9 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.model.BaseWorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.SWTUtil;
 
@@ -28,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -123,8 +130,7 @@ public class Utils {
     enableControls(result, enabled);
     return result;
   }
-  
-  
+
   /**
    * Create a line of widgets, made of:
    * - A label
@@ -198,6 +204,50 @@ public class Utils {
     // away
 //    TestNGPlugin.bold(result.button, true);
 
+    return result;
+  }
+
+  public static ITreeContentProvider getResourceContentProvider(final String extension) {
+    return new BaseWorkbenchContentProvider() {
+      @Override
+      public Object[] getChildren(Object element) {
+        Object[] children = super.getChildren(element);
+        List<Object> elements = new ArrayList<>();
+        for (Object obj : children) {
+          if (obj instanceof IProject) {
+            if (((IProject) obj).isOpen()) {
+              elements.add(obj);
+            }
+          }
+          else if (obj instanceof IFile) {
+            if (((IFile) obj).getFileExtension().equalsIgnoreCase(extension)) {
+              elements.add(obj);
+            }
+          }
+          else {
+            elements.add(obj);
+          }
+        }
+        return elements.toArray(new Object[elements.size()]);
+      }
+    };
+  }
+
+  public static String selectTemplateFile(Shell shell) {
+    ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(shell, 
+        new WorkbenchLabelProvider(), Utils.getResourceContentProvider("xml"));
+    dialog.setTitle("Select TestNG suite template file");
+    dialog.setInput(ResourcesPlugin.getWorkspace().getRoot());
+    String result = null;
+    dialog.open();
+    Object[] results = dialog.getResult();    
+    if ((results != null) && (results.length > 0) && (results[0] instanceof IFile)) {
+      IFile file = (IFile) results[0];
+      IProject prj = file.getProject();
+      IPath relativePath = file.getProjectRelativePath();
+      String wsRelativePath = prj.getName() + "/" + relativePath;
+      result = "${workspace_loc:" + wsRelativePath + "}";
+    }
     return result;
   }
 

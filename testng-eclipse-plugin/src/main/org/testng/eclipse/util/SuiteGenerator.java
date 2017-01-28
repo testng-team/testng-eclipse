@@ -21,18 +21,18 @@ public class SuiteGenerator {
   public static LaunchSuite createCustomizedSuite(String projectName,
       List<String> packageNames, List<String> classNames, Map<String, List<String>> methodNames,
       List<String> groupNames, Map<String, String> parameters,
-      int logLevel) {
+      int logLevel, String workingDir) {
 
     if((null != groupNames) && !groupNames.isEmpty()) {
       return new GroupListSuite(projectName, packageNames, classNames, groupNames, parameters,
-          logLevel);
+          logLevel, workingDir);
     }
     else if(null != packageNames && !packageNames.isEmpty()) {
-      return new PackageSuite(projectName, packageNames, parameters, logLevel);
+      return new PackageSuite(projectName, packageNames, parameters, logLevel, workingDir);
     }
     else {
       return new ClassMethodsSuite(projectName, classNames, methodNames, parameters,
-          logLevel);
+          logLevel, workingDir);
     }
   }
 
