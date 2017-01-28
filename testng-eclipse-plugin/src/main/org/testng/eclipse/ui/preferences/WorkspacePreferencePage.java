@@ -77,15 +77,6 @@ public class WorkspacePreferencePage
     m_xmlTemplateFile.setEmptyStringAllowed(true);
     m_xmlTemplateFile.fillIntoGrid(parentComposite, 3);
 
-    // Excluded stack traces
-    m_excludedStackTraces = new StringFieldEditor(TestNGPluginConstants.S_EXCLUDED_STACK_TRACES,
-        "Excluded stack traces:", parentComposite);
-    m_excludedStackTraces.fillIntoGrid(parentComposite, 3);
-    GridDataFactory.fillDefaults().grab(true, false)
-        .hint(convertWidthInCharsToPixels(36), SWT.DEFAULT)
-        .applyTo(m_excludedStackTraces.getTextControl(parentComposite));
-
-
     m_disabledDefaultListeners= new BooleanFieldEditor2(TestNGPluginConstants.S_DISABLEDLISTENERS, 
         ResourceUtil.getString("TestNGPropertyPage.disableDefaultListeners"), //$NON-NLS-1$ 
         SWT.NONE, 
@@ -107,6 +98,14 @@ public class WorkspacePreferencePage
         TestNGPluginConstants.S_VIEW_TITLE_SHOW_CASE_NAME,
         "Show test name on view title when tests complete", //$NON-NLS-1$ 
         SWT.NONE, parentComposite);
+
+    // Excluded stack traces
+    m_excludedStackTraces = new StringFieldEditor(TestNGPluginConstants.S_EXCLUDED_STACK_TRACES,
+        "Excluded stack traces:", parentComposite);
+    m_excludedStackTraces.fillIntoGrid(parentComposite, 3);
+    GridDataFactory.fillDefaults().grab(true, false)
+        .hint(convertWidthInCharsToPixels(36), SWT.DEFAULT)
+        .applyTo(m_excludedStackTraces.getTextControl(parentComposite));
 
 
     addField(m_outputdir);
