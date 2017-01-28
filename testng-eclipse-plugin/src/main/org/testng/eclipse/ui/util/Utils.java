@@ -36,12 +36,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 public class Utils {
-  
+
   private static Composite createParent(Composite parent, boolean group) {
     Composite result;
     if (group) {
@@ -264,7 +263,7 @@ public class Utils {
   public static String[] split(final String string, final String sep) {
     return org.testng.internal.Utils.split(string, sep);
   }
-  
+
   public static void ppp(String s) {
     System.out.println("[Utils] " + s);
   }
@@ -274,7 +273,7 @@ public class Utils {
     if(null != sourcePath && !"".equals(sourcePath.trim())) {
       sourceFile= new File(sourcePath);
     }
-    
+
     if(null != sourceFile && sourceFile.isAbsolute()) {
       return sourceFile.getAbsolutePath();
     }
@@ -284,7 +283,7 @@ public class Utils {
       return new File(rootPath, sourcePath).getAbsolutePath();
     }
   }
-  
+
   /**
    * Unifies the list of files absolute paths into a single path string using the 
    * specified separator.
@@ -297,20 +296,20 @@ public class Utils {
     if(null == files || files.isEmpty()) {
       return "";
     }
-    
+
     final StringBuffer buf= new StringBuffer(((File) files.get(0)).getAbsolutePath());
     for(int i= 1; i < files.size(); i++) {
       buf.append(sep).append(((File) files.get(i)).getAbsolutePath());
     }
-    
+
     return buf.toString();
   }
-  
+
   public static class WidgetPair {
     public Text   text;
     public Button button;
   }
-  
+
   public static class Widgets extends WidgetPair {
     public Button radio;
   }
@@ -318,13 +317,13 @@ public class Utils {
   /**
    * Collection<List<String>>
    */
-  public static List uniqueMergeList(Collection collection) {
-    Set uniques = new HashSet();
-    for(Iterator it = collection.iterator(); it.hasNext(); ) {
-      uniques.addAll((List) it.next());
+  public static List<String> uniqueMergeList(Collection<List<String>> collection) {
+    Set<String> uniques = new HashSet<>();
+    for(List<String> l : collection) {
+      uniques.addAll(l);
     }
-    
-    return new ArrayList(uniques);
+
+    return new ArrayList<>(uniques);
   }
 
   /**
