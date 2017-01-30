@@ -8,7 +8,7 @@ TestNG for Eclipse Plugin
 
 ### Install Release
 
-<a href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=1549" class="drag" title="Drag to your running Eclipse workspace to install TestNG for Eclipse"><img class="img-responsive" src="https://marketplace.eclipse.org/sites/all/themes/solstice/_themes/solstice_marketplace/public/images/btn-install.png" alt="Drag to your running Eclipse workspace to install TestNG for Eclipse" /></a>
+<a href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=1549" class="drag" title="Drag to your running Eclipse workspace."><img class="img-responsive" src="https://marketplace.eclipse.org/sites/all/themes/solstice/public/images/marketplace/btn-install.png" alt="Drag to your running Eclipse workspace." /></a>
 
 see more at http://testng.org/doc/download.html
 
@@ -16,13 +16,13 @@ see more at http://testng.org/doc/download.html
 
 The update site to install snapshot versions of the TestNG Eclipse plug-in is:
 
-`http://testng.org/eclipse-beta`
+`http://beust.com/eclipse-beta`
 
 Use it if you want to experiment with the new features or verify the bug fixes, and please [report back if you encounter any issues](https://github.com/cbeust/testng-eclipse/issues).
 
 To install it:
 * Click "Help -> Install New Software..." on top level menu
-* Paste the url http://testng.org/eclipse-beta to `Work with: ` text field and press enter.
+* Paste the url http://beust.com/eclipse-beta to `Work with: ` text field and press enter.
 * Select the plugins
 * Click "Next" button and accept the license to complete the installation.
 * Restart Eclipse
@@ -35,8 +35,8 @@ Enjoy.
 
 Plugin Version            | Update Site
 ------------------------- | ------------
-latest                    | [release](http://beust.com/eclipse) , [beta](http://testng.org/eclipse-beta)
-:new: 6.10.0.201612030230 | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.10.0/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.10.0.201612030230/site_assembly.zip)
+:star2: latest            | [release](http://beust.com/eclipse) , [beta](http://beust.com/eclipse-beta)
+6.10.0.201612030230       | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.10.0/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.10.0.201612030230/site_assembly.zip)
 6.9.13.201609291640       | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.13/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.13.201609291640/site_assembly.zip)
 6.9.12.201607091356       | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.12/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.12.201607091356/site_assembly.zip)
 6.9.11.201604020423       | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.11/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.11.201604020423/site_assembly.zip)
