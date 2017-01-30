@@ -416,6 +416,58 @@ public void ${testName}() throws Exception {
 }
        </pattern>
     </template>
+    <template
+          autoinsert="false"
+          contextTypeId="java-members"
+          description="%template.setUpClass.desc"
+          id="org.testng.eclipse.template.setup"
+          name="%template.setUpClass.name">
+       <pattern>
+          @${testType:newType(org.testng.annotations.BeforeClass)}
+public void ${setUp}() throws Exception {
+    ${cursor}
+}
+       </pattern>
+    </template>
+    <template
+          autoinsert="false"
+          contextTypeId="java-members"
+          description="%template.tearDownClass.desc"
+          id="org.testng.eclipse.template.teardown"
+          name="%template.tearDownClass.name">
+       <pattern>
+          @${testType:newType(org.testng.annotations.AfterClass)}
+public void ${tearDown}() throws Exception {
+    ${cursor}
+}
+       </pattern>
+    </template>
+    <template
+          autoinsert="false"
+          contextTypeId="java-members"
+          description="%template.setUpMethod.desc"
+          id="org.testng.eclipse.template.setupMethod"
+          name="%template.setUpMethod.name">
+       <pattern>
+          @${testType:newType(org.testng.annotations.BeforeMethod)}
+public void ${setUpMethod}() throws Exception {
+    ${cursor}
+}
+       </pattern>
+    </template>
+    <template
+          autoinsert="false"
+          contextTypeId="java-members"
+          description="%template.tearDownMethod.desc"
+          id="org.testng.eclipse.template.teardownMethod"
+          name="%template.tearDownMethod.name">
+       <pattern>
+          @${testType:newType(org.testng.annotations.AfterMethod)}
+public void ${tearDownMethod}() throws Exception {
+    ${cursor}
+}
+       </pattern>
+    </template>
  </extension>
  <extension
        point="org.eclipse.ui.systemSummarySections">
