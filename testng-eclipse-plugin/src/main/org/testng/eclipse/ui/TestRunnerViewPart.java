@@ -6,7 +6,6 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -1479,21 +1478,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
 			try {
 				ILaunchConfigurationWorkingCopy wc = config.getWorkingCopy();
 				Set<String> descriptions = getTestDescriptions();
-				if (!descriptions.isEmpty()) { // String.join is not
-					// available in jdk 1.4
-					StringBuffer buf = new StringBuffer();
-					Iterator<String> it = descriptions.iterator();
-					boolean first = true;
-					while (it.hasNext()) {
-						if (first) {
-							first = false;
-						} else {
-							buf.append(",");
-						}
-						buf.append(it.next());
-					}
-					config = LaunchUtil.addJvmArg(TestNGPlugin
-							.getFailedTestsKey(), buf.toString(), wc);
+				if (!descriptions.isEmpty()) {
+					config = LaunchUtil.addJvmArg(TestNGPlugin.getFailedTestsKey(), 
+					                              StringUtils.listToString(descriptions), wc);
 				}
 			} catch (CoreException ce) {
 				ce.printStackTrace();

@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,7 +31,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.search.internal.ui.text.FileSearchQuery;
@@ -45,10 +43,8 @@ import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants;
 import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
-import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.Protocols;
 import org.testng.eclipse.ui.RunInfo;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
-import org.testng.eclipse.util.JDTUtil.MethodDefinition;
 import org.testng.eclipse.util.param.ParameterSolver;
 import org.testng.reporters.FailedReporter;
 
@@ -96,7 +92,7 @@ public class LaunchUtil {
    * Suite file launcher. The file may reside outside the workbench.
    */
   public static void launchFailedSuiteConfiguration(IJavaProject javaProject, 
-		  String runMode, ILaunchConfiguration prevConfig, Set failureDescriptions) {
+		  String runMode, ILaunchConfiguration prevConfig, Set<String> failureDescriptions) {
     final String suiteConfName= javaProject.getElementName() + "-" + FailedReporter.TESTNG_FAILED_XML;
     final String suiteFilePath= TestNGPlugin.getPluginPreferenceStore().getOutputAbsolutePath(javaProject).toOSString() + "/" + FailedReporter.TESTNG_FAILED_XML;
     
@@ -105,7 +101,7 @@ public class LaunchUtil {
         suiteFilePath,
         runMode, prevConfig, failureDescriptions);
   }
-  
+
   /**
    * Suite file launcher. The <code>IFile</code> must exist in the workbench.
    */
@@ -117,7 +113,7 @@ public class LaunchUtil {
    * Suite file launcher. The <code>IFile</code> must exist in the workbench.
    */
   public static void launchSuiteConfiguration(IFile suiteFile, String mode, 
-		  ILaunchConfiguration prevConfig, Set failureDescriptions) {
+		  ILaunchConfiguration prevConfig, Set<String> failureDescriptions) {
     final IProject project= suiteFile.getProject();
     final String fileConfName= suiteFile.getProjectRelativePath().toString().replace('/', '.');
     final String suitePath= suiteFile.getLocation().toOSString();
@@ -128,7 +124,7 @@ public class LaunchUtil {
     
   private static void launchSuiteConfiguration(IProject project, String fileConfName,
       String suiteFilePath,
-		  String mode, ILaunchConfiguration prevConfig, Set failureDescriptions) {
+		  String mode, ILaunchConfiguration prevConfig, Set<String> failureDescriptions) {
     ILaunchConfigurationWorkingCopy configWC =
         createLaunchConfiguration(project, project.getName() + "_" + fileConfName, null);
     try {
@@ -154,16 +150,8 @@ public class LaunchUtil {
         jargs = ConfigurationHelper.getJvmArgs(prevConfig);
       }
       if (jargs != null) ConfigurationHelper.setJvmArgs(configWC, jargs);
-      if (failureDescriptions != null && failureDescriptions.size() > 0) {
-      	Iterator it = failureDescriptions.iterator();
-      	StringBuffer buf = new StringBuffer();
-    		boolean first = true;
-    		while (it.hasNext()) {
-    			if (first) first = false;
-    			else buf.append(",");
-    			buf.append (it.next());
-    		}
-    		setFailedTestsJvmArg(buf.toString(), configWC);
+      if (failureDescriptions != null && !failureDescriptions.isEmpty()) {
+    		setFailedTestsJvmArg(StringUtils.listToString(failureDescriptions), configWC);
       }
     } catch (CoreException e) {
       // TODO throw the exception rather than catch it

@@ -1,9 +1,9 @@
 package org.testng.eclipse.util;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 public class StringUtils {
@@ -37,20 +37,9 @@ public class StringUtils {
   }
 
   public static String listToString(Collection<String> l) {
-    StringBuffer result = new StringBuffer();
-
-    if(null != l) {
-      Iterator<String> iter = l.iterator();
-      while(iter.hasNext()) {
-        String s = iter.next();
-        result.append(s);
-        // only append if it's not the last entry
-        if(iter.hasNext()) {
-          result.append(",");
-        }
-      }
+    if (l != null && !l.isEmpty()) {
+      return Joiner.on(',').join(l).trim();
     }
-
-    return result.toString().trim();
+    return "";
   }
 }

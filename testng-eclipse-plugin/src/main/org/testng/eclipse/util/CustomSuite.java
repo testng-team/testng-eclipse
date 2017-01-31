@@ -10,7 +10,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -495,12 +494,7 @@ class GroupListSuite extends CustomSuite {
     m_classNames= classNames;
     m_groupNames= groupNames;
 
-    for(Iterator<String> it = groupNames.iterator(); it.hasNext(); ) {
-      m_testName.append(it.next());
-      if(it.hasNext()) {
-        m_testName.append(",");
-      }
-    }
+    m_testName.append(StringUtils.listToString(groupNames));
   }
 
   @Override
