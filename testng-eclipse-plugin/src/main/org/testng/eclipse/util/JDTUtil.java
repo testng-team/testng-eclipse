@@ -402,7 +402,7 @@ public class JDTUtil {
 
     return (fuzzyResults.isEmpty() ? null : fuzzyResults.get(0) );
   }
-  
+
   public static IMethod fuzzyFindMethodInProject(IJavaProject project,
       IType methodType, IMethod currentMethod, String methodName) throws JavaModelException {
     int dotIdx = methodName.lastIndexOf('.');
@@ -432,10 +432,10 @@ public class JDTUtil {
     List<MethodDefinition> results = Lists.newArrayList();
     results.add(md);
     results.addAll(solveDependencies(md, parsedMethods));
-    
+
     return results;
   }
-  
+
   /**
    * Tries to retrieve the dependsOn part of a method definition.
    * @param method
@@ -444,17 +444,17 @@ public class JDTUtil {
   private static List<MethodDefinition> solveDependencies(MethodDefinition methodDef,
       Set<String> parsedMethods) {
     DependencyVisitor dv = parse(methodDef.getMethod());
-    
+
     List<MethodDefinition> results = Lists.newArrayList();
     List<String> dependsOnMethods = dv.getDependsOnMethods();
-    
+
     if(!dependsOnMethods.isEmpty()) {
       for(String methodName : dependsOnMethods) {
         if(!parsedMethods.contains(methodName)) {
           IMethod meth= solveMethod(methodDef.getMethod().getDeclaringType(), methodName);
           if(null != meth) {
             MethodDefinition md= new MethodDefinition(meth);
-            
+
             parsedMethods.add(meth.getElementName());
             results.add(md);
             methodDef.addDependencyMethod(md);
@@ -463,12 +463,12 @@ public class JDTUtil {
         }
       }
     }
-    
+
     methodDef.addDependencyGroups(dv.getDependsOnGroups());
-    
+
     return results;
   }
-  
+
   private static DependencyVisitor parse(IMethod method) {
     DependencyVisitor dv= new DependencyVisitor();
     try {
@@ -514,15 +514,15 @@ public class JDTUtil {
   
   public static class MethodDefinition {
     private final IMethod m_method;
-    private final Set/*<String>*/ m_dependsongroups= new HashSet();
-    private final Set/*<IMethod>*/<MethodDefinition> m_dependsonmethods= new HashSet<MethodDefinition>();
-    
+    private final Set<String> m_dependsongroups= new HashSet<>();
+    private final Set<MethodDefinition> m_dependsonmethods= new HashSet<MethodDefinition>();
+
     public MethodDefinition(IMethod method) {
       m_method= method;
     }
-    
-    public void addDependencyGroups(List dependsOnGroups) {
-      if(null != dependsOnGroups && !dependsOnGroups.isEmpty()) {
+
+    public void addDependencyGroups(List<String> dependsOnGroups) {
+      if (null != dependsOnGroups && !dependsOnGroups.isEmpty()) {
         m_dependsongroups.addAll(dependsOnGroups);
       }
     }
@@ -545,7 +545,7 @@ public class JDTUtil {
     /**
      * @return
      */
-    public Set/*<String>*/ getGroups() {
+    public Set<String> getGroups() {
       return m_dependsongroups;
     }
   }

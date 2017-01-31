@@ -28,9 +28,8 @@ public class TestNGQuickFixProcessor implements IQuickFixProcessor {
     if (!isJava5SyntaxSupported(project) || isTestNGContainerOnClasspath(project)) {
       return null;
     }
-    List res = new ArrayList();
-    for (int i = 0; i < locations.length; i++) {
-      IProblemLocation problem = locations[i];
+    List<IJavaCompletionProposal> res = new ArrayList<>();
+    for (IProblemLocation problem : locations) {
       int problemId = problem.getProblemId();
       if (isImportProblem(problemId)) {
         res = getAddTestNGToBuildPathProposals(context, problem, res);
@@ -66,12 +65,11 @@ public class TestNGQuickFixProcessor implements IQuickFixProcessor {
     }
   }
 
-  private List getAddTestNGToBuildPathProposals(IInvocationContext context,
+  private List<IJavaCompletionProposal> getAddTestNGToBuildPathProposals(IInvocationContext context,
                                                 IProblemLocation location,
-                                                List proposals) {
+                                                List<IJavaCompletionProposal> proposals) {
     try {
       ICompilationUnit compilationUnit = context.getCompilationUnit();
-      IJavaProject project = compilationUnit.getJavaProject();
       String s = compilationUnit.getBuffer().getText(location.getOffset(), location.getLength());
 
       if (maybeTestNGPackage(s)) { 

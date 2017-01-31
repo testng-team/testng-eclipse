@@ -354,10 +354,10 @@ public class LaunchUtil {
     	String jargs = runInfo.getJvmArgs();
     	if (jargs != null) workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS,
     			jargs);
-      Map envVars = runInfo.getEnvironmentVariables();
-      if (envVars != null)
-        workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES,
-            envVars);
+      Map<String, String> envVars = runInfo.getEnvironmentVariables();
+      if (envVars != null) {
+        workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, envVars);
+      }
     	setFailedTestsJvmArg(runInfo.getTestDescription(), workingCopy);
     }
     runConfig(workingCopy, runMode);
@@ -693,17 +693,19 @@ public class LaunchUtil {
    * Wrapper method over <code>ParameterSolver.solveParameters</code> that never
    * returns <tt>null</tt>s.
    */
-  private static Map solveParameters(IJavaElement[] javaElements) {
-    Map result= ParameterSolver.solveParameters(javaElements);
-    
-    return result != null ? result : new HashMap();
+  private static Map<String, String> solveParameters(IJavaElement[] javaElements) {
+    Map<String, String> result = ParameterSolver.solveParameters(javaElements);
+    if (result != null) {
+      return result;
+    }
+    return Collections.emptyMap();
   }
-  
+
   /**
    * Wrapper method over <code>ParameterSolver.solveParameters</code> that never
    * returns <tt>null</tt>s.
    */
-  private static Map solveParameters(IJavaElement javaElement) {
+  private static Map<String, String> solveParameters(IJavaElement javaElement) {
     return solveParameters(new IJavaElement[] {javaElement});
   }
 
