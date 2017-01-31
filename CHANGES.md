@@ -14,6 +14,8 @@ Supported Metrics:
 * feature #300: testng eclipse plugin results view should allow the user to copy the test data that is displayed for test iterations
 * fixed #279: java.lang.SecurityException: class "org.osgi.framework.BundleException"'s signer information does not match signer information of other classes in the same package
 * feature #102: Template XML file should should offer workspace-related location
+* feature #152: add more templates for quickly adding new method for 'setup' and 'teardown'
+* feature #154: Add Eclipse Favorites - for static import of 'org.testng.Assert.*'
 
 ## 6.10
 
