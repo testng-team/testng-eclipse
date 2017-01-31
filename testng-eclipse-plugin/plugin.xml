@@ -477,5 +477,11 @@ public void ${tearDownMethod}() throws Exception {
           sectionTitle="TestNG for Eclipse Details">
     </section>
  </extension>
+ <extension
+       point="org.eclipse.ui.startup">
+    <startup
+          class="org.testng.eclipse.ui.preferences.JdtPreferenceInjector">
+    </startup>
+ </extension>
 
 </plugin>

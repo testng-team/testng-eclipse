@@ -1,18 +1,9 @@
 package org.testng.eclipse.ui.preferences;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
-
-import com.google.common.base.Joiner;
 
 /**
  * Class used to initialize default preference values.
@@ -38,26 +29,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         true);
     store.setDefault(TestNGPluginConstants.S_VIEW_TITLE_SHOW_CASE_NAME,
         true);
-
-    initializeFavoriteStatic();
+    store.setDefault(TestNGPluginConstants.S_APPEND_FAVORITE_STATIC_IMPORT,
+        true);
   }
 
-  private void initializeFavoriteStatic() {
-    IPreferenceStore jdtPrefStore = PreferenceConstants.getPreferenceStore();
-
-    Set<String> favorites = new LinkedHashSet<>();
-    String existingFavorites = jdtPrefStore.getString(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
-    if (!existingFavorites.isEmpty()) {
-      favorites.addAll(Arrays.asList(existingFavorites.split(";")));
-    }
-
-    favorites.add("org.testng.Assert.*");
-
-    jdtPrefStore.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS,
-                          Joiner.on(";").join(favorites));
-    try {
-      ((ScopedPreferenceStore) jdtPrefStore).save();
-    } catch (IOException e) {
-    }
-  }
 }
