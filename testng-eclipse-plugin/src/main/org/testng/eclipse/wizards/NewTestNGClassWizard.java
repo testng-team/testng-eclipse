@@ -4,10 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import com.google.common.collect.Sets;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -197,8 +196,8 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	  //
 	  // Test methods
 	  //
-	  Set<String> overloadedMethods = Sets.newHashSet();
-	  Set<String> temp = Sets.newHashSet();
+	  Set<String> overloadedMethods = new HashSet<>();
+	  Set<String> temp = new HashSet<>();
 	  for (IMethod m : testMethods) {
 	    String name = m.getElementName();
       if (temp.contains(name)) overloadedMethods.add(name);

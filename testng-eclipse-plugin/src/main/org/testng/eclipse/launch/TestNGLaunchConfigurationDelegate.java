@@ -38,8 +38,6 @@ import org.testng.remote.RemoteArgs;
 import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
 
-import com.google.common.collect.Lists;
-
 import static org.testng.eclipse.buildpath.BuildPathSupport.getBundleFile;
 
 public class TestNGLaunchConfigurationDelegate
@@ -340,7 +338,7 @@ public class TestNGLaunchConfigurationDelegate
   @Override
   public String[] getEnvironment(ILaunchConfiguration configuration)
       throws CoreException {
-    List<String> result = Lists.newArrayList();
+    List<String> result = new ArrayList<>();
     String[] base = super.getEnvironment(configuration);
     if (base != null && base.length > 0) {
       result.addAll(Arrays.asList(base));

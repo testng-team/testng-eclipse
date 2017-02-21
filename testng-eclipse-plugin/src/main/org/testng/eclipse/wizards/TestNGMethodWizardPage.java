@@ -1,10 +1,9 @@
 package org.testng.eclipse.wizards;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import com.google.common.collect.Lists;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -31,7 +30,7 @@ import org.testng.eclipse.util.Utils.JavaElement;
  */
 public class TestNGMethodWizardPage extends WizardPage {
 
-  private List<IMethod> m_elements = Lists.newArrayList();
+  private List<IMethod> m_elements = new ArrayList<>();
   private Table m_table;
 
   protected TestNGMethodWizardPage(List<JavaElement> elements) {
@@ -142,7 +141,7 @@ public class TestNGMethodWizardPage extends WizardPage {
   }
 
   public List<IMethod> getSelectedMethods() {
-    List<IMethod> result = Lists.newArrayList();
+    List<IMethod> result = new ArrayList<>();
     for (TableItem ti : m_table.getItems()) {
       if (ti.getChecked()) {
         result.add((IMethod) ti.getData());

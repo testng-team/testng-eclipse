@@ -2,6 +2,7 @@ package org.testng.eclipse.util.param;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.parsers.FactoryConfigurationError;
@@ -37,8 +38,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.google.common.collect.Maps;
-
 
 /**
  * @author <a href='mailto:the_mindstorm[at]evolva[dot]ro'>Alexandru Popescu</a>
@@ -49,7 +48,7 @@ public class ParameterSolver {
    * and not all the dependencies.
    */
   public static Map<String, String> solveParameters(IJavaElement[] javaElements) {
-    Map<String, String> paramNames = Maps.newHashMap();
+    Map<String, String> paramNames = new HashMap<>();
 
     if (null == javaElements || javaElements.length == 0) {
       return paramNames;
@@ -97,7 +96,7 @@ public class ParameterSolver {
       }
 
       default:
-        return Maps.newHashMap();
+        return new HashMap<>();
     }
   }
 
@@ -118,7 +117,7 @@ public class ParameterSolver {
       return parseParameterNames(new ICompilationUnit[] {method.getCompilationUnit()}, new TestNGMethodParameterVisitor(method));
     }
 
-    return Maps.newHashMap();
+    return new HashMap<>();
   }
 
   protected static Map<String, String> parseParameterNames(ICompilationUnit[] units, TestNGMethodParameterVisitor visitor) {
@@ -143,7 +142,7 @@ public class ParameterSolver {
     if (suiteFiles.length == 0) {
     	// No parameters.  If they're all @Optional, this will work anyway.
     	// Otherwise, this will ultimately cause the test to fail with a clear error.
-    	return Maps.newHashMap();
+    	return new HashMap<>();
     }
 
     if(suiteFiles.length > 1) {
@@ -154,7 +153,7 @@ public class ParameterSolver {
     }
 
     if (selectedSuite == null) {
-      return Maps.newHashMap();
+      return new HashMap<>();
     }
     return extractParameterValues(selectedSuite, parameters);
   }

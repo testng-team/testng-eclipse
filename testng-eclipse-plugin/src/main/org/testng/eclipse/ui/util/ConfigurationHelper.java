@@ -44,9 +44,6 @@ import org.testng.eclipse.util.param.ParameterSolver;
 import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
 /**
  * Helper methods to store and retrieve values from a launch configuration.
  * 
@@ -61,7 +58,7 @@ public class ConfigurationHelper {
     private Collection<String> m_packageNames;
     private Map<String, List<String>> m_classMethods;
     private String m_suiteName;
-    private Map<String, List<String>> m_groupMap = Maps.newHashMap();
+    private Map<String, List<String>> m_groupMap = new HashMap<>();
     private String m_logLevel;
     private boolean m_verbose;
     private boolean m_debug;
@@ -387,7 +384,7 @@ public class ConfigurationHelper {
     // collect test parameters
     //
 
-    List<IJavaElement> je = Lists.newArrayList();
+    List<IJavaElement> je = new ArrayList<>();
     if (packages != null) {
       for (String pkg : packages) {
         for (IPackageFragment pf : ijp.getPackageFragments()) {
@@ -487,7 +484,7 @@ public class ConfigurationHelper {
    * @return List<LaunchSuite>
    */
   private static List<LaunchSuite> createLaunchSuites(final IProject project, List<String> suites) {
-    List<LaunchSuite> result = Lists.newArrayList();
+    List<LaunchSuite> result = new ArrayList<>();
 
     for (String suitePath : suites) {
       File suiteFile= new File(suitePath);
@@ -565,9 +562,8 @@ public class ConfigurationHelper {
 							String method = runInfo.getMethodName();
 							if (method != null && availableClassMethods != null) {
 								String className = runInfo.getClassName();
-								Object o = availableClassMethods.get(className);
-								if (o != null && o instanceof List) {
-									List methods = (List) o;
+								List<String> methods = availableClassMethods.get(className);
+								if (methods != null) {
 									if (methods.size() == 1) {
 										String available = (String) methods.get(0);
 										if (method.equalsIgnoreCase(available)) {
@@ -611,7 +607,7 @@ public class ConfigurationHelper {
    * @param configuration
    */
   public static void updateLaunchConfiguration(ILaunchConfigurationWorkingCopy configuration, LaunchInfo launchInfo) {
-    Map<String, Collection<String>> classMethods = Maps.newHashMap();
+    Map<String, Collection<String>> classMethods = new HashMap<>();
     if (launchInfo.m_groupMap != null) {
       Collection<List<String>> classes= launchInfo.m_groupMap.values();
       if(null != classes) {

@@ -8,9 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -263,7 +260,7 @@ public class JDTUtil {
       return Collections.<File>emptyList();
     }
 
-    List<File> sourcePaths = Lists.newArrayList();
+    List<File> sourcePaths = new ArrayList<>();
 
     try {
       IPackageFragmentRoot[] sourceRoots = jproject.getAllPackageFragmentRoots();
@@ -425,11 +422,11 @@ public class JDTUtil {
   }
 
   public static List<MethodDefinition> solveDependencies(IMethod method) {
-    Set<String> parsedMethods = Sets.newHashSet();
+    Set<String> parsedMethods = new HashSet<>();
     MethodDefinition md = new MethodDefinition(method);
     parsedMethods.add(method.getElementName());
 
-    List<MethodDefinition> results = Lists.newArrayList();
+    List<MethodDefinition> results = new ArrayList<>();
     results.add(md);
     results.addAll(solveDependencies(md, parsedMethods));
 
@@ -445,7 +442,7 @@ public class JDTUtil {
       Set<String> parsedMethods) {
     DependencyVisitor dv = parse(methodDef.getMethod());
 
-    List<MethodDefinition> results = Lists.newArrayList();
+    List<MethodDefinition> results = new ArrayList<>();
     List<String> dependsOnMethods = dv.getDependsOnMethods();
 
     if(!dependsOnMethods.isEmpty()) {

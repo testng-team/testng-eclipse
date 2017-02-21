@@ -1,8 +1,7 @@
 package org.testng.eclipse.util;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import com.google.common.collect.Lists;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
@@ -25,8 +24,8 @@ public class DependencyVisitor extends ASTVisitor {
   private static final String DEPENDS_ON_METHODS= "dependsOnMethods";
   private static final String DEPENDS_ON_GROUPS= "dependsOnGroups";
   
-  List<String> m_dependsOnMethods = Lists.newArrayList();
-  List<String> m_dependsOnGroups= Lists.newArrayList();
+  List<String> m_dependsOnMethods = new ArrayList<>();
+  List<String> m_dependsOnGroups = new ArrayList<>();
 
   @Override
   public boolean visit(NormalAnnotation annotation) {
@@ -62,7 +61,7 @@ public class DependencyVisitor extends ASTVisitor {
   }
 
   private List<String> extractValues(Expression paramAttr) {
-    List<String> values = Lists.newArrayList();
+    List<String> values = new ArrayList<>();
     if(paramAttr instanceof ArrayInitializer) {
       List<StringLiteral> literals= ((ArrayInitializer) paramAttr).expressions();
 //      List paramNames= new ArrayList(literals.size());

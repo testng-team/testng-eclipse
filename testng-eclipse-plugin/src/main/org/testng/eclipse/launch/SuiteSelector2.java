@@ -1,6 +1,7 @@
 package org.testng.eclipse.launch;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -17,8 +18,6 @@ import org.testng.eclipse.launch.components.SuiteFileCheckBoxTable;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
 import org.testng.eclipse.util.StringUtils;
 import org.testng.eclipse.util.TestSearchEngine;
-
-import com.google.common.collect.Lists;
 
 /**
  * Allow the user to select one or many suite files in this launch configuration.
@@ -37,7 +36,7 @@ public class SuiteSelector2 extends MultiSelector {
   @Override
   protected Collection<String> getValues(ILaunchConfiguration configuration) {
     TestNGMainTab mainTab = getCallback();
-    List<String> result = Lists.newArrayList();
+    List<String> result = new ArrayList<>();
     try {
       IFile[] types = TestSearchEngine.findSuites(mainTab.getLaunchConfigurationDialog(),
           new Object[] {mainTab.getSelectedProject()});

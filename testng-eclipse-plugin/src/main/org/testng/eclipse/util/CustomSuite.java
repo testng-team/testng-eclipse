@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -27,9 +28,6 @@ import org.testng.xml.LaunchSuite;
 import org.testng.xml.Parser;
 import org.testng.xml.XmlMethodSelector;
 import org.testng.xml.XmlSuite;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 /**
  * Base class used by classes that generate XML suite files.
@@ -401,7 +399,7 @@ class ClassMethodsSuite extends CustomSuite {
   }
 
   private Map<String, List<String>> sanitize(Map<String, List<String>> classMethods) {
-    Map<String, List<String>> result = Maps.newHashMap();
+    Map<String, List<String>> result = new HashMap<>();
     for (Map.Entry<String, List<String>> entry : classMethods.entrySet()) {
       String clsName= entry.getKey();
       List<String> methods= entry.getValue();
@@ -409,7 +407,7 @@ class ClassMethodsSuite extends CustomSuite {
         result.put(clsName, null);
       }
       else {
-        List<String> methodNames= Lists.newArrayList();
+        List<String> methodNames = new ArrayList<>();
         for (String meth : methods) {
           if(null != meth && !"".equals(meth)) {
             methodNames.add(meth);

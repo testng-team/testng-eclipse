@@ -1,8 +1,7 @@
 package org.testng.eclipse.refactoring;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import com.google.common.collect.Lists;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -77,14 +76,14 @@ public class TestNGQuickAssistProcessor
   public IJavaCompletionProposal[] getAssists(IInvocationContext context,
       IProblemLocation[] locations) throws CoreException
   {
-    List<IJavaCompletionProposal> vResult = Lists.newArrayList();
+    List<IJavaCompletionProposal> vResult = new ArrayList<>();
     init(context);
     if (hasAssists(context)) {
 
       //
       // Only show applicable TestNG refactorings
       //
-      List<IRewriteProvider> providers = Lists.newArrayList();
+      List<IRewriteProvider> providers = new ArrayList<>();
       if (hasPushAssists(m_visitor)) providers.add(new PushTestRewriter());
       if (hasPullAssists(m_visitor)) providers.add(new PullTestRewriter());
       if (hasAssertImportAssists(m_visitor)) {

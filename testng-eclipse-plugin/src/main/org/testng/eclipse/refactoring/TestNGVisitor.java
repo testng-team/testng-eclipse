@@ -1,11 +1,11 @@
 package org.testng.eclipse.refactoring;
 
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.google.common.collect.Sets;
 
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
@@ -13,7 +13,6 @@ import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.testng.collections.Maps;
 import org.testng.eclipse.ui.conversion.Visitor;
 
 /**
@@ -23,13 +22,13 @@ import org.testng.eclipse.ui.conversion.Visitor;
  */
 public class TestNGVisitor extends Visitor {
 
-  private Map<MethodDeclaration, Annotation> m_testMethods = Maps.newHashMap();
+  private Map<MethodDeclaration, Annotation> m_testMethods = new HashMap<>();
   private TypeDeclaration m_type;
   private Annotation m_testClassAnnotation;
-  private Set<MethodDeclaration> m_publicMethods = Sets.newHashSet();
+  private Set<MethodDeclaration> m_publicMethods = new HashSet<>();
 
   // List of assert calls, so we can suggest static imports for them
-  private Set<String> m_assertMethods = Sets.newHashSet();
+  private Set<String> m_assertMethods = new HashSet<>();
 
   @Override
   public boolean visit(MethodDeclaration md) {

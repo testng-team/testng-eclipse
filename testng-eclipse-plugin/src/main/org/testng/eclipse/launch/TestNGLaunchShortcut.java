@@ -1,5 +1,6 @@
 package org.testng.eclipse.launch;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,8 +29,6 @@ import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.tester.JavaTypeExtender;
 import org.testng.eclipse.util.LaunchUtil;
 
-import com.google.common.collect.Lists;
-
 /**
  * Right-click launcher.
  * 
@@ -39,7 +38,7 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
 
   public void launch(ISelection selection, String mode) {
     if(selection instanceof StructuredSelection) {
-      List<IType> types = Lists.newArrayList();
+      List<IType> types = new ArrayList<>();
       IJavaProject javaProject = null;
       IProject project = null;
 

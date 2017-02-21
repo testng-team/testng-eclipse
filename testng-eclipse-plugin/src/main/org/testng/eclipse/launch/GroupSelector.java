@@ -1,16 +1,14 @@
 package org.testng.eclipse.launch;
 
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.google.common.collect.Maps;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
@@ -28,7 +26,7 @@ import org.testng.eclipse.util.TestSearchEngine;
 
 public class GroupSelector extends MultiSelector {
 
-  private Map<String, List<String>> m_groupMap = Maps.newHashMap();
+  private Map<String, List<String>> m_groupMap = new HashMap<>();
 
   GroupSelector(TestNGMainTab callback, Composite comp) {
     super(callback, comp, LaunchType.GROUP, "TestNGMainTab.label.group",
@@ -38,7 +36,7 @@ public class GroupSelector extends MultiSelector {
 
   @Override
   protected Collection<String> getValues(ILaunchConfiguration configuration) {
-    Map<String, List<String>> result = Maps.newHashMap();
+    Map<String, List<String>> result = new HashMap<>();
 
     try {
       IJavaProject[] dependencies = new IJavaProject[0];
@@ -108,7 +106,7 @@ public class GroupSelector extends MultiSelector {
 
   @Override
   public Map<String, List<String>> onSelect(String[] selectedValues) {
-    Map<String, List<String>> result = Maps.newHashMap();
+    Map<String, List<String>> result = new HashMap<>();
     for(String value : selectedValues) {
       result.put(value, m_groupMap.get(value));
     }

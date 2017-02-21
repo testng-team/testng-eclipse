@@ -2,15 +2,13 @@ package org.testng.eclipse.ui;
 
 import static org.testng.eclipse.ui.Images.IMG_TEST_HIERARCHY;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.Action;
@@ -52,6 +50,8 @@ import org.testng.eclipse.ui.tree.TestTreeItem;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.eclipse.util.StringUtils;
 
+import com.google.common.collect.ArrayListMultimap;
+
 /**
  * This class is responsible for the tree display in the runner view part. It
  * has two subclasses, SuccessTab and FailureTab. Whenever a new test result
@@ -85,12 +85,12 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
   //
   // Keeping track of what's in the tree
   //
-  private Map<String, ITreeItem> m_treeItemMap = Maps.newHashMap();
-  private Set<RunInfo> m_runInfos = Sets.newHashSet();
+  private Map<String, ITreeItem> m_treeItemMap = new HashMap<>();
+  private Set<RunInfo> m_runInfos = new HashSet<>();
   private String m_searchFilter = "";
-  private Map<String, ITreeItem> m_suites = Maps.newHashMap();
-  private Map<String, ITreeItem> m_tests = Maps.newHashMap();
-  private Map<String, ITreeItem> m_classes = Maps.newHashMap();
+  private Map<String, ITreeItem> m_suites = new HashMap<>();
+  private Map<String, ITreeItem> m_tests = new HashMap<>();
+  private Map<String, ITreeItem> m_classes = new HashMap<>();
   // bug/167: use ArrayListMultimap which allows duplicate keys to store m_methods
   //          since the instanceName (which is used as key) might be same
   private ArrayListMultimap<String, ITreeItem> m_methods = ArrayListMultimap.create();

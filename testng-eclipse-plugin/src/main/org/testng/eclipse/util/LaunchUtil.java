@@ -49,9 +49,7 @@ import org.testng.eclipse.util.param.ParameterSolver;
 import org.testng.reporters.FailedReporter;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 
 /**
  * An utility class that centralize the work about configuration launchers.
@@ -77,7 +75,7 @@ import com.google.common.collect.Sets;
  * @author <a href='mailto:the_mindstorm@evolva.ro'>Alexandru Popescu</a>
  */
 public class LaunchUtil {
-  private static final List<String> EMPTY_ARRAY_PARAM = Lists.newArrayList();
+  private static final List<String> EMPTY_ARRAY_PARAM = new ArrayList<>();
   
   /**
    * Suite file launcher. The file may reside outside the workbench.
@@ -186,7 +184,7 @@ public class LaunchUtil {
   public static Map<String, Object> createClassLaunchConfigurationMap(IType mainType, IType[] types, String annotationType) {
     Map<String, Object> attrs= new HashMap<String, Object>();
 
-    List<String> classNames= Lists.newArrayList();
+    List<String> classNames= new ArrayList<>();
     Multimap<String, String> classMethods = ArrayListMultimap.create();
     classMethods.get(null);
 
@@ -274,7 +272,8 @@ public class LaunchUtil {
           String runMode,
           RunInfo runInfo) {
 
-    Set<TypeAndMethod> typeAndMethods = Sets.newHashSet(new TypeAndMethod(iType, iMethod));
+    Set<TypeAndMethod> typeAndMethods = new HashSet<>();
+    typeAndMethods.add(new TypeAndMethod(iType, iMethod));
 
     try {
       if (methodHasDependencies(iMethod)) {
@@ -309,7 +308,7 @@ public class LaunchUtil {
 
   private static void launchMethodBasedConfiguration(IJavaProject ijp,
           TypeAndMethod[] typeAndMethods, String runMode, RunInfo runInfo) {
-    List<String> methodNames = Lists.newArrayList();
+    List<String> methodNames = new ArrayList<>();
     IMethod[] methods = new IMethod[typeAndMethods.length];
     Multimap<String, String> classMethods = ArrayListMultimap.create();
     Set<IType> typesSet = new HashSet<IType>();
@@ -375,7 +374,7 @@ public class LaunchUtil {
    */
   public static void launchCompilationUnitConfiguration(IJavaProject ijp,
       List<ICompilationUnit> units, String mode) {
-    List<IType> types = Lists.newArrayList();
+    List<IType> types = new ArrayList<>();
     IType mainType = null;
     for (ICompilationUnit icu : units) {
       try {
@@ -417,11 +416,11 @@ public class LaunchUtil {
   private static void launchTypeBasedConfiguration(IJavaProject javaProject, String confName,
       IType[] types, String mode) {
     Multimap<String, String> classMethods = ArrayListMultimap.create();
-    List<String> typeNames = Lists.newArrayList();
-    Set<IType> allTypes = Sets.newHashSet();
+    List<String> typeNames = new ArrayList<>();
+    Set<IType> allTypes = new HashSet<>();
     allTypes.addAll(Arrays.asList(types));
 
-    Set<IMethod> allMethods = Sets.newHashSet();
+    Set<IMethod> allMethods = new HashSet<>();
 
     // If we depend on groups, need to add all the necessary types
     Object[] groupDependencies = findGroupDependencies(types);
@@ -437,7 +436,7 @@ public class LaunchUtil {
       typeNames.add(type.getFullyQualifiedName());
     }
 
-    List<String> methodNames = Lists.newArrayList();
+    List<String> methodNames = new ArrayList<>();
     for (IMethod m : allMethods) {
       methodNames.add(m.getElementName());
       classMethods.put(m.getDeclaringType().getFullyQualifiedName(), m.getElementName());
@@ -467,7 +466,7 @@ public class LaunchUtil {
   }
 
   public static Set<IMethod> findMethodTransitiveClosure(IType[] types, DependencyInfo groupInfo) {
-    Set<IMethod> result = Sets.newHashSet();
+    Set<IMethod> result = new HashSet<>();
     for (IType type : types) {
       result.addAll(findMethodTransitiveClosure(type, groupInfo));
     }
@@ -476,7 +475,7 @@ public class LaunchUtil {
   }
 
   public static Set<IMethod> findMethodTransitiveClosure(IType type, DependencyInfo groupInfo) {
-    Set<IMethod> result = Sets.newHashSet();
+    Set<IMethod> result = new HashSet<>();
     try {
       for (IMethod method : type.getMethods()) {
         result.addAll(findMethodTransitiveClosure(method, groupInfo));
@@ -489,11 +488,11 @@ public class LaunchUtil {
   }
 
   public static Set<IMethod> findMethodTransitiveClosure(IMethod startMethod, DependencyInfo groupInfo) {
-    Set<IMethod> result = Sets.newHashSet();
-    Set<IMethod> currentMethods = Sets.newHashSet();
+    Set<IMethod> result = new HashSet<>();
+    Set<IMethod> currentMethods = new HashSet<>();
     currentMethods.add(startMethod);
-    Set<IMethod> nextMethods = Sets.newHashSet();
-    Set<String> initialGroups = Sets.newHashSet();
+    Set<IMethod> nextMethods = new HashSet<>();
+    Set<String> initialGroups = new HashSet<>();
 
     while (! currentMethods.isEmpty()) {
       for (IMethod method : currentMethods) {
@@ -547,11 +546,11 @@ public class LaunchUtil {
   }
 
   private static Set<IType> findTypeTransitiveClosure(IType[] types, DependencyInfo groupInfo) {
-    Set<IType> result = Sets.newHashSet();
-    Set<IType> currentTypes = Sets.newHashSet();
+    Set<IType> result = new HashSet<>();
+    Set<IType> currentTypes = new HashSet<>();
     currentTypes.addAll(Arrays.asList(types));
-    Set<IType> nextTypes = Sets.newHashSet();
-    Set<String> initialGroups = Sets.newHashSet();
+    Set<IType> nextTypes = new HashSet<>();
+    Set<String> initialGroups = new HashSet<>();
 
     while (! currentTypes.isEmpty()) {
       for (IType type : currentTypes) {
@@ -593,7 +592,7 @@ public class LaunchUtil {
   }
 
   private static Object[] findGroupDependencies(ICompilationUnit[] units) {
-    List<IResource> resources = Lists.newArrayList();
+    List<IResource> resources = new ArrayList<>();
     for (ICompilationUnit unit : units) {
       try {
         resources.add(unit.getCorrespondingResource());

@@ -2,6 +2,7 @@ package org.testng.eclipse.launch;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,8 +17,6 @@ import org.testng.eclipse.launch.TestNGLaunchConfigurationConstants.LaunchType;
 import org.testng.eclipse.launch.components.CheckBoxTable;
 import org.testng.eclipse.util.StringUtils;
 
-import com.google.common.collect.Maps;
-
 /**
  * Abstract base class for launch configurations that allow the user to select one or more
  * strings from a dialog.
@@ -26,7 +25,7 @@ import com.google.common.collect.Maps;
  */
 abstract public class MultiSelector extends TestngTestSelector {
 
-  private Map<String, List<String>> m_valueMap = Maps.newHashMap();
+  private Map<String, List<String>> m_valueMap = new HashMap<>();
   private ILaunchConfiguration m_configuration;
 
   protected MultiSelector(TestNGMainTab callback, Composite comp, LaunchType type,

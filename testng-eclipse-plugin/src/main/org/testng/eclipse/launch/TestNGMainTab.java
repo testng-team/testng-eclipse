@@ -2,11 +2,10 @@ package org.testng.eclipse.launch;
 
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -95,7 +94,7 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
 
   private ComboViewer m_protocolComboViewer;
   
-  private List <TestngTestSelector> m_launchSelectors = Lists.newArrayList();
+  private List <TestngTestSelector> m_launchSelectors = new ArrayList<>();
   private Map<String, List<String>> m_classMethods;
 
   /**
@@ -421,8 +420,8 @@ public class TestNGMainTab extends AbstractLaunchConfigurationTab implements ILa
           String methodName = fullName.substring(index + 1);
           m_classSelector.setText(className);
           m_methodSelector.setText(methodName);
-          m_classMethods = Maps.newHashMap();
-          List<String> methods = Lists.newArrayList();
+          m_classMethods = new HashMap<>();
+          List<String> methods = new ArrayList<>();
           methods.add(methodName);
           m_classMethods.put(className, methods);
           break;
