@@ -36,6 +36,7 @@ Enjoy.
 Plugin Version            | Update Site
 ------------------------- | ------------
 :star2: latest            | [release](http://beust.com/eclipse) , [beta](http://beust.com/eclipse-beta)
+6.11.0.201703011520       | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.11.0/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.11.0.201703011520/site_assembly.zip)
 6.10.0.201612030230       | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.10.0/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.10.0.201612030230/site_assembly.zip)
 6.9.13.201609291640       | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.13/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.13.201609291640/site_assembly.zip)
 6.9.12.201607091356       | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.12/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.12.201607091356/site_assembly.zip)
