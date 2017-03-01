@@ -8,5 +8,9 @@
         <version>6.11.1-SNAPSHOT</version>
     </parent>
   <artifactId>org.testng.eclipse.updatesite</artifactId>
-  <packaging>eclipse-update-site</packaging>
+  <packaging>eclipse-repository</packaging>
+
+  <build>
+    <finalName>${project.artifactId}</finalName>
+  </build>
 </project>

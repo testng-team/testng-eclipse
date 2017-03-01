@@ -17,8 +17,8 @@ publishP2Repo {
     repoName = System.getenv('BUILD_MODE') == 'release' ? 'testng-eclipse-release' : 'testng-eclipse'
     compositePackage = ''
     subCompositeStrategy = 'MICRO'
-    repoDir = new File("target/site")
-    zippedRepoFile = new File("target/site_assembly.zip")
+    repoDir = new File("target/repository")
+    zippedRepoFile = new File("target/org.testng.eclipse.updatesite.zip")
 }
 
 task wrapper(type: Wrapper) {
