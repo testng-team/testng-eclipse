@@ -1,7 +1,7 @@
 Change Log
 ====
 
-## Current Dev
+## 6.11
 
 Supported Metrics:
 

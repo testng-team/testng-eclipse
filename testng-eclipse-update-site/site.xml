@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.testng.eclipse_6.10.1.qualifier.jar" id="org.testng.eclipse" version="6.10.1.qualifier">
+   <feature url="features/org.testng.eclipse_6.11.0.qualifier.jar" id="org.testng.eclipse" version="6.11.0.qualifier">
       <category name="org.testng.eclipse"/>
    </feature>
-   <feature url="features/org.testng.eclipse.maven.feature_6.10.1.qualifier.jar" id="org.testng.eclipse.maven.feature" version="6.10.1.qualifier">
+   <feature url="features/org.testng.eclipse.maven.feature_6.11.0.qualifier.jar" id="org.testng.eclipse.maven.feature" version="6.11.0.qualifier">
       <category name="org.testng.eclipse"/>
    </feature>
    <category-def name="org.testng.eclipse" label="TestNG"/>
