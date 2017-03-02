@@ -1,11 +1,10 @@
 package org.testng.eclipse.util;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
-import com.google.common.collect.Lists;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -143,7 +142,7 @@ public class Utils {
   }
 
   public static List<IType> findTypes(List<JavaElement> elements, ITypeFilter filter) {
-    List<IType> result = Lists.newArrayList();
+    List<IType> result = new ArrayList<>();
     if (filter == null) {
       filter = new ITypeFilter() {
         public boolean accept(IType type) {
@@ -209,7 +208,7 @@ public class Utils {
   }
 
   public static List<JavaElement> getSelectedJavaElements(IWorkbenchPage page) {
-    List<JavaElement> result = Lists.newArrayList();
+    List<JavaElement> result = new ArrayList<>();
     ISelection selection = page.getSelection();
 
     if (selection instanceof TreeSelection) {
@@ -294,7 +293,7 @@ public class Utils {
    * @return the source folders for this Java project.
    */
   public static List<IClasspathEntry> getSourceFolders(IJavaProject jp) {
-    List<IClasspathEntry> result = Lists.newArrayList();
+    List<IClasspathEntry> result = new ArrayList<>();
     try {
       for (IClasspathEntry entry : jp.getRawClasspath()) {
         if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {

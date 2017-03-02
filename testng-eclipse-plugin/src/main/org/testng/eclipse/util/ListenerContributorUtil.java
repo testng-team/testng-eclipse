@@ -6,9 +6,8 @@
  */
 package org.testng.eclipse.util;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import com.google.common.collect.Lists;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
@@ -24,7 +23,7 @@ import org.testng.TestListenerAdapter;
  */
 public class ListenerContributorUtil {
   public static List<ITestNGListener> findReporterContributors() {
-    List<ITestNGListener> result = Lists.newArrayList();
+    List<ITestNGListener> result = new ArrayList<>();
 
     // Find all of the plug-ins that create extensions for the
     // profilerContributor extension point.
@@ -59,7 +58,7 @@ public class ListenerContributorUtil {
   }
 
   public static List<ITestNGListener> findTestContributors() {
-    List<ITestNGListener> result = Lists.newArrayList();
+    List<ITestNGListener> result = new ArrayList<>();
 
     // Find all of the plug-ins that create extensions for the
     // profilerContributor extension point.

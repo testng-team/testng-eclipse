@@ -2,8 +2,10 @@ package org.testng.eclipse.ui.conversion;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,10 +28,6 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.testng.AssertJUnit;
-import org.testng.collections.Lists;
-
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 import junit.framework.Assert;
 
@@ -45,12 +43,12 @@ import junit.framework.Assert;
  * @author Cedric Beust <cedric@beust.com>
  */
 public class JUnitVisitor extends Visitor {
-  private List<MethodDeclaration> m_testMethods = Lists.newArrayList();
-  private List<MethodDeclaration> m_disabledTestMethods = Lists.newArrayList();
-  private List<MethodDeclaration> m_beforeMethods = Lists.newArrayList();
-  private List<MethodDeclaration> m_afterMethods = Lists.newArrayList();
-  private List<MethodDeclaration> m_beforeClasses = Lists.newArrayList();
-  private List<MethodDeclaration> m_afterClasses = Lists.newArrayList();
+  private List<MethodDeclaration> m_testMethods = new ArrayList<>();
+  private List<MethodDeclaration> m_disabledTestMethods = new ArrayList<>();
+  private List<MethodDeclaration> m_beforeMethods = new ArrayList<>();
+  private List<MethodDeclaration> m_afterMethods = new ArrayList<>();
+  private List<MethodDeclaration> m_beforeClasses = new ArrayList<>();
+  private List<MethodDeclaration> m_afterClasses = new ArrayList<>();
   private MethodDeclaration m_suite = null;
 
   // Parent classes
@@ -58,37 +56,37 @@ public class JUnitVisitor extends Visitor {
   private boolean m_isTestSuite = false;
 
   // The JUnit imports found on this class
-  private List<ImportDeclaration> m_junitImports = Lists.newArrayList();
+  private List<ImportDeclaration> m_junitImports = new ArrayList<>();
 
   // Static imports for assert methods
-  private Set<String> m_assertStaticImports = Sets.newHashSet();
+  private Set<String> m_assertStaticImports = new HashSet<>();
 
   // List of all the methods that have @Test(expected) or @Test(timeout)
-  private Map<MemberValuePair, String> m_testsWithExpected = Maps.newHashMap();
+  private Map<MemberValuePair, String> m_testsWithExpected = new HashMap<>();
 
   // The position and length of all the Assert references that are not statically
   // imported
-  private Set<MethodInvocation> m_asserts = Sets.newHashSet();
+  private Set<MethodInvocation> m_asserts = new HashSet<>();
 
   // The position and length of all the fail() calls
-  private Set<MethodInvocation> m_fails = Sets.newHashSet();
+  private Set<MethodInvocation> m_fails = new HashSet<>();
 
   // True if there are test methods (if they are annotated with @Test, they won't
   // show up in m_testMethods).
   private boolean m_hasTestMethods = false;
 
   // Nodes that need to be removed by the refactoring
-  private List<ASTNode> m_nodesToRemove = Lists.newArrayList();
+  private List<ASTNode> m_nodesToRemove = new ArrayList<>();
   private SuperConstructorInvocation m_superConstructorInvocation;
   private String m_className;
   private SingleMemberAnnotation m_runWithParameterized;
   private MethodDeclaration m_parametersMethod;
   private TypeDeclaration m_type;
   private boolean m_hasDefaultConstructor = false;
-  private Map<MethodDeclaration, Annotation> m_ignoredMethods = Maps.newHashMap();
+  private Map<MethodDeclaration, Annotation> m_ignoredMethods = new HashMap<>();
 
   // The list of methods that are present on JUnit's Assert class
-  private static Set<String> m_assertMethods = Sets.newHashSet();
+  private static Set<String> m_assertMethods = new HashSet<>();
 
   static {
     for (Method m : Assert.class.getDeclaredMethods()) {
@@ -318,7 +316,7 @@ public class JUnitVisitor extends Visitor {
     if (! m_assertMethods.contains(method.getName().toString())) return false;
 
     List<Expression> arguments = method.arguments();
-    List<Class> types = Lists.newArrayList();
+    List<Class> types = new ArrayList<>();
     for (Expression e : arguments) {
       ITypeBinding binding = e.resolveTypeBinding();
       // Early abort if a binding fails

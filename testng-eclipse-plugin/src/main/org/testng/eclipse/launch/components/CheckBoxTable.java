@@ -1,5 +1,6 @@
 package org.testng.eclipse.launch.components;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,8 +30,6 @@ import org.eclipse.ui.internal.misc.StringMatcher;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.util.ResourceUtil;
 
-import com.google.common.collect.Lists;
-
 /**
  * A Table with checkboxes to present group names.
  */
@@ -39,7 +38,7 @@ public class CheckBoxTable extends SelectionStatusDialog {
   protected CheckboxTableViewer m_viewer;
 
   private String[] m_elements;
-  private List<Object> m_selection = Lists.newArrayList();
+  private List<Object> m_selection = new ArrayList<>();
   
   public CheckBoxTable(Shell shell, Collection<String> elements, String titleId) {
     this(shell, elements.toArray(new String[elements.size()]), titleId);
@@ -57,7 +56,7 @@ public class CheckBoxTable extends SelectionStatusDialog {
   }
   
   protected void removeSelectionElements(){
-    List<Object> toRemove = Lists.newArrayList();
+    List<Object> toRemove = new ArrayList<>();
     for (Object element : m_selection) {
       if (!m_viewer.setChecked(element.toString(), true)) {
         toRemove.add(element);

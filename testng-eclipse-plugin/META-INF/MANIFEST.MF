@@ -27,12 +27,11 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ltk.ui.refactoring,
  org.eclipse.core.variables,
  org.junit,
- org.eclipse.ui.editors
+ org.eclipse.ui.editors,
+ com.google.guava;bundle-version="[15.0.0,22.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
- lib/guava-base-r03.jar,
- lib/guava-collections-r03.jar,
  lib/testng-remote.jar,
  lib/testng.jar,
  lib/testng-sources.jar,

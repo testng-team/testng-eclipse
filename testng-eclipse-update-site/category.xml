@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature id="org.testng.eclipse" version="0.0.0">
+      <category name="org.testng.eclipse"/>
+   </feature>
+   <feature id="org.testng.eclipse.maven.feature" version="0.0.0">
+      <category name="org.testng.eclipse"/>
+   </feature>
+   <bundle id="com.google.guava" version="0.0.0">
+      <category name="org.testng.eclipse"/>
+   </bundle>
+   <category-def name="org.testng.eclipse" label="TestNG"/>
+</site>

@@ -1,15 +1,15 @@
 package org.testng.eclipse.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 
 public class StringUtils {
 
   public static List<String> stringToList(String s) {
-    List<String> result = Lists.newArrayList();
+    List<String> result = new ArrayList<>();
     
     if(null != s){
       String[] a = s.split("[,]+");

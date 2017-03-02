@@ -1,13 +1,12 @@
 package org.testng.eclipse.ui.summary;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -46,7 +45,7 @@ import org.testng.remote.strprotocol.SuiteMessage;
  */
 public class SummaryTab extends TestRunTab  {
 
-  private Map<String, RunInfo> m_tests = Maps.newHashMap();
+  private Map<String, RunInfo> m_tests = new HashMap<>();
 
   /** The table that contains all the tests */
   private TableViewer m_testViewer;
@@ -54,18 +53,18 @@ public class SummaryTab extends TestRunTab  {
   /** A test result, updated whenever we receive a new test result */
   static class TestResult {
     Long time = 0L;
-    Set<String> methods = Sets.newHashSet();
-    Set<String> classes = Sets.newHashSet();
+    Set<String> methods = new HashSet<>();
+    Set<String> classes = new HashSet<>();
   }
 
   /** The model for the excluded method table */
-  private Map<String, TestResult> m_testResults = Maps.newHashMap();
+  private Map<String, TestResult> m_testResults = new HashMap<>();
 
   /** The table that contains the excluded methods */
   private TableViewer m_excludedMethodViewer;
 
   /** The model for the excluded method table */
-  private List<ExcludedMethod> m_excludedMethodsModel = Lists.newArrayList();
+  private List<ExcludedMethod> m_excludedMethodsModel = new ArrayList<>();
 
   // The filters for the two tables
   private RunInfoFilter m_testSearchFilter;

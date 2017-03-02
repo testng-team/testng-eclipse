@@ -1,11 +1,10 @@
 package org.testng.eclipse.refactoring;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -39,7 +38,7 @@ public class ConvertFromJUnitCompositeChange extends CompositeChange {
    * IType (if the class has nested classes) and we only want to perform the refactoring
    * once per file.
    */
-  private Map<String, Set<IResource>> m_classes = Maps.newHashMap();
+  private Map<String, Set<IResource>> m_classes = new HashMap<>();
 
   public ConvertFromJUnitCompositeChange(IProgressMonitor pm, IWorkbenchPage page) {
     super("Composite change");
@@ -64,7 +63,7 @@ public class ConvertFromJUnitCompositeChange extends CompositeChange {
             if (resource.getFullPath().toOSString().contains(sourceFolder)) {
               Set<IResource> l = m_classes.get(sourceFolder);
               if (l == null) {
-                l = Sets.newHashSet();
+                l = new HashSet<>();
                 m_classes.put(sourceFolder, l);
               }
               l.add(resource);

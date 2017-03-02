@@ -32,11 +32,10 @@ import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.SWTUtil;
 import org.testng.remote.RemoteTestNG;
 
-import com.google.common.collect.Lists;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.AbstractSet;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -347,7 +346,7 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
 
   public static List<ITestNGLaunchConfigurationProvider> getLaunchConfigurationProviders()
       throws CoreException {
-    List<ITestNGLaunchConfigurationProvider> result = Lists.newArrayList();
+    List<ITestNGLaunchConfigurationProvider> result = new ArrayList<>();
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint extensionPoint = registry
         .getExtensionPoint("org.testng.eclipse.launchConfigurationProvider");

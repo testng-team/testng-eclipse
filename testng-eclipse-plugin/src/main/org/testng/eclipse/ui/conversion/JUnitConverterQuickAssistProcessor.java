@@ -1,8 +1,7 @@
 package org.testng.eclipse.ui.conversion;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import com.google.common.collect.Lists;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -50,7 +49,7 @@ public class JUnitConverterQuickAssistProcessor
       IProblemLocation[] locations) 
     throws CoreException 
   {
-    List<IJavaCompletionProposal> vResult = Lists.newArrayList();
+    List<IJavaCompletionProposal> vResult = new ArrayList<>();
     
     if (hasAssists(context)) {
       //

@@ -36,8 +36,6 @@ import org.testng.eclipse.launch.components.Filters;
 import org.testng.eclipse.launch.components.ITestContent;
 import org.testng.eclipse.ui.util.TypeParser;
 
-import com.google.common.collect.Sets;
-
 /**
  * Search engine for TestNG related elements.
  * <P/>
@@ -50,7 +48,7 @@ public class TestSearchEngine {
 
   public static IType[] findTestNGTests(IRunnableContext context,
       final IJavaElement element) throws InvocationTargetException, InterruptedException {
-    final Set<IType> result = Sets.newHashSet();
+    final Set<IType> result = new HashSet<>();
     
     IRunnableWithProgress runnable = new IRunnableWithProgress() {
       public void run(IProgressMonitor pm) throws InterruptedException, InvocationTargetException {
@@ -78,7 +76,7 @@ public class TestSearchEngine {
   public static IType[] findTests(IRunnableContext context,
                                   final Object[] elements,
                                   final Filters.ITypeFilter filter) throws InvocationTargetException, InterruptedException {
-    final Set<IType> result = Sets.newHashSet();
+    final Set<IType> result = new HashSet<>();
 
     if(elements.length != 0) {
       IRunnableWithProgress runnable = new IRunnableWithProgress() {
@@ -95,7 +93,7 @@ public class TestSearchEngine {
   public static String[] findPackages(IRunnableContext context,
 			final Object[] elements)
 			throws InvocationTargetException, InterruptedException {
-    final Set<String> result = Sets.newHashSet();
+    final Set<String> result = new HashSet<>();
 
 		if (elements.length != 0) {
 			IRunnableWithProgress runnable = new IRunnableWithProgress() {

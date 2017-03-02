@@ -1,11 +1,8 @@
 package org.testng.eclipse.util;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
 import java.util.Set;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -20,6 +17,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.launch.components.Filters;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * A class that represents all the information about groups in the current project
@@ -40,7 +40,7 @@ public class DependencyInfo {
 
       public void run(IProgressMonitor monitor)
           throws InvocationTargetException, InterruptedException {
-        final Set<IType> allTypes = Sets.newHashSet();
+        final Set<IType> allTypes = new HashSet<>();
         try {
           monitor.beginTask("Launching", 2000);
           monitor.subTask("Calculating dependencies");

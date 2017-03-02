@@ -1,12 +1,10 @@
 package org.testng.eclipse.util.param;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -21,7 +19,8 @@ import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.testng.collections.Lists;
+
+import com.google.common.base.Strings;
 
 /**
  * Visitor for TestNG methods.
@@ -36,7 +35,7 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
   private static final String TEST_ANNOTATION_FQN = ANNOTATION_PACKAGE + TEST_ANNOTATION;
   private static final String DEFAULT_PARAM_VALUE = "param-val-not-found";
 
-  private Map<MethodDeclaration, List<String>> m_parameters = Maps.newHashMap();
+  private Map<MethodDeclaration, List<String>> m_parameters = new HashMap<>();
   private IType m_typeFilter;
   private IMethod m_methodFilter;
 
@@ -172,10 +171,10 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
    * @return the non-null parameter name/value map
    */
   public Map<String, String> getParametersMap() {
-    Map<String, String> parameterMap = Maps.newHashMap();
+    Map<String, String> parameterMap = new HashMap<>();
     for (Entry<MethodDeclaration, List<String>> paramEntry : m_parameters.entrySet()) {
       // get all '@Optional' value, as the default value for the parameters
-      List<String> optionals = Lists.newArrayList();
+      List<String> optionals = new ArrayList<>();
       for (Object p : paramEntry.getKey().parameters()) {
         SingleVariableDeclaration paramDecl = (SingleVariableDeclaration) p;
         for (Object pm : paramDecl.modifiers()) {

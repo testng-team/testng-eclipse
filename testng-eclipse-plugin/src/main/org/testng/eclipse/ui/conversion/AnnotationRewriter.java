@@ -1,13 +1,12 @@
 package org.testng.eclipse.ui.conversion;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import com.google.common.collect.Maps;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -40,7 +39,7 @@ import org.testng.eclipse.util.PreferenceStoreUtil.SuiteMethodTreatment;
  * A rewriter that will convert the current JUnit file to TestNG
  * using JDK5 annotations
  *
- * @author CŽdric Beust <cedric@beust.com>
+ * @author Cï¿½dric Beust <cedric@beust.com>
  */
 public class AnnotationRewriter implements IRewriteProvider
 {
@@ -277,7 +276,7 @@ public class AnnotationRewriter implements IRewriteProvider
   }
 
   private Map<String, Boolean> createDisabledAttribute(AST ast) {
-    Map<String, Boolean> result = Maps.newHashMap();
+    Map<String, Boolean> result = new HashMap<>();
     result.put("enabled", false);
     return result;
   }

@@ -1,5 +1,6 @@
 package org.testng.eclipse.ui;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,8 +12,6 @@ import org.testng.remote.strprotocol.IRemoteTestListener;
 import org.testng.remote.strprotocol.SuiteMessage;
 import org.testng.remote.strprotocol.TestMessage;
 import org.testng.remote.strprotocol.TestResultMessage;
-
-import com.google.common.collect.Lists;
 
 /**
  * Holds the result of running a test suite. It is useful for keeping the history of test runs.
@@ -39,7 +38,7 @@ public class SuiteRunInfo implements IRemoteSuiteListener, IRemoteTestListener {
   private long m_startTime;
   private long m_stopTime;
 
-  private List<RunInfo> m_results = Lists.newArrayList();
+  private List<RunInfo> m_results = new ArrayList<>();
 
   /**
    * The launcher that has started the test. May be used for reruns.

@@ -1,6 +1,7 @@
 package org.testng.eclipse.refactoring;
 
 import java.io.ByteArrayInputStream;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -34,8 +35,6 @@ import org.testng.xml.XmlClass;
 import org.testng.xml.XmlPackage;
 import org.testng.xml.XmlSuite;
 import org.testng.xml.XmlTest;
-
-import com.google.common.collect.Sets;
 
 /**
  * The page in the refactoring wizard that lets the user configure the
@@ -75,8 +74,8 @@ public class TestNGXmlPage extends UserInputWizardPage {
     }
   };
   private Combo m_selectionCombo;
-  private Set<XmlClass> m_classes = Sets.newHashSet();
-  private Set<XmlPackage> m_packages = Sets.newHashSet();
+  private Set<XmlClass> m_classes = new HashSet<>();
+  private Set<XmlPackage> m_packages = new HashSet<>();
   private Text m_xmlFile;
   private Button m_generateBox;
   private Combo m_parallelCombo;
@@ -305,7 +304,7 @@ public class TestNGXmlPage extends UserInputWizardPage {
     //
     // Initialize m_classes
     //
-    Set<String> packageSet = Sets.newHashSet();
+    Set<String> packageSet = new HashSet<>();
     List<IType> types = Utils.findTypes(Utils.getSelectedJavaElements(), Utils.CONVERSION_FILTER);
     for (IType type : types) {
       String packageName = type.getPackageFragment().getElementName();
