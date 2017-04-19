@@ -5,10 +5,5 @@
 	<classpathentry kind="src" path="src/main"/>
 	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry exported="true" kind="lib" path="lib/testng-remote.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/testng.jar" sourcepath="lib/testng-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/testng-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jcommander.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/snakeyaml.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/bsh-2.0b4.jar"/>
-	<classpathentry kind="output" path="build"/>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>

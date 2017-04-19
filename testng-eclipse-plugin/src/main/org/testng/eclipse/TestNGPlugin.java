@@ -24,6 +24,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.testng.eclipse.launch.ITestNGLaunchConfigurationProvider;
 import org.testng.eclipse.ui.TestRunnerViewPart;
 import org.testng.eclipse.ui.util.ConfigurationHelper;
@@ -62,7 +63,7 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
    */
   private AbstractSet<ILaunch> n_trackedLaunches = new HashSet<>(20);
 
-  private BundleContext m_context;
+  private BundleContext fBundleContext;
   private PreferenceStoreUtil m_preferenceUtil;
 
   public TestNGPlugin() {
@@ -106,7 +107,7 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
   public void start(BundleContext context) throws Exception {
     super.start(context);
 
-    m_context= context;
+    fBundleContext= context;
     ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
     launchManager.addLaunchListener(this);
     m_isStopped = false;
@@ -129,8 +130,15 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
     }
     finally {
       super.stop(context);
-      m_context= null;
+      fBundleContext= null;
     }
+  }
+
+  public Object getService(String serviceName) {
+    ServiceReference reference= fBundleContext.getServiceReference(serviceName);
+    if (reference == null)
+      return null;
+    return fBundleContext.getService(reference);
   }
 
   public static boolean isStopped() {

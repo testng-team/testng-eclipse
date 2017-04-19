@@ -169,6 +169,14 @@ by reason of your accepting any such warranty or additional liability.
 END OF TERMS AND CONDITIONS
    </license>
 
+   <requires>
+      <!-- 
+        depends on testng-p2 version >= 6.9.12, 
+        otherwise the RemoteTest classes will conflict with the ones in TestNG < 6.9.12 
+      -->
+      <import feature="org.testng.p2.feature" version="6.9.12" match="greaterOrEqual"/>
+   </requires>
+
    <plugin
          id="org.testng.eclipse"
          download-size="0"
