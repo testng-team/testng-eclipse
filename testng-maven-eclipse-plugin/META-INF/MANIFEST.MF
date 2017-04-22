@@ -5,7 +5,7 @@ Bundle-Name: %bundle.name
 Bundle-SymbolicName: org.testng.eclipse.maven;singleton:=true
 Bundle-Version: 6.11.1.qualifier
 Bundle-Activator: org.testng.eclipse.maven.Activator
-Bundle-Vendor: %bundler.provider
+Bundle-Vendor: %bundle.provider
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,

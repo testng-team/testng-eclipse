@@ -167,6 +167,11 @@
             <url>http://download.eclipse.org/releases/luna</url>
         </repository>
         <repository>
+            <id>testng-p2-repo</id>
+            <layout>p2</layout>
+            <url>http://dl.bintray.com/testng-team/testng-p2/</url>
+        </repository>
+        <repository>
             <id>jcenter</id>
             <name>bintray</name>
             <url>http://jcenter.bintray.com</url>

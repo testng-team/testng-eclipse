@@ -6,8 +6,12 @@
    <feature id="org.testng.eclipse.maven.feature" version="0.0.0">
       <category name="org.testng.eclipse"/>
    </feature>
+   <feature id="org.testng.p2.feature" version="0.0.0">
+      <category name="org.testng.eclipse"/>
+   </feature>
    <bundle id="com.google.guava" version="0.0.0">
       <category name="org.testng.eclipse"/>
    </bundle>
    <category-def name="org.testng.eclipse" label="TestNG"/>
+   <repository-reference location="http://dl.bintray.com/testng-team/testng-p2/" enabled="true" />
 </site>
