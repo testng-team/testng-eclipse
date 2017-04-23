@@ -15,4 +15,4 @@ before_install: echo "MAVEN_OPTS='-Xmx1024m -XX:MaxPermSize=512m'" > ~/.mavenrc
 
 script:
   - mvn -e -U -Dci clean install
-  - test "${TRAVIS_PULL_REQUEST}" == "false" && test ${TRAVIS_BRANCH} == "master" && ./scripts/upload-updatesite
+  - if [[ "${TRAVIS_PULL_REQUEST}" == "false" ]] && [[ ${TRAVIS_BRANCH} == "master" ]]; then ./scripts/upload-updatesite; fi
