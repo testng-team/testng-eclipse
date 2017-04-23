@@ -4,7 +4,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.github.missedone:gradle-bintray-p2-plugin:1.1.0'
+        classpath 'com.github.missedone:gradle-bintray-p2-plugin:1.2.0'
     }
 }
 
@@ -13,16 +13,12 @@ apply plugin: 'bintray-p2'
 defaultTasks 'publishP2Repo'
 
 publishP2Repo {
-    FileTree tree = fileTree('target/repository/features/').include("org.testng.eclipse_*.jar")
-    tree.each {File file ->
-        packageVersion = file.name.take(file.name.lastIndexOf('.')).split('_')[1]
-    }
-
     repoOwner = 'testng-team'
     repoName = System.getenv('BUILD_MODE') == 'release' ? 'testng-eclipse-release' : 'testng-eclipse'
     compositePackage = ''
     subCompositeStrategy = 'MICRO'
     repoDir = new File("target/repository")
+    mainFeatureId = 'org.testng.eclipse'
     zippedRepoFile = new File("target/org.testng.eclipse.updatesite.zip")
 }
 
