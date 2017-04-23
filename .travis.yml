@@ -13,6 +13,8 @@ jdk:
 
 before_install: echo "MAVEN_OPTS='-Xmx1024m -XX:MaxPermSize=512m'" > ~/.mavenrc
 
+install: echo "skip 'mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V' step"
+
 script:
   - mvn -e -U -Dci clean install
   - if [[ "${TRAVIS_PULL_REQUEST}" == "false" ]] && [[ ${TRAVIS_BRANCH} == "master" ]]; then ./scripts/upload-updatesite; fi
