@@ -1,3 +1,5 @@
 instructions.configure=\
- org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//dl.bintray.com/testng-team/testng-p2,type:0,name:TestNG P2,enabled:true);\
- org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//dl.bintray.com/testng-team/testng-p2,type:1,name:TestNG P2,enabled:true);
+ org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//dl.bintray.com/testng-team/testng-p2-release,type:0,name:TestNG P2,enabled:true);\
+ org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//dl.bintray.com/testng-team/testng-p2-release,type:1,name:TestNG P2,enabled:true);\
+ org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//beust.com/eclipse,type:0,name:TestNG Eclipse,enabled:true);\
+ org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//beust.com/eclipse,type:1,name:TestNG Eclipse,enabled:true);
