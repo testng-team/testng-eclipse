@@ -6,8 +6,8 @@
 <repository location="http://download.eclipse.org/releases/juno/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.testng.p2.feature.feature.group" version="6.11.0.rel"/>
-<repository location="https://dl.bintray.com/testng-team/testng-p2/"/>
+<unit id="org.testng.p2.feature.feature.group" version="6.11.0.r201704240320"/>
+<repository location="https://dl.bintray.com/testng-team/testng-p2-release/"/>
 </location>
 </locations>
 </target>
