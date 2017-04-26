@@ -44,7 +44,7 @@ Plugin Version            | Update Site
 6.9.10.201512240000       | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.10/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.10.201512240000/site_assembly.zip)
 6.9.5.201505251947        | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.5/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.5.201505251947/site_assembly.zip)
 
-(NOTE: it's always recommended to install from the 'latest' release updatesite. the version specific updatesites are for cases that you want to stay on old version.)
+(**NOTE**: it's always recommended to install from the *'latest'* release updatesite. the version specific updatesites are for cases that you want to stay on old version.)
 
 ## Change Logs
 
@@ -60,27 +60,33 @@ The documentation for this plug-in can be found at http://testng.org/doc/eclipse
 
 Set the version number with `scripts/set-version`, e.g.:
 
-```
+```bash
 scripts/set-version 6.8.22-SNAPSHOT
 ```
 
-Using `SNAPSHOT` version numbers will generate UTC timestamped plugin-numbers, e.g. 6.8.22.201505030200 so you should only increase the version number if you are including a higher version of `testng.jar`.
+Using `SNAPSHOT` version numbers will generate UTC timestamped plugin-numbers, e.g. 6.8.22.201505030200.
 
 ### Building
 
 Once the version is correct, build the Eclipse plug-in as follows:
 
-```
+```bash
 mvn -e -U -Dci clean install
 ```
 
-The update site package will be generated at `testng-eclipse-update-site/target/site.zip`
+The update site package will be generated at `testng-eclipse-update-site/target/org.testng.eclipse.updatesite.zip`
 
 ## For Plugin Developer
 
-In Eclipse, select _Import / Existing Project_ and point the dialog to
-this directory. Then you can just create a new Eclipse application
-launch to run the plug-in.
+### Setup Dev Env
+
+* In Eclipse, select _Import / Existing Project_ and point the dialog to
+this directory. 
+* Go to Eclipse Preference page, navigate to _Plug-in Development / Target Platform_, select 'TestNG Eclipse Luna Target Platform' as the active target platform.
+* Then you can just create a new Eclipse application launch to run the plug-in.
+
+
+### Tech Details
 
 The runner view is called TestRunnerViewPart and it receives the test
 results from the remote TestNG process. Every new result is passed to
