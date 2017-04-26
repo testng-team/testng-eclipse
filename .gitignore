@@ -1,6 +1,8 @@
 build
 test-output
 target/
+.settings/
+
 .DS_Store
 
 .gradle
