@@ -33,18 +33,20 @@ Enjoy.
 
 ### Update sites
 
-Plugin Version            | Update Site
-------------------------- | ------------
-:star2: latest            | [release](http://beust.com/eclipse) , [beta](http://beust.com/eclipse-beta)
-6.11.0.201703011520       | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.11.0/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.11.0.201703011520/site_assembly.zip)
-6.10.0.201612030230       | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.10.0/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.10.0.201612030230/site_assembly.zip)
-6.9.13.201609291640       | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.13/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.13.201609291640/site_assembly.zip)
-6.9.12.201607091356       | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.12/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.12.201607091356/site_assembly.zip)
-6.9.11.201604020423       | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.11/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.11.201604020423/site_assembly.zip)
-6.9.10.201512240000       | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.10/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.10.201512240000/site_assembly.zip)
-6.9.5.201505251947        | [online](https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.5/) , [offline](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.5.201505251947/site_assembly.zip)
+Plugin Version            | Online Update-Site | Zipped Update-Site
+------------------------- | ------------------ | ---------------------
+:star2: LATEST RELEASE    | http://beust.com/eclipse | [here](http://dl.bintray.com/testng-team/testng-eclipse-release/zipped/)
+BETA | http://beust.com/eclipse-beta | [here](https://dl.bintray.com/testng-team/testng-eclipse/zipped/)
+History:||
+6.11.0.201703011520       | https://dl.bintray.com/testng-team/testng-eclipse-release/6.11.0/ | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.11.0.201703011520/site_assembly.zip)
+6.10.0.201612030230       | https://dl.bintray.com/testng-team/testng-eclipse-release/6.10.0/ | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.10.0.201612030230/site_assembly.zip)
+6.9.13.201609291640       | https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.13/ | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.13.201609291640/site_assembly.zip)
+6.9.12.201607091356       | https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.12/ | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.12.201607091356/site_assembly.zip)
+6.9.11.201604020423       | https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.11/ | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.11.201604020423/site_assembly.zip)
+6.9.10.201512240000       | https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.10/ | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.10.201512240000/site_assembly.zip)
+6.9.5.201505251947        | https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.5/ | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.5.201505251947/site_assembly.zip)
 
-(**NOTE**: it's always recommended to install from the *'latest'* release updatesite. the version specific updatesites are for cases that you want to stay on old version.)
+(**NOTE**: it's always recommended to install from the ***LATEST RELEASE*** updatesite. the version specific updatesites are for cases that you want to stay on old version.)
 
 ## Change Logs
 
