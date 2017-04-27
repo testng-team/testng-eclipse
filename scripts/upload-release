@@ -1,4 +1,4 @@
-UPDATE_SITE=$HOME/java/testng-eclipse/testng-eclipse-update-site/target/site
+UPDATE_SITE=$HOME/java/testng-eclipse/testng-eclipse-update-site/target/repository
 TMP=$HOME/t
 
 if [ $1 == "-m" ]

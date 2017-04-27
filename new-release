@@ -2,7 +2,7 @@
 
 mvn -e -Dci clean install
 
-VER=$(echo $(basename `ls testng-eclipse-update-site/target/site/features/org.testng.eclipse_*.jar`) | cut -d'_' -f2 | rev | cut -f 2- -d '.' | rev)
+VER=$(echo $(basename `ls testng-eclipse-update-site/target/repository/features/org.testng.eclipse_*.jar`) | cut -d'_' -f2 | rev | cut -f 2- -d '.' | rev)
 echo "Build version: $VER"
 
 scripts/upload-updatesite 'release'
