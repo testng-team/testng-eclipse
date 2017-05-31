@@ -71,7 +71,7 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
         if (envDom != null) {
           List<String> environList = new ArrayList<>(envDom.getChildCount());
           for (Xpp3Dom varDom : envDom.getChildren()) {
-            environList.add(varDom.getName() + "=" + varDom.getValue());
+            environList.add(varDom.getName() + "=\"" + varDom.getValue() + "\"");
           }
           return environList;
         }
@@ -110,7 +110,7 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
         Xpp3Dom propDom = confDom.getChild("systemPropertyVariables");
         if (propDom != null) {
           for (Xpp3Dom pDom : propDom.getChildren()) {
-            sb.append(" -D").append(pDom.getName()).append("=").append(pDom.getValue());
+            sb.append(" -D").append(pDom.getName()).append("=\"").append(pDom.getValue()).append("\"");
           }
         }
       }

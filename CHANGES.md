@@ -13,6 +13,7 @@ Supported Metrics:
 * PR #315: Debundle Guava from the plugin. (@mbooth101)
 * PR #319: Update build machinery to latest version of tycho 1.0.0 (@mbooth101)
 * Feature #287: Provide testng in the update site (aka, de-bundle TestNG jar from the plugin). (@mschreiber & Nick Tan)
+# fixed #336: if m2e integration is installed, reportNG listener with spaces in title breaks testNG. (@borisivan & Nick Tan)
 
 ## 6.11
 
