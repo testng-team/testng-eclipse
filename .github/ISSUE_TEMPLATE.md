@@ -1,12 +1,5 @@
-### Plugin Version
-> 'Eclipse -> About Eclipse -> Installation Details -> Locate the TestNG plugin'
-
-> Or, optional, provide the git revision of plugin: "About Eclipse -> 'Installation Details' at left bottom -> 'Configuration' tab -> scroll down to '*** TestNG for Eclipse Details:' portion ")
-
-### Expected behaviour
-
-
-### Actual behaviour
+### Problem Statement
+**please read [troubleshooting doc](../docs/Troubleshooting.md) first**
 
 
 ### Any relate message in "Error Log" view
