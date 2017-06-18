@@ -1,5 +1,5 @@
 ### Problem Statement
-**please read [troubleshooting doc](../docs/Troubleshooting.md) first**
+**please read https://github.com/cbeust/testng-eclipse/blob/master/docs/Troubleshooting.md first**
 
 
 ### Any relate message in "Error Log" view
