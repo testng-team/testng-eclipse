@@ -206,7 +206,7 @@ public class LaunchUtil {
     packageNames.add(ipf.getElementName());
 
     try {
-      if (findGroupDependencies(ipf.getCompilationUnits()).length > 0) {
+      if (findDependsOnGroups(ipf.getCompilationUnits()).length > 0) {
         groupDependencyWarning("package " + ipf.getElementName(), null);
       }
     }
@@ -417,19 +417,19 @@ public class LaunchUtil {
   private static void launchTypeBasedConfiguration(IJavaProject javaProject, String confName,
       IType[] types, String mode) {
     Multimap<String, String> classMethods = ArrayListMultimap.create();
-    List<String> typeNames = new ArrayList<>();
+    Set<String> typeNames = new HashSet<>();
     Set<IType> allTypes = new HashSet<>();
     allTypes.addAll(Arrays.asList(types));
 
     Set<IMethod> allMethods = new HashSet<>();
 
     // If we depend on groups, need to add all the necessary types
-    Object[] groupDependencies = findGroupDependencies(types);
+    Object[] groupDependencies = findDependsOnMethodsOrGroups(types);
     if (groupDependencies.length > 0) {
-      DependencyInfo groupInfo = DependencyInfo.createDependencyInfo(javaProject);
-      Set<IType> closure = findTypeTransitiveClosure(types, groupInfo);
+      DependencyInfo depInfo = DependencyInfo.createDependencyInfo(javaProject);
+      Set<IType> closure = findTypeTransitiveClosure(types, depInfo);
       allTypes.addAll(closure);
-      Set<IMethod> methods = findMethodTransitiveClosure(types, groupInfo);
+      Set<IMethod> methods = findMethodTransitiveClosure(types, depInfo);
       allMethods.addAll(methods);
     }
 
@@ -441,6 +441,7 @@ public class LaunchUtil {
     for (IMethod m : allMethods) {
       methodNames.add(m.getElementName());
       classMethods.put(m.getDeclaringType().getFullyQualifiedName(), m.getElementName());
+      typeNames.add(m.getDeclaringType().getFullyQualifiedName());
     }
 
     ILaunchConfigurationWorkingCopy workingCopy =
@@ -451,7 +452,7 @@ public class LaunchUtil {
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
                              ConfigurationHelper.toClassMethodsMap(classMethods.asMap()));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
-                             typeNames);
+                             new ArrayList<>(typeNames));
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.METHOD_TEST_LIST,
         methodNames);
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST,
@@ -592,7 +593,20 @@ public class LaunchUtil {
     return result;
   }
 
-  private static Object[] findGroupDependencies(ICompilationUnit[] units) {
+  public static Object[] findDependenciesBySearch(List<IResource> resources, String q) {
+    IResource[] scopeResources= resources.toArray(new IResource[resources.size()]);
+    ISearchQuery query= new FileSearchQuery(q, 
+        true /*regexp*/ , 
+        true /*casesensitive*/, 
+        FileTextSearchScope.newSearchScope(scopeResources, new String[] {"*.java"}, false));
+    query.run(new NullProgressMonitor());
+    FileSearchResult result= (FileSearchResult) query.getSearchResult(); 
+    Object[] elements = result.getElements();
+
+    return elements;
+  }
+
+  private static Object[] findDependsOnGroups(ICompilationUnit[] units) {
     List<IResource> resources = new ArrayList<>();
     for (ICompilationUnit unit : units) {
       try {
@@ -602,27 +616,19 @@ public class LaunchUtil {
         ;
       }
     }
-    IResource[] scopeResources= resources.toArray(new IResource[resources.size()]);
-    ISearchQuery query= new FileSearchQuery("@Test\\(.*\\s*dependsOnGroups\\s*=.*", 
-        true /*regexp*/ , 
-        true /*casesensitive*/, 
-        FileTextSearchScope.newSearchScope(scopeResources, new String[] {"*.java"}, false));
-    query.run(new NullProgressMonitor());
-    FileSearchResult result= (FileSearchResult) query.getSearchResult(); 
-    Object[] elements = result.getElements();
-    
-    return elements;
+
+    return findDependenciesBySearch(resources, "@Test\\(.*\\s*dependsOnGroups\\s*=.*");
   }
-  
-  private static Object[] findGroupDependencies(IType[] types) {
-    ICompilationUnit[] units= new ICompilationUnit[types.length];
+
+  private static Object[] findDependsOnMethodsOrGroups(IType[] types) {
+    List<IResource> resources = new ArrayList<>(types.length);
     for(int i= 0; i < types.length; i++) {
-      units[i]= types[i].getCompilationUnit();
+      resources.add(types[i].getResource());
     }
-    
-    return findGroupDependencies(units);
+
+    return findDependenciesBySearch(resources, "@Test\\(.*\\s*[dependsOnGroups|dependsOnMethods]\\s*=.*");
   }
-  
+
   /**
    * Initialize a <code>ILaunchConfigurationWorkingCopy</code> either by using an existing one (if found),
    * or using a default configuration (for example, the one used for the most recent launch), 
