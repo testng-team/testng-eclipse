@@ -280,7 +280,8 @@ public class LaunchUtil {
         DependencyInfo groupInfo = DependencyInfo.createDependencyInfo(javaProject);
         Set<IMethod> transitiveMethods = findMethodTransitiveClosure(iMethod, groupInfo);
         for (IMethod transitiveMethod : transitiveMethods) {
-          typeAndMethods.add(new TypeAndMethod(iType, transitiveMethod));
+          IType t = transitiveMethod.getDeclaringType();
+          typeAndMethods.add(new TypeAndMethod(t, transitiveMethod));
         }
       }
     } catch (JavaModelException e) {
@@ -481,7 +482,7 @@ public class LaunchUtil {
         result.addAll(findMethodTransitiveClosure(method, groupInfo));
       }
     } catch(JavaModelException ex) {
-      ex.printStackTrace();
+      TestNGPlugin.log(ex);
     }
 
     return result;
@@ -511,11 +512,11 @@ public class LaunchUtil {
                 }
               }
             } else {
-              System.out.println("Can't find any method defining the group " + group);
+              TestNGPlugin.log("Can't find any method defining the group " + group);
             }
           }
         } else {
-          System.out.println("No groups depended upon by method: " + method.getElementName());
+          TestNGPlugin.log("No groups depended upon by method: " + method.getElementName());
         }
 
         Collection<IMethod> depMethods = groupInfo.methodsByMethods.get(method);
@@ -569,11 +570,11 @@ public class LaunchUtil {
                 }
               }
             } else {
-              System.out.println("Can't find any types defining the group " + group);
+              TestNGPlugin.log("Can't find any types defining the group " + group);
             }
           }
         } else {
-          System.out.println("No groups depended upon by type: " + type.getElementName());
+          TestNGPlugin.log("No groups depended upon by type: " + type.getElementName());
         }
       }
 
