@@ -437,9 +437,7 @@ public class LaunchUtil {
       typeNames.add(type.getFullyQualifiedName());
     }
 
-    List<String> methodNames = new ArrayList<>();
     for (IMethod m : allMethods) {
-      methodNames.add(m.getElementName());
       classMethods.put(m.getDeclaringType().getFullyQualifiedName(), m.getElementName());
       typeNames.add(m.getDeclaringType().getFullyQualifiedName());
     }
@@ -447,16 +445,12 @@ public class LaunchUtil {
     ILaunchConfigurationWorkingCopy workingCopy =
         createLaunchConfiguration(javaProject.getProject(), confName, null);
 
-    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE,
-        LaunchType.CLASS.ordinal());
+    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.TYPE, LaunchType.CLASS.ordinal());
     workingCopy.setAttribute(TestNGLaunchConfigurationConstants.ALL_METHODS_LIST,
                              ConfigurationHelper.toClassMethodsMap(classMethods.asMap()));
-    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST,
-                             new ArrayList<>(typeNames));
-    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.METHOD_TEST_LIST,
-        methodNames);
-    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST,
-                             EMPTY_ARRAY_PARAM);
+    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.CLASS_TEST_LIST, new ArrayList<>(typeNames));
+    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.METHOD_TEST_LIST, EMPTY_ARRAY_PARAM);
+    workingCopy.setAttribute(TestNGLaunchConfigurationConstants.PACKAGE_TEST_LIST, EMPTY_ARRAY_PARAM);
 
     String projectName= javaProject.getProject().getName();
 
@@ -541,7 +535,7 @@ public class LaunchUtil {
       sb.append(m.getDeclaringType().getFullyQualifiedName())
           .append(".").append(m.getElementName()).append(" ");
     }
-    TestNGPlugin.log("Transitive closure for method " + startMethod.getElementName()
+    TestNGPlugin.trace("Transitive closure for method " + startMethod.getElementName()
         + ": "  + sb.toString());
 
     return result;
@@ -588,7 +582,7 @@ public class LaunchUtil {
     for (IType type : result) {
       sb.append(type.getFullyQualifiedName()).append(" ");
     }
-    TestNGPlugin.log("Transitive closure for groups \"" + initialGroups + "\":"  + sb.toString());
+    TestNGPlugin.trace("Transitive closure for groups \"" + initialGroups + "\":"  + sb.toString());
 
     return result;
   }
