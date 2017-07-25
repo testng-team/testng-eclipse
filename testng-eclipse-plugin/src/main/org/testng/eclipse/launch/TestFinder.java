@@ -9,6 +9,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IRegion;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
@@ -28,6 +30,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
@@ -35,6 +38,36 @@ import org.eclipse.jdt.internal.junit.util.CoreTestSearchEngine;
 import org.testng.eclipse.util.ResourceUtil;
 
 public class TestFinder {
+
+  public static Set<IType> findTests(IJavaElement element, IProgressMonitor pm) throws CoreException {
+    TestReferenceCollector requestor = new TestReferenceCollector();
+    findTests(element, requestor, pm);
+    return requestor.getResult();
+  }
+
+  public static void findTests(IJavaElement element, SearchRequestor requestor, IProgressMonitor pm) throws CoreException {
+    if (element == null) {
+      throw new IllegalArgumentException();
+    }
+
+    if (pm == null) {
+      pm= new NullProgressMonitor();
+    }
+
+    try {
+      pm.beginTask(ResourceUtil.getString("TestSearchEngine.message.searching"), 4);
+      IJavaElement[] elements = new IJavaElement[] {element};
+      IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements, IJavaSearchScope.SOURCES);
+      int matchRule= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
+      SearchPattern annotationsPattern= SearchPattern.createPattern("org.testng.annotations.Test", 
+                                            IJavaSearchConstants.ANNOTATION_TYPE, 
+                                            IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE, matchRule);
+      SearchParticipant[] searchParticipants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
+      new SearchEngine().search(annotationsPattern, searchParticipants, scope, requestor, new SubProgressMonitor(pm, 2));
+    } finally {
+      pm.done();
+    }
+  }
 
   public void findTestsInContainer(IJavaElement element, Set result, IProgressMonitor pm) throws CoreException {
     if (element == null || result == null) {
@@ -78,7 +111,7 @@ public class TestFinder {
       pm.done();
     }
   }
-  
+
   private boolean internalIsTest(IType type, IProgressMonitor monitor) throws JavaModelException {
     if (CoreTestSearchEngine.isAccessibleClass(type)) {
       ASTParser parser= ASTParser.newParser(AST.JLS4);
@@ -152,4 +185,23 @@ public class TestFinder {
     return  false;
   }
 
+  public static class TestReferenceCollector extends SearchRequestor {
+    Set<IType> fResult = new HashSet<>(50);
+
+    @Override
+    public void acceptSearchMatch(SearchMatch match) throws CoreException {
+      if (match.getAccuracy() == SearchMatch.A_ACCURATE && !match.isInsideDocComment()) {
+        Object element= match.getElement();
+        if (element instanceof IType || element instanceof IMethod) {
+          IMember member= (IMember) element;
+          IType type= member.getElementType() == IJavaElement.TYPE ? (IType) member : member.getDeclaringType();
+          fResult.add(type);
+        }
+      }
+    }
+
+    public Set<IType> getResult() {
+      return this.fResult;
+    }
+  }
 }
