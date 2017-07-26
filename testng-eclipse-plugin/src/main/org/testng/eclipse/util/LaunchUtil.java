@@ -620,7 +620,7 @@ public class LaunchUtil {
       resources.add(types[i].getResource());
     }
 
-    return findDependenciesBySearch(resources, "@Test\\(.*\\s*[dependsOnGroups|dependsOnMethods]\\s*=.*");
+    return findDependenciesBySearch(resources, "@Test\\(.*\\s*(dependsOnGroups)|(dependsOnMethods)\\s*=.*");
   }
 
   /**
