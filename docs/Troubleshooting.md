@@ -11,5 +11,6 @@ If you failed to install TestNG Eclipse Plugin with following error:
 You can follow thses steps try to fix/bypass the problem:
 * Check if you have any http proxy setting, or behind the company firewall, make you can access the update site: `http://beust.com/eclipse`
 * Make sure your network can reach `http://dl.bintray.com/testng-team/testng-eclipse-release/` (the main entrypoint http://beust.com/eclipse redirects to it)
+* Add vmargs '-Djava.net.preferIPv4Stack=true' to Eclipse config.ini, read the wiki [[1]](https://wiki.eclipse.org/Eclipse.ini) for the detail.
 * Retry two or more times, if still can't install, it could be the site http://beust.com temporarily unavailable, please install from the updatesite: `http://dl.bintray.com/testng-team/testng-eclipse-release/`
 * Or, for whatever reason, you can't access either `http://beust.com/eclipse` or `http://dl.bintray.com/testng-team/testng-eclipse-release/` directly, you can download the [offline updatesite](https://github.com/cbeust/testng-eclipse#update-sites), then copy to your workstation.
