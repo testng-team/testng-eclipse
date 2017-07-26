@@ -162,9 +162,9 @@
 
     <repositories>
         <repository>
-            <id>luna</id>
+            <id>eclipse</id>
             <layout>p2</layout>
-            <url>http://download.eclipse.org/releases/luna</url>
+            <url>http://download.eclipse.org/releases/neon/</url>
         </repository>
         <repository>
             <id>testng-p2-repo</id>
