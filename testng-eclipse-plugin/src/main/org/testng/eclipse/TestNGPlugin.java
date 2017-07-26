@@ -87,7 +87,11 @@ public class TestNGPlugin extends AbstractUIPlugin implements ILaunchListener {
   public static PreferenceStoreUtil getPluginPreferenceStore() {
     return m_pluginInstance.m_preferenceUtil; 
   }
-  
+
+  public static void trace(String s) {
+    System.out.println("[TestNGPlugin] " + s);
+  }
+
   public static void log(String s) {
     log(new Status(IStatus.INFO, getPluginId(), IStatus.OK, s, null)); //$NON-NLS-1$
   }

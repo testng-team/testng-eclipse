@@ -1,7 +1,6 @@
 package org.testng.eclipse.util;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -16,7 +15,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.launch.components.Filters;
+import org.testng.eclipse.launch.TestFinder;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -40,15 +39,12 @@ public class DependencyInfo {
 
       public void run(IProgressMonitor monitor)
           throws InvocationTargetException, InterruptedException {
-        final Set<IType> allTypes = new HashSet<>();
         try {
           monitor.beginTask("Launching", 2000);
           monitor.subTask("Calculating dependencies");
-          TestSearchEngine.collectTypes(javaProject, monitor, allTypes, Filters.SINGLE_TEST,
-              "Parsing tests");
-          monitor.subTask("Collecting group information");
-          monitor.worked(1);
-          for (IType type : allTypes) {
+
+          Set<IType> types = TestFinder.findTests(javaProject, monitor);
+          for (IType type : types) {
             for (IMethod method : type.getMethods()) {
               for (IAnnotation annotation : method.getAnnotations()) {
                 monitor.worked(1);
@@ -115,7 +111,7 @@ public class DependencyInfo {
     try {
       dialog.run(true /* fork */, true /* cancelable */, runnable);
     } catch (InvocationTargetException | InterruptedException e) {
-      e.printStackTrace();
+      TestNGPlugin.log(e);
     }
 
     return result;
