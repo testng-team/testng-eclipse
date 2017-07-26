@@ -1,7 +1,7 @@
 Change Log
 ====
 
-## Current Dev
+## 6.12
 
 Supported Metrics:
 
@@ -13,7 +13,9 @@ Supported Metrics:
 * PR #315: Debundle Guava from the plugin. (@mbooth101)
 * PR #319: Update build machinery to latest version of tycho 1.0.0 (@mbooth101)
 * Feature #287: Provide testng in the update site (aka, de-bundle TestNG jar from the plugin). (@mschreiber & Nick Tan)
-* fixed #336: if m2e integration is installed, reportNG listener with spaces in title breaks testNG. (@borisivan & Nick Tan)
+* Fixed #336: if m2e integration is installed, reportNG listener with spaces in title breaks testNG. (@borisivan & Nick Tan)
+* Fixed #344: The dependonMethod is not work when i dependon a different class method，this issue seems have been fixed in 6.9.9，but now i still have this problem
+* Fixed #346: the first launch on test class is a little bit slow
 
 ## 6.11
 
