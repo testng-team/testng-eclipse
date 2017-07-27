@@ -172,9 +172,12 @@
             <url>http://dl.bintray.com/testng-team/testng-p2/</url>
         </repository>
         <repository>
-            <id>jcenter</id>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-testng-team-testng</id>
             <name>bintray</name>
-            <url>http://jcenter.bintray.com</url>
+            <url>http://dl.bintray.com/testng-team/testng</url>
         </repository>
         <repository>
             <snapshots />
