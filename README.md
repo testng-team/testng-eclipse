@@ -78,6 +78,10 @@ mvn -e -U -Dci clean install
 
 The update site package will be generated at `testng-eclipse-update-site/target/org.testng.eclipse.updatesite.zip`
 
+## Troubleshooting
+
+See the troubleshooting doc [here](Troubleshooting.md)
+
 ## For Plugin Developer
 
 ### Setup Dev Env
