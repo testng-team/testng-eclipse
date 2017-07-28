@@ -15,6 +15,7 @@ Supported Metrics:
 * Feature #287: Provide testng in the update site (aka, de-bundle TestNG jar from the plugin). (@mschreiber & Nick Tan)
 * Fixed #336: if m2e integration is installed, reportNG listener with spaces in title breaks testNG. (@borisivan & Nick Tan)
 * Fixed #344: The dependonMethod is not work when i dependon a different class method，this issue seems have been fixed in 6.9.9，but now i still have this problem
+* Fixed #104: testng-eclipse-plugin run configurations not check dependencies
 * Fixed #346: the first launch on test class is a little bit slow
 
 ## 6.11
