@@ -5,8 +5,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -327,12 +329,19 @@ public class TestNGLaunchConfigurationDelegate
   @Override
   public String[] getClasspath(ILaunchConfiguration configuration)
       throws CoreException {
-    String[] cp = super.getClasspath(configuration);
-    String[] allCp = new String[cp.length + 1];
-    allCp[0] = getBundleFile("lib/testng-remote.jar").toOSString();
-    System.arraycopy(cp, 0, allCp, 1, cp.length);
+    Set<String> cps = new LinkedHashSet<>();
+    cps.add(getBundleFile("lib/testng-remote.jar").toOSString());
+    cps.addAll(Arrays.asList(super.getClasspath(configuration)));
 
-    return allCp;
+    for (ITestNGLaunchConfigurationProvider lcp : TestNGPlugin
+        .getLaunchConfigurationProviders()) {
+      List<String> cplist = lcp.getClasspath(configuration);
+      if (cplist != null) {
+        cps.addAll(cplist);
+      }
+    }
+
+    return cps.toArray(new String[cps.size()]);
   }
 
   @Override

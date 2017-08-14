@@ -17,6 +17,7 @@ Supported Metrics:
 * Fixed #344: The dependonMethod is not work when i dependon a different class method，this issue seems have been fixed in 6.9.9，but now i still have this problem
 * Fixed #104: testng-eclipse-plugin run configurations not check dependencies
 * Fixed #346: the first launch on test class is a little bit slow
+* New (PR #351): add support for appending 'additionalClasspath' of maven surefire/failsafe plugin to runtime TestNG process
 
 ## 6.11
 
