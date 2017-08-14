@@ -28,4 +28,14 @@ public interface ITestNGLaunchConfigurationProvider {
    */
   List<String> getEnvironment(ILaunchConfiguration configuration)
       throws CoreException;
+
+  /**
+   * Return as list of classpath
+   * 
+   * @param configuration
+   * @return
+   * @throws CoreException
+   */
+  List<String> getClasspath(ILaunchConfiguration configuration)
+      throws CoreException;
 }

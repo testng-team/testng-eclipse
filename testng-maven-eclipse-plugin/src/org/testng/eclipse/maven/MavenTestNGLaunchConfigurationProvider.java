@@ -49,18 +49,11 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     return null;
   }
 
+  @SuppressWarnings("restriction")
   @Override
   public List<String> getEnvironment(ILaunchConfiguration launchConf) throws CoreException {
     IProject project = LaunchConfigurationHelper.getProject(launchConf);
-    if (project == null || !project.hasNature(IMavenConstants.NATURE_ID)) {
-      return null;
-    }
-
-    IMavenProjectFacade prjFecade = MavenPlugin.getMavenProjectRegistry().getProject(project);
-    if (prjFecade == null) {
-      throw new CoreException(Activator.createError(project.getName() + " is not in Maven project registry."));
-    }
-
+    IMavenProjectFacade prjFecade = getMavenProject(project, launchConf);
     IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
     List<ProfileData> profiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
     Model model = MavenPlugin.getMavenModelManager().readMavenModel(prjFecade.getPom());
@@ -81,16 +74,37 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
   }
 
   @SuppressWarnings("restriction")
+  @Override
+  public List<String> getClasspath(ILaunchConfiguration launchConf) throws CoreException {
+    IProject project = LaunchConfigurationHelper.getProject(launchConf);
+    IMavenProjectFacade prjFecade = getMavenProject(project, launchConf);
+    IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
+    MavenProject mvnProject = prjFecade.getMavenProject(new NullProgressMonitor());
+    List<ProfileData> profiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
+    Model model = MavenPlugin.getMavenModelManager().readMavenModel(prjFecade.getPom());
+    Xpp3Dom confDom = findPluginConfiguration(model, profiles);
+    if (confDom != null) {
+      if (PreferenceUtils.getBoolean(project, Activator.PREF_ADDITION_CLASSPATH)) {
+        Xpp3Dom cpsDom = confDom.getChild("additionalClasspathElements");
+        if (cpsDom != null) {
+          List<String> cpList = new ArrayList<>(cpsDom.getChildCount());
+          for (Xpp3Dom varDom : cpsDom.getChildren()) {
+            if ("additionalClasspathElement".equals(varDom.getName())) {
+              String cp = resolve(varDom.getValue(), mvnProject, profiles, prjFecade);
+              cpList.add(cp);
+            }
+          }
+          return cpList;
+        }
+      }
+    }
+    return null;
+  }
+
+  @SuppressWarnings("restriction")
   private String getVMArgsFromPom(ILaunchConfiguration launchConf) throws CoreException {
     IProject project = LaunchConfigurationHelper.getProject(launchConf);
-    if (project == null || !project.hasNature(IMavenConstants.NATURE_ID)) {
-      return null;
-    }
-
-    IMavenProjectFacade prjFecade = MavenPlugin.getMavenProjectRegistry().getProject(project);
-    if (prjFecade == null) {
-      throw new CoreException(Activator.createError(project.getName() + " is not in Maven project registry."));
-    }
+    IMavenProjectFacade prjFecade = getMavenProject(project, launchConf);;
 
     MavenProject mvnProject = prjFecade.getMavenProject(new NullProgressMonitor());
     IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
@@ -120,6 +134,19 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
       return vmArgs;
     }
     return null;
+  }
+
+  private IMavenProjectFacade getMavenProject(IProject project, ILaunchConfiguration launchConf) throws CoreException {
+    if (project == null || !project.hasNature(IMavenConstants.NATURE_ID)) {
+      return null;
+    }
+
+    IMavenProjectFacade prjFecade = MavenPlugin.getMavenProjectRegistry().getProject(project);
+    if (prjFecade == null) {
+      throw new CoreException(Activator.createError(project.getName() + " is not in Maven project registry."));
+    }
+
+    return prjFecade;
   }
 
   /**
@@ -233,6 +260,11 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
       if (d != null && d.getChildCount() > 0) {
         return true;
       }
+
+      d = dom.getChild("additionalClasspathElements");
+      if (d != null && d.getChildCount() > 0) {
+        return true;
+      }
     }
 
     return false;
@@ -275,7 +307,7 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     // sometimes we don't have 'localRepository' defined in ~/.m2/settings.xml,
     // so we trade it as a special case.
     result.put("settings.localRepository", MavenPlugin.getMaven().getLocalRepositoryPath());
-    result.put("basedir", project.getFullPath().toOSString());
+    result.put("basedir", project.getProject().getLocation().toOSString());
 
     //
     // project base properties

@@ -17,6 +17,7 @@ public class Activator extends AbstractUIPlugin {
     public static final String PREF_ARGLINE = PLUGIN_ID + ".argline";
     public static final String PREF_ENVIRON = PLUGIN_ID + ".environ";
     public static final String PREF_SYSPROPERTIES = PLUGIN_ID + ".sysproperties";
+    public static final String PREF_ADDITION_CLASSPATH = PLUGIN_ID + ".additionalClasspath";
 
     // The shared instance
     private static Activator plugin;

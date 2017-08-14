@@ -16,6 +16,7 @@ public class MavenTestNGPreferenceInitializer extends AbstractPreferenceInitiali
     defaultMap.put(Activator.PREF_ARGLINE, Boolean.TRUE.toString());
     defaultMap.put(Activator.PREF_SYSPROPERTIES, Boolean.TRUE.toString());
     defaultMap.put(Activator.PREF_ENVIRON, Boolean.TRUE.toString());
+    defaultMap.put(Activator.PREF_ADDITION_CLASSPATH, Boolean.TRUE.toString());
 
     // Store default values to default core preferences
     IEclipsePreferences defaultPreferences = DefaultScope.INSTANCE.getNode(Activator.PLUGIN_ID);
