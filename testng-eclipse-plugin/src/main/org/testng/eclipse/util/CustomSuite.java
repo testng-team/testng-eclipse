@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.variables.IStringVariableManager;
@@ -28,6 +30,7 @@ import org.testng.xml.LaunchSuite;
 import org.testng.xml.Parser;
 import org.testng.xml.XmlMethodSelector;
 import org.testng.xml.XmlSuite;
+import org.xml.sax.SAXException;
 
 /**
  * Base class used by classes that generate XML suite files.
@@ -227,6 +230,10 @@ abstract public class CustomSuite extends LaunchSuite {
         }
       }
     } catch (IOException e) {
+      throw new TestNGException(e);
+    } catch (ParserConfigurationException e) {
+      throw new TestNGException(e);
+    } catch (SAXException e) {
       throw new TestNGException(e);
     }
   }
