@@ -65,6 +65,8 @@ public class ConvertToYamlAction extends AbstractHandler {
             TestNGPlugin.log(e1);
           } catch (CoreException e) {
             TestNGPlugin.log(e);
+          } catch (Exception e) {
+            TestNGPlugin.log(e);
           }
         }
       }

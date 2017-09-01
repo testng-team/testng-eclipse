@@ -228,6 +228,8 @@ abstract public class CustomSuite extends LaunchSuite {
       }
     } catch (IOException e) {
       throw new TestNGException(e);
+    } catch (Exception e) {
+      throw new TestNGException(e);
     }
   }
 
