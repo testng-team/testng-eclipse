@@ -169,7 +169,7 @@
         <repository>
             <id>testng-p2-repo</id>
             <layout>p2</layout>
-            <url>http://dl.bintray.com/testng-team/testng-p2/</url>
+            <url>http://dl.bintray.com/testng-team/testng-p2-release/</url>
         </repository>
         <repository>
             <snapshots>
