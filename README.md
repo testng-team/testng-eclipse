@@ -38,6 +38,7 @@ Plugin Version            | Online Update-Site | Zipped Update-Site
 :star2: LATEST RELEASE    | `http://beust.com/eclipse` | [here](http://dl.bintray.com/testng-team/testng-eclipse-release/zipped/)
 BETA | `http://beust.com/eclipse-beta` | [here](https://dl.bintray.com/testng-team/testng-eclipse/zipped/)
 History:||
+6.12.0.201709030110       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.12.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.12.0.201709030110/org.testng.eclipse.updatesite.zip)
 6.11.0.201703011520       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.11.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.11.0.201703011520/site_assembly.zip)
 6.10.0.201612030230       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.10.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.10.0.201612030230/site_assembly.zip)
 6.9.13.201609291640       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.13/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.13.201609291640/site_assembly.zip)
