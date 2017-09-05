@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="TestNG Eclipse Luna Target Platform" sequenceNumber="1">
+<?pde version="3.8"?><target name="TestNG Eclipse Luna Target Platform" sequenceNumber="6">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.m2e.sdk.feature.feature.group" version="1.5.1.20150109-1820"/>
-<unit id="org.eclipse.sdk.ide" version="4.4.2.M20150204-1700"/>
-<unit id="org.eclipse.m2e.feature.feature.group" version="1.5.1.20150109-1820"/>
-<repository location="http://download.eclipse.org/releases/luna/"/>
+<unit id="org.eclipse.m2e.feature.feature.group" version="1.7.0.20160603-1933"/>
+<unit id="org.eclipse.m2e.sdk.feature.feature.group" version="1.7.0.20160603-1933"/>
+<unit id="org.eclipse.sdk.ide" version="4.6.3.M20170301-0400"/>
+<repository location="http://download.eclipse.org/releases/neon/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.testng.p2.feature.feature.group" version="6.11.0.r201704240320"/>
+<unit id="org.testng.p2.feature.feature.group" version="6.12.0.r201709030044"/>
 <repository location="https://dl.bintray.com/testng-team/testng-p2-release/"/>
 </location>
 </locations>
