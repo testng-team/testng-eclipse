@@ -53,6 +53,10 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
   @Override
   public List<String> getEnvironment(ILaunchConfiguration launchConf) throws CoreException {
     IProject project = LaunchConfigurationHelper.getProject(launchConf);
+    if (!PreferenceUtils.getBoolean(project, Activator.PREF_ENVIRON)) {
+      return null;
+    }
+
     IMavenProjectFacade prjFecade = getMavenProject(project, launchConf);
     if (prjFecade == null) {
       return null;
@@ -63,15 +67,13 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     Model model = MavenPlugin.getMavenModelManager().readMavenModel(prjFecade.getPom());
     Xpp3Dom confDom = findPluginConfiguration(model, profiles);
     if (confDom != null) {
-      if (PreferenceUtils.getBoolean(project, Activator.PREF_ENVIRON)) {
-        Xpp3Dom envDom = confDom.getChild("environmentVariables");
-        if (envDom != null) {
-          List<String> environList = new ArrayList<>(envDom.getChildCount());
-          for (Xpp3Dom varDom : envDom.getChildren()) {
-            environList.add(varDom.getName() + "=\"" + varDom.getValue() + "\"");
-          }
-          return environList;
+      Xpp3Dom envDom = confDom.getChild("environmentVariables");
+      if (envDom != null) {
+        List<String> environList = new ArrayList<>(envDom.getChildCount());
+        for (Xpp3Dom varDom : envDom.getChildren()) {
+          environList.add(varDom.getName() + "=\"" + varDom.getValue() + "\"");
         }
+        return environList;
       }
     }
     return null;
@@ -81,6 +83,10 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
   @Override
   public List<String> getClasspath(ILaunchConfiguration launchConf) throws CoreException {
     IProject project = LaunchConfigurationHelper.getProject(launchConf);
+    if (!PreferenceUtils.getBoolean(project, Activator.PREF_ADDITION_CLASSPATH)) {
+      return null;
+    }
+
     IMavenProjectFacade prjFecade = getMavenProject(project, launchConf);
     if (prjFecade == null) {
       return null;
@@ -92,18 +98,16 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     Model model = MavenPlugin.getMavenModelManager().readMavenModel(prjFecade.getPom());
     Xpp3Dom confDom = findPluginConfiguration(model, profiles);
     if (confDom != null) {
-      if (PreferenceUtils.getBoolean(project, Activator.PREF_ADDITION_CLASSPATH)) {
-        Xpp3Dom cpsDom = confDom.getChild("additionalClasspathElements");
-        if (cpsDom != null) {
-          List<String> cpList = new ArrayList<>(cpsDom.getChildCount());
-          for (Xpp3Dom varDom : cpsDom.getChildren()) {
-            if ("additionalClasspathElement".equals(varDom.getName())) {
-              String cp = resolve(varDom.getValue(), mvnProject, profiles, prjFecade);
-              cpList.add(cp);
-            }
+      Xpp3Dom cpsDom = confDom.getChild("additionalClasspathElements");
+      if (cpsDom != null) {
+        List<String> cpList = new ArrayList<>(cpsDom.getChildCount());
+        for (Xpp3Dom varDom : cpsDom.getChildren()) {
+          if ("additionalClasspathElement".equals(varDom.getName())) {
+            String cp = resolve(varDom.getValue(), mvnProject, profiles, prjFecade);
+            cpList.add(cp);
           }
-          return cpList;
         }
+        return cpList;
       }
     }
     return null;
