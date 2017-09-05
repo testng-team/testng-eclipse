@@ -54,6 +54,10 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
   public List<String> getEnvironment(ILaunchConfiguration launchConf) throws CoreException {
     IProject project = LaunchConfigurationHelper.getProject(launchConf);
     IMavenProjectFacade prjFecade = getMavenProject(project, launchConf);
+    if (prjFecade == null) {
+      return null;
+    }
+
     IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
     List<ProfileData> profiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
     Model model = MavenPlugin.getMavenModelManager().readMavenModel(prjFecade.getPom());
@@ -78,6 +82,10 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
   public List<String> getClasspath(ILaunchConfiguration launchConf) throws CoreException {
     IProject project = LaunchConfigurationHelper.getProject(launchConf);
     IMavenProjectFacade prjFecade = getMavenProject(project, launchConf);
+    if (prjFecade == null) {
+      return null;
+    }
+
     IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
     MavenProject mvnProject = prjFecade.getMavenProject(new NullProgressMonitor());
     List<ProfileData> profiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
@@ -104,7 +112,10 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
   @SuppressWarnings("restriction")
   private String getVMArgsFromPom(ILaunchConfiguration launchConf) throws CoreException {
     IProject project = LaunchConfigurationHelper.getProject(launchConf);
-    IMavenProjectFacade prjFecade = getMavenProject(project, launchConf);;
+    IMavenProjectFacade prjFecade = getMavenProject(project, launchConf);
+    if (prjFecade == null) {
+      return null;
+    }
 
     MavenProject mvnProject = prjFecade.getMavenProject(new NullProgressMonitor());
     IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
