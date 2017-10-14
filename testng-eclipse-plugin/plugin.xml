@@ -124,25 +124,15 @@
                         value="1">
                   </count>
                   <iterate>
-                    <test property="org.eclipse.debug.ui.matchesPattern" value="*.xml|*.yaml"/>
-                    <instanceof value="org.eclipse.core.resources.IFile"/>
-                    <test property="org.testng.eclipse.isSuite"/>
+                    <adapt type="org.eclipse.core.resources.IResource">
+                       <and>
+                          <test property="org.testng.eclipse.isSuite"/>
+                       </and>
+                    </adapt>
                   </iterate>
                </with>
             </enablement>
          </contextualLaunch>
-         <perspective
-               id="org.eclipse.jdt.ui.JavaPerspective">
-         </perspective>
-         <perspective
-               id="org.eclipse.jdt.ui.JavaHierarchyPerspective">
-         </perspective>
-         <perspective
-               id="org.eclipse.jdt.ui.JavaBrowsingPerspective">
-         </perspective>
-         <perspective
-               id="org.eclipse.debug.ui.DebugPerspective">
-         </perspective>
       </shortcut>
   </extension>
 
