@@ -11,6 +11,7 @@ Supported Metrics:
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
 * PR #358: allow run xml test suite from context menu of IEditorPart
+# Fixed #349: Run As TestNG is not shown for class extending AbstractTestNGCucumberTests. (@vikramvi & Nick Tan)
 
 ## 6.12
 
