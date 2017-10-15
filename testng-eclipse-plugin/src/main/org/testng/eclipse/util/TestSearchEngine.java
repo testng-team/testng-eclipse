@@ -12,6 +12,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
@@ -23,10 +24,21 @@ import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IParent;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.PlatformUI;
@@ -248,34 +260,55 @@ public class TestSearchEngine {
     }
     return false;
   }
-  
-  private static boolean doIsTest(IType iType) throws JavaModelException {
-    if (Flags.isAbstract(iType.getFlags())) {
-      return false;
-    }
-    ITestContent testContent = TypeParser.parseType(iType);
-    if (testContent.hasTestMethods()) {
-      return true;
-    }
 
-    // Check if super-type contains tests.
-    IType[] superclasses;
-    try {
-      superclasses = iType.newSupertypeHierarchy(null).getAllSuperclasses(iType);
-    } catch (JavaModelException e) {
-      TestNGPlugin.log("Could not resolve supertype of "+iType.getFullyQualifiedName());
+  private static boolean isAvailable(ISourceRange range) {
+    return range != null && range.getOffset() != -1;
+  }
+
+  private static boolean doIsTest(IType type) throws JavaModelException {
+    if (Flags.isAbstract(type.getFlags())) {
       return false;
     }
 
-    for (IType superclass : superclasses) {
-      ITestContent superContent = TypeParser.parseType(superclass);
-      if (superContent.hasTestMethods()) {
-        return true;
+    ASTParser parser= ASTParser.newParser(AST.JLS8);
+    IProgressMonitor monitor = new NullProgressMonitor();
+    if (type.getCompilationUnit() != null) {
+      parser.setSource(type.getCompilationUnit());
+    } else if (!isAvailable(type.getSourceRange())) { // class file with no source
+      parser.setProject(type.getJavaProject());
+      IBinding[] bindings= parser.createBindings(new IJavaElement[] { type }, monitor);
+      if (bindings.length == 1 && bindings[0] instanceof ITypeBinding) {
+        ITypeBinding binding= (ITypeBinding) bindings[0];
+        return isTest(binding);
+      }
+      return false;
+    } else {
+      parser.setSource(type.getClassFile());
+    }
+    parser.setFocalPosition(0);
+    parser.setResolveBindings(true);
+    CompilationUnit root= (CompilationUnit) parser.createAST(monitor);
+    ASTNode node= root.findDeclaringNode(type.getKey());
+    if (node instanceof TypeDeclaration) {
+      ITypeBinding binding= ((TypeDeclaration) node).resolveBinding();
+      if (binding != null) {
+        return isTest(binding);
       }
     }
     return false;
   }
-  
+
+  private static boolean isTest(ITypeBinding binding) {
+    if (Modifier.isAbstract(binding.getModifiers()))
+      return false;
+
+    if (Annotation.TEST.annotatesTypeOrSuperTypes(binding)
+        || Annotation.TEST.annotatesAtLeastOneMethod(binding)) {
+      return true;
+    }
+    return false;
+  }
+
   private static void doFindTests(Object[] elements,
                                   Set result,
                                   IProgressMonitor pm,
@@ -669,5 +702,54 @@ public class TestSearchEngine {
 
   public static void ppp(String s) {
     System.out.println("[TestSearchEngine] " + s);
+  }
+
+  private static class Annotation {
+
+    private static final Annotation TEST = new Annotation("org.testng.annotations.Test"); //$NON-NLS-1$
+
+    private final String fName;
+
+    private Annotation(String name) {
+      fName = name;
+    }
+
+    public String getName() {
+      return fName;
+    }
+
+    private boolean annotates(IAnnotationBinding[] annotations) {
+      for (IAnnotationBinding annotationBinding : annotations) {
+        ITypeBinding annotationType = annotationBinding.getAnnotationType();
+        if (annotationType != null
+            && (annotationType.getQualifiedName().equals(fName))) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    public boolean annotatesTypeOrSuperTypes(ITypeBinding type) {
+      while (type != null) {
+        if (annotates(type.getAnnotations())) {
+          return true;
+        }
+        type = type.getSuperclass();
+      }
+      return false;
+    }
+
+    public boolean annotatesAtLeastOneMethod(ITypeBinding type) {
+      while (type != null) {
+        IMethodBinding[] declaredMethods = type.getDeclaredMethods();
+        for (IMethodBinding curr : declaredMethods) {
+          if (annotates(curr.getAnnotations())) {
+            return true;
+          }
+        }
+        type = type.getSuperclass();
+      }
+      return false;
+    }
   }
 }
