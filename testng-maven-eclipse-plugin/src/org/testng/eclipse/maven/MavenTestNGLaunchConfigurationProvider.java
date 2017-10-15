@@ -290,6 +290,12 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     if (text == null) {
       return text;
     }
+
+    // workaround #357, MavenTestNGLaunchConfigurationProvider does not execute any maven plugin/goal before launching the tests, 
+    //          it simply parses the effective pom xml file.
+    //          so the workaround here is using the init properties value. Aka., the late properties resolution won't be supported.
+    text = text.replace("@{", "${");
+
     if (!text.contains("${")) {
       return text;
     }
