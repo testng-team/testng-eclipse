@@ -608,13 +608,13 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     fProgressBar.refresh(currentSuiteRunInfo.getStatus(), msg);
   }
 
-  private void postShowTestResultsView() {
+  private void postShowTestResultsView(final boolean hasErrors) {
     postSyncRunnable(new Runnable() {
       public void run() {
         if(isDisposed()) {
           return;
         }
-        showTestResultsView();
+        showTestResultsView(hasErrors);
       }
     });
   }
@@ -622,7 +622,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   /**
    * Show the result view.
    */
-  public void showTestResultsView() {
+  public void showTestResultsView(boolean hasErrors) {
     IWorkbenchWindow   window = getSite().getWorkbenchWindow();
     IWorkbenchPage     page = window.getActivePage();
     TestRunnerViewPart testRunner = null;
@@ -633,10 +633,12 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
         // set to do so, otherwise just make sure the view exists
         boolean focusOnView = TestNGPlugin.getDefault().getPreferenceStore()
             .getBoolean(TestNGPluginConstants.S_SHOW_VIEW_WHEN_TESTS_COMPLETE);
+        boolean focusOnFailureOnly = TestNGPlugin.getDefault().getPreferenceStore()
+            .getBoolean(TestNGPluginConstants.S_SHOW_VIEW_ON_FAILURE_ONLY);
 
         testRunner = (TestRunnerViewPart) page.findView(TestRunnerViewPart.NAME);
 
-        if (focusOnView) {
+        if (focusOnView && (!focusOnFailureOnly || (focusOnFailureOnly && hasErrors))) {
           if (testRunner == null) {
             IWorkbenchPart activePart = page.getActivePart();
             testRunner = (TestRunnerViewPart) page
@@ -1352,7 +1354,7 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       fNextAction.setEnabled(hasErrors);
       fPrevAction.setEnabled(hasErrors);
       m_rerunFailedAction.setEnabled(hasErrors);
-      postShowTestResultsView();
+      postShowTestResultsView(hasErrors);
       stopTest();
       postSyncRunnable(new Runnable() {
         public void run() {

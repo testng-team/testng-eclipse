@@ -33,6 +33,7 @@ public class WorkspacePreferencePage
   private BooleanFieldEditor2 m_absolutePath;
   private BooleanFieldEditor2 m_disabledDefaultListeners;
   private BooleanFieldEditor2 m_showViewWhenTestsComplete;
+  private BooleanFieldEditor2 m_showViewOnFailureOnly;
   private BooleanFieldEditor2 m_showCaseNameOnViewTitle;
   private ResourceSelectionFieldEditor m_xmlTemplateFile;
   private StringFieldEditor m_excludedStackTraces;
@@ -94,6 +95,11 @@ public class WorkspacePreferencePage
         "Show view when tests complete", //$NON-NLS-1$ 
         SWT.NONE, parentComposite);
 
+    m_showViewOnFailureOnly = new BooleanFieldEditor2(
+        TestNGPluginConstants.S_SHOW_VIEW_ON_FAILURE_ONLY,
+        "Show view on failure only", //$NON-NLS-1$ 
+        SWT.NONE, parentComposite);
+
     m_showCaseNameOnViewTitle = new BooleanFieldEditor2(
         TestNGPluginConstants.S_VIEW_TITLE_SHOW_CASE_NAME,
         "Show test name on view title when tests complete", //$NON-NLS-1$ 
@@ -112,6 +118,7 @@ public class WorkspacePreferencePage
     addField(m_absolutePath);
     addField(m_disabledDefaultListeners);
     addField(m_showViewWhenTestsComplete);
+    addField(m_showViewOnFailureOnly);
     addField(m_showCaseNameOnViewTitle);
     addField(m_xmlTemplateFile);
     addField(m_excludedStackTraces);

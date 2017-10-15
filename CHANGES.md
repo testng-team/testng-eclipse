@@ -13,6 +13,7 @@ Supported Metrics:
 * PR #358: allow run xml test suite from context menu of IEditorPart
 * Fixed #349: Run As TestNG is not shown for class extending AbstractTestNGCucumberTests. (@vikramvi & Nick Tan)
 * Fixed #357: Surefire 2.17 late replacement: Error: Could not find or load main class @{argLine}. (@kay & Nick Tan)
+* PR #362 Add option to show view only on failures (@jan-z)
 
 ## 6.12
 
