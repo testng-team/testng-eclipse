@@ -27,6 +27,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
     // tests finish running
     store.setDefault(TestNGPluginConstants.S_SHOW_VIEW_WHEN_TESTS_COMPLETE,
         true);
+    store.setDefault(TestNGPluginConstants.S_SHOW_VIEW_ON_FAILURE_ONLY,
+        false);
     store.setDefault(TestNGPluginConstants.S_VIEW_TITLE_SHOW_CASE_NAME,
         true);
     store.setDefault(TestNGPluginConstants.S_APPEND_FAVORITE_STATIC_IMPORT,
