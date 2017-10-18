@@ -21,9 +21,9 @@ class ShowNextFailureAction extends Action {
 
 	public ShowNextFailureAction(TestRunnerViewPart part) {
 		super(ResourceUtil.getString("ShowNextFailureAction.label"));  //$NON-NLS-1$
-		setDisabledImageDescriptor(TestNGPlugin.getImageDescriptor("dlcl16/select_next.gif")); //$NON-NLS-1$
-		setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/select_next.gif")); //$NON-NLS-1$
-		setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/select_next.gif")); //$NON-NLS-1$
+		setDisabledImageDescriptor(TestNGPlugin.getImageDescriptor("dlcl16/select_next.png")); //$NON-NLS-1$
+		setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/select_next.png")); //$NON-NLS-1$
+		setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/select_next.png")); //$NON-NLS-1$
 		setToolTipText(ResourceUtil.getString("ShowNextFailureAction.tooltip")); //$NON-NLS-1$
 		fPart= part;
 	}

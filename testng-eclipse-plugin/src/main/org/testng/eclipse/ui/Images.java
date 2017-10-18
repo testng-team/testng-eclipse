@@ -40,23 +40,23 @@ public class Images {
     // Tree display
     //
     m_imageRegistry.put(IMG_TESTNG, TestNGPlugin.getImageDescriptor("main16/testng.gif"));
-    m_imageRegistry.put(IMG_SUITE, TestNGPlugin.getImageDescriptor("obj16/suite.gif"));
-    m_imageRegistry.put(IMG_SUITE_OK, TestNGPlugin.getImageDescriptor("obj16/suiteok.gif"));
-    m_imageRegistry.put(IMG_SUITE_SKIP, TestNGPlugin.getImageDescriptor("obj16/suiteskip.gif"));
-    m_imageRegistry.put(IMG_SUITE_FAIL, TestNGPlugin.getImageDescriptor("obj16/suitefail.gif"));
-    m_imageRegistry.put(IMG_SUITE_RUN, TestNGPlugin.getImageDescriptor("obj16/suiterun.gif"));
-    m_imageRegistry.put(IMG_TEST_HIERARCHY, TestNGPlugin.getImageDescriptor("obj16/testhier.gif"));
-    m_imageRegistry.put(IMG_TEST, TestNGPlugin.getImageDescriptor("obj16/test.gif"));
-    m_imageRegistry.put(IMG_TEST_OK, TestNGPlugin.getImageDescriptor("obj16/testok.gif"));
-    m_imageRegistry.put(IMG_TEST_SKIP, TestNGPlugin.getImageDescriptor("obj16/testskip.gif"));
-    m_imageRegistry.put(IMG_TEST_FAIL, TestNGPlugin.getImageDescriptor("obj16/testfail.gif"));
-    m_imageRegistry.put(IMG_TEST_RUN, TestNGPlugin.getImageDescriptor("obj16/testrun.gif"));
+    m_imageRegistry.put(IMG_SUITE, TestNGPlugin.getImageDescriptor("obj16/tsuite.png"));
+    m_imageRegistry.put(IMG_SUITE_OK, TestNGPlugin.getImageDescriptor("obj16/tsuiteok.png"));
+    m_imageRegistry.put(IMG_SUITE_SKIP, TestNGPlugin.getImageDescriptor("obj16/tsuiteskip.png"));
+    m_imageRegistry.put(IMG_SUITE_FAIL, TestNGPlugin.getImageDescriptor("obj16/tsuitefail.png"));
+    m_imageRegistry.put(IMG_SUITE_RUN, TestNGPlugin.getImageDescriptor("obj16/tsuiterun.png"));
+    m_imageRegistry.put(IMG_TEST_HIERARCHY, TestNGPlugin.getImageDescriptor("obj16/testhier.png"));
+    m_imageRegistry.put(IMG_TEST, TestNGPlugin.getImageDescriptor("obj16/test.png"));
+    m_imageRegistry.put(IMG_TEST_OK, TestNGPlugin.getImageDescriptor("obj16/testok.png"));
+    m_imageRegistry.put(IMG_TEST_SKIP, TestNGPlugin.getImageDescriptor("obj16/testskip.png"));
+    m_imageRegistry.put(IMG_TEST_FAIL, TestNGPlugin.getImageDescriptor("obj16/testfail.png"));
+    m_imageRegistry.put(IMG_TEST_RUN, TestNGPlugin.getImageDescriptor("obj16/testrun.png"));
 
-    m_imageRegistry.put(IMG_COMPARE_DISABLED,TestNGPlugin.getImageDescriptor("dlcl16/compare.gif"));
-    m_imageRegistry.put(IMG_COMPARE_HOVER, TestNGPlugin.getImageDescriptor("elcl16/compare.gif"));
-    m_imageRegistry.put(IMG_COMPARE, TestNGPlugin.getImageDescriptor("elcl16/compare.gif"));
+    m_imageRegistry.put(IMG_COMPARE_DISABLED,TestNGPlugin.getImageDescriptor("dlcl16/compare.png"));
+    m_imageRegistry.put(IMG_COMPARE_HOVER, TestNGPlugin.getImageDescriptor("elcl16/compare.png"));
+    m_imageRegistry.put(IMG_COMPARE, TestNGPlugin.getImageDescriptor("elcl16/compare.png"));
 
-    m_imageRegistry.put(IMG_STOP, TestNGPlugin.getImageDescriptor("obj16/terminatedlaunch_obj.png"));
+    m_imageRegistry.put(IMG_STOP, TestNGPlugin.getImageDescriptor("elcl16/stop.png"));
   }
 
   public static Image getTestNGImage() {

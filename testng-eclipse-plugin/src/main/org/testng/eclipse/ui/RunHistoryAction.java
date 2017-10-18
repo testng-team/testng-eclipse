@@ -36,7 +36,8 @@ public class RunHistoryAction extends Action implements IMenuCreator {
     this.testRunnerViewPart = testRunnerViewPart;
 
     setToolTipText("Test Run History...");
-    setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/history_list.gif")); //$NON-NLS-1$
+    setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/history_list.png")); //$NON-NLS-1$
+    setDisabledImageDescriptor(TestNGPlugin.getImageDescriptor("dlcl16/history_list.png")); //$NON-NLS-1$
     setMenuCreator(this);
   }
 

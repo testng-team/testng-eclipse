@@ -1064,15 +1064,15 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       super("", AS_RADIO_BUTTON); //$NON-NLS-1$
       if(orientation == TestRunnerViewPart.VIEW_ORIENTATION_HORIZONTAL) {
         setText(ResourceUtil.getString("TestRunnerViewPart.toggle.horizontal.label")); //$NON-NLS-1$
-        setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/th_horizontal.gif")); //$NON-NLS-1$
+        setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/th_horizontal.png")); //$NON-NLS-1$
       }
       else if(orientation == TestRunnerViewPart.VIEW_ORIENTATION_VERTICAL) {
         setText(ResourceUtil.getString("TestRunnerViewPart.toggle.vertical.label")); //$NON-NLS-1$
-        setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/th_vertical.gif")); //$NON-NLS-1$
+        setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/th_vertical.png")); //$NON-NLS-1$
       }
       else if(orientation == TestRunnerViewPart.VIEW_ORIENTATION_AUTOMATIC) {
         setText(ResourceUtil.getString("TestRunnerViewPart.toggle.automatic.label")); //$NON-NLS-1$
-        setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/th_automatic.gif")); //$NON-NLS-1$
+        setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/th_automatic.png")); //$NON-NLS-1$
       }
       fActionOrientation = orientation;
     }
@@ -1199,9 +1199,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     public RerunAction() {
       setText(ResourceUtil.getString("TestRunnerViewPart.rerunaction.label")); //$NON-NLS-1$
       setToolTipText(ResourceUtil.getString("TestRunnerViewPart.rerunaction.tooltip")); //$NON-NLS-1$
-      setDisabledImageDescriptor(TestNGPlugin.getImageDescriptor("dlcl16/relaunch.gif")); //$NON-NLS-1$
-      setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
-      setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
+      setDisabledImageDescriptor(TestNGPlugin.getImageDescriptor("dlcl16/relaunch.png")); //$NON-NLS-1$
+      setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunch.png")); //$NON-NLS-1$
+      setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunch.png")); //$NON-NLS-1$
       setActionDefinitionId(RERUN_LAST_COMMAND);
     }
 
@@ -1218,9 +1218,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     public OpenReportAction() {
       setText(ResourceUtil.getString("TestRunnerViewPart.openreport.label")); //$NON-NLS-1$
       setToolTipText(ResourceUtil.getString("TestRunnerViewPart.openreport.tooltip")); //$NON-NLS-1$
-      setDisabledImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/report.gif")); //$NON-NLS-1$
-      setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/report.gif")); //$NON-NLS-1$
-      setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/report.gif")); //$NON-NLS-1$
+      setDisabledImageDescriptor(TestNGPlugin.getImageDescriptor("dlcl16/report.png")); //$NON-NLS-1$
+      setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/report.png")); //$NON-NLS-1$
+      setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/report.png")); //$NON-NLS-1$
     }
 
     private void openEditor(IFile file) {
@@ -1286,9 +1286,9 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
     public RerunFailedAction() {
       setText(ResourceUtil.getString("TestRunnerViewPart.rerunfailedsaction.label")); //$NON-NLS-1$
       setToolTipText(ResourceUtil.getString("TestRunnerViewPart.rerunfailedsaction.tooltip")); //$NON-NLS-1$
-      setDisabledImageDescriptor(TestNGPlugin.getImageDescriptor("dlcl16/relaunchf.gif")); //$NON-NLS-1$
-      setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunchf.gif")); //$NON-NLS-1$
-      setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunchf.gif")); //$NON-NLS-1$
+      setDisabledImageDescriptor(TestNGPlugin.getImageDescriptor("dlcl16/relaunchf.png")); //$NON-NLS-1$
+      setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunchf.png")); //$NON-NLS-1$
+      setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunchf.png")); //$NON-NLS-1$
       setActionDefinitionId(RERUN_FAILED_COMMAND);
     }
 

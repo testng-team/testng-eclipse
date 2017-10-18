@@ -19,7 +19,7 @@ public class TestNGContainerWizardPage extends WizardPage implements IClasspathC
     super("TestNGContainerWizardPage"); //$NON-NLS-1$
     setTitle(ResourceUtil.getString("TestNGContainerWizardPage.title"));  //$NON-NLS-1$
     setDescription(ResourceUtil.getString("TestNGContainerWizardPage.description")); //$NON-NLS-1$
-    setImageDescriptor(TestNGPlugin.getImageDescriptor("wizban/addlibrary_wiz.png")); //$NON-NLS-1$
+    setImageDescriptor(TestNGPlugin.getImageDescriptor("wizban/library_wiz.png")); //$NON-NLS-1$
   }
 
   public void createControl(Composite parent) {

@@ -495,7 +495,7 @@ abstract public class AbstractTab extends TestRunTab implements IMenuListener {
 
   private void initImages() {
     m_testHierarchyIcon = Images.getImage(IMG_TEST_HIERARCHY); 
-    m_stackViewIcon = TestNGPlugin.getImageDescriptor("eview16/stackframe.gif")
+    m_stackViewIcon = TestNGPlugin.getImageDescriptor("eview16/stackframe.png")
         .createImage(); //$NON-NLS-1$
   }
 

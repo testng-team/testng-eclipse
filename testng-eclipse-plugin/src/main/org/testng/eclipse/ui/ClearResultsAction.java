@@ -11,7 +11,7 @@ public class ClearResultsAction extends Action {
 
   public ClearResultsAction(List<TestRunTab> tabs) {
     m_tabs = tabs;
-    setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/clear.gif"));
+    setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/clear.png"));
     setToolTipText(ResourceUtil.getString("TestRunnerViewPart.clearResults.tooltip")); //$NON-NLS-1$
   }
 
