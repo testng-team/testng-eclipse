@@ -47,9 +47,9 @@ class FailureTrace implements IMenuListener {
   private static final String  FRAME_PREFIX = "at "; //$NON-NLS-1$
   
   private final Image m_stackIcon = TestNGPlugin.getImageDescriptor(
-      "obj16/stkfrm_obj.gif").createImage(); //$NON-NLS-1$
+      "obj16/stkfrm_obj.png").createImage(); //$NON-NLS-1$
   private final Image m_exceptionIcon = TestNGPlugin.getImageDescriptor(
-      "obj16/exc_catch.gif").createImage(); //$NON-NLS-1$
+      "obj16/exc_catch.png").createImage(); //$NON-NLS-1$
 
   private final Clipboard fClipboard;
   private Table fTable;

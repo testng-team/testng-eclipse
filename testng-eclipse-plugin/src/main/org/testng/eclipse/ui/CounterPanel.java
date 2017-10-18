@@ -26,8 +26,8 @@ import org.eclipse.swt.widgets.Text;
  */
 public class CounterPanel extends Composite {
   private static final String TOTAL_MESSAGE_FORMAT = "{0}/{1}  ";
-  private final Image m_successIcon = TestNGPlugin.getImageDescriptor("ovr16/success.gif").createImage(); //$NON-NLS-1$
-  private final Image m_failureIcon = TestNGPlugin.getImageDescriptor("ovr16/failure.gif").createImage(); //$NON-NLS-1$
+  private final Image m_successIcon = TestNGPlugin.getImageDescriptor("ovr16/success_ovr.png").createImage(); //$NON-NLS-1$
+  private final Image m_failureIcon = TestNGPlugin.getImageDescriptor("ovr16/failed_ovr.png").createImage(); //$NON-NLS-1$
   private final Image m_skipIcon = TestNGPlugin.getImageDescriptor("ovr16/skip.gif").createImage(); //$NON-NLS-1$
 //  private final Image m_failPercentIcon = TestNGPlugin.getImageDescriptor("ovr16/failureOnPercentage.gif").createImage(); //$NON-NLS-1$
 

@@ -44,16 +44,16 @@ public class QuickRunAction extends Action {
     if(ILaunchManager.RUN_MODE.equals(m_runMode)) {
       setText(ResourceUtil.getString("QuickRunAction.run.action.label")); //$NON-NLS-1$
       setToolTipText(ResourceUtil.getString("QuickRunAction.run.action.tooltip")); //$NON-NLS-1$
-      setDisabledImageDescriptor(TestNGPlugin.getImageDescriptor("dlcl16/relaunch.gif")); //$NON-NLS-1$
-      setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
-      setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
+      setDisabledImageDescriptor(TestNGPlugin.getImageDescriptor("dlcl16/relaunch.png")); //$NON-NLS-1$
+      setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunch.png")); //$NON-NLS-1$
+      setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/relaunch.png")); //$NON-NLS-1$
     }
     else {
       setText(ResourceUtil.getString("QuickRunAction.debug.action.label")); //$NON-NLS-1$
       setToolTipText(ResourceUtil.getString("QuickRunAction.debug.action.tooltip")); //$NON-NLS-1$
-      setDisabledImageDescriptor(TestNGPlugin.getImageDescriptor("dlcl16/debug.gif")); //$NON-NLS-1$
-      setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/debug.gif")); //$NON-NLS-1$
-      setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/debug.gif")); //$NON-NLS-1$
+      setDisabledImageDescriptor(TestNGPlugin.getImageDescriptor("dlcl16/debug.png")); //$NON-NLS-1$
+      setHoverImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/debug.png")); //$NON-NLS-1$
+      setImageDescriptor(TestNGPlugin.getImageDescriptor("elcl16/debug.png")); //$NON-NLS-1$
     }
   }
   
