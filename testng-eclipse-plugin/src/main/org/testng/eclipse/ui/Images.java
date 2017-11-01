@@ -42,7 +42,7 @@ public class Images {
     m_imageRegistry.put(IMG_TESTNG, TestNGPlugin.getImageDescriptor("main16/testng.gif"));
     m_imageRegistry.put(IMG_SUITE, TestNGPlugin.getImageDescriptor("obj16/tsuite.png"));
     m_imageRegistry.put(IMG_SUITE_OK, TestNGPlugin.getImageDescriptor("obj16/tsuiteok.png"));
-    m_imageRegistry.put(IMG_SUITE_SKIP, TestNGPlugin.getImageDescriptor("obj16/tsuiteskip.png"));
+    m_imageRegistry.put(IMG_SUITE_SKIP, TestNGPlugin.getImageDescriptor("obj16/suiteskip.gif"));
     m_imageRegistry.put(IMG_SUITE_FAIL, TestNGPlugin.getImageDescriptor("obj16/tsuitefail.png"));
     m_imageRegistry.put(IMG_SUITE_RUN, TestNGPlugin.getImageDescriptor("obj16/tsuiterun.png"));
     m_imageRegistry.put(IMG_TEST_HIERARCHY, TestNGPlugin.getImageDescriptor("obj16/testhier.png"));
