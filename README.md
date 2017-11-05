@@ -3,6 +3,7 @@ TestNG for Eclipse Plugin
 
 [![Build Status](http://img.shields.io/travis/cbeust/testng-eclipse.svg)](https://travis-ci.org/cbeust/testng-eclipse)
 [![Join the chat at https://gitter.im/cbeust/testng-eclipse](https://badges.gitter.im/cbeust/testng-eclipse.svg)](https://gitter.im/cbeust/testng-eclipse?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Download](https://api.bintray.com/packages/testng-team/testng-eclipse-release/updatesites/images/download.svg) ](https://bintray.com/testng-team/testng-eclipse-release/updatesites/_latestVersion)
 
 ## Installation
 
@@ -35,8 +36,8 @@ Enjoy.
 
 Plugin Version            | Online Update-Site | Zipped Update-Site
 ------------------------- | ------------------ | ---------------------
-:star2: LATEST RELEASE    | `http://beust.com/eclipse` | [here](http://dl.bintray.com/testng-team/testng-eclipse-release/zipped/)
-BETA | `http://beust.com/eclipse-beta` | [here](https://dl.bintray.com/testng-team/testng-eclipse/zipped/)
+LATEST RELEASE [![Download](https://api.bintray.com/packages/testng-team/testng-eclipse-release/updatesites/images/download.svg)](http://dl.bintray.com/testng-team/testng-eclipse-release/zipped/)   | `http://beust.com/eclipse` | [here](http://dl.bintray.com/testng-team/testng-eclipse-release/zipped/)
+LATEST BETA [![Download](https://api.bintray.com/packages/testng-team/testng-eclipse/updatesites/images/download.svg)](https://dl.bintray.com/testng-team/testng-eclipse/zipped/) | `http://beust.com/eclipse-beta` | [here](https://dl.bintray.com/testng-team/testng-eclipse/zipped/)
 History:||
 6.12.0.201709050550       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.12.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.12.0.201709050550/org.testng.eclipse.updatesite.zip)
 6.11.0.201703011520       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.11.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.11.0.201703011520/site_assembly.zip)
