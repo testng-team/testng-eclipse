@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.testng.eclipse</groupId>
     <artifactId>org.testng.eclipse.parent</artifactId>
-    <version>6.12.0-SNAPSHOT</version>
+    <version>6.13.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -169,7 +169,7 @@
         <repository>
             <id>testng-p2-repo</id>
             <layout>p2</layout>
-            <url>http://dl.bintray.com/testng-team/testng-p2-release/</url>
+            <url>http://dl.bintray.com/testng-team/testng-p2/6.13.0/</url>
         </repository>
         <repository>
             <snapshots>
