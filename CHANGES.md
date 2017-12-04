@@ -1,6 +1,16 @@
 Change Log
 ====
 
+## Current
+
+Supported Metrics:
+
+| Plugin | Dependency |
+| ------------- | ------------- |
+| TestNG for Eclipse | Eclipse Juno (4.2) or above |
+| TestNG M2E Integration (Optional) | M2E 1.5 or above |
+
+
 ## 6.13
 
 Supported Metrics:
