@@ -10,7 +10,6 @@ Supported Metrics:
 | TestNG for Eclipse | Eclipse Juno (4.2) or above |
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
-* PR #374: skip plugin conf if skipTests=true for maven-surefire-plugin (or skipITs=true for maven-failsafe-plugin)
 
 ## 6.13
 
