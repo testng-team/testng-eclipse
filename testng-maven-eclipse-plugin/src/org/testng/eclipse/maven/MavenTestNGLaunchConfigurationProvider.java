@@ -228,14 +228,14 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
         if ("maven-surefire-plugin".equals(plugin.getArtifactId())
             || "maven-failsafe-plugin".equals(plugin.getArtifactId())) {
           Object mvnPlugConf = plugin.getConfiguration();
-          if (isTargetConfiguration(mvnPlugConf)) {
+          if (isTargetConfiguration(plugin.getArtifactId(), mvnPlugConf)) {
             return (Xpp3Dom) mvnPlugConf;
           } else {
             List<PluginExecution> pexecs = plugin.getExecutions();
             if (pexecs != null) {
               for (PluginExecution pexec : pexecs) {
                 mvnPlugConf = pexec.getConfiguration();
-                if (isTargetConfiguration(mvnPlugConf)) {
+                if (isTargetConfiguration(plugin.getArtifactId(), mvnPlugConf)) {
                   return (Xpp3Dom) mvnPlugConf;
                 }
               }
@@ -258,9 +258,25 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
    * @param configuration
    * @return {@code true} if found
    */
-  private boolean isTargetConfiguration(Object configuration) {
+  private boolean isTargetConfiguration(String pluginId, Object configuration) {
     if (configuration != null && configuration instanceof Xpp3Dom) {
       Xpp3Dom dom = ((Xpp3Dom) configuration);
+
+      Xpp3Dom skipTestsDom = dom.getChild("skipTests");
+      if (skipTestsDom != null) {
+        if (Boolean.parseBoolean(skipTestsDom.getValue().trim())) {
+          return false;
+        }
+      }
+      if ("maven-failsafe-plugin".equals(pluginId)) {
+        Xpp3Dom skipITsDom = dom.getChild("skipITs");
+        if (skipITsDom != null) {
+          if (Boolean.parseBoolean(skipITsDom.getValue().trim())) {
+            return false;
+          }
+        }
+      }
+
       Xpp3Dom d = dom.getChild("argLine");
       if (d != null && !d.getValue().trim().isEmpty()) {
         return true;
