@@ -170,9 +170,9 @@
             <id>testng-p2-repo</id>
             <layout>p2</layout>
             <!-- testng-p2 beta -->
-            <!-- <url>http://dl.bintray.com/testng-team/testng-p2/6.13.0/</url> -->
+            <url>https://dl.bintray.com/testng-team/testng-p2/6.14.0/</url>
             <!-- testng-p2 release -->
-            <url>https://dl.bintray.com/testng-team/testng-p2-release/6.13.1/</url>
+            <!-- <url>https://dl.bintray.com/testng-team/testng-p2-release/6.13.1/</url> -->
         </repository>
         <repository>
             <snapshots>
