@@ -15,4 +15,5 @@ public class Messages extends NLS {
   public static String prefEnvironBtnName;
   public static String prefSysPropsBtnName;
   public static String prefAdditionalClasspathBtnName;
+  public static String prefPropertiesBtnName;
 }

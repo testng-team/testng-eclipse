@@ -39,6 +39,46 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
   public static final Pattern PATTERN = Pattern.compile("\\$\\{([^}]+)\\}");
 
   @Override
+  public String getArguments(ILaunchConfiguration launchConf) throws CoreException {
+    IProject project = LaunchConfigurationHelper.getProject(launchConf);
+    if (PreferenceUtils.getBoolean(project, Activator.PREF_PROPERTIES)) {
+      IMavenProjectFacade prjFecade = getMavenProject(project, launchConf);
+      if (prjFecade == null) {
+        return null;
+      }
+
+      MavenProject mvnProject = prjFecade.getMavenProject(new NullProgressMonitor());
+      IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
+      List<ProfileData> selectedProfiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
+      Model model = mvnProject.getModel();
+      Xpp3Dom confDom = findPluginConfiguration(model, selectedProfiles);
+      if (confDom != null) {
+        Xpp3Dom propsDom = confDom.getChild("properties");
+        if (propsDom != null) {
+          StringBuilder sb = new StringBuilder();
+          Xpp3Dom[] propDoms = propsDom.getChildren("property");
+          if (propDoms != null) {
+            for (Xpp3Dom propDom : propDoms) {
+              Xpp3Dom nameDom = propDom.getChild("name");
+              if (nameDom != null) {
+                String name = nameDom.getValue();
+
+                Xpp3Dom valDom = propDom.getChild("value");
+                if (valDom != null) {
+                  String val = valDom.getValue();
+                  sb.append("-").append(name).append(" ").append(val).append(" ");
+                }
+              }
+            }
+          }
+          return sb.toString();
+        }
+      }
+    }
+    return null;
+  }
+
+  @Override
   public String getVmArguments(ILaunchConfiguration launchConf) throws CoreException {
     IProject project = LaunchConfigurationHelper.getProject(launchConf);
     if (PreferenceUtils.getBoolean(project, Activator.PREF_ARGLINE)

@@ -10,6 +10,7 @@ Supported Metrics:
 | TestNG for Eclipse | Eclipse Juno (4.2) or above |
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
+* Feature #373: Support for surefire and failsafe <properties> tag.
 
 ## 6.13
 
