@@ -17,6 +17,12 @@ public class Activator extends AbstractUIPlugin {
     public static final String PREF_ARGLINE = PLUGIN_ID + ".argline";
     public static final String PREF_ENVIRON = PLUGIN_ID + ".environ";
     public static final String PREF_SYSPROPERTIES = PLUGIN_ID + ".sysproperties";
+    /**
+     * surefire/failsafe use configuration/properties as TestNG runtime arguments
+     * 
+     * @see http://maven.apache.org/surefire/maven-surefire-plugin/examples/testng.html
+     */
+    public static final String PREF_PROPERTIES = PLUGIN_ID + ".properties";
     public static final String PREF_ADDITION_CLASSPATH = PLUGIN_ID + ".additionalClasspath";
 
     // The shared instance

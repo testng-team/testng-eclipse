@@ -99,10 +99,6 @@ public class TestNGLaunchConfigurationDelegate
     launch.setAttribute(TestNGLaunchConfigurationConstants.TESTNG_RUN_NAME_ATTR,
         getRunNameAttr(configuration));
 
-    StringBuilder sb = new StringBuilder();
-    for (String arg : runConfig.getProgramArguments()) {
-      sb.append(arg).append(" ");
-    }
     TestNGPlugin
         .log("[TestNGLaunchConfigurationDelegate] " + debugConfig(runConfig));
     runner.run(runConfig, launch, monitor);
@@ -324,6 +320,22 @@ public class TestNGLaunchConfigurationDelegate
     vmConfig.setProgramArguments(argv.toArray(new String[argv.size()]));
 
     return vmConfig;
+  }
+
+  @Override
+  public String getProgramArguments(ILaunchConfiguration configuration)
+      throws CoreException {
+    String args = super.getProgramArguments(configuration);
+
+    for (ITestNGLaunchConfigurationProvider lcp : TestNGPlugin.getLaunchConfigurationProviders()) {
+      String extraArgs = lcp.getArguments(configuration);
+      if (extraArgs != null && !extraArgs.isEmpty()) {
+        args += " ";
+        args += extraArgs;
+      }
+    }
+
+    return args;
   }
 
   @Override

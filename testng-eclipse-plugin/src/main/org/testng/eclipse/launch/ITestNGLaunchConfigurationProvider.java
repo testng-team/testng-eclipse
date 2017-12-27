@@ -38,4 +38,13 @@ public interface ITestNGLaunchConfigurationProvider {
    */
   List<String> getClasspath(ILaunchConfiguration configuration)
       throws CoreException;
+
+  /**
+   * Returns extra program argument for TestNG
+   * 
+   * @param configuration
+   * @return
+   * @throws CoreException 
+   */
+  String getArguments(ILaunchConfiguration configuration) throws CoreException;
 }

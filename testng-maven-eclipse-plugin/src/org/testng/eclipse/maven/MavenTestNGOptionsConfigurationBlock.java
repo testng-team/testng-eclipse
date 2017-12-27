@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.Group;
 
 public class MavenTestNGOptionsConfigurationBlock extends OptionsConfigurationBlock {
 
+  private static final Key KEY_PROPERTIES = getKey(Activator.PREF_PROPERTIES);
   private static final Key KEY_ARGLINE = getKey(Activator.PREF_ARGLINE);
   private static final Key KEY_ENVIRON = getKey(Activator.PREF_ENVIRON);
   private static final Key KEY_SYSPROPERTIES = getKey(Activator.PREF_SYSPROPERTIES);
@@ -19,6 +20,7 @@ public class MavenTestNGOptionsConfigurationBlock extends OptionsConfigurationBl
 
   private Button argLineBtn;
   private Button environBtn;
+  private Button propertiesBtn;
   private Button syspropsBtn;
   private Button additionalCpBtn;
 
@@ -48,6 +50,9 @@ public class MavenTestNGOptionsConfigurationBlock extends OptionsConfigurationBl
     additionalCpBtn = new Button(mavenGroup, SWT.CHECK);
     additionalCpBtn.setText(Messages.prefAdditionalClasspathBtnName);
 
+    propertiesBtn = new Button(mavenGroup, SWT.CHECK);
+    propertiesBtn.setText(Messages.prefPropertiesBtnName);
+
     initWidgetValues();
 
     return composite;
@@ -58,23 +63,27 @@ public class MavenTestNGOptionsConfigurationBlock extends OptionsConfigurationBl
     environBtn.setSelection(getBooleanValue(KEY_ENVIRON));
     syspropsBtn.setSelection(getBooleanValue(KEY_SYSPROPERTIES));
     additionalCpBtn.setSelection(getBooleanValue(KEY_ADDITION_CLASSPATH));
+    propertiesBtn.setSelection(getBooleanValue(KEY_PROPERTIES));
   }
 
   public boolean performApply(boolean useDefaults) {
     boolean fArgLine = argLineBtn.getSelection();
     boolean fEnviron = environBtn.getSelection();
+    boolean fProperties = propertiesBtn.getSelection();
     boolean fSysProps = syspropsBtn.getSelection();
     boolean fAdditionalCp = additionalCpBtn.getSelection();
     if (useDefaults) {
       IPreferenceStore prefStore = Activator.getDefault().getPreferenceStore();
       fArgLine = prefStore.getDefaultBoolean(Activator.PREF_ARGLINE);
       fEnviron = prefStore.getDefaultBoolean(Activator.PREF_ENVIRON);
+      fProperties = prefStore.getDefaultBoolean(Activator.PREF_PROPERTIES);
       fSysProps = prefStore.getDefaultBoolean(Activator.PREF_SYSPROPERTIES);
       fAdditionalCp = prefStore.getDefaultBoolean(Activator.PREF_ADDITION_CLASSPATH);
     }
 
     setValue(KEY_ARGLINE, fArgLine);
     setValue(KEY_ENVIRON, fEnviron);
+    setValue(KEY_PROPERTIES, fProperties);
     setValue(KEY_SYSPROPERTIES, fSysProps);
     setValue(KEY_ADDITION_CLASSPATH, fAdditionalCp);
 
@@ -94,6 +103,6 @@ public class MavenTestNGOptionsConfigurationBlock extends OptionsConfigurationBl
   }
 
   private static Key[] getKeys() {
-    return new Key[] { KEY_ARGLINE, KEY_ENVIRON, KEY_SYSPROPERTIES, KEY_ADDITION_CLASSPATH };
+    return new Key[] { KEY_ARGLINE, KEY_ENVIRON, KEY_SYSPROPERTIES, KEY_ADDITION_CLASSPATH, KEY_PROPERTIES };
   }
 }
