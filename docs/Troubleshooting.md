@@ -14,3 +14,9 @@ You can follow thses steps try to fix/bypass the problem:
 * Add vmargs '-Djava.net.preferIPv4Stack=true' to Eclipse config.ini, read the wiki [[1]](https://wiki.eclipse.org/Eclipse.ini) for the detail.
 * Retry two or more times, if still can't install, it could be the site http://beust.com temporarily unavailable, please install from the updatesite: `http://dl.bintray.com/testng-team/testng-eclipse-release/`
 * Or, for whatever reason, you can't access either `http://beust.com/eclipse` or `http://dl.bintray.com/testng-team/testng-eclipse-release/` directly, you can download the [offline updatesite](https://github.com/cbeust/testng-eclipse#update-sites), then copy to your workstation.
+
+
+## TestNG Eclipse Plugin not showing up
+
+On Windows platform, if you installed plugin succeed, but it's [not showing up](https://github.com/cbeust/testng-eclipse/issues/378#issuecomment-359957096), please make sure install Eclipse to a folder where your user has full rights (Ex., user home dir).
+see relate StackOverflow answer: https://stackoverflow.com/a/3448786/4867232
