@@ -1,26 +1,16 @@
 package org.testng.eclipse.ui.preferences;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.FolderSelectionDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -30,14 +20,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.PropertyPage;
-import org.eclipse.ui.model.WorkbenchLabelProvider;
-import org.eclipse.ui.views.navigator.ResourceSorter;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.ui.util.Utils.Widgets;
-import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.ResourceUtil;
 import org.testng.reporters.XMLReporter;
@@ -195,61 +181,6 @@ public class ProjectPropertyPage extends PropertyPage {
     }
     
     return false;
-  }
-
-  private void handleBrowseAction() {
-    Class[] acceptedClasses = new Class[] { IProject.class, IFolder.class };
-    ISelectionStatusValidator validator = new ISelectionStatusValidator() {
-        public IStatus validate(Object[] selection) {
-          if ((null == selection) || (selection.length == 0)) {
-            return TestNGPlugin.createError("empty selection is not allowed");
-          }
-
-          if (selection.length > 1) {
-            return TestNGPlugin.createError("multiple selection is not allowed");
-          }
-
-          if (IFolder.class.isInstance(selection[0]) || IProject.class.isInstance(selection[0])) {
-            return TestNGPlugin.createStatus(IStatus.OK, "");
-          }
-
-          return TestNGPlugin.createError("not accepted type");
-        }
-      };
-
-    IWorkspaceRoot workspaceRoot = JDTUtil.getWorkspaceRoot();
-    IProject[] allProjects = workspaceRoot.getProjects();
-    List<IProject> rejectedElements = new ArrayList<>(allProjects.length);
-    IProject currProject = m_workingProject.getProject();
-    for (int i = 0; i < allProjects.length; i++) {
-      if (!allProjects[i].equals(currProject)) {
-        rejectedElements.add(allProjects[i]);
-      }
-    }
-    ViewerFilter filter = new TypedViewerFilter(acceptedClasses, rejectedElements.toArray());
-
-    ILabelProvider lp = new WorkbenchLabelProvider();
-    ITreeContentProvider cp = new ProjectContentProvider();
-
-    IResource initSelection = null;
-//    if (!"".equals(m_outdirPath.getText())) {
-//      initSelection= workspaceRoot.findMember(new Path(m_outdirPath.getText()));
-//    }
-
-    FolderSelectionDialog dialog = new FolderSelectionDialog(getShell(), lp, cp);
-    dialog.setTitle("Select TestNG output artifacts directory");
-    dialog.setValidator(validator);
-    dialog.setMessage("a message");
-    dialog.addFilter(filter);
-    dialog.setInput(workspaceRoot);
-    dialog.setInitialSelection(initSelection);
-    dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
-
-    if (dialog.open() == Window.OK) {
-      m_outputdir.setText(((IContainer) dialog.getFirstResult()).getProjectRelativePath()
-                           .toPortableString());
-    }
-
   }
 
   public static class ProjectContentProvider implements ITreeContentProvider {
