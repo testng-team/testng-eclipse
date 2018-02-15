@@ -10,7 +10,7 @@ Supported Metrics:
 | TestNG for Eclipse | Eclipse Juno (4.2) or above |
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
-* Feature #373: Support for surefire and failsafe <properties> tag.
+* Feature #373: Support for surefire and failsafe \<properties\> tag.
 * PR #385: Remove the option of 'Absolute output path', now it's always the relative path to the project(s).
 * Fixed #383: Spring boot 2.0.0.M7+RC1 projects not testable in Eclipse Oxygen 2. (@vguna & Nick Tan)
 
