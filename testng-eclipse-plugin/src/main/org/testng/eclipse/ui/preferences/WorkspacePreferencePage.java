@@ -10,8 +10,6 @@ import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.StringButtonFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -29,8 +27,7 @@ public class WorkspacePreferencePage
     extends FieldEditorPreferencePage
     implements IWorkbenchPreferencePage
 {
-  private FSBrowseDirectoryFieldEditor m_outputdir;
-  private BooleanFieldEditor2 m_absolutePath;
+  private StringFieldEditor m_outputdir;
   private BooleanFieldEditor2 m_disabledDefaultListeners;
   private BooleanFieldEditor2 m_showViewWhenTestsComplete;
   private BooleanFieldEditor2 m_showViewOnFailureOnly;
@@ -54,23 +51,9 @@ public class WorkspacePreferencePage
   @Override
   public void createFieldEditors() {
     Composite parentComposite= getFieldEditorParent();
-    m_outputdir= new FSBrowseDirectoryFieldEditor(TestNGPluginConstants.S_OUTDIR, 
-        "Output directory:", //$NON-NLS-1$ 
-        parentComposite);
-    m_outputdir.fillIntoGrid(parentComposite, 3);
-    Button btn= m_outputdir.getChangeControl(parentComposite);
-    btn.addSelectionListener(new SelectionAdapter() {
-      @Override
-      public void widgetSelected(SelectionEvent evt) {
-        m_absolutePath.getChangeControl(getFieldEditorParent()).setSelection(true);
-      }
-    });
-    
-    m_absolutePath= new BooleanFieldEditor2(TestNGPluginConstants.S_ABSOLUTEPATH, 
-        "Absolute output path", //$NON-NLS-1$ 
-        SWT.NONE, 
-        parentComposite); 
-    m_outputdir.setAbsolutePathVerifier(m_absolutePath);
+
+    m_outputdir = new StringFieldEditor(TestNGPluginConstants.S_OUTDIR,
+        ResourceUtil.getString("TestNGPropertyPage.outputDir"), parentComposite);
 
     // XML template
     m_xmlTemplateFile = new ResourceSelectionFieldEditor(TestNGPluginConstants.S_XML_TEMPLATE_FILE,
@@ -115,7 +98,6 @@ public class WorkspacePreferencePage
 
 
     addField(m_outputdir);
-    addField(m_absolutePath);
     addField(m_disabledDefaultListeners);
     addField(m_showViewWhenTestsComplete);
     addField(m_showViewOnFailureOnly);

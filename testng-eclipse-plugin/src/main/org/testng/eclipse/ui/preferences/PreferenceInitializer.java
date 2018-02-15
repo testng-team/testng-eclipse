@@ -19,7 +19,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
   @Override
   public void initializeDefaultPreferences() {
     IPreferenceStore store = TestNGPlugin.getDefault().getPreferenceStore();
-    store.setDefault(TestNGPluginConstants.S_OUTDIR, "/test-output");
+    store.setDefault(TestNGPluginConstants.S_OUTDIR, "test-output");
     store.setDefault(TestNGPluginConstants.S_EXCLUDED_STACK_TRACES,
         "org.testng.internal org.testng.TestRunner org.testng.SuiteRunner "
         + "org.testng.remote.RemoteTestNG org.testng.TestNG sun.reflect java.lang");

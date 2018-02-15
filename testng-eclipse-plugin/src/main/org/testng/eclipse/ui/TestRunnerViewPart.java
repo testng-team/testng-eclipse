@@ -1249,35 +1249,16 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
       }
       PreferenceStoreUtil storage= TestNGPlugin.getPluginPreferenceStore();
       IPath filePath= new Path(storage.getOutputDirectoryPath(javaProject).toOSString() + "/index.html");
-      boolean isAbsolute= storage.isOutputAbsolutePath(javaProject.getElementName(), false);
 
       IProgressMonitor progressMonitor= new NullProgressMonitor();
-      if(isAbsolute) {
-        IFile file = javaProject.getProject().getFile("temp-testng-index.html");
-        try {
-          if(null == file) return;
-          file.createLink(filePath, IResource.NONE, progressMonitor);
-          try {
-            openEditor(file);
-          }
-          finally {
-            file.delete(true, progressMonitor);
-          }
-        }
-        catch(CoreException cex) {
-          TestNGPlugin.log(cex);
-        }
+      IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(filePath);
+      if(null == file) return;
+      try {
+        file.refreshLocal(IResource.DEPTH_ZERO, progressMonitor);
+        openEditor(file);
       }
-      else {
-        IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(filePath);
-        if(null == file) return;
-        try {
-          file.refreshLocal(IResource.DEPTH_ZERO, progressMonitor);
-          openEditor(file);
-        }
-        catch(CoreException cex) {
-          TestNGPlugin.log(cex); // nothing I can do about it
-        }
+      catch(CoreException cex) {
+        TestNGPlugin.log(cex); // nothing I can do about it
       }
     }
   }

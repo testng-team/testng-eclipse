@@ -24,13 +24,10 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
@@ -43,7 +40,6 @@ import org.testng.eclipse.ui.util.Utils.Widgets;
 import org.testng.eclipse.util.JDTUtil;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.ResourceUtil;
-import org.testng.eclipse.util.SWTUtil;
 import org.testng.reporters.XMLReporter;
 
 /**
@@ -53,7 +49,6 @@ import org.testng.reporters.XMLReporter;
  */
 public class ProjectPropertyPage extends PropertyPage {
   private Text m_outputdir;
-  private Button m_absolutePath;
   private Button m_disabledDefaultListeners;
   private Text m_xmlTemplateFile;
   private Text m_preDefinedListeners;
@@ -78,25 +73,9 @@ public class ProjectPropertyPage extends PropertyPage {
     // Output directory
     //
     {
-      Group g = new Group(parentComposite, SWT.SHADOW_ETCHED_IN);
-      g.setLayout(new GridLayout());
-      SelectionAdapter buttonListener = new SelectionAdapter() {
-        public void widgetSelected(SelectionEvent evt) {
-          DirectoryDialog dlg= new DirectoryDialog(m_outputdir.getShell());
-          dlg.setMessage("Select TestNG output directory");
-          String selectedDir= dlg.open();
-          m_outputdir.setText(selectedDir != null ? selectedDir : "");
-          m_absolutePath.setSelection(true);
-        }
-      };
-      Widgets w = Utils.createTextBrowseControl(g, null,
-          "TestNGPropertyPage.outputDir", buttonListener, null, null, true);
+      Widgets w = Utils.createStringEditorControl(parentComposite, "TestNGPropertyPage.outputDir", null, true);
       m_outputdir = w.text;
-
-      m_absolutePath = new Button(g, SWT.CHECK);
-      m_absolutePath.setText("Absolute output path");
-      m_absolutePath.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
-      g.setLayoutData(SWTUtil.createGridData());
+      m_outputdir.setToolTipText(ResourceUtil.getString("TestNGPropertyPage.outputDir.tips"));
     }
 
     //
@@ -173,7 +152,6 @@ public class ProjectPropertyPage extends PropertyPage {
 
   public void dispose() {
     m_outputdir.dispose();
-    m_absolutePath.dispose();
     m_disabledDefaultListeners.dispose();
     m_xmlTemplateFile.dispose();
     m_preDefinedListeners.dispose();
@@ -187,8 +165,7 @@ public class ProjectPropertyPage extends PropertyPage {
     // Populate the owner text field with the default value
     PreferenceStoreUtil storage= TestNGPlugin.getPluginPreferenceStore();
     String projectName = m_workingProject.getName();
-    m_outputdir.setText(storage.getOutputDir(projectName, true));
-    m_absolutePath.setSelection(storage.isOutputAbsolutePath(projectName, true));
+    m_outputdir.setText(storage.getOutputDir(projectName, false));
     m_disabledDefaultListeners.setSelection(storage.hasDisabledListeners(projectName, true));
     m_xmlTemplateFile.setText(storage.getXmlTemplateFile(projectName, true));
     m_watchResultRadio.setSelection(storage.getWatchResults(projectName));
@@ -205,7 +182,7 @@ public class ProjectPropertyPage extends PropertyPage {
   public boolean performOk() {
     PreferenceStoreUtil storage= TestNGPlugin.getPluginPreferenceStore();
     String projectName = m_workingProject.getName();
-    storage.storeOutputDir(projectName, m_outputdir.getText(), m_absolutePath.getSelection());
+    storage.storeOutputDir(projectName, m_outputdir.getText());
     storage.storeDisabledListeners(projectName, m_disabledDefaultListeners.getSelection());
     storage.storeXmlTemplateFile(projectName, m_xmlTemplateFile.getText());
     storage.storePreDefinedListeners(projectName, m_preDefinedListeners.getText());
@@ -271,7 +248,6 @@ public class ProjectPropertyPage extends PropertyPage {
     if (dialog.open() == Window.OK) {
       m_outputdir.setText(((IContainer) dialog.getFirstResult()).getProjectRelativePath()
                            .toPortableString());
-      m_absolutePath.setSelection(false);
     }
 
   }
