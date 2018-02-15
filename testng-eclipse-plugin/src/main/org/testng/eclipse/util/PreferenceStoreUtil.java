@@ -30,9 +30,8 @@ public class PreferenceStoreUtil {
   /**
    * Saves the output directory information.
    */
-  public void storeOutputDir(String projectName, String outdir, boolean isAbsolute) {
+  public void storeOutputDir(String projectName, String outdir) {
     m_storage.setValue(projectName + TestNGPluginConstants.S_OUTDIR, outdir);
-    m_storage.setValue(projectName + TestNGPluginConstants.S_ABSOLUTEPATH, isAbsolute);
   }
 
   public void storeDisabledListeners(String projectName, boolean selection) {
@@ -70,48 +69,20 @@ public class PreferenceStoreUtil {
   public IPath getOutputDirectoryPath(IJavaProject project) {
     final String projectName= project.getElementName();
     final String outdir= getOutputDir(projectName, false);
-    boolean isAbsolute= isOutputAbsolutePath(projectName, false);
-    return new Path(isAbsolute ? outdir : project.getPath().toOSString() + "/" + outdir);
+    return new Path(project.getPath().toOSString() + "/" + outdir);
   }
 
   public IPath getOutputAbsolutePath(IJavaProject project) {
     final String projectName= project.getElementName();
     final String outdir= getOutputDir(projectName, false);
-    boolean isAbsolute= isOutputAbsolutePath(projectName, false);
     
-    return new Path(isAbsolute ? outdir : project.getProject().getLocation().toOSString() + "/" + outdir);
+    return new Path(project.getProject().getLocation().toOSString() + "/" + outdir);
   }
 
   public String getOutputDir(String projectName, boolean projectOnly) {
     String result = getString(projectName, projectOnly, TestNGPluginConstants.S_OUTDIR);
 
-    // Convert the deprecated property into the new one
-    if (StringUtils.isEmptyString(result)) {
-      if (m_storage.contains(TestNGPluginConstants.S_DEPRECATED_OUTPUT)) {
-        m_storage.setValue(TestNGPluginConstants.S_DEPRECATED_OUTPUT, "");
-        m_storage.setValue(TestNGPluginConstants.S_OUTDIR,
-            m_storage.getString(TestNGPluginConstants.S_DEPRECATED_OUTPUT));
-      }
-
-      String outDir = m_storage.getString(TestNGPluginConstants.S_OUTDIR);
-      result = !"".equals(outDir) ? outDir : TestNG.DEFAULT_OUTPUTDIR;
-    }
-
-    return result;
-  }
-
-  public boolean isOutputAbsolutePath(String projectName, boolean projectOnly) {
-    if(projectOnly || m_storage.contains(projectName + TestNGPluginConstants.S_ABSOLUTEPATH)) {
-      return m_storage.getBoolean(projectName + TestNGPluginConstants.S_ABSOLUTEPATH);
-    }
-    // backward compatibility 5.6.20070407
-    if(m_storage.contains(TestNGPluginConstants.S_DEPRECATED_ABSOLUTEPATH)) {
-      m_storage.setValue(TestNGPluginConstants.S_DEPRECATED_ABSOLUTEPATH, false);
-      m_storage.setValue(TestNGPluginConstants.S_ABSOLUTEPATH, 
-          m_storage.getBoolean(TestNGPluginConstants.S_DEPRECATED_ABSOLUTEPATH));
-    }
-    
-    return m_storage.getBoolean(TestNGPluginConstants.S_ABSOLUTEPATH);
+    return result.isEmpty() ? TestNG.DEFAULT_OUTPUTDIR : result;
   }
 
   private String getString(String projectName, boolean projectOnly, String prefName) {
@@ -119,7 +90,7 @@ public class PreferenceStoreUtil {
     if (m_storage.contains(projectName + prefName)) {
       result = m_storage.getString(projectName + prefName);
     }
-    if (StringUtils.isEmptyString(result) && ! projectOnly) {
+    if (StringUtils.isEmptyString(result) && !projectOnly) {
       result = m_storage.getString(prefName);
     }
 

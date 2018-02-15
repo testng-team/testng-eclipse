@@ -11,6 +11,7 @@ Supported Metrics:
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
 * Feature #373: Support for surefire and failsafe <properties> tag.
+* PR #385: Remove the option of 'Absolute output path', now it's always the relative path to the project(s).
 
 ## 6.13
 
