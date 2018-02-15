@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
-
 import org.apache.maven.model.BuildBase;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
@@ -27,10 +26,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
-import org.eclipse.m2e.profiles.core.internal.IProfileManager;
-import org.eclipse.m2e.profiles.core.internal.MavenProfilesCoreActivator;
-import org.eclipse.m2e.profiles.core.internal.ProfileData;
-import org.eclipse.m2e.profiles.core.internal.ProfileState;
 import org.testng.eclipse.launch.ITestNGLaunchConfigurationProvider;
 import org.testng.eclipse.launch.LaunchConfigurationHelper;
 
@@ -48,10 +43,9 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
       }
 
       MavenProject mvnProject = prjFecade.getMavenProject(new NullProgressMonitor());
-      IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
-      List<ProfileData> selectedProfiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
+      List<Profile> activeProfiles = mvnProject.getActiveProfiles();
       Model model = mvnProject.getModel();
-      Xpp3Dom confDom = findPluginConfiguration(model, selectedProfiles);
+      Xpp3Dom confDom = findPluginConfiguration(model, activeProfiles);
       if (confDom != null) {
         Xpp3Dom propsDom = confDom.getChild("properties");
         if (propsDom != null) {
@@ -102,10 +96,10 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
       return null;
     }
 
-    IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
-    List<ProfileData> profiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
+    MavenProject mvnProject = prjFecade.getMavenProject(new NullProgressMonitor());
+    List<Profile> activeProfiles = mvnProject.getActiveProfiles();
     Model model = MavenPlugin.getMavenModelManager().readMavenModel(prjFecade.getPom());
-    Xpp3Dom confDom = findPluginConfiguration(model, profiles);
+    Xpp3Dom confDom = findPluginConfiguration(model, activeProfiles);
     if (confDom != null) {
       Xpp3Dom envDom = confDom.getChild("environmentVariables");
       if (envDom != null) {
@@ -132,18 +126,17 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
       return null;
     }
 
-    IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
     MavenProject mvnProject = prjFecade.getMavenProject(new NullProgressMonitor());
-    List<ProfileData> profiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
+    List<Profile> activeProfiles = mvnProject.getActiveProfiles();
     Model model = MavenPlugin.getMavenModelManager().readMavenModel(prjFecade.getPom());
-    Xpp3Dom confDom = findPluginConfiguration(model, profiles);
+    Xpp3Dom confDom = findPluginConfiguration(model, activeProfiles);
     if (confDom != null) {
       Xpp3Dom cpsDom = confDom.getChild("additionalClasspathElements");
       if (cpsDom != null) {
         List<String> cpList = new ArrayList<>(cpsDom.getChildCount());
         for (Xpp3Dom varDom : cpsDom.getChildren()) {
           if ("additionalClasspathElement".equals(varDom.getName())) {
-            String cp = resolve(varDom.getValue(), mvnProject, profiles, prjFecade);
+            String cp = resolve(varDom.getValue(), mvnProject, activeProfiles, prjFecade);
             cpList.add(cp);
           }
         }
@@ -162,10 +155,9 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     }
 
     MavenProject mvnProject = prjFecade.getMavenProject(new NullProgressMonitor());
-    IProfileManager profileManager = MavenProfilesCoreActivator.getDefault().getProfileManager();
-    List<ProfileData> selectedProfiles = profileManager.getProfileDatas(prjFecade, new NullProgressMonitor());
+    List<Profile> activeProfiles = mvnProject.getActiveProfiles();
     Model model = mvnProject.getModel();
-    Xpp3Dom confDom = findPluginConfiguration(model, selectedProfiles);
+    Xpp3Dom confDom = findPluginConfiguration(model, activeProfiles);
     if (confDom != null) {
       StringBuilder sb = new StringBuilder();
       if (PreferenceUtils.getBoolean(project, Activator.PREF_ARGLINE)) {
@@ -185,7 +177,7 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
       }
 
       String vmArgs = sb.toString();
-      vmArgs = resolve(vmArgs, mvnProject, selectedProfiles, prjFecade);
+      vmArgs = resolve(vmArgs, mvnProject, activeProfiles, prjFecade);
       return vmArgs;
     }
     return null;
@@ -213,21 +205,19 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
    * @return {@code null} if not found
    */
   @SuppressWarnings("restriction")
-  private Xpp3Dom findPluginConfiguration(Model model, List<ProfileData> selectedProfiles) {
+  private Xpp3Dom findPluginConfiguration(Model model, List<Profile> activeProfiles) {
     Xpp3Dom pluginConf = null;
 
     // found from selected profiles first, if anyone matched, use and return it.
-    if (selectedProfiles != null) {
-      for (ProfileData pd : selectedProfiles) {
-        if (pd.getActivationState() == ProfileState.Active) {
-          List<Profile> profiles = model.getProfiles();
-          if (profiles != null) {
-            for (Profile profile : profiles) {
-              if (pd.getId().equals(profile.getId())) {
-                pluginConf = findPluginConfiguration(profile.getBuild());
-                if (pluginConf != null) {
-                  return pluginConf;
-                }
+    if (activeProfiles != null) {
+      for (Profile pd : activeProfiles) {
+        List<Profile> profiles = model.getProfiles();
+        if (profiles != null) {
+          for (Profile profile : profiles) {
+            if (pd.getId().equals(profile.getId())) {
+              pluginConf = findPluginConfiguration(profile.getBuild());
+              if (pluginConf != null) {
+                return pluginConf;
               }
             }
           }
@@ -325,7 +315,7 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     return false;
   }
 
-  private String resolve(String text, MavenProject mvnProject, List<ProfileData> selectedProfiles,
+  private String resolve(String text, MavenProject mvnProject, List<Profile> activeProfiles,
       IMavenProjectFacade prjFecade) throws CoreException {
     if (text == null) {
       return text;
@@ -342,7 +332,7 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
 
     RegexBasedInterpolator inter = new RegexBasedInterpolator();
     Model model = mvnProject.getModel();
-    Properties profileProperties = collectProperties(model, selectedProfiles, prjFecade);
+    Properties profileProperties = collectProperties(model, activeProfiles, prjFecade);
     try {
       inter.addValueSource(new PropertiesBasedValueSource(profileProperties));
       inter.addValueSource(new EnvarBasedValueSource());
@@ -358,7 +348,7 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
   }
 
   @SuppressWarnings("restriction")
-  private Properties collectProperties(Model model, List<ProfileData> selectedProfiles, IMavenProjectFacade project) {
+  private Properties collectProperties(Model model, List<Profile> activeProfiles, IMavenProjectFacade project) {
     Properties result = new Properties();
 
     //
@@ -382,15 +372,13 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     // profile base properties could override the project level properties/
     //
 
-    if (selectedProfiles != null) {
-      for (ProfileData pd : selectedProfiles) {
-        if (pd.getActivationState() == ProfileState.Active) {
-          List<Profile> profiles = model.getProfiles();
-          if (profiles != null) {
-            for (Profile profile : profiles) {
-              if (pd.getId().equals(profile.getId())) {
-                result.putAll(profile.getProperties());
-              }
+    if (activeProfiles != null) {
+      for (Profile pd : activeProfiles) {
+        List<Profile> profiles = model.getProfiles();
+        if (profiles != null) {
+          for (Profile profile : profiles) {
+            if (pd.getId().equals(profile.getId())) {
+              result.putAll(profile.getProperties());
             }
           }
         }

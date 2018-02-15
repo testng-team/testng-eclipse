@@ -87,7 +87,6 @@ public class TestNGLaunchShortcut implements ILaunchShortcut {
 
   private void maybeAddJavaElement(IJavaElement element, List<IType> units)
       throws JavaModelException {
-    p("Examining Java element:" + element);
     if (element != null) {
       switch (element.getElementType()) {
       case IJavaElement.JAVA_PROJECT:
