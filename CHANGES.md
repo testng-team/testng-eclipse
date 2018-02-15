@@ -12,6 +12,7 @@ Supported Metrics:
 
 * Feature #373: Support for surefire and failsafe <properties> tag.
 * PR #385: Remove the option of 'Absolute output path', now it's always the relative path to the project(s).
+* Fixed #383: Spring boot 2.0.0.M7+RC1 projects not testable in Eclipse Oxygen 2. (@vguna & Nick Tan)
 
 ## 6.13
 
