@@ -1,16 +1,12 @@
 package org.testng.eclipse.ui.preferences;
 
 
-import java.io.File;
-
 import org.eclipse.debug.internal.ui.preferences.BooleanFieldEditor2;
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.StringButtonFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
@@ -126,35 +122,4 @@ public class WorkspacePreferencePage
     }
   }
 
-  private static class FSBrowseDirectoryFieldEditor extends DirectoryFieldEditor {
-    BooleanFieldEditor2 absolutePath;
-    
-    public FSBrowseDirectoryFieldEditor(String name, String labelText, Composite parent) {
-      super(name, labelText, parent);
-    }
-
-    protected void setAbsolutePathVerifier(BooleanFieldEditor2 isAbsolute) {
-      absolutePath= isAbsolute;
-    }
-
-    @Override
-    public Button getChangeControl(Composite parent) {
-      return super.getChangeControl(parent);
-    }
-
-    @Override
-    protected boolean doCheckState() {
-      String fileName = getTextControl().getText();
-      fileName = fileName.trim();
-      if (fileName.length() == 0 && isEmptyStringAllowed()) {
-        return true;
-      }
-      if(absolutePath.getBooleanValue()) {
-        File file = new File(fileName);
-        return file.isDirectory();
-      }
-      
-      return true;
-    }
-  }
 }
