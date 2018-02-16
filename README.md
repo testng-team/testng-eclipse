@@ -39,6 +39,7 @@ Plugin Version            | Online Update-Site | Zipped Update-Site
 LATEST RELEASE [![Download](https://api.bintray.com/packages/testng-team/testng-eclipse-release/updatesites/images/download.svg)](http://dl.bintray.com/testng-team/testng-eclipse-release/zipped/)   | `http://beust.com/eclipse` | [here](http://dl.bintray.com/testng-team/testng-eclipse-release/zipped/)
 LATEST BETA [![Download](https://api.bintray.com/packages/testng-team/testng-eclipse/updatesites/images/download.svg)](https://dl.bintray.com/testng-team/testng-eclipse/zipped/) | `http://beust.com/eclipse-beta` | [here](https://dl.bintray.com/testng-team/testng-eclipse/zipped/)
 History:||
+6.14.0.201802161500       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.14.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.14.0.201802161500/org.testng.eclipse.updatesite.zip)
 6.13.0.201712040650       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.13.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.13.0.201712040650/org.testng.eclipse.updatesite.zip)
 6.12.0.201709050550       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.12.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.12.0.201709050550/org.testng.eclipse.updatesite.zip)
 6.11.0.201703011520       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.11.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.11.0.201703011520/site_assembly.zip)
