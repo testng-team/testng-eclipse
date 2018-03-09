@@ -94,6 +94,8 @@ public class CompareResultDialog extends Dialog {
   static String[] regexes = { 
       ".*expected:<(.*)> but was:<(.*)>.*", 
       ".*expected not same with:<(.*)> but was same:<(.*)>.*", 
+      ".*expected not same \\[(.*)\\] but found \\[(.*)\\].*", 
+      ".*did not expect to find \\[(.*)\\] but found \\[(.*)\\].*", 
       ".*expected same with:<(.*)> but was:<(.*)>.*", 
       ".*expected \\[(.*)\\] but found \\[(.*)\\].*" 
       };

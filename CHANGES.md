@@ -1,6 +1,18 @@
 Change Log
 ====
 
+## Current
+
+Supported Metrics:
+
+| Plugin | Dependency |
+| ------------- | ------------- |
+| TestNG for Eclipse | Eclipse Juno (4.2) or above |
+| TestNG M2E Integration (Optional) | M2E 1.5 or above |
+
+* https://github.com/cbeust/testng/pull/1714: Ignore null message in assertNotEquals methods
+
+
 ## 6.14
 
 Supported Metrics:
