@@ -31,6 +31,12 @@
              class="org.testng.eclipse.maven.MavenTestNGPreferencePage"
              id="org.testng.eclipse.maven.prop"
              name="%org.testng.eclipse.maven.pref.name">
+         <filter name="nature" value="org.eclipse.m2e.core.maven2Nature"/>
+         <enabledWhen>
+            <adapt
+                  type="org.eclipse.core.resources.IProject">
+            </adapt>
+         </enabledWhen>
        </page>
     </extension>
 
