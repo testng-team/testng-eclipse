@@ -2,7 +2,7 @@
 <feature
       id="org.testng.eclipse.maven.feature"
       label="%feature.name"
-      version="6.15.0.qualifier"
+      version="7.0.0.qualifier"
       provider-name="%feature.provider">
 
    <description url="http://testng.org">
@@ -170,7 +170,7 @@ END OF TERMS AND CONDITIONS
    </license>
 
    <requires>
-      <import feature="org.testng.eclipse" version="6.9.9.qualifier"/>
+      <import feature="org.testng.eclipse" version="7.0.0" match="compatible"/>
    </requires>
 
    <plugin
