@@ -12,7 +12,7 @@
     <packaging>eclipse-plugin</packaging>
 
     <properties>
-        <testng.remote.version>1.3.1</testng.remote.version>
+        <testng.remote.version>1.4.0-SNAPSHOT</testng.remote.version>
     </properties>
 
     <build>
