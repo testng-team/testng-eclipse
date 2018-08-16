@@ -26,7 +26,6 @@ import org.testng.eclipse.ui.util.Utils;
 import org.testng.eclipse.ui.util.Utils.Widgets;
 import org.testng.eclipse.util.PreferenceStoreUtil;
 import org.testng.eclipse.util.ResourceUtil;
-import org.testng.reporters.XMLReporter;
 
 /**
  * Project specific properties.
@@ -116,7 +115,9 @@ public class ProjectPropertyPage extends PropertyPage {
           dlg.setMessage("Select TestNG Output Directory");
           String selectedDir = dlg.open();
           if (new File(selectedDir).isDirectory()) {
-            selectedDir = selectedDir + File.separator + XMLReporter.FILE_NAME;
+            // use xml reporter file name as String literal rather than constant
+            // since XMLReporter.FILE_NAME was moved in https://github.com/cbeust/testng/pull/1785
+            selectedDir = selectedDir + File.separator + "testng-results.xml";
           }
           m_watchResultText.setText(selectedDir != null ? selectedDir : "");
         }

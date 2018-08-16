@@ -2,7 +2,6 @@ package org.testng.eclipse.ui;
 
 import org.testng.remote.strprotocol.IRemoteSuiteListener;
 import org.testng.remote.strprotocol.IRemoteTestListener;
-import org.testng.reporters.XMLReporter;
 import org.testng.xml.ResultXMLParser;
 
 import java.io.File;
@@ -26,7 +25,7 @@ public class WatchResultThread {
   {
     m_watchResultRunnable = new Runnable() {
       public void run() {
-        File f = new File(path, XMLReporter.FILE_NAME);
+        File f = new File(path, "testng-results.xml");
         long timeStamp = f.lastModified();
         p("Watching " + path);
         while (m_watchResults) {
