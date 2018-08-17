@@ -11,6 +11,7 @@ Supported Metrics:
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
 * https://github.com/cbeust/testng/pull/1714: Ignore null message in assertNotEquals methods
+* PR #401: support TestNG 7.0
 
 
 ## 6.14
