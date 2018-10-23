@@ -12,7 +12,7 @@ Supported Metrics:
 
 * https://github.com/cbeust/testng/pull/1714: Ignore null message in assertNotEquals methods
 * PR #401: support TestNG 7.0
-
+* Fixed #348: String index out of range: -2. (@timrsfo & Nick Tan)
 
 ## 6.14
 

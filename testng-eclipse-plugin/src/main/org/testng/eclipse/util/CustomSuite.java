@@ -100,22 +100,22 @@ abstract public class CustomSuite extends LaunchSuite {
   protected XMLStringBuffer createContentBuffer() {
     PreferenceStoreUtil storage =
         new PreferenceStoreUtil(TestNGPlugin.getDefault().getPreferenceStore());
-    String xmlFile = storage.getXmlTemplateFile(m_projectName, false /* not only project */);
-    boolean hasEclipseXmlFile = !Utils.isStringEmpty(xmlFile);
+    String suiteTemplateFile = storage.getXmlTemplateFile(m_projectName, false /* not only project */);
     XMLStringBuffer suiteBuffer = new XMLStringBuffer(); //$NON-NLS-1$
     suiteBuffer.setDocType("suite SYSTEM \"" + Parser.TESTNG_DTD_URL + "\"");
 
-    if (hasEclipseXmlFile) {
+    if (!Utils.isStringEmpty(suiteTemplateFile)) {
       try {
         IStringVariableManager manager = VariablesPlugin.getDefault().getStringVariableManager();
-        String resolvedXmlFile = manager.performStringSubstitution(xmlFile);
+        String resolvedXmlFile = manager.performStringSubstitution(suiteTemplateFile);
         if (!(new Path(resolvedXmlFile).isAbsolute()) && !Utils.isStringEmpty(workingDir)) {
           resolvedXmlFile = workingDir + "/" + resolvedXmlFile;
         }
 
         createXmlFileFromTemplate(suiteBuffer, resolvedXmlFile);
       } catch (CoreException e) {
-        TestNGPlugin.log(e);
+        throw new RuntimeException("Failed to create TestNG suite from \"Template XML File\" '"
+                + suiteTemplateFile + "': " + e.getMessage(), e);
       }
     } else {
       createXmlFileFromParameters(suiteBuffer);
