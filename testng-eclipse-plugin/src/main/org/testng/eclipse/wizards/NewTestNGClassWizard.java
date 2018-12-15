@@ -238,7 +238,7 @@ public class NewTestNGClassWizard extends Wizard implements INewWizard {
 	 */
   private String createSignature(IMethod m, Set<String> overloadedMethods) {
     String elementName = m.getElementName();
-    StringBuilder result = new StringBuilder(elementName);
+    StringBuilder result = new StringBuilder(elementName + "Test");
     if (overloadedMethods.contains(elementName)) {
       for (String type : m.getParameterTypes()) {
         result.append(sanitizeSignature(Signature.toString(type)));
