@@ -14,6 +14,7 @@ Supported Metrics:
 * PR #401: support TestNG 7.0
 * Fixed #348: String index out of range: -2. (@timrsfo & Nick Tan)
 * Fixed #407: eclipse plugin generates invalid java for toString & hashCode (@dabraham02124 & Nick Tan)
+* Fixed #408: Doesn't build against or run on Eclipse 4.10 (2018-12)
 
 ## 6.14
 

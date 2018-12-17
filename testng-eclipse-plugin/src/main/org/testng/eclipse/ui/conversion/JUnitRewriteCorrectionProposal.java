@@ -2,9 +2,17 @@ package org.testng.eclipse.ui.conversion;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -84,7 +92,7 @@ public class JUnitRewriteCorrectionProposal implements IJavaCompletionProposal
 //      }
 //    }
     Document document= new Document(cu.getSource());
-    document.setInitialLineDelimiter(StubUtility.getLineDelimiterUsed(cu));
+    document.setInitialLineDelimiter(getLineDelimiterUsed(cu));
     change= new DocumentChange(name, document);
 //    } else {
 //      Document doc = new Document(m_cu.getSource());
@@ -99,6 +107,45 @@ public class JUnitRewriteCorrectionProposal implements IJavaCompletionProposal
 //    IDocument document= change.getCurrentDocument(new NullProgressMonitor());
     addEdits(change.getCurrentDocument(new NullProgressMonitor()), rootEdit);
     return change;
+  }
+
+  /* This method is based on the implementation from org.eclipse.jdt.internal.core.manipulation.StubUtility */
+  private static String getLineDelimiterUsed(ICompilationUnit elem) {
+    IOpenable openable= elem.getOpenable();
+    if (openable instanceof ITypeRoot) {
+      try {
+        return openable.findRecommendedLineSeparator();
+      } catch (JavaModelException exception) {
+        // Use project setting
+      }
+    }
+    IJavaProject javaProject= elem.getJavaProject();
+    IProject project= null;
+    if (javaProject != null) {
+      project= javaProject.getProject();
+    }
+    String lineDelimiter= getLineDelimiterPreference(project);
+    if (lineDelimiter != null) {
+      return lineDelimiter;
+    }
+    return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+  }
+
+  /* This method is based on the implementation from org.eclipse.jdt.internal.core.manipulation.StubUtility */
+  private static String getLineDelimiterPreference(IProject project) {
+    IScopeContext[] scopeContext;
+    if (project != null) {
+      // project preference
+      scopeContext= new IScopeContext[] { new ProjectScope(project) };
+      String lineDelimiter= Platform.getPreferencesService().getString(Platform.PI_RUNTIME, Platform.PREF_LINE_SEPARATOR, null, scopeContext);
+      if (lineDelimiter != null) {
+        return lineDelimiter;
+      }
+    }
+    // workspace preference
+    scopeContext= new IScopeContext[] { InstanceScope.INSTANCE };
+    String platformDefault= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+    return Platform.getPreferencesService().getString(Platform.PI_RUNTIME, Platform.PREF_LINE_SEPARATOR, platformDefault, scopeContext);
   }
 
   protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
