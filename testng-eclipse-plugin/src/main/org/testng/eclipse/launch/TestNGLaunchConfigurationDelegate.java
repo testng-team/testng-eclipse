@@ -1,5 +1,7 @@
 package org.testng.eclipse.launch;
 
+import static org.testng.eclipse.buildpath.BuildPathSupport.getBundleFile;
+
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -13,6 +15,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
@@ -22,6 +25,7 @@ import org.eclipse.jdt.launching.ExecutionArguments;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMRunner;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.osgi.framework.Version;
@@ -39,8 +43,6 @@ import org.testng.eclipse.util.StringUtils;
 import org.testng.remote.RemoteArgs;
 import org.testng.remote.RemoteTestNG;
 import org.testng.xml.LaunchSuite;
-
-import static org.testng.eclipse.buildpath.BuildPathSupport.getBundleFile;
 
 public class TestNGLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
@@ -151,12 +153,19 @@ public class TestNGLaunchConfigurationDelegate
     }
 
     // Program & VM args
-    ExecutionArguments execArgs = new ExecutionArguments(
-        ConfigurationHelper.getJvmArgs(configuration), ""); //$NON-NLS-1$
-
     VMRunnerConfiguration runConfig = createVMRunner(configuration, launch,
         jproject, port, mode);
-    runConfig.setVMArguments(execArgs.getVMArgumentsArray());
+
+    ExecutionArguments execArgs = new ExecutionArguments(
+        ConfigurationHelper.getJvmArgs(configuration), ""); //$NON-NLS-1$
+    ArrayList<String> vmArguments= new ArrayList<>();
+    vmArguments.addAll(Arrays.asList(DebugPlugin.parseArguments(getVMArguments(configuration, mode))));
+    vmArguments.addAll(Arrays.asList(execArgs.getVMArgumentsArray()));
+    if (JavaRuntime.isModularProject(jproject)) {
+      vmArguments.add("--add-modules=ALL-MODULE-PATH"); //$NON-NLS-1$
+    }
+
+    runConfig.setVMArguments(vmArguments.toArray(new String[vmArguments.size()]));
     runConfig.setWorkingDirectory(workingDirName);
     runConfig.setEnvironment(getEnvironment(configuration));
 
@@ -164,8 +173,21 @@ public class TestNGLaunchConfigurationDelegate
         configuration);
     runConfig.setVMSpecificAttributesMap(vmAttributesMap);
 
-    String[] bootpath = getBootpath(configuration);
-    runConfig.setBootClassPath(bootpath);
+    String[][] paths = getClasspathAndModulepath(configuration);
+
+    // Launch Configuration should be launched by Java 9 or above for modulepath setting
+    if (!JavaRuntime.isModularConfiguration(configuration)) {
+      // Bootpath
+      runConfig.setBootClassPath(getBootpath(configuration));
+    } else if (supportsModule()) {
+      // module path
+      runConfig.setModulepath(paths[1]);
+      if (!configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_MODULE_CLI_OPTIONS, true)) {
+        runConfig.setOverrideDependencies(configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MODULE_CLI_OPTIONS, "")); //$NON-NLS-1$
+      } else {
+        runConfig.setOverrideDependencies(getModuleCLIOptions(configuration));
+      }
+    }
 
     return runConfig;
   }
