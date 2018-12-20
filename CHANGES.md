@@ -7,15 +7,17 @@ Supported Metrics:
 
 | Plugin | Dependency |
 | ------------- | ------------- |
-| TestNG for Eclipse | Eclipse Juno (4.2) or above |
+| TestNG for Eclipse | Eclipse Photon (4.8) or above |
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
+* **Compatbility Notice**: since this version Java 9+ is supported, the minimum required Eclipse version is Photon (4.8)
 * https://github.com/cbeust/testng/pull/1714: Ignore null message in assertNotEquals methods
 * PR #401: support TestNG 7.0
 * Fixed #348: String index out of range: -2. (@timrsfo & Nick Tan)
 * Fixed #407: eclipse plugin generates invalid java for toString & hashCode (@dabraham02124 & Nick Tan)
 * Fixed #408: Doesn't build against or run on Eclipse 4.10 (2018-12)
-* Fixed #410: After adding module-info.java, testng-eclipse no longer finds test classes in maven project. Aka, support Java 11.
+* Fixed #410: After adding module-info.java, testng-eclipse no longer finds test classes in maven project.
+
 
 ## 6.14
 

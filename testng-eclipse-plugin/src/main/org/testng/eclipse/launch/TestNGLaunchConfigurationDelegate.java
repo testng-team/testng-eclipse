@@ -179,7 +179,7 @@ public class TestNGLaunchConfigurationDelegate
     if (!JavaRuntime.isModularConfiguration(configuration)) {
       // Bootpath
       runConfig.setBootClassPath(getBootpath(configuration));
-    } else if (supportsModule()) {
+    } else {
       // module path
       runConfig.setModulepath(paths[1]);
       if (!configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_MODULE_CLI_OPTIONS, true)) {
