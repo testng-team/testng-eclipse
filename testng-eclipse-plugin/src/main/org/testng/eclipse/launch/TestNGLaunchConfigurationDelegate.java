@@ -7,24 +7,18 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.AbstractVMInstall;
 import org.eclipse.jdt.launching.ExecutionArguments;
@@ -159,26 +153,16 @@ public class TestNGLaunchConfigurationDelegate
     }
 
     // Program & VM args
-    VMRunnerConfiguration runConfig = createVMRunner(configuration, launch,
-        jproject, port, mode);
+    VMRunnerConfiguration runConfig = createVMRunner(configuration, launch, jproject, port, mode);
 
     ExecutionArguments execArgs = new ExecutionArguments(
         ConfigurationHelper.getJvmArgs(configuration), ""); //$NON-NLS-1$
     ArrayList<String> vmArguments= new ArrayList<>();
+    // add the add-opens vm args collected in createVMRunner
+    vmArguments.addAll(Arrays.asList(runConfig.getVMArguments()));
     vmArguments.addAll(Arrays.asList(DebugPlugin.parseArguments(getVMArguments(configuration, mode))));
     vmArguments.addAll(Arrays.asList(execArgs.getVMArgumentsArray()));
     if (JavaRuntime.isModularProject(jproject)) {
-      // issue #413, ideally it's better to open packages contains the tests
-      //            however, TestNG support launch the test from Java method, type, package and testng suite xml file
-      //            it's hard to get the packages used in suite xml file
-      //            the quick and dirty way below, is to open all source packages of this project
-      String sourceModuleName = jproject.getModuleDescription().getElementName();
-      for (String pkgName : getSourcePackages(jproject)) {
-        vmArguments.add("--add-opens");
-        vmArguments.add(sourceModuleName + "/" + pkgName + "=ALL-UNNAMED");
-      }
-      // end #413
-
       vmArguments.add("--add-modules=ALL-MODULE-PATH"); //$NON-NLS-1$
     }
 
@@ -209,29 +193,6 @@ public class TestNGLaunchConfigurationDelegate
     return runConfig;
   }
 
-  /**
-   * get all source package under this project.
-   * 
-   * @param javaProject
-   * @return the String set of the package name
-   * @throws JavaModelException
-   */
-  private Set<String> getSourcePackages(IJavaProject javaProject) throws JavaModelException {
-    Set<String> pkgs = new HashSet<>();
-    for (IPackageFragmentRoot pkgFragmentRoot : javaProject.getPackageFragmentRoots()) {
-      if (!pkgFragmentRoot.isArchive()) {
-        for (final IJavaElement pkg : pkgFragmentRoot.getChildren()) {
-          if (!pkg.getElementName().isEmpty() && !(pkg instanceof IFolder)) {
-            if (((IPackageFragment) pkg).containsJavaResources()) {
-              pkgs.add(((IPackageFragment) pkg).getElementName());
-            }
-          }
-        }
-      }
-    }
-    return pkgs;
-  }
-  
   @Override
   public String getMainTypeName(ILaunchConfiguration configuration)
       throws CoreException {
@@ -350,8 +311,8 @@ public class TestNGLaunchConfigurationDelegate
       argv.add("false");
     }
 
-    List<LaunchSuite> launchSuiteList = ConfigurationHelper
-        .getLaunchSuites(jproject, configuration);
+    List<String> vmArguments= new ArrayList<>();
+    List<LaunchSuite> launchSuiteList = ConfigurationHelper.getLaunchSuites(jproject, configuration, vmArguments);
     List<String> suiteList = new ArrayList<String>();
     List<String> tempSuites = new ArrayList<String>();
 
@@ -380,6 +341,7 @@ public class TestNGLaunchConfigurationDelegate
     }
 
     vmConfig.setProgramArguments(argv.toArray(new String[argv.size()]));
+    vmConfig.setVMArguments(vmArguments.toArray(new String[vmArguments.size()]));
 
     return vmConfig;
   }
