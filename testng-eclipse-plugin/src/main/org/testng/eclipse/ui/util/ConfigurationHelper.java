@@ -6,10 +6,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -25,10 +28,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
@@ -353,7 +358,8 @@ public class ConfigurationHelper {
    * @throws CoreException 
    */
   public static List<LaunchSuite> getLaunchSuites(IJavaProject ijp,
-      ILaunchConfiguration configuration) throws CoreException {
+      ILaunchConfiguration configuration, List<String> vmArguments) throws CoreException {
+    String addOpensTargets = JavaRuntime.isModularProject(ijp) ? "ALL-UNNAMED" : null;
     LaunchType type = ConfigurationHelper.getType(configuration);
 
     List<String> packages= null;
@@ -362,6 +368,11 @@ public class ConfigurationHelper {
     Map<String, List<String>> classMethods= null;
 
     if (type == LaunchType.SUITE) {
+      // #413, when launch suite, it's hard to get the test classes/packages, 
+      // open all packages for suite mode
+      for (String pkg : getSourcePackages(ijp)) {
+        collectAddOpensVmArgs(addOpensTargets, vmArguments, pkg, configuration);
+      }
       return createLaunchSuites(ijp.getProject(), getSuites(configuration));
     }
 
@@ -390,6 +401,7 @@ public class ConfigurationHelper {
         for (IPackageFragment pf : ijp.getPackageFragments()) {
           if (pf.getElementName().equals(pkg)) {
             je.add(pf);
+            collectAddOpensVmArgs(addOpensTargets, vmArguments, pkg, configuration);
             break;
           }
         }
@@ -399,6 +411,7 @@ public class ConfigurationHelper {
       for (String clz : testClasses) {
         IType t = ijp.findType(clz);
         if (t != null) {
+          collectAddOpensVmArgs(addOpensTargets, vmArguments, t, configuration);
           je.add(t);
         }
       }
@@ -413,6 +426,7 @@ public class ConfigurationHelper {
               throw new JavaModelException(new CoreException(TestNGPlugin.createError(
                           "no test method [" + mthd + "] was found")));
             }
+            collectAddOpensVmArgs(addOpensTargets, vmArguments, m, configuration);
             je.add(m);
           }
         }
@@ -440,6 +454,82 @@ public class ConfigurationHelper {
                               getLogLevel(configuration),
                               workingDir
            );
+  }
+
+  /**
+   * copied from org.eclipse.jdt.junit.launcher.JUnitLaunchConfigurationDelegate
+   * 
+   * @param addOpensTargets
+   * @param addOpensVmArgs
+   * @param javaElem
+   * @param configuration
+   * @throws CoreException
+   */
+  private static void collectAddOpensVmArgs(String addOpensTargets, List<String> addOpensVmArgs, IJavaElement javaElem, ILaunchConfiguration configuration) throws CoreException {
+    if (addOpensTargets != null) {
+      IPackageFragment pkg= getParentPackageFragment(javaElem);
+      if (pkg != null) {
+        String pkgName= pkg.getElementName();
+        collectAddOpensVmArgs(addOpensTargets, addOpensVmArgs, pkgName, configuration);
+      }
+    }
+  }
+
+  /**
+   * copied from org.eclipse.jdt.junit.launcher.JUnitLaunchConfigurationDelegate
+   * 
+   * @param addOpensTargets
+   * @param addOpensVmArgs
+   * @param pkgName
+   * @param configuration
+   * @throws CoreException
+   */
+  private static void collectAddOpensVmArgs(String addOpensTargets, List<String> addOpensVmArgs, String pkgName, ILaunchConfiguration configuration) throws CoreException {
+    if (addOpensTargets != null) {
+      IJavaProject javaProject= getJavaProject(configuration);
+      String sourceModuleName= javaProject.getModuleDescription().getElementName();
+      addOpensVmArgs.add("--add-opens"); //$NON-NLS-1$
+      addOpensVmArgs.add(sourceModuleName + "/" + pkgName + "=" + addOpensTargets); //$NON-NLS-1$ //$NON-NLS-2$     
+    }
+  }
+
+  /**
+   * copied from org.eclipse.jdt.junit.launcher.JUnitLaunchConfigurationDelegate
+   * @param element
+   * @return
+   */
+  private static IPackageFragment getParentPackageFragment(IJavaElement element) {
+    IJavaElement parent= element.getParent();
+    while (parent != null) {
+      if (parent instanceof IPackageFragment) {
+        return (IPackageFragment) parent;
+      }
+      parent= parent.getParent();
+    }
+    return null;
+  }
+
+  /**
+   * get all source package under this project.
+   * 
+   * @param javaProject
+   * @return the String set of the package name
+   * @throws JavaModelException
+   */
+  private static Set<String> getSourcePackages(IJavaProject javaProject) throws JavaModelException {
+    Set<String> pkgs = new HashSet<>();
+    for (IPackageFragmentRoot pkgFragmentRoot : javaProject.getPackageFragmentRoots()) {
+      if (!pkgFragmentRoot.isArchive()) {
+        for (final IJavaElement pkg : pkgFragmentRoot.getChildren()) {
+          if (!pkg.getElementName().isEmpty() && !(pkg instanceof IFolder)) {
+            if (((IPackageFragment) pkg).containsJavaResources()) {
+              pkgs.add(((IPackageFragment) pkg).getElementName());
+            }
+          }
+        }
+      }
+    }
+    return pkgs;
   }
 
   public static IPath getWorkingDirectoryPath(ILaunchConfiguration configuration) throws CoreException {

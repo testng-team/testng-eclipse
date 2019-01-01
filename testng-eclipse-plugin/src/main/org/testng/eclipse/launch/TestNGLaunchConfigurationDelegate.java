@@ -153,12 +153,13 @@ public class TestNGLaunchConfigurationDelegate
     }
 
     // Program & VM args
-    VMRunnerConfiguration runConfig = createVMRunner(configuration, launch,
-        jproject, port, mode);
+    VMRunnerConfiguration runConfig = createVMRunner(configuration, launch, jproject, port, mode);
 
     ExecutionArguments execArgs = new ExecutionArguments(
         ConfigurationHelper.getJvmArgs(configuration), ""); //$NON-NLS-1$
     ArrayList<String> vmArguments= new ArrayList<>();
+    // add the add-opens vm args collected in createVMRunner
+    vmArguments.addAll(Arrays.asList(runConfig.getVMArguments()));
     vmArguments.addAll(Arrays.asList(DebugPlugin.parseArguments(getVMArguments(configuration, mode))));
     vmArguments.addAll(Arrays.asList(execArgs.getVMArgumentsArray()));
     if (JavaRuntime.isModularProject(jproject)) {
@@ -310,8 +311,8 @@ public class TestNGLaunchConfigurationDelegate
       argv.add("false");
     }
 
-    List<LaunchSuite> launchSuiteList = ConfigurationHelper
-        .getLaunchSuites(jproject, configuration);
+    List<String> vmArguments= new ArrayList<>();
+    List<LaunchSuite> launchSuiteList = ConfigurationHelper.getLaunchSuites(jproject, configuration, vmArguments);
     List<String> suiteList = new ArrayList<String>();
     List<String> tempSuites = new ArrayList<String>();
 
@@ -340,6 +341,7 @@ public class TestNGLaunchConfigurationDelegate
     }
 
     vmConfig.setProgramArguments(argv.toArray(new String[argv.size()]));
+    vmConfig.setVMArguments(vmArguments.toArray(new String[vmArguments.size()]));
 
     return vmConfig;
   }
