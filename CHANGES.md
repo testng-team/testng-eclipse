@@ -18,6 +18,7 @@ Supported Metrics:
 * Fixed #408: Doesn't build against or run on Eclipse 4.10 (2018-12)
 * Fixed #410: After adding module-info.java, testng-eclipse no longer finds test classes in maven project.
 * Fixed #413: Testng-eclipse can not find classes in non exported packages in a java modular maven project.
+* Feature #415: Testng plugin cannot run Factory methods directly (@real-borat-sagdiyev & Nick Tan)
 
 ## 6.14
 

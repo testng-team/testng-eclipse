@@ -303,7 +303,8 @@ public class TestSearchEngine {
       return false;
 
     if (Annotation.TEST.annotatesTypeOrSuperTypes(binding)
-        || Annotation.TEST.annotatesAtLeastOneMethod(binding)) {
+        || Annotation.TEST.annotatesAtLeastOneMethod(binding)
+        || Annotation.FACTORY.annotatesAtLeastOneMethod(binding)) {
       return true;
     }
     return false;
@@ -707,6 +708,7 @@ public class TestSearchEngine {
   private static class Annotation {
 
     private static final Annotation TEST = new Annotation("org.testng.annotations.Test"); //$NON-NLS-1$
+    private static final Annotation FACTORY = new Annotation("org.testng.annotations.Factory"); //$NON-NLS-1$
 
     private final String fName;
 
