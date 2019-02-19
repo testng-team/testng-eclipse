@@ -154,7 +154,7 @@
         <repository>
             <id>eclipse</id>
             <layout>p2</layout>
-            <url>http://download.eclipse.org/releases/photon/</url>
+            <url>https://download.eclipse.org/releases/photon/</url>
         </repository>
         <repository>
             <id>testng-p2-repo</id>
@@ -170,7 +170,7 @@
             </snapshots>
             <id>bintray-testng-team-testng</id>
             <name>bintray</name>
-            <url>http://dl.bintray.com/testng-team/testng</url>
+            <url>https://dl.bintray.com/testng-team/testng</url>
         </repository>
         <repository>
             <snapshots />
