@@ -27,7 +27,7 @@ import org.testng.eclipse.util.ResourceUtil;
 
 public class BuildPathSupport {
 
-  private static final PluginDescription TESTNG_PLUGIN_DESC = new PluginDescription("org.testng", new VersionRange("[6.0, 7.0)"), null, null, "org.testng.source", null);
+  private static final PluginDescription TESTNG_PLUGIN_DESC = new PluginDescription("org.testng", new VersionRange("[6.0, 7.0]"), null, null, "org.testng.source", null);
   private static final PluginDescription JCOMMANDER_PLUGIN_DESC = new PluginDescription("com.beust.jcommander", new VersionRange("[1.5, 2.0)"), null, null, "com.beust.jcommander.source", null);
   private static final PluginDescription BSH_PLUGIN_DESC = new PluginDescription("org.apache-extras.beanshell.bsh", new VersionRange("[2.0, 2.1)"), null, null, "org.apache-extras.beanshell.bsh.source", null);
   private static final PluginDescription YAML_PLUGIN_DESC = new PluginDescription("org.yaml.snakeyaml", new VersionRange("[1.0, 2.0)"), null, null, "org.yaml.snakeyaml", null);
