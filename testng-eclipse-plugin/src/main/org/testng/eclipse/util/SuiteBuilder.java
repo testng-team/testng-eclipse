@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.launch.components.ITestContent;
 import org.testng.eclipse.ui.util.TypeParser;
 import org.testng.eclipse.util.signature.IMethodDescriptor;
@@ -131,7 +132,7 @@ public class SuiteBuilder {
   
   private static XMLStringBuffer getSuiteBuffer(String name) {
     XMLStringBuffer xmlBuf = new XMLStringBuffer(); //$NON-NLS-1$
-    xmlBuf.setDocType("suite SYSTEM " + Parser.TESTNG_DTD_URL);
+    xmlBuf.setDocType("suite SYSTEM " + TestNGPluginConstants.TESTNG_DTD_URL);
     Properties attrs = new Properties();
     attrs.setProperty("name", name);
     xmlBuf.push("suite", attrs);

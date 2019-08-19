@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.ui.util.SuiteListSelectionDialog;
 import org.testng.xml.Parser;
 import org.xml.sax.Attributes;
@@ -240,7 +241,7 @@ public class ParameterSolver {
     @Override
     public InputSource resolveEntity(String systemId, String publicId) throws SAXException {
       InputSource result = null;
-      if (Parser.DEPRECATED_TESTNG_DTD_URL.equals(publicId) || Parser.TESTNG_DTD_URL.equals(publicId)) {
+      if (TestNGPluginConstants.DEPRECATED_TESTNG_DTD_URL.equals(publicId) || TestNGPluginConstants.TESTNG_DTD_URL.equals(publicId)) {
         InputStream is = getClass().getClassLoader().getResourceAsStream(Parser.TESTNG_DTD);
         if (null == is) {
           is = Thread.currentThread().getContextClassLoader().getResourceAsStream(Parser.TESTNG_DTD);

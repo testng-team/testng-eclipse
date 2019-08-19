@@ -4,6 +4,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.testng.collections.Maps;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.TestNGPluginConstants;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -123,13 +124,13 @@ public class SuiteFileValidator {
     throws SAXException 
     {
       InputSource result = null;
-      if(Parser.TESTNG_DTD_URL.equals(publicId)) {
-        InputStream is = getClass().getClassLoader().getResourceAsStream(Parser.TESTNG_DTD);
+      if(TestNGPluginConstants.TESTNG_DTD_URL.equals(publicId)) {
+        InputStream is = getClass().getClassLoader().getResourceAsStream(TestNGPluginConstants.TESTNG_DTD);
         if(null == is) {
           is = Thread.currentThread().getContextClassLoader()
-              .getResourceAsStream(Parser.TESTNG_DTD);
+              .getResourceAsStream(TestNGPluginConstants.TESTNG_DTD);
           if(null == is) {
-            System.out.println("WARNING: couldn't find in classpath " + Parser.TESTNG_DTD_URL
+            System.out.println("WARNING: couldn't find in classpath " + TestNGPluginConstants.TESTNG_DTD_URL
                 + "\n" + "Fetching it from the Web site.");
             try {
               result = super.resolveEntity(systemId, publicId);
