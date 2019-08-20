@@ -21,6 +21,7 @@ import org.eclipse.core.variables.IStringVariableManager;
 import org.eclipse.core.variables.VariablesPlugin;
 import org.testng.TestNGException;
 import org.testng.eclipse.TestNGPlugin;
+import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.internal.Utils;
 import org.testng.remote.RemoteTestNG;
 import org.testng.reporters.XMLStringBuffer;
@@ -102,7 +103,7 @@ abstract public class CustomSuite extends LaunchSuite {
         new PreferenceStoreUtil(TestNGPlugin.getDefault().getPreferenceStore());
     String suiteTemplateFile = storage.getXmlTemplateFile(m_projectName, false /* not only project */);
     XMLStringBuffer suiteBuffer = new XMLStringBuffer(); //$NON-NLS-1$
-    suiteBuffer.setDocType("suite SYSTEM \"" + Parser.TESTNG_DTD_URL + "\"");
+    suiteBuffer.setDocType("suite SYSTEM \"" + TestNGPluginConstants.TESTNG_DTD_URL + "\"");
 
     if (!Utils.isStringEmpty(suiteTemplateFile)) {
       try {
