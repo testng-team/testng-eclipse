@@ -11,6 +11,7 @@ Supported Metrics:
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
 * update embedded testng to 7.0.0
+* fixed issue #445 Cannot add the TextNG 7.0 library (@vkadlcik, Nick)
 
 ## 6.14.3
 
