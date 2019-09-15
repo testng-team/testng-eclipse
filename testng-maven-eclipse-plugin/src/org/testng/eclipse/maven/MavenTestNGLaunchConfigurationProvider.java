@@ -360,6 +360,11 @@ public class MavenTestNGLaunchConfigurationProvider implements ITestNGLaunchConf
     result.put("settings.localRepository", MavenPlugin.getMaven().getLocalRepositoryPath());
     result.put("basedir", project.getProject().getLocation().toOSString());
 
+    // issue #459: quick and dirty workaround for jacoco generated placeholder '${argLine}'
+    // FIXME jacoco configuration support custom property name: https://www.eclemma.org/jacoco/trunk/doc/prepare-agent-mojo.html#propertyName
+    //          should get the actual jacoco propertyName, rather than hard-code below
+    result.put("argLine", "");
+
     //
     // project base properties
     //

@@ -1,6 +1,18 @@
 Change Log
 ====
 
+
+## DEV
+
+Supported Metrics:
+
+| Plugin | Dependency |
+| ------------- | ------------- |
+| TestNG for Eclipse | Eclipse Photon (4.8) or above |
+| TestNG M2E Integration (Optional) | M2E 1.5 or above |
+
+* workaround #459, replace `${argLine}` with empty string
+
 ## 7.0.0
 
 Supported Metrics:
