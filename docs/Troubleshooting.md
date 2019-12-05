@@ -3,6 +3,8 @@ Troubleshooting
 
 ## Can't install TestNG Eclipse Plugin
 
+**Note that, https://dl.bintray.com/testng-team/testng-eclipse/ is the official update site for TestNG Eclipse Plugin**
+
 If you failed to install TestNG Eclipse Plugin with following error:
 * Unable to read repository at http://beust.com/eclipse/content.xml.
 * HTTP Service 'Service Unavailable': http://beust.com/eclipse-beta/content.xml

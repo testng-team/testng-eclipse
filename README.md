@@ -17,13 +17,13 @@ see more at http://testng.org/doc/download.html
 
 The update site to install snapshot versions of the TestNG Eclipse plug-in is:
 
-`http://beust.com/eclipse-beta`
+`https://dl.bintray.com/testng-team/testng-eclipse/`
 
 Use it if you want to experiment with the new features or verify the bug fixes, and please [report back if you encounter any issues](https://github.com/cbeust/testng-eclipse/issues).
 
 To install it:
 * Click "Help -> Install New Software..." on top level menu
-* Paste the url http://beust.com/eclipse-beta to `Work with: ` text field and press enter.
+* Paste the url https://dl.bintray.com/testng-team/testng-eclipse/ to `Work with: ` text field and press enter.
 * Select the plugins
 * Click "Next" button and accept the license to complete the installation.
 * Restart Eclipse
@@ -36,8 +36,8 @@ Enjoy.
 
 Plugin Version            | Online Update-Site | Zipped Update-Site
 ------------------------- | ------------------ | ---------------------
-LATEST RELEASE [![Download](https://api.bintray.com/packages/testng-team/testng-eclipse-release/updatesites/images/download.svg)](http://dl.bintray.com/testng-team/testng-eclipse-release/zipped/)   | `http://beust.com/eclipse` | [here](http://dl.bintray.com/testng-team/testng-eclipse-release/zipped/)
-LATEST BETA [![Download](https://api.bintray.com/packages/testng-team/testng-eclipse/updatesites/images/download.svg)](https://dl.bintray.com/testng-team/testng-eclipse/zipped/) | `http://beust.com/eclipse-beta` | [here](https://dl.bintray.com/testng-team/testng-eclipse/zipped/)
+LATEST RELEASE [![Download](https://api.bintray.com/packages/testng-team/testng-eclipse-release/updatesites/images/download.svg)](http://dl.bintray.com/testng-team/testng-eclipse-release/zipped/)   | `https://dl.bintray.com/testng-team/testng-eclipse-release` | [here](http://dl.bintray.com/testng-team/testng-eclipse-release/zipped/)
+LATEST BETA [![Download](https://api.bintray.com/packages/testng-team/testng-eclipse/updatesites/images/download.svg)](https://dl.bintray.com/testng-team/testng-eclipse/zipped/) | `https://dl.bintray.com/testng-team/testng-eclipse` | [here](https://dl.bintray.com/testng-team/testng-eclipse/zipped/)
 History:||
 7.0.0.201908240652       | `https://dl.bintray.com/testng-team/testng-eclipse-release/7.0.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/7.0.0.201908240652/org.testng.eclipse.updatesite.zip)
 6.14.3.201902250526       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.14.3/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.14.3.201902250526/org.testng.eclipse.updatesite.zip)
