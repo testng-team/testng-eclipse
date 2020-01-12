@@ -2,7 +2,7 @@ Change Log
 ====
 
 
-## DEV
+## 7.1.0
 
 Supported Metrics:
 
@@ -12,6 +12,7 @@ Supported Metrics:
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
 * workaround #459, replace `${argLine}` with empty string
+* update embedded testng to 7.1.0
 
 ## 7.0.0
 
