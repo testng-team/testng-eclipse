@@ -13,6 +13,7 @@ Supported Metrics:
 
 * workaround #459, replace `${argLine}` with empty string
 * update embedded testng to 7.1.0
+* update default update site to https://dl.bintray.com/testng-team/testng-eclipse-release
 
 ## 7.0.0
 
