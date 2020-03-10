@@ -216,8 +216,8 @@ public class ParameterSolver {
   }
 
   protected static IResource[] searchSuites(IResource[] scopeResources) {
-    ISearchQuery query= new FileSearchQuery("<!DOCTYPE suite SYSTEM \"http://testng.org/testng-1.0.dtd\" >", 
-                                            false /*regexp*/ , 
+    ISearchQuery query= new FileSearchQuery("<!DOCTYPE suite SYSTEM \"(http|https)://testng.org/testng-1.0.dtd\" >", 
+                                            true /*regexp*/ , 
                                             false /*casesensitive*/, 
                                             FileTextSearchScope.newSearchScope(scopeResources, new String[] {"*.xml"}, false));
     query.run(null);

@@ -35,10 +35,10 @@ public abstract class TestNGPluginConstants {
   public static final String TESTNG_DTD = "testng-1.0.dtd";
 
   /** The URL to the deprecated TestNG DTD. */
-  public static final String DEPRECATED_TESTNG_DTD_URL = "http://beust.com/testng/" + TESTNG_DTD;
+  public static final String DEPRECATED_TESTNG_DTD_URL = "https://beust.com/testng/" + TESTNG_DTD;
 
   /** The URL to the TestNG DTD. */
-  public static final String TESTNG_DTD_URL = "http://testng.org/" + TESTNG_DTD;
+  public static final String TESTNG_DTD_URL = "https://testng.org/" + TESTNG_DTD;
 
   private TestNGPluginConstants() {}
 }

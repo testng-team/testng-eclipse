@@ -5,11 +5,11 @@
       version="7.1.0.qualifier"
       provider-name="%feature.provider">
 
-   <description url="http://testng.org">
+   <description url="https://testng.org">
       TestNG plug-in with M2E integration for Eclipse.
    </description>
 
-   <copyright url="http://beust.com">
+   <copyright url="https://beust.com">
       Copyright 2004-2016 Cedric Beust.
    </copyright>
 
