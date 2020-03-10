@@ -11,7 +11,7 @@ TestNG for Eclipse Plugin
 
 <a href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=1549" class="drag" title="Drag to your running Eclipse workspace."><img class="img-responsive" src="https://marketplace.eclipse.org/sites/all/themes/solstice/public/images/marketplace/btn-install.png" alt="Drag to your running Eclipse workspace." /></a>
 
-see more at http://testng.org/doc/download.html
+see more at https://testng.org/doc/download.html
 
 ### Install Snapshot
 
@@ -61,7 +61,7 @@ The full changelog is [here](CHANGES.md)
 
 ## User documentation
 
-The documentation for this plug-in can be found at http://testng.org/doc/eclipse.html
+The documentation for this plug-in can be found at https://testng.org/doc/eclipse.html
 
 ## Build
 

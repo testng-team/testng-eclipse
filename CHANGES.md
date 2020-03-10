@@ -1,7 +1,7 @@
 Change Log
 ====
 
-## Current Dev
+## 7.1.1
 
 Supported Metrics:
 
@@ -10,6 +10,7 @@ Supported Metrics:
 | TestNG for Eclipse | Eclipse Photon (4.8) or above |
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
+* use https DTD `https://testng.org/testng-1.0.dtd`
 
 ## 7.1.0
 
