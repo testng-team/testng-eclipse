@@ -24,4 +24,9 @@ jobs:
       run: |
         echo "MAVEN_OPTS='-Xmx1024m -XX:MaxPermSize=512m -Djava.net.preferIPv4Stack=true'" > ~/.mavenrc
         mvn -e -U -Dci clean install
-    
+    - uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
