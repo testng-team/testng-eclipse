@@ -473,5 +473,12 @@ public void ${tearDownMethod}() throws Exception {
           class="org.testng.eclipse.ui.preferences.JdtPreferenceInjector">
     </startup>
  </extension>
+ <extension
+       point="org.eclipse.ui.workbench.texteditor.codeMiningProviders">
+    <codeMiningProvider
+          class="org.testng.eclipse.ui.codemining.TestCodeMiningProvider"
+          id="org.testng.eclipse.codemining.testngProvider">
+    </codeMiningProvider>
+ </extension>
 
 </plugin>
