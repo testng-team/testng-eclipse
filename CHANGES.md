@@ -10,7 +10,7 @@ Supported Metrics:
 | TestNG for Eclipse | Eclipse Photon (4.8) or above |
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
-* TBD
+* add support for eclipse codeminings to provide Run All, Run and Debug shortcuts inline on source code of Test classes and Test methods.
 
 ## 7.1.1
 
