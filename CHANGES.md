@@ -1,6 +1,17 @@
 Change Log
 ====
 
+## Current Dev
+
+Supported Metrics:
+
+| Plugin | Dependency |
+| ------------- | ------------- |
+| TestNG for Eclipse | Eclipse Photon (4.8) or above |
+| TestNG M2E Integration (Optional) | M2E 1.5 or above |
+
+* TBD
+
 ## 7.2.0
 
 Supported Metrics:
