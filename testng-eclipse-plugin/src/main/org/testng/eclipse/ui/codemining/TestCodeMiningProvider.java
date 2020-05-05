@@ -2,6 +2,7 @@ package org.testng.eclipse.ui.codemining;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -48,7 +49,7 @@ public class TestCodeMiningProvider extends AbstractCodeMiningProvider {
     final ITextEditor editor = super.getAdapter(ITextEditor.class);
     final ITypeRoot typeRoot = EditorUtility.getEditorInputJavaElement(editor, true);
     if (typeRoot == null) {
-      return null;
+      return Collections.emptyList();
     }
     
     try {
@@ -56,7 +57,7 @@ public class TestCodeMiningProvider extends AbstractCodeMiningProvider {
           .getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT));
       // do not process non-test classes
       if(packageFragmentRoot == null || !packageFragmentRoot.getResolvedClasspathEntry().isTest()) {
-        return null;
+        return Collections.emptyList();
       }
       
       IJavaElement[] elements = typeRoot.getChildren();
@@ -67,7 +68,7 @@ public class TestCodeMiningProvider extends AbstractCodeMiningProvider {
       return minings;
     } catch (Exception e) {
       TestNGPlugin.log(e);
-      return null;
+      return Collections.emptyList();
     }
   }
 
