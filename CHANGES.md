@@ -22,6 +22,7 @@ Supported Metrics:
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
 * Feature #483 add support for eclipse codeminings to provide Run All, Run and Debug shortcuts inline on source code of Test classes and Test methods. (@gayanper)
+* Fix #496: return emptyList instead of null to avoid NPE
 
 ## 7.1.1
 
