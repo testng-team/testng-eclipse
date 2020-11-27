@@ -97,7 +97,8 @@ public class CompareResultDialog extends Dialog {
       ".*expected not same \\[(.*)\\] but found \\[(.*)\\].*", 
       ".*did not expect to find \\[(.*)\\] but found \\[(.*)\\].*", 
       ".*expected same with:<(.*)> but was:<(.*)>.*", 
-      ".*expected \\[(.*)\\] but found \\[(.*)\\].*" 
+      ".*expected \\[(.*)\\] but found \\[(.*)\\].*",
+      ".*Expecting:.*<(.*)>.*to be equal to:.*<(.*)>.*"
       };
 
   public CompareResultDialog(Shell parentShell, RunInfo failure) {
