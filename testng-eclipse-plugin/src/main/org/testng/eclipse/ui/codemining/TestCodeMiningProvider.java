@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IAnnotation;
@@ -113,9 +114,8 @@ public class TestCodeMiningProvider extends AbstractCodeMiningProvider {
         .filter(a -> "Test".equals(a.getElementName()) || "org.testng.annotations.Test".equals(a.getElementName())).findFirst(); //$NON-NLS-1$ //$NON-NLS-2$
     if(annotation.isPresent()) {
       String[][] resolveType = method.getDeclaringType().resolveType(annotation.get().getElementName());
-      if(resolveType.length > 0) {
-        return Arrays.equals(EXPECTED_TYPE, resolveType[0]);
-      }
+      return Optional.ofNullable(resolveType)
+          .flatMap(r -> Stream.of(r).filter(e -> Arrays.equals(EXPECTED_TYPE, e)).findFirst()).isPresent();
     }
     return false;
   }
