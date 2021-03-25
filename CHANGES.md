@@ -11,6 +11,7 @@ Supported Metrics:
 | TestNG M2E Integration (Optional) | M2E 1.5 or above |
 
 * update embedded testng to 7.3.0
+* Fix #512: Fixed a NPE while rendering codeminings 
 
 ## 7.2.0
 
