@@ -8,7 +8,7 @@
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.testng.p2.feature.feature.group" version="6.12.0.r201709030044"/>
-<repository location="https://dl.bintray.com/testng-team/testng-p2-release/"/>
+<repository location="https://testng.org/testng-p2-update-site/"/>
 </location>
 </locations>
 </target>
