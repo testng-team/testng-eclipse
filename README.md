@@ -17,18 +17,18 @@ see more at https://testng.org/doc/download.html
 
 The update site to install snapshot versions of the TestNG Eclipse plug-in is:
 
-`https://dl.bintray.com/testng-team/testng-eclipse/`
+`https://testng.org/testng-eclipse-update-site`
 
 Use it if you want to experiment with the new features or verify the bug fixes, and please [report back if you encounter any issues](https://github.com/cbeust/testng-eclipse/issues).
 
 To install it:
 * Click "Help -> Install New Software..." on top level menu
-* Paste the url https://dl.bintray.com/testng-team/testng-eclipse/ to `Work with: ` text field and press enter.
+* Paste the url `https://testng.org/testng-eclipse-update-site` to `Work with: ` text field and press enter.
 * Select the plugins
 * Click "Next" button and accept the license to complete the installation.
 * Restart Eclipse
 
-If you want to install previous version of beta, you can pick up one from [here](http://dl.bintray.com/testng-team/testng-eclipse/updatesites/).
+If you want to install previous version of beta, you can pick up one from [here](https://testng.org/testng-eclipse-update-site).
 
 Enjoy.
 
@@ -36,25 +36,26 @@ Enjoy.
 
 Plugin Version            | Online Update-Site | Zipped Update-Site
 ------------------------- | ------------------ | ---------------------
-LATEST RELEASE [![Download](https://api.bintray.com/packages/testng-team/testng-eclipse-release/updatesites/images/download.svg)](http://dl.bintray.com/testng-team/testng-eclipse-release/zipped/)   | `https://dl.bintray.com/testng-team/testng-eclipse-release` | [here](http://dl.bintray.com/testng-team/testng-eclipse-release/zipped/)
-LATEST BETA [![Download](https://api.bintray.com/packages/testng-team/testng-eclipse/updatesites/images/download.svg)](https://dl.bintray.com/testng-team/testng-eclipse/zipped/) | `https://dl.bintray.com/testng-team/testng-eclipse` | [here](https://dl.bintray.com/testng-team/testng-eclipse/zipped/)
+LATEST RELEASE   | `https://testng.org/testng-eclipse-update-site` | [here](https://testng.org/testng-eclipse-update-site)
+LATEST BETA | `https://testng.org/testng-eclipse-update-site` | [here](https://testng.org/testng-eclipse-update-site)
 History:||
-7.3.0.202008060412      | `https://dl.bintray.com/testng-team/testng-eclipse-release/7.3.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/7.3.0.202008060412/org.testng.eclipse.updatesite.zip)
-7.2.0.202005051752      | `https://dl.bintray.com/testng-team/testng-eclipse-release/7.2.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/7.2.0.202005051752/org.testng.eclipse.updatesite.zip)
-7.1.1.202003100345      | `https://dl.bintray.com/testng-team/testng-eclipse-release/7.1.1/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/7.1.1.202003100345/org.testng.eclipse.updatesite.zip)
-7.1.0.202003090500      | `https://dl.bintray.com/testng-team/testng-eclipse-release/7.1.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/7.1.0.202003090500/org.testng.eclipse.updatesite.zip)
-7.0.0.201908240652       | `https://dl.bintray.com/testng-team/testng-eclipse-release/7.0.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/7.0.0.201908240652/org.testng.eclipse.updatesite.zip)
-6.14.3.201902250526       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.14.3/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.14.3.201902250526/org.testng.eclipse.updatesite.zip)
-6.14.0.201802161500       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.14.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.14.0.201802161500/org.testng.eclipse.updatesite.zip)
-6.13.0.201712040650       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.13.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.13.0.201712040650/org.testng.eclipse.updatesite.zip)
-6.12.0.201709050550       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.12.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.12.0.201709050550/org.testng.eclipse.updatesite.zip)
-6.11.0.201703011520       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.11.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.11.0.201703011520/site_assembly.zip)
-6.10.0.201612030230       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.10.0/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.10.0.201612030230/site_assembly.zip)
-6.9.13.201609291640       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.13/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.13.201609291640/site_assembly.zip)
-6.9.12.201607091356       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.12/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.12.201607091356/site_assembly.zip)
-6.9.11.201604020423       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.11/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.11.201604020423/site_assembly.zip)
-6.9.10.201512240000       | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.10/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.10.201512240000/site_assembly.zip)
-6.9.5.201505251947        | `https://dl.bintray.com/testng-team/testng-eclipse-release/6.9.5/` | [download](https://dl.bintray.com/testng-team/testng-eclipse-release/zipped/6.9.5.201505251947/site_assembly.zip)
+7.4.0.202105021622      | `https://testng.org/testng-eclipse-update-site/7.4.0/` | [download](https://testng.org/testng-eclipse-update-site/zipped/7.4.0.202105021622/org.testng.eclipse.updatesite.zip)
+7.3.0.202008060412      | `https://testng.org/testng-eclipse-update-site/7.3.0/` | [download](https://testng.org/testng-eclipse-update-site/zipped/7.3.0.202008060412/org.testng.eclipse.updatesite.zip)
+7.2.0.202005051752      | `https://testng.org/testng-eclipse-update-site/7.2.0/` | [download](https://testng.org/testng-eclipse-update-site/zipped/7.2.0.202005051752/org.testng.eclipse.updatesite.zip)
+7.1.1.202003100345      | `https://testng.org/testng-eclipse-update-site/7.1.1/` | [download](https://testng.org/testng-eclipse-update-site/zipped/7.1.1.202003100345/org.testng.eclipse.updatesite.zip)
+7.1.0.202003090500      | `https://testng.org/testng-eclipse-update-site/7.1.0/` | [download](https://testng.org/testng-eclipse-update-site/zipped/7.1.0.202003090500/org.testng.eclipse.updatesite.zip)
+7.0.0.201908240652       | `https://testng.org/testng-eclipse-update-site/7.0.0/` | [download](https://testng.org/testng-eclipse-update-site/zipped/7.0.0.201908240652/org.testng.eclipse.updatesite.zip)
+6.14.3.201902250526       | `https://testng.org/testng-eclipse-update-site/6.14.3/` | [download](https://testng.org/testng-eclipse-update-site/zipped/6.14.3.201902250526/org.testng.eclipse.updatesite.zip)
+6.14.0.201802161500       | `https://testng.org/testng-eclipse-update-site/6.14.0/` | [download](https://testng.org/testng-eclipse-update-site/zipped/6.14.0.201802161500/org.testng.eclipse.updatesite.zip)
+6.13.0.201712040650       | `https://testng.org/testng-eclipse-update-site/6.13.0/` | [download](https://testng.org/testng-eclipse-update-site/zipped/6.13.0.201712040650/org.testng.eclipse.updatesite.zip)
+6.12.0.201709050550       | `https://testng.org/testng-eclipse-update-site/6.12.0/` | [download](https://testng.org/testng-eclipse-update-site/zipped/6.12.0.201709050550/org.testng.eclipse.updatesite.zip)
+6.11.0.201703011520       | `https://testng.org/testng-eclipse-update-site/6.11.0/` | [download](https://testng.org/testng-eclipse-update-site/zipped/6.11.0.201703011520/site_assembly.zip)
+6.10.0.201612030230       | `https://testng.org/testng-eclipse-update-site/6.10.0/` | [download](https://testng.org/testng-eclipse-update-site/zipped/6.10.0.201612030230/site_assembly.zip)
+6.9.13.201609291640       | `https://testng.org/testng-eclipse-update-site/6.9.13/` | [download](https://testng.org/testng-eclipse-update-site/zipped/6.9.13.201609291640/site_assembly.zip)
+6.9.12.201607091356       | `https://testng.org/testng-eclipse-update-site/6.9.12/` | [download](https://testng.org/testng-eclipse-update-site/zipped/6.9.12.201607091356/site_assembly.zip)
+6.9.11.201604020423       | `https://testng.org/testng-eclipse-update-site/6.9.11/` | [download](https://testng.org/testng-eclipse-update-site/zipped/6.9.11.201604020423/site_assembly.zip)
+6.9.10.201512240000       | `https://testng.org/testng-eclipse-update-site/6.9.10/` | [download](https://testng.org/testng-eclipse-update-site/zipped/6.9.10.201512240000/site_assembly.zip)
+6.9.5.201505251947        | `https://testng.org/testng-eclipse-update-site/6.9.5/` | [download](https://testng.org/testng-eclipse-update-site/zipped/6.9.5.201505251947/site_assembly.zip)
 
 (**NOTE**: it's always recommended to install from the ***LATEST RELEASE*** updatesite. the version specific updatesites are for cases that you want to stay on old version.)
 

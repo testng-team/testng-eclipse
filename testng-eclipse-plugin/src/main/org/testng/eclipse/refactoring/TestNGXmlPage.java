@@ -34,6 +34,7 @@ import org.testng.eclipse.util.Utils.JavaElement;
 import org.testng.xml.XmlClass;
 import org.testng.xml.XmlPackage;
 import org.testng.xml.XmlSuite;
+import org.testng.xml.XmlSuite.ParallelMode;
 import org.testng.xml.XmlTest;
 
 /**
@@ -127,7 +128,7 @@ public class TestNGXmlPage extends UserInputWizardPage {
   private void updateUi() {
     m_xmlSuite.setName(m_suiteText.getText());
     m_xmlSuite.getTests().get(0).setName(m_testText.getText());
-    m_xmlSuite.setParallel(m_parallelCombo.getItem(m_parallelCombo.getSelectionIndex()));
+    m_xmlSuite.setParallel(ParallelMode.getValidParallel(m_parallelCombo.getItem(m_parallelCombo.getSelectionIndex())));
     Integer threadCount = null;
     try {
       threadCount = Integer.parseInt(m_threadCountText.getText());
