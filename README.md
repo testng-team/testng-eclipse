@@ -28,7 +28,7 @@ To install it:
 * Click "Next" button and accept the license to complete the installation.
 * Restart Eclipse
 
-If you want to install previous version of beta, you can pick up one from [here](http://dl.bintray.com/testng-team/testng-eclipse/updatesites/).
+If you want to install previous version of beta, you can pick up one from [here](https://testng.org/testng-eclipse-update-site).
 
 Enjoy.
 
