@@ -1,6 +1,18 @@
 Change Log
 ====
 
+## 7.4.0
+
+Supported Metrics:
+
+| Plugin | Dependency |
+| ------------- | ------------- |
+| TestNG for Eclipse | Eclipse Photon (4.8) or above |
+| TestNG M2E Integration (Optional) | M2E 1.5 or above |
+
+* update default update site to https://testng.org/testng-eclipse-update-site/
+* IMPORTANT: testng-p2 7.4.0 is required
+
 ## 7.3.0
 
 Supported Metrics:

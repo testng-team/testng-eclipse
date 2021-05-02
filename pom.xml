@@ -162,15 +162,7 @@
             <!-- testng-p2 beta -->
             <!-- <url>https://dl.bintray.com/testng-team/testng-p2/7.0.0/</url> -->
             <!-- testng-p2 release -->
-            <url>https://testng.org/testng-p2-update-site/7.3.0/</url>
-        </repository>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-testng-team-testng</id>
-            <name>bintray</name>
-            <url>https://dl.bintray.com/testng-team/testng</url>
+            <url>https://testng.org/testng-p2-update-site/7.4.0/</url>
         </repository>
         <repository>
             <snapshots />
