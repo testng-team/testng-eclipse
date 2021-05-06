@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
-import org.eclipse.ui.internal.misc.StringMatcher;
+import org.eclipse.core.text.StringMatcher;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.util.ResourceUtil;
 
