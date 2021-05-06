@@ -12,6 +12,7 @@ Supported Metrics:
 
 * update default update site to https://testng.org/testng-eclipse-update-site/
 * IMPORTANT: testng-p2 7.4.0 is required
+* Fix #514: Missing class usage StringMatcher in eclipse internal code
 
 ## 7.3.0
 
