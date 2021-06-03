@@ -29,6 +29,7 @@ public class BuildPathSupport {
 
   private static final PluginDescription TESTNG_PLUGIN_DESC = new PluginDescription("org.testng", new VersionRange("[6.0, 8.0)"), null, null, "org.testng.source", null);
   private static final PluginDescription JCOMMANDER_PLUGIN_DESC = new PluginDescription("com.beust.jcommander", new VersionRange("[1.5, 2.0)"), null, null, "com.beust.jcommander.source", null);
+  private static final PluginDescription JQUERY_PLUGIN_DESC = new PluginDescription("org.webjars.jquery", new VersionRange("[3.5.1, 4.0)"), null, null, "org.webjars.jquery.source", null);
   private static final PluginDescription BSH_PLUGIN_DESC = new PluginDescription("org.apache-extras.beanshell.bsh", new VersionRange("[2.0, 2.1)"), null, null, "org.apache-extras.beanshell.bsh.source", null);
   private static final PluginDescription YAML_PLUGIN_DESC = new PluginDescription("org.yaml.snakeyaml", new VersionRange("[1.0, 2.0)"), null, null, "org.yaml.snakeyaml", null);
   private static IClasspathEntry[] TESTNG_LIB_ENTRIES_CACHE;
@@ -76,6 +77,11 @@ public class BuildPathSupport {
       IClasspathEntry yamlCpEnt = YAML_PLUGIN_DESC.getLibraryEntry();
       if (yamlCpEnt != null) {
         result.add(yamlCpEnt);
+      }
+
+      IClasspathEntry jqueryCpEnt = JQUERY_PLUGIN_DESC.getLibraryEntry();
+      if (jqueryCpEnt != null) {
+        result.add(jqueryCpEnt);
       }
 
       TESTNG_LIB_ENTRIES_CACHE = result.toArray(new IClasspathEntry[result.size()]);
