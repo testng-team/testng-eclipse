@@ -39,6 +39,7 @@ Plugin Version            | Online Update-Site | Zipped Update-Site
 LATEST RELEASE   | `https://testng.org/testng-eclipse-update-site` | [here](https://testng.org/testng-eclipse-update-site)
 LATEST BETA | `https://testng.org/testng-eclipse-update-site` | [here](https://testng.org/testng-eclipse-update-site)
 History:||
+7.4.0.202106051955      | `https://testng.org/testng-eclipse-update-site/7.4.0/` | [download](https://testng.org/testng-eclipse-update-site/zipped/7.4.0.202106051955/org.testng.eclipse.updatesite.zip)
 7.4.0.202105021622      | `https://testng.org/testng-eclipse-update-site/7.4.0/` | [download](https://testng.org/testng-eclipse-update-site/zipped/7.4.0.202105021622/org.testng.eclipse.updatesite.zip)
 7.3.0.202008060412      | `https://testng.org/testng-eclipse-update-site/7.3.0/` | [download](https://testng.org/testng-eclipse-update-site/zipped/7.3.0.202008060412/org.testng.eclipse.updatesite.zip)
 7.2.0.202005051752      | `https://testng.org/testng-eclipse-update-site/7.2.0/` | [download](https://testng.org/testng-eclipse-update-site/zipped/7.2.0.202005051752/org.testng.eclipse.updatesite.zip)
