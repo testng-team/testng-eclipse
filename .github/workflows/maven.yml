@@ -31,4 +31,4 @@ jobs:
     - name: Build with Maven
       run: |
         echo "MAVEN_OPTS='-Xmx1024m -XX:MaxPermSize=512m -Djava.net.preferIPv4Stack=true'" > ~/.mavenrc
-        mvn -e -U -Dci clean install
+        ./mvnw -e -U -Dci clean install

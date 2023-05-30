@@ -4,4 +4,4 @@ then
   exit -1
 fi
 
-mvn -e -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=$1
+./mvnw -e -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=$1
