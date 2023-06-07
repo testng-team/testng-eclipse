@@ -13,6 +13,6 @@
       <category name="org.testng.eclipse"/>
    </bundle>
    <category-def name="org.testng.eclipse" label="TestNG"/>
-   <repository-reference location="http://testng.org/testng-p2-update-site/" enabled="true" />
-   <repository-reference location="http://download.eclipse.org/technology/m2e/releases/" enabled="true" />
+   <repository-reference location="https://testng.org/testng-p2-update-site/" enabled="true" />
+   <repository-reference location="https://download.eclipse.org/technology/m2e/releases/latest" enabled="true" />
 </site>
