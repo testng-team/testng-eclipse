@@ -14,14 +14,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK 1.8
-      uses: actions/setup-java@v2
+    - uses: actions/checkout@v3
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
       with:
         distribution: adopt
-        java-version: 8
+        java-version: 11
 
-    - uses: actions/cache@v1
+    - uses: actions/cache@v3
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -31,4 +31,4 @@ jobs:
     - name: Build with Maven
       run: |
         echo "MAVEN_OPTS='-Xmx1024m -XX:MaxPermSize=512m -Djava.net.preferIPv4Stack=true'" > ~/.mavenrc
-        mvn -e -U -Dci clean install
+        ./mvnw -e -U -Dci clean install

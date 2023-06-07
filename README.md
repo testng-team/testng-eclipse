@@ -85,7 +85,7 @@ Using `SNAPSHOT` version numbers will generate UTC timestamped plugin-numbers, e
 Once the version is correct, build the Eclipse plug-in as follows:
 
 ```bash
-mvn -e -U -Dci clean install
+./mvnw -e -U -Dci clean install
 ```
 
 The update site package will be generated at `testng-eclipse-update-site/target/org.testng.eclipse.updatesite.zip`

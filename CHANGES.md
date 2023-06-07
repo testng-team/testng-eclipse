@@ -1,6 +1,20 @@
 Change Log
 ====
 
+## 7.8.0
+
+Supported Metrics:
+
+| Plugin | Dependency |
+| ------------- | ------------- |
+| TestNG for Eclipse | Eclipse Photon (4.8) or above |
+| TestNG M2E Integration (Optional) | M2E 1.5 or above |
+| Java | 11.0 or above |
+
+* update testng-remote to 1.5.1
+* IMPORTANT: testng-p2 7.8.0 is required
+* IMPORTANT: Java 11 or above is required
+
 ## 7.4.0
 
 Supported Metrics:
