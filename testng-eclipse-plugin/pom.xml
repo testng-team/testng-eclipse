@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.testng.eclipse</groupId>
         <artifactId>org.testng.eclipse.parent</artifactId>
-        <version>7.4.0-SNAPSHOT</version>
+        <version>7.8.0-SNAPSHOT</version>
     </parent>
     <artifactId>org.testng.eclipse</artifactId>
     <packaging>eclipse-plugin</packaging>
 
     <properties>
-        <testng.remote.version>1.4.0</testng.remote.version>
+        <testng.remote.version>1.5.1</testng.remote.version>
     </properties>
 
     <build>
