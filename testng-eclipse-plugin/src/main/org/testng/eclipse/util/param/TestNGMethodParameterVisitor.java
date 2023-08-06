@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
@@ -148,9 +149,15 @@ public class TestNGMethodParameterVisitor extends ASTVisitor {
   protected void record(MethodDeclaration method, ArrayInitializer values) {
     List<?> literals = values.expressions();
     List<String> paramNames = new ArrayList<String>(literals.size());
-    for(int i= 0; i < literals.size(); i++) {
-      StringLiteral str = (StringLiteral) literals.get(i);
-      paramNames.add(str.getLiteralValue());
+    for(Object expr : literals) {
+      if (expr instanceof StringLiteral) {
+        StringLiteral str = (StringLiteral) expr;
+        paramNames.add(str.getLiteralValue());
+      } else if (expr instanceof SimpleName) {
+        SimpleName sn = (SimpleName) expr;
+        paramNames.add(sn.getIdentifier());
+      }
+      
     }
 
     record(method, paramNames);
