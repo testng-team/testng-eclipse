@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.testng.eclipse</groupId>
     <artifactId>org.testng.eclipse.parent</artifactId>
-    <version>7.8.0-SNAPSHOT</version>
+    <version>7.9.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -162,7 +162,7 @@
             <!-- testng-p2 beta -->
             <!-- <url>https://dl.bintray.com/testng-team/testng-p2/7.0.0/</url> -->
             <!-- testng-p2 release -->
-            <url>https://testng.org/testng-p2-update-site/7.8.0/</url>
+            <url>https://testng.org/testng-p2-update-site/7.9.0/</url>
         </repository>
         <repository>
             <snapshots />
