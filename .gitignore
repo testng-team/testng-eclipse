@@ -4,6 +4,7 @@ target/
 .settings/
 
 .vscode/
+.idea/
 
 .DS_Store
 
