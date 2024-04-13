@@ -17,7 +17,7 @@ import org.testng.eclipse.ui.util.TypeParser;
 import org.testng.eclipse.util.signature.IMethodDescriptor;
 import org.testng.eclipse.util.signature.MethodDescriptor;
 import org.testng.reporters.XMLStringBuffer;
-import org.testng.xml.Parser;
+import org.testng.xml.internal.Parser;
 
 /**
  * Utility class that builds a temporary suite definition file.
