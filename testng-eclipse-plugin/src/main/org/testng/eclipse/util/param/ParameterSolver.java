@@ -33,7 +33,7 @@ import org.eclipse.ui.PlatformUI;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.TestNGPluginConstants;
 import org.testng.eclipse.ui.util.SuiteListSelectionDialog;
-import org.testng.xml.Parser;
+import org.testng.xml.internal.Parser;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;

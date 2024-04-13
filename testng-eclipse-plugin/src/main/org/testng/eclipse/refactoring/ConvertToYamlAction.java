@@ -17,7 +17,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.testng.eclipse.TestNGPlugin;
 import org.testng.eclipse.util.Utils;
 import org.testng.internal.Yaml;
-import org.testng.xml.Parser;
+import org.testng.xml.internal.Parser;
 import org.testng.xml.XmlSuite;
 import org.xml.sax.SAXException;
 

@@ -26,7 +26,7 @@ import org.testng.internal.Utils;
 import org.testng.remote.RemoteTestNG;
 import org.testng.reporters.XMLStringBuffer;
 import org.testng.xml.LaunchSuite;
-import org.testng.xml.Parser;
+import org.testng.xml.internal.Parser;
 import org.testng.xml.XmlMethodSelector;
 import org.testng.xml.XmlSuite;
 
@@ -173,7 +173,7 @@ abstract public class CustomSuite extends LaunchSuite {
         // them in the suite we are creating.
         Properties attr = new Properties();
         put(attr, "name", s.getName());
-        put(attr, "junit", s.isJUnit());
+//        put(attr, "junit", s.isJUnit());
         put(attr, "verbose", s.getVerbose());
         put(attr, "parallel", s.getParallel());
         put(attr, "thread-count", s.getThreadCount());
@@ -182,7 +182,7 @@ abstract public class CustomSuite extends LaunchSuite {
         put(attr, "skipfailedinvocationcounts", s.skipFailedInvocationCounts());
         put(attr, "configfailurepolicy", s.getConfigFailurePolicy());
         put(attr, "data-provider-thread-count", s.getDataProviderThreadCount());
-        put(attr, "object-factory", s.getObjectFactory());
+        put(attr, "object-factory", s.getObjectFactoryClass());
         put(attr, "allow-return-values", s.getAllowReturnValues());
         put(attr, "preserve-order", s.getPreserveOrder());
         put(attr, "group-by-instances", s.getGroupByInstances());

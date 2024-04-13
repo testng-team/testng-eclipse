@@ -232,7 +232,7 @@ public class TestNGLaunchConfigurationDelegate
     switch (protocol) {
     case STRING:
       p("Using the string protocol");
-      argv.add(CommandLineArgs.PORT);
+      argv.add(RemoteArgs.PORT);
       break;
     case OBJECT:
       p("Using the object serialization protocol");
