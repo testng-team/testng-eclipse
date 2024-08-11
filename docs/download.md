@@ -1,6 +1,8 @@
 # Download Current Release Version
 
-- **Java 8+ is required** for running the TestNG for Eclipse plugin.
+- **Java 11+ is required** for running the TestNG for Eclipse plugin v7.8.0 and above.
+
+- **Java 8 is required** for running the TestNG for Eclipse plugin Upto v7.4.0.
 
 - **Eclipse 4.2 and above is required**. Eclipse 3.x is NOT supported
   any more, please update your Eclipse to 4.2 or above.
