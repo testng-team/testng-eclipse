@@ -23,15 +23,15 @@ import org.eclipse.osgi.service.resolver.VersionRange;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.testng.eclipse.TestNGPlugin;
-import org.testng.eclipse.util.ResourceUtil;
 
 public class BuildPathSupport {
 
   private static final PluginDescription TESTNG_PLUGIN_DESC = new PluginDescription("org.testng", new VersionRange("[6.0, 8.0)"), null, null, "org.testng.source", null);
   private static final PluginDescription JCOMMANDER_PLUGIN_DESC = new PluginDescription("com.beust.jcommander", new VersionRange("[1.5, 2.0)"), null, null, "com.beust.jcommander.source", null);
+  private static final PluginDescription SLF4J_PLUGIN_DESC = new PluginDescription("slf4j.api", new VersionRange("[1.7.0, 3.0.0)"), null, null, "org.slf4j.api.source", null);
   private static final PluginDescription JQUERY_PLUGIN_DESC = new PluginDescription("org.webjars.jquery", new VersionRange("[3.5.1, 4.0)"), null, null, "org.webjars.jquery.source", null);
   private static final PluginDescription BSH_PLUGIN_DESC = new PluginDescription("org.apache-extras.beanshell.bsh", new VersionRange("[2.0, 2.1)"), null, null, "org.apache-extras.beanshell.bsh.source", null);
-  private static final PluginDescription YAML_PLUGIN_DESC = new PluginDescription("org.yaml.snakeyaml", new VersionRange("[1.0, 2.0)"), null, null, "org.yaml.snakeyaml", null);
+  private static final PluginDescription YAML_PLUGIN_DESC = new PluginDescription("org.yaml.snakeyaml", new VersionRange("[2.0, 3.0)"), null, null, "org.yaml.snakeyaml", null);
   private static IClasspathEntry[] TESTNG_LIB_ENTRIES_CACHE;
 
   private static IPath getBundleLocation() {
@@ -69,6 +69,7 @@ public class BuildPathSupport {
 
       result.add(TESTNG_PLUGIN_DESC.getLibraryEntry());
       result.add(JCOMMANDER_PLUGIN_DESC.getLibraryEntry());
+      result.add(SLF4J_PLUGIN_DESC.getLibraryEntry());
       IClasspathEntry bshCpEnt = BSH_PLUGIN_DESC.getLibraryEntry();
       if (bshCpEnt != null) {
         result.add(bshCpEnt);
