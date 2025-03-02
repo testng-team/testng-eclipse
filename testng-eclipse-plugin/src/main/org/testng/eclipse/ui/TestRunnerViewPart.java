@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -209,6 +211,30 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   // MAX_TEXT_SIZE_THRESHOLD.
   private static final int MAX_RESULTS_THRESHOLD = 1000;
   private static final int MAX_TEXT_SIZE_THRESHOLD = 3;
+  
+  private static final BlockingQueue<Runnable> SYNC_RUNNABLE_QUEUE = new LinkedBlockingDeque<>();
+
+  static {
+    Thread t = new Thread() {
+      @Override
+      public void run() {
+        while (true) {
+          try {
+            Runnable runnable = SYNC_RUNNABLE_QUEUE.take();
+            runnable.run();
+          } catch (InterruptedException ex) {
+            TestNGPlugin.log(ex);
+            break;
+          } catch (RuntimeException ex) {
+            TestNGPlugin.log(ex);
+          }
+        }
+      }
+    };
+    t.setName("testng-sync-runnable-executor"); //$NON-NLS-1$
+    t.setDaemon(true);
+    t.start();
+  }
 
   /** Infos for the current suite run. */
   private SuiteRunInfo currentSuiteRunInfo;
@@ -584,9 +610,11 @@ implements IPropertyChangeListener, IRemoteSuiteListener, IRemoteTestListener {
   }
 
   private void postSyncRunnable(Runnable r) {
-    if(!isDisposed()) {
-      getDisplay().syncExec(r);
-    }
+    SYNC_RUNNABLE_QUEUE.add(() -> {
+      if(!isDisposed()) {
+        getDisplay().syncExec(r);
+      }
+    });
   }
 
   private void postAsyncRunnable(Runnable r) {
