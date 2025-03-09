@@ -1,6 +1,19 @@
 Change Log
 ====
 
+## 7.11.0
+
+Supported Metrics: **BREAKING SINCE 7.11.0**
+
+| Plugin | Dependency |
+| ------------- | ------------- |
+| TestNG for Eclipse | Eclipse 2023-09 (4.29) or above |
+| TestNG M2E Integration (Optional) | M2E 2.4.0 or above |
+| Java | 17.0 or above |
+
+* update testng-p2 to 7.11.0
+* update tycho-maven-plugin to 4.0.12, maven wrapper 3.9.8
+
 ## 7.10.0
 
 Supported Metrics:

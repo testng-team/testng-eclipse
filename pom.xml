@@ -5,15 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.testng.eclipse</groupId>
     <artifactId>org.testng.eclipse.parent</artifactId>
-    <version>7.10.2-SNAPSHOT</version>
+    <version>7.11.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
-        <tycho.version>2.7.5</tycho.version>
+        <tycho.version>4.0.12</tycho.version>
         <enforcer.maven.version>3.1.1</enforcer.maven.version>
-        <enforcer.java.version>11</enforcer.java.version>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <enforcer.java.version>17</enforcer.java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -40,8 +40,7 @@
                 <configuration>
                     <!-- http://dev.eclipse.org/mhonarc/lists/tycho-user/msg02782.html -->
                     <!-- http://stackoverflow.com/a/28812963 -->
-                    <compilerArgument>-warn:none</compilerArgument>
-                    <compilerArgument>-err:none</compilerArgument>
+                    <compilerArgument>-warn:-raw,unchecked</compilerArgument>
                 </configuration>
             </plugin>
             <plugin>
@@ -152,17 +151,14 @@
 
     <repositories>
         <repository>
-            <id>eclipse</id>
+            <id>2023-09</id>
             <layout>p2</layout>
-            <url>https://download.eclipse.org/releases/photon/</url>
+            <url>https://download.eclipse.org/releases/2023-09</url>
         </repository>
         <repository>
             <id>testng-p2-repo</id>
             <layout>p2</layout>
-            <!-- testng-p2 beta -->
-            <!-- <url>https://dl.bintray.com/testng-team/testng-p2/7.0.0/</url> -->
-            <!-- testng-p2 release -->
-            <url>https://testng.org/testng-p2-update-site/7.10.2/</url>
+            <url>https://testng.org/testng-p2-update-site/7.11.0/</url>
         </repository>
         <repository>
             <snapshots />
