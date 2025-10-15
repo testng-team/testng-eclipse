@@ -80,6 +80,11 @@ public class TestNGLaunchConfigurationDelegate
               new String[] { install.getName() }), 
           null, TestNGPluginConstants.LAUNCH_ERROR_JVM_VER_UNKNOWN);
     }
+
+    int idx = jreVer.indexOf("_");
+    if (idx > 0) {
+      jreVer = jreVer.substring(0, idx);
+    }
     Version vmVer = new Version(jreVer);
     if (compareVersion(vmVer, mimJvmVer) < 0) {
       abort(
