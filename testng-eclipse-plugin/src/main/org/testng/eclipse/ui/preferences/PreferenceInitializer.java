@@ -33,6 +33,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         true);
     store.setDefault(TestNGPluginConstants.S_APPEND_FAVORITE_STATIC_IMPORT,
         true);
+    store.setDefault(TestNGPluginConstants.S_PAGE_SIZE, 1000);
   }
 
 }

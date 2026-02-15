@@ -30,6 +30,7 @@ public abstract class TestNGPluginConstants {
   public static final String S_SHOW_VIEW_ON_FAILURE_ONLY = "showViewOnFailureOnly";
   public static final String S_VIEW_TITLE_SHOW_CASE_NAME = "showCaseNameOnViewTitle";
   public static final String S_APPEND_FAVORITE_STATIC_IMPORT = "appendFavoriteStaticImport";
+  public static final String S_PAGE_SIZE = "resultPageSize";
 
   /** The name of the TestNG DTD. */
   public static final String TESTNG_DTD = "testng-1.0.dtd";
