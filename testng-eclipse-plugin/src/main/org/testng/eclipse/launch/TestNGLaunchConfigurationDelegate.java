@@ -11,6 +11,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -48,6 +50,8 @@ public class TestNGLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
 
   private static final Version mimJvmVer = new Version("1.7.0"); //$NON-NLS-1$
+  private static final Pattern JAVA_VERSION =
+      Pattern.compile("(\\d+)(?:\\.(\\d+))?(?:\\.(\\d+))?"); //$NON-NLS-1$
 
   /**
    * Launch RemoteTestNG (except if we're in debug mode).
@@ -81,11 +85,14 @@ public class TestNGLaunchConfigurationDelegate
           null, TestNGPluginConstants.LAUNCH_ERROR_JVM_VER_UNKNOWN);
     }
 
-    int idx = jreVer.indexOf("_");
-    if (idx > 0) {
-      jreVer = jreVer.substring(0, idx);
+    Version vmVer = parseJavaVersion(jreVer);
+    if (vmVer == null) {
+      abort(
+          ResourceUtil.getFormattedString(
+              "TestNGLaunchConfigurationDelegate.error.unknownjre", //$NON-NLS-1$
+              new String[] { install.getName() }),
+          null, TestNGPluginConstants.LAUNCH_ERROR_JVM_VER_UNKNOWN);
     }
-    Version vmVer = new Version(jreVer);
     if (compareVersion(vmVer, mimJvmVer) < 0) {
       abort(
           ResourceUtil.getFormattedString(
@@ -427,6 +434,24 @@ public class TestNGLaunchConfigurationDelegate
     default:
       return "from context";
     }
+  }
+
+  /**
+   * Parses the leading major[.minor[.micro]] of a Java version string. JEP 223
+   * allows an arbitrary number of numeric elements (e.g. "17.0.21.0.3") plus
+   * "_update", "-pre" and "+build" suffixes, none of which are valid OSGi
+   * version syntax.
+   *
+   * @return the version, or null if the string doesn't start with a number
+   */
+  static Version parseJavaVersion(String javaVersion) {
+    Matcher m = JAVA_VERSION.matcher(javaVersion);
+    if (!m.lookingAt()) {
+      return null;
+    }
+    return new Version(Integer.parseInt(m.group(1)),
+        m.group(2) != null ? Integer.parseInt(m.group(2)) : 0,
+        m.group(3) != null ? Integer.parseInt(m.group(3)) : 0);
   }
 
   private static int compareVersion(Version v1, Version v2)
