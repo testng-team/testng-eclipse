@@ -158,7 +158,7 @@
         <repository>
             <id>testng-p2-repo</id>
             <layout>p2</layout>
-            <url>https://testng.org/testng-p2-update-site/7.11.0/</url>
+            <url>https://testng.org/testng-p2-update-site/7.12.0/</url>
         </repository>
         <repository>
             <snapshots />
