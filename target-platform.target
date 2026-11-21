@@ -15,7 +15,7 @@
         <!--<unit id="org.eclipse.m2e.sdk.feature.feature.group" version="0.0.0"/>-->
     </location>
     <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-        <repository location="https://testng.org/testng-p2-update-site/7.11.0/"/>
+        <repository location="https://testng.org/testng-p2-update-site/7.12.0/"/>
         <unit id="org.testng.p2.feature.feature.group" version="0.0.0"/>
     </location>
 	<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
