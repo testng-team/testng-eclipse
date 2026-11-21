@@ -16,6 +16,21 @@ Two sibling repos are involved. Confirm both paths with the user if they differ:
 - Folder naming: `QUAL` = `<VERSION>.<yyyyMMddHHmm>` in UTC, e.g. `7.11.0.202503091801` (all existing `updatesites/` and `zipped/` folders follow this; the bare `<VERSION>/` folder holds only the composite XMLs). Take the timestamp from the build: `TZ=UTC stat -f %Sm -t %Y%m%d%H%M SRC/testng-eclipse-update-site/target/org.testng.eclipse.updatesite.zip`. Preferably build with `X.Y.Z-SNAPSHOT` so the bundle/feature versions inside the repo carry the same qualifier; building with plain `X.Y.Z` yields jars versioned `X.Y.Z` (7.12.0 was released that way, folder renamed afterwards).
 - Working tree of `SITE` must be clean: `git -C SITE status --short`. If not, stop and ask.
 
+## 0b. Check the bundled TestNG (testng-p2) is the latest
+
+The release bundles `org.testng` from the `testng-p2-repo` in `SRC/pom.xml` (`https://testng.org/testng-p2-update-site/<ver>/`); `SRC/target-platform.target` references the same site. Both must point at the latest published version before building.
+
+```bash
+LATEST=$(curl -fsS https://testng.org/testng-p2-update-site/compositeContent.xml | grep -o '<child location="[^"]*"' | tail -1 | sed 's/.*location="//;s/"//')
+CURRENT=$(grep -o 'testng-p2-update-site/[0-9][^/]*/' SRC/pom.xml | head -1 | cut -d/ -f2)
+CURRENT_TP=$(grep -o 'testng-p2-update-site/[0-9][^/]*/' SRC/target-platform.target | head -1 | cut -d/ -f2)
+echo "latest=$LATEST pom=$CURRENT target-platform=$CURRENT_TP"
+```
+
+The root composite lists versions oldest first, so the last `<child>` is the latest. Confirm `https://testng.org/testng-p2-update-site/$LATEST/compositeContent.xml` returns 200.
+
+If `CURRENT` or `CURRENT_TP` differs from `LATEST`, update the URL in `pom.xml` and `target-platform.target` to `LATEST`. If `LATEST` is newer than `<VERSION>`'s TestNG expectation, or the user wants to pin an older TestNG, ask before changing. After the build (step 2), confirm the TestNG bundle matches: `ls SRC/testng-eclipse-update-site/target/repository/plugins | grep '^org.testng_'` must show the `LATEST` version (e.g. `org.testng_7.12.0.r<timestamp>.jar`), not an older one.
+
 ## 1. Set the version in SRC
 
 ```bash
@@ -47,7 +62,6 @@ Known failures:
 
 Success = `BUILD SUCCESS` and `target/org.testng.eclipse.updatesite.zip` exists. Check `features/` contains `org.testng.eclipse_<built version>.jar`.
 
-Note: the bundled `org.testng` jar comes from `https://testng.org/testng-p2-update-site/updatesites/...` (see `SRC/testng-eclipse-update-site/category.xml`/pom). If the release should ship a newer TestNG, update that reference before building.
 
 ## 3. Copy into SITE
 
